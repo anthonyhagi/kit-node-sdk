@@ -1,0 +1,27 @@
+{
+  "name": "@anthonyhagi/kit-node-sdk",
+  "version": "0.1.0",
+  "description": "An unofficial TypeScript/Node.js SDK for the KIT.com API, providing a simple and easy-to-use interface.",
+  "author": "Anthony Hagidimitriou <info@anthonyhagi.com.au>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anthonyhagi/kit-node-sdk.git"
+  },
+  "homepage": "https://github.com/anthonyhagi/kit-node-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/anthonyhagi/kit-node-sdk/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/headers.js",
+  "types": "./dist/headers.d.ts",
+  "exports": {
+    "./package.json": "./package.json"
+  },
+  "scripts": {},
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "tsdown": "^0.12.3"
+  }
+}
