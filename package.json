@@ -4,6 +4,11 @@
   "description": "An unofficial TypeScript/Node.js SDK for the KIT.com API, providing a simple and easy-to-use interface.",
   "author": "Anthony Hagidimitriou <info@anthonyhagi.com.au>",
   "license": "MIT",
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/anthonyhagi/kit-node-sdk.git"
