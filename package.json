@@ -38,7 +38,8 @@
   "scripts": {
     "build": "tsdown",
     "clean": "rm -rf dist",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "lint": "eslint ."
   },
   "devDependencies": {
     "@sxzz/eslint-config": "^7.0.1",
