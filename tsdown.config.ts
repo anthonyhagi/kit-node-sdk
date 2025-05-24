@@ -6,4 +6,5 @@ export default defineConfig({
   format: ["esm", "cjs"],
   platform: "neutral",
   entry: ["./src"],
+  external: [/node:.*/],
 });
