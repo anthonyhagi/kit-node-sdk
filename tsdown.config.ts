@@ -4,7 +4,6 @@ export default defineConfig({
   clean: true,
   dts: true,
   format: ["esm", "cjs"],
-  platform: "neutral",
+  platform: "node",
   entry: ["./src"],
-  external: [/node:.*/],
 });
