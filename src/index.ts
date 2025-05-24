@@ -1,36 +1,10 @@
+import process from "node:process";
 import { AccountsHandler } from "~/resources/accounts/handler";
+import { ApiClient } from "./api-client";
+import type { ClientOptions } from "./types";
 
-export interface ClientOptions {
-  /**
-   * Defaults to `process.env['KIT_API_KEY']`
-   */
-  apiKey?: string | undefined;
-
-  /**
-   * The type of api key you will be using for requests:
-   *
-   * - `apikey` — this option is used for personal requests for
-   * your own account.
-   * - `oauth` — this option is used for auth flows that may
-   * involve accounts for other users of the platform.
-   *
-   * If you don't know which one to use, use the `apikey`
-   * option.
-   */
-  authType?: "oauth" | "apikey";
-
-  /**
-   * Override the default base URL for the API, e.g., "https://api.example.com/v4"
-   *
-   * Defaults to "https://api.kit.com/v4".
-   */
-  baseURL?: string | null | undefined;
-}
-
-export class Kit {
-  apiKey: string;
-  authType: "oauth" | "apikey";
-  baseURL: string;
+export class Kit extends ApiClient {
+  protected options: Required<ClientOptions>;
 
   public readonly accounts: AccountsHandler;
 
@@ -38,28 +12,53 @@ export class Kit {
    * API Client for interfacing with the Kit API.
    *
    * @param {ClientOptions} opts the options to initialise the sdk with.
-   * @param {ClientOptions['apiKey']} opts.apiKey The API key to use for all requests.
-   * @param {ClientOptions['authType']} opts.authType Specify the type of api key you will be using for requests.
+   * @param {ClientOptions['apiKey']} opts.apiKey The API key to use for
+   * all requests.
+   * @param {ClientOptions['authType']} opts.authType Specify the type
+   * of api key you will be using for requests.
    */
-  constructor({ apiKey, authType, baseURL }: ClientOptions = {}) {
-    if (apiKey === undefined) {
+  constructor({
+    apiKey = process.env.KIT_API_KEY,
+    ...opts
+  }: ClientOptions = {}) {
+    if (!apiKey || apiKey == null) {
       throw new Error(
         "The KIT_API_KEY environment variable is missing or empty. Please provide it, or pass in the `apiKey` option explicitly when initialising this SDK."
       );
     }
 
-    this.apiKey = apiKey;
-    this.authType = authType || "apikey";
-    this.baseURL = baseURL || "https://api.kit.com/v4";
+    const options = {
+      apiKey,
+      authType: opts.authType || "apikey",
+      baseUrl: opts.baseUrl || "https://api.kit.com/v4",
+    } satisfies ClientOptions;
+
+    super({ baseUrl: options.baseUrl });
+
+    this.options = options;
 
     this.accounts = new AccountsHandler(this);
   }
 
-  protected authHeaders() {
-    if (this.authType === "oauth") {
-      return { Authorization: `Bearer ${this.apiKey}` };
+  /**
+   * Generates the appropriate authentication headers based on the
+   * configured auth type.
+   *
+   * @returns {Record<string, string>} The authentication headers.
+   */
+  protected override authHeaders(): Record<string, string> {
+    const authType = this.options.authType;
+    const apiKey = this.options.apiKey;
+
+    if (authType === "oauth") {
+      return { Authorization: `Bearer ${apiKey}` };
     }
 
-    return { "X-Kit-Api-Key": this.apiKey };
+    // Personal api keys follow a different authentication header
+    // for all requests. More information can be found here:
+    // https://developers.kit.com/v4.html#api-keys
+    return { "X-Kit-Api-Key": apiKey };
   }
 }
+
+export type { ClientOptions };
