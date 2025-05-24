@@ -1,6 +1,15 @@
 import process from "node:process";
+
 import { AccountsHandler } from "~/resources/accounts/handler";
 import { ApiClient } from "./api-client";
+import type {
+  GetCreatorProfile,
+  GetCurrentAccount,
+  GetEmailStats,
+  GetGrowthStats,
+  GetGrowthStatsParams,
+  ListColors,
+} from "./resources/accounts/types";
 import type { ClientOptions } from "./types";
 
 export class Kit extends ApiClient {
@@ -61,4 +70,14 @@ export class Kit extends ApiClient {
   }
 }
 
-export type { ClientOptions };
+export type {
+  ClientOptions,
+
+  // Accounts Types that should be exported.
+  GetCreatorProfile,
+  GetCurrentAccount,
+  GetEmailStats,
+  GetGrowthStats,
+  GetGrowthStatsParams,
+  ListColors,
+};

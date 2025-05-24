@@ -29,13 +29,24 @@ export class ApiClient {
     return await this.request<TResponseType>("GET", path, options);
   }
 
+  public async put<TResponseType = unknown>(
+    path: string,
+    options?: {
+      headers?: Record<string, string>;
+      query?: URLSearchParams | undefined;
+      body?: RequestInit["body"];
+    }
+  ) {
+    return await this.request<TResponseType>("PUT", path, options);
+  }
+
   protected async request<TResponseType = unknown>(
     method: HttpMethod,
     path: string,
     options?: {
       headers?: Record<string, string>;
       query?: URLSearchParams | undefined;
-      body?: any;
+      body?: RequestInit["body"];
     }
   ): Promise<TResponseType> {
     const cleanedBaseUrl = this.baseUrl.endsWith("/")

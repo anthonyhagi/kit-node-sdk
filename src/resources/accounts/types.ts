@@ -22,6 +22,14 @@ export interface ListColors {
   colors: string[];
 }
 
+export interface UpdateColorsParams {
+  colors: string[];
+}
+
+export interface UpdateColors {
+  colors: string[];
+}
+
 export interface GetCreatorProfile {
   profile: {
     name: string;

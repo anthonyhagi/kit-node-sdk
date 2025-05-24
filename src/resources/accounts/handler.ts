@@ -6,6 +6,8 @@ import type {
   GetGrowthStats,
   GetGrowthStatsParams,
   ListColors,
+  UpdateColors,
+  UpdateColorsParams,
 } from "./types";
 
 export class AccountsHandler {
@@ -28,7 +30,23 @@ export class AccountsHandler {
     return await this.api.get<ListColors>("/account/colors");
   }
 
-  public updateColors() {}
+  public async updateColors(params: UpdateColorsParams): Promise<UpdateColors> {
+    const { colors = [] } = params;
+
+    if (colors.length === 0) {
+      throw new Error(
+        "Cannot update colors to an empty list. Please enter up to 5 different hex colors"
+      );
+    } else if (colors.length > 5) {
+      throw new Error(
+        "Cannot update colors with more than 5 colors specified. Please specify between 1 and 5 different colors to update to"
+      );
+    }
+
+    return await this.api.put<UpdateColors>("/account/colors", {
+      body: JSON.stringify({ colors }),
+    });
+  }
 
   public async getCreatorProfile(): Promise<GetCreatorProfile> {
     return await this.api.get<GetCreatorProfile>("/account/creator_profile");
@@ -54,7 +72,7 @@ export class AccountsHandler {
       query.append("starting", value);
     }
 
-    if (ending) {
+    if (ending != null && ending !== "") {
       const value =
         ending instanceof Date ? ending.toISOString().split("T")[0]! : ending;
 
