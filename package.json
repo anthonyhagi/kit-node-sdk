@@ -2,33 +2,35 @@
   "name": "@anthonyhagi/kit-node-sdk",
   "version": "0.1.0",
   "description": "An unofficial TypeScript/Node.js SDK for the KIT.com API, providing a simple and easy-to-use interface.",
-  "author": "Anthony Hagidimitriou <info@anthonyhagi.com.au>",
-  "license": "MIT",
-  "files": [
-    "dist",
-    "LICENSE",
-    "README.md"
+  "type": "module",
+  "keywords": [
+    "kit.com",
+    "kit",
+    "v4"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/anthonyhagi/kit-node-sdk.git"
-  },
+  "license": "MIT",
   "homepage": "https://github.com/anthonyhagi/kit-node-sdk#readme",
   "bugs": {
     "url": "https://github.com/anthonyhagi/kit-node-sdk/issues"
   },
-  "engines": {
-    "node": ">=18.0.0"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anthonyhagi/kit-node-sdk.git"
   },
-  "type": "module",
+  "author": "Anthony Hagidimitriou <info@anthonyhagi.com.au>",
+  "files": [
+    "LICENSE",
+    "README.md",
+    "dist"
+  ],
   "main": "./dist/index.cjs",
   "module": "./dist/headers.js",
   "types": "./dist/headers.d.ts",
   "exports": {
     ".": {
       "types": "./dist/headers.d.ts",
-      "import": "./dist/headers.js",
       "require": "./dist/headers.cjs",
+      "import": "./dist/headers.js",
       "default": "./dist/headers.js"
     },
     "./package.json": "./package.json"
@@ -39,13 +41,14 @@
     "typecheck": "tsc"
   },
   "devDependencies": {
+    "@sxzz/eslint-config": "^7.0.1",
     "@types/node": "^22.15.21",
+    "eslint": "^9.27.0",
+    "prettier": "^3.5.3",
     "tsdown": "^0.12.3",
     "typescript": "^5.8.3"
   },
-  "keywords": [
-    "kit.com",
-    "kit",
-    "v4"
-  ]
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }

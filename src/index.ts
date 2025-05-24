@@ -37,13 +37,14 @@ export class Kit {
   /**
    * API Client for interfacing with the Kit API.
    *
-   * @param {string | undefined} [opts.apiKey=process.env['KIT_API_KEY'] ?? undefined]
-   * @param {ClientOptions['authType']} [opts.authType='apiKey'] - Specify the type of api key you will be using for requests.
+   * @param {ClientOptions} opts the options to initialise the sdk with.
+   * @param {ClientOptions['apiKey']} opts.apiKey The API key to use for all requests.
+   * @param {ClientOptions['authType']} opts.authType Specify the type of api key you will be using for requests.
    */
   constructor({ apiKey, authType, baseURL }: ClientOptions = {}) {
     if (apiKey === undefined) {
       throw new Error(
-        "The KIT_API_KEY environment variable is missing or empty. Please provide it, or pass in the `apiKey` option explicitly when initialising this SDK.",
+        "The KIT_API_KEY environment variable is missing or empty. Please provide it, or pass in the `apiKey` option explicitly when initialising this SDK."
       );
     }
 
