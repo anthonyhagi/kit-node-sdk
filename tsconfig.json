@@ -13,7 +13,10 @@
     "noImplicitOverride": true,
     "module": "preserve",
     "noEmit": true,
-    "lib": ["ES2024"]
+    "lib": ["ES2024"],
+    "paths": {
+      "~/*": ["./src/*"]
+    }
   },
   "include": ["src/*"],
   "exclude": ["node_modules", "dist"]

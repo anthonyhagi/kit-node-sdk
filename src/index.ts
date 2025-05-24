@@ -1,4 +1,4 @@
-import { AccountsHandler } from "./resources/accounts/handler";
+import { AccountsHandler } from "~/resources/accounts/handler";
 
 export interface ClientOptions {
   /**

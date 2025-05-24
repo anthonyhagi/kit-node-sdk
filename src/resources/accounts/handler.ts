@@ -1,4 +1,4 @@
-import { Kit } from "../../index";
+import { Kit } from "~/index";
 
 export class AccountsHandler {
   #sdk: Kit;
