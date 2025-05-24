@@ -1,4 +1,4 @@
-# kit-node-sdk
+# Kit.com SDK for Node (Unofficial)
 
 An unofficial Node.js SDK for interacting with the Kit.com API. This SDK aims to provide a
 convenient and simple way for Node.js developers to integrate with Kit.com services.
