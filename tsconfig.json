@@ -1,19 +1,22 @@
 {
   "compilerOptions": {
-    "esModuleInterop": true,
-    "skipLibCheck": true,
     "target": "ES2024",
-    "allowJs": true,
-    "resolveJsonModule": true,
+    "lib": ["ES2024"],
     "moduleDetection": "force",
+    "module": "preserve",
+    "paths": {
+      "~/*": ["./src/*"]
+    },
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "strict": true,
+    "noImplicitOverride": true,
+    "noUncheckedIndexedAccess": true,
+    "noEmit": true,
+    "esModuleInterop": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
-    "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
-    "module": "preserve",
-    "noEmit": true,
-    "lib": ["ES2024"]
+    "skipLibCheck": true
   },
   "include": ["src/*"],
   "exclude": ["node_modules", "dist"]
