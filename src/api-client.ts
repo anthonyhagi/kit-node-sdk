@@ -48,6 +48,17 @@ export class ApiClient {
     return await this.request<TResponseType>("PUT", path, options);
   }
 
+  public async delete<TResponseType = unknown>(
+    path: string,
+    options?: {
+      headers?: Record<string, string>;
+      query?: URLSearchParams | undefined;
+      body?: RequestInit["body"];
+    }
+  ) {
+    return await this.request<TResponseType>("DELETE", path, options);
+  }
+
   protected async request<TResponseType = unknown>(
     method: HttpMethod,
     path: string,
@@ -83,7 +94,13 @@ export class ApiClient {
     const resp = await fetch(url, fetchOptions);
 
     if (!resp.ok) {
-      await this.handleError(resp);
+      return (await this.handleError(resp)) as TResponseType;
+    }
+
+    // There's no need to return any data as the response
+    // indicates there is no content.
+    if (resp.status === 204) {
+      return null as TResponseType;
     }
 
     const data = await resp.json();
@@ -91,7 +108,7 @@ export class ApiClient {
     return data as TResponseType;
   }
 
-  private async handleError(resp: Response): Promise<never> {
+  private async handleError(resp: Response): Promise<null | never> {
     let errorDetails: any = null;
     let detailsString: string = "";
 
@@ -118,6 +135,9 @@ export class ApiClient {
         throw new Error(
           `Authentication failed: Invalid or expired access token. Status: ${resp.status} - ${detailsString}`
         );
+
+      case 404:
+        return null;
 
       case 429:
         throw new Error(
