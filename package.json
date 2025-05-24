@@ -32,7 +32,8 @@
   },
   "scripts": {
     "build": "tsdown",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "typecheck": "tsc"
   },
   "devDependencies": {
     "@types/node": "^22.15.21",
