@@ -17,14 +17,26 @@
   "module": "./dist/headers.js",
   "types": "./dist/headers.d.ts",
   "exports": {
+    ".": {
+      "types": "./dist/headers.d.ts",
+      "import": "./dist/headers.js",
+      "require": "./dist/headers.cjs",
+      "default": "./dist/headers.js"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "tsdown"
+    "build": "tsdown",
+    "clean": "rm -rf dist"
   },
   "devDependencies": {
     "@types/node": "^22.15.21",
     "tsdown": "^0.12.3",
     "typescript": "^5.8.3"
-  }
+  },
+  "keywords": [
+    "kit.com",
+    "kit",
+    "v4"
+  ]
 }
