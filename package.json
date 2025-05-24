@@ -19,9 +19,12 @@
   "exports": {
     "./package.json": "./package.json"
   },
-  "scripts": {},
+  "scripts": {
+    "build": "tsdown"
+  },
   "devDependencies": {
     "@types/node": "^22.15.21",
-    "tsdown": "^0.12.3"
+    "tsdown": "^0.12.3",
+    "typescript": "^5.8.3"
   }
 }
