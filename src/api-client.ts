@@ -1,4 +1,12 @@
-import type { HttpMethod } from "./types";
+type HttpMethod =
+  | "GET"
+  | "POST"
+  | "PUT"
+  | "DELETE"
+  | "PATCH"
+  | "HEAD"
+  | "OPTIONS"
+  | (string & {});
 
 export class ApiClient {
   baseUrl: string;

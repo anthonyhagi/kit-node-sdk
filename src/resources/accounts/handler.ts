@@ -26,10 +26,26 @@ export class AccountsHandler {
     return await this.api.get<GetCurrentAccount>("/account");
   }
 
+  /**
+   * Returns list of colors for the current account.
+   *
+   * @returns a list of colors as hex strings in an array.
+   */
   public async listColors(): Promise<ListColors> {
     return await this.api.get<ListColors>("/account/colors");
   }
 
+  /**
+   * Update and return the newly set colors.
+   *
+   * @param params the required parameters to send.
+   * @param params.colors The hex colours to set on the account.
+   *
+   * @returns the newly set list of hex colours in an array.
+   *
+   * @throws Error when no colors are passed in the array.
+   * @throws Error when more than 5 colours are passed in the array.
+   */
   public async updateColors(params: UpdateColorsParams): Promise<UpdateColors> {
     const { colors = [] } = params;
 
@@ -48,14 +64,31 @@ export class AccountsHandler {
     });
   }
 
+  /**
+   * Returns the Creator Profile details.
+   *
+   * @returns the details stored on the current profile.
+   */
   public async getCreatorProfile(): Promise<GetCreatorProfile> {
     return await this.api.get<GetCreatorProfile>("/account/creator_profile");
   }
 
+  /**
+   * Returns your email stats for the last 90 days.
+   *
+   * @returns the basic email statistics over the last 90 days.
+   */
   public async getEmailStats(): Promise<GetEmailStats> {
     return await this.api.get<GetEmailStats>("/account/email_stats");
   }
 
+  /**
+   * Returns your growth stats for the provided starting and ending dates.
+   *
+   * @param params the optional starting and ending dates to search between.
+   *
+   * @returns the growth stats as reported between the start and end dates.
+   */
   public async getGrowthStats(
     params?: GetGrowthStatsParams
   ): Promise<GetGrowthStats> {

@@ -24,13 +24,3 @@ export interface ClientOptions {
    */
   baseUrl?: string | null | undefined;
 }
-
-export type HttpMethod =
-  | "GET"
-  | "POST"
-  | "PUT"
-  | "DELETE"
-  | "PATCH"
-  | "HEAD"
-  | "OPTIONS"
-  | (string & {});

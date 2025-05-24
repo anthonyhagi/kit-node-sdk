@@ -9,6 +9,8 @@ import type {
   GetGrowthStats,
   GetGrowthStatsParams,
   ListColors,
+  UpdateColors,
+  UpdateColorsParams,
 } from "./resources/accounts/types";
 import type { ClientOptions } from "./types";
 
@@ -80,4 +82,6 @@ export type {
   GetGrowthStats,
   GetGrowthStatsParams,
   ListColors,
+  UpdateColors,
+  UpdateColorsParams,
 };
