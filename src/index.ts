@@ -32,6 +32,8 @@ export class Kit {
   authType: "oauth" | "apikey";
   baseURL: string;
 
+  public readonly accounts: AccountsHandler;
+
   /**
    * API Client for interfacing with the Kit API.
    *
@@ -48,9 +50,9 @@ export class Kit {
     this.apiKey = apiKey;
     this.authType = authType || "apikey";
     this.baseURL = baseURL || "https://api.kit.com/v4";
-  }
 
-  accounts = new AccountsHandler(this);
+    this.accounts = new AccountsHandler(this);
+  }
 
   protected authHeaders() {
     if (this.authType === "oauth") {
@@ -60,5 +62,3 @@ export class Kit {
     return { "X-Kit-Api-Key": this.apiKey };
   }
 }
-
-const kit = new Kit({ apiKey: "" }).accounts;
