@@ -12,12 +12,14 @@ import type {
   UpdateColors,
   UpdateColorsParams,
 } from "./resources/accounts/types";
+import { BroadcastsHandler } from "./resources/broadcasts/handler";
 import type { ClientOptions } from "./types";
 
 export class Kit extends ApiClient {
   protected options: Required<ClientOptions>;
 
   public readonly accounts: AccountsHandler;
+  public readonly broadcasts: BroadcastsHandler;
 
   /**
    * API Client for interfacing with the Kit API.
@@ -49,6 +51,7 @@ export class Kit extends ApiClient {
     this.options = options;
 
     this.accounts = new AccountsHandler(this);
+    this.broadcasts = new BroadcastsHandler(this);
   }
 
   /**
