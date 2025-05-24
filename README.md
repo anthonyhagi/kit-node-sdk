@@ -27,7 +27,7 @@ Here's a basic example of how to use the SDK with TypeScript and ESM imports:
 ```typescript
 import { Kit } from '@anthonyhagi/kit-node-sdk';
 
-const kit = new KitSDK({ apiKey: 'YOUR_API_KEY' });
+const kit = new Kit({ apiKey: 'YOUR_API_KEY' });
 
 const myAccount = await kit.accounts.getCurrentAccount();
 ```
