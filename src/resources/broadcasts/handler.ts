@@ -8,6 +8,8 @@ import type {
   GetSingleBroadcastStats,
   ListBroadcasts,
   ListBroadcastsParams,
+  UpdateBroadcast,
+  UpdateBroadcastParams,
 } from "./types";
 
 export class BroadcastsHandler {
@@ -73,7 +75,7 @@ export class BroadcastsHandler {
    *
    * @returns an array of stats for all broadcasts.
    */
-  public async getStats(): Promise<GetBroadcastStats> {
+  public async getAllStats(): Promise<GetBroadcastStats> {
     return await this.api.get<GetBroadcastStats>("/broadcasts/stats");
   }
 
@@ -82,14 +84,11 @@ export class BroadcastsHandler {
    *
    * @param id The specific broadcast we are looking at.
    *
-   * @returns the broadcast link clicks in an array.
+   * @returns the broadcast link clicks in an array. Otherwise, `null`
+   * if the broadcast cannot be found.
    */
-  public async getLinkClicks(id: number): Promise<GetLinkClicks | null> {
-    if (!id || id == null) {
-      throw new Error(
-        "Please provide a valid broadcast id to get it's link clicks"
-      );
-    }
+  public async getLinkClicksById(id: number): Promise<GetLinkClicks | null> {
+    this.validateId(id);
 
     return await this.api.get<GetLinkClicks | null>(`/broadcasts/${id}/clicks`);
   }
@@ -101,9 +100,9 @@ export class BroadcastsHandler {
    *
    * @returns the broadcast if it exists, `null` otherwise.
    */
-  public async getStatsById(
-    id: number
-  ): Promise<GetSingleBroadcastStats | null> {
+  public async getStats(id: number): Promise<GetSingleBroadcastStats | null> {
+    this.validateId(id);
+
     return await this.api.get<GetSingleBroadcastStats | null>(
       `/broadcasts/${id}/stats`
     );
@@ -114,9 +113,11 @@ export class BroadcastsHandler {
    *
    * @param id the unique ID of the broadcast.
    *
-   * @returns `true` when deleted successfully, `false` otherwise.
+   * @returns `true` when deleted successfully, `false` if it was not found.
    */
-  public async deleteBroadcast(id: number): Promise<boolean> {
+  public async delete(id: number): Promise<boolean> {
+    this.validateId(id);
+
     const resp = await this.api.delete<object | null>(`/broadcasts/${id}`);
 
     if (resp == null) {
@@ -127,11 +128,60 @@ export class BroadcastsHandler {
   }
 
   /**
+   * Get a broadcast by it's unique ID.
    *
-   * @param id
-   * @returns
+   * @param id the unique ID of the broadcast.
+   *
+   * @returns the broadcast if it was found; `null` otherwise.
    */
-  public async getBroadcast(id: number): Promise<GetBroadcast | null> {
+  public async get(id: number): Promise<GetBroadcast | null> {
+    this.validateId(id);
+
     return await this.api.get<GetBroadcast | null>(`/broadcasts/${id}`);
+  }
+
+  /**
+   * Update an existing broadcast. Continue to draft or schedule to send
+   * a broadcast to all or a subset of your subscribers.
+   *
+   * To save a draft, set `public` to false.
+   *
+   * To schedule the broadcast for sending, set the `public` field to
+   * `true` and provide the `send_at` field. Scheduled broadcasts
+   * should contain a subject and your content, at a minimum.
+   *
+   * Kit currently supports targeting your subscribers based on segment
+   * or tag ids.
+   *
+   * @returns the updated broadcast with attached details. If the
+   * broadcast was not found, `null` is returned.
+   */
+  public async update(
+    id: number,
+    params: UpdateBroadcastParams
+  ): Promise<UpdateBroadcast | null> {
+    this.validateId(id);
+
+    const body = JSON.stringify(params);
+
+    return await this.api.put<UpdateBroadcast | null>(`/broadcasts/${id}`, {
+      body,
+    });
+  }
+
+  /**
+   * Handle validating that an actual ID was passed in.
+   *
+   * @param id the unqiue ID of the broadcast.
+   *
+   * @throws Error when the id is undefined, null or `0` as they
+   * are invalid values.
+   */
+  private validateId(id: number) {
+    if (!id || id == null) {
+      throw new Error(
+        "Please provide a valid broadcast id to get the link clicks"
+      );
+    }
   }
 }
