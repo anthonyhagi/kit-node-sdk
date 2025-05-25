@@ -3,6 +3,8 @@ import type {
   CreateBroadcast,
   CreateBroadcastParams,
   GetBroadcast,
+  ListBroadcasts,
+  ListBroadcastsParams,
 } from "./types";
 
 export class BroadcastsHandler {
@@ -12,8 +14,29 @@ export class BroadcastsHandler {
     this.api = api;
   }
 
-  public async listBroadcasts() {
-    return await this.api.get("/broadcasts");
+  /**
+   * Returns a paginated list of all broadcasts for your account
+   * (including draft, scheduled, and already sent).
+   *
+   * @param params any filters that should be applied to the request.
+   *
+   * @returns the paginated list of broadcasts.
+   */
+  public async listBroadcasts(
+    params: ListBroadcastsParams = {}
+  ): Promise<ListBroadcasts> {
+    const { after, before, include_total_count, per_page } = params;
+
+    const query = new URLSearchParams({
+      ...(after && { after }),
+      ...(before && { before }),
+      ...(include_total_count && {
+        include_total_count: String(include_total_count),
+      }),
+      ...(per_page && { per_page: per_page.toString() }),
+    });
+
+    return await this.api.get<ListBroadcasts>("/broadcasts", { query });
   }
 
   /**

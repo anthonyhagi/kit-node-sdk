@@ -19,10 +19,16 @@ export interface GetCurrentAccount {
 }
 
 export interface ListColors {
+  /**
+   * An array of up to 5 color hex codes.
+   */
   colors: string[];
 }
 
 export interface UpdateColorsParams {
+  /**
+   * An array of up to 5 color hex codes.
+   */
   colors: string[];
 }
 
@@ -54,7 +60,19 @@ export interface GetEmailStats {
 }
 
 export interface GetGrowthStatsParams {
+  /**
+   * Get stats for time period ending on this date (format yyyy-mm-dd).
+   * Defaults to today. Dates are automatically converted into the
+   * expected format of "yyyy-mm-dd".
+   */
   ending?: Date | string | undefined;
+
+  /**
+   * Get stats for time period beginning on this date (format
+   * yyyy-mm-dd). Defaults to 90 days ago. Dates are
+   * automatically converted into the expected
+   * format of "yyyy-mm-dd".
+   */
   starting?: Date | string | undefined;
 }
 

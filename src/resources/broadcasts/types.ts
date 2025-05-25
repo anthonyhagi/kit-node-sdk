@@ -1,3 +1,84 @@
+export interface ListBroadcastsParams {
+  /**
+   * Pass in the string from the previous request to move
+   * the cursor. This can be found in the following field:
+   *
+   * @example after: pagination.end_cursor
+   */
+  after?: string | undefined;
+
+  /**
+   * Pass in the string from the previous request to move
+   * the cursor. This can be found in the following field:
+   *
+   * @example after: pagination.start_cursor
+   */
+  before?: string | undefined;
+
+  /**
+   * To include the total count of records in the response,
+   * use `true`. For large collections, expect a slightly
+   * slower response.
+   */
+  include_total_count?: boolean | undefined;
+
+  /**
+   * Number of results per page. Default 500, maximum 1000.
+   */
+  per_page?: number | undefined;
+}
+
+export interface ListBroadcasts {
+  broadcasts: {
+    id: number;
+    created_at: string;
+    subject: string;
+    description: string | null;
+    content: string | null;
+    public: boolean;
+    published_at: string | null;
+    send_at: string | null;
+    thumbnail_alt: string | null;
+    thumbnail_url: string | null;
+    email_address: string | null;
+    preview_text?: string | null | undefined;
+    email_template: {
+      id: number;
+      name: string;
+    };
+    subscriber_filter: {
+      all: { type: string; ids: number[] }[];
+      any?: { type: string; ids: number[] }[];
+      none?: { type: string; ids: number[] }[];
+    }[];
+    publication_id?: number | undefined;
+    clicks?: unknown[] | undefined;
+    stats?:
+      | {
+          recipients: number;
+          open_rate: number;
+          emails_opened: number;
+          click_rate: number;
+          unsubscribe_rate: number;
+          unsubscribes: number;
+          total_clicks: number;
+          show_total_clicks: boolean;
+          status: string;
+          progress: number;
+          open_tracking_disabled: boolean;
+          click_tracking_disabled: boolean;
+        }
+      | undefined;
+  }[];
+  pagination: {
+    has_previous_page: boolean;
+    has_next_page: boolean;
+    start_cursor: string | null;
+    end_cursor: string | null;
+    per_page: number;
+  };
+}
+
 export interface CreateBroadcastParams {
   /**
    * Id of the email template to use. Uses the account's default
