@@ -111,7 +111,9 @@ export class ApiClient {
     // There's no need to return any data as the response
     // indicates there is no content.
     if (resp.status === 204) {
-      return null as TResponseType;
+      const emptyObj = {};
+
+      return emptyObj as TResponseType;
     }
 
     const data = await resp.json();

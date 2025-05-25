@@ -19,11 +19,15 @@ export interface ListBroadcastsParams {
    * To include the total count of records in the response,
    * use `true`. For large collections, expect a slightly
    * slower response.
+   *
+   * @example include_total_count: true
    */
   include_total_count?: boolean | undefined;
 
   /**
    * Number of results per page. Default 500, maximum 1000.
+   *
+   * @example per_page: 500
    */
   per_page?: number | undefined;
 }
@@ -194,6 +198,72 @@ export interface CreateBroadcast {
       };
     };
     publication_id: number;
+  };
+}
+
+export interface GetBroadcastStats {
+  broadcasts: {
+    id: number;
+    stats: {
+      recipients: number;
+      open_rate: number;
+      emails_opened: number;
+      click_rate: number;
+      unsubscribe_rate: number;
+      unsubscribes: number;
+      total_clicks: number;
+      show_total_clicks: boolean;
+      status: string;
+      progress: number;
+      open_tracking_disabled: boolean;
+      click_tracking_disabled: boolean;
+    };
+  }[];
+  pagination: {
+    has_previous_page: boolean;
+    has_next_page: boolean;
+    start_cursor: string;
+    end_cursor: string;
+    per_page: number;
+  };
+}
+
+export interface GetLinkClicks {
+  broadcast: {
+    id: number;
+    clicks: {
+      url: string;
+      unique_clicks: number;
+      click_to_delivery_rate: number;
+      click_to_open_rate: number;
+    }[];
+  };
+  pagination: {
+    has_previous_page: boolean;
+    has_next_page: boolean;
+    start_cursor: string;
+    end_cursor: string;
+    per_page: number;
+  };
+}
+
+export interface GetSingleBroadcastStats {
+  broadcast: {
+    id: number;
+    stats: {
+      recipients: number;
+      open_rate: number;
+      emails_opened: number;
+      click_rate: number;
+      unsubscribe_rate: number;
+      unsubscribes: number;
+      total_clicks: number;
+      show_total_clicks: boolean;
+      status: string;
+      progress: number;
+      open_tracking_disabled: boolean;
+      click_tracking_disabled: boolean;
+    };
   };
 }
 
