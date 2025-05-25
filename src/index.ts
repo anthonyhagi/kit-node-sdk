@@ -1,6 +1,7 @@
 import process from "node:process";
 
 import { AccountsHandler } from "~/resources/accounts/handler";
+import { BroadcastsHandler } from "~/resources/broadcasts/handler";
 import { ApiClient } from "./api-client";
 import type {
   GetCreatorProfile,
@@ -12,7 +13,6 @@ import type {
   UpdateColors,
   UpdateColorsParams,
 } from "./resources/accounts/types";
-import { BroadcastsHandler } from "./resources/broadcasts/handler";
 import type { ClientOptions } from "./types";
 
 export class Kit extends ApiClient {

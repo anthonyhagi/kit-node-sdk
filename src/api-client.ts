@@ -37,6 +37,17 @@ export class ApiClient {
     return await this.request<TResponseType>("GET", path, options);
   }
 
+  public async post<TResponseType = unknown>(
+    path: string,
+    options?: {
+      headers?: Record<string, string>;
+      query?: URLSearchParams | undefined;
+      body?: RequestInit["body"];
+    }
+  ) {
+    return await this.request<TResponseType>("POST", path, options);
+  }
+
   public async put<TResponseType = unknown>(
     path: string,
     options?: {
