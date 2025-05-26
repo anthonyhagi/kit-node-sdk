@@ -14,6 +14,8 @@ import type {
 } from "./resources/accounts/types";
 import { BroadcastsHandler } from "./resources/broadcasts/handler";
 import { CustomFieldsHandler } from "./resources/custom-fields/handler";
+import { PurchasesHandler } from "./resources/purchases/handler";
+import { SegmentsHandler } from "./resources/segments/handler";
 import type { ClientOptions } from "./types";
 
 export class Kit extends ApiClient {
@@ -22,6 +24,8 @@ export class Kit extends ApiClient {
   public readonly accounts: AccountsHandler;
   public readonly broadcasts: BroadcastsHandler;
   public readonly customFields: CustomFieldsHandler;
+  public readonly segments: SegmentsHandler;
+  public readonly purchases: PurchasesHandler;
 
   /**
    * API Client for interfacing with the Kit API.
@@ -55,6 +59,8 @@ export class Kit extends ApiClient {
     this.accounts = new AccountsHandler(this);
     this.broadcasts = new BroadcastsHandler(this);
     this.customFields = new CustomFieldsHandler(this);
+    this.segments = new SegmentsHandler(this);
+    this.purchases = new PurchasesHandler(this);
   }
 
   /**
