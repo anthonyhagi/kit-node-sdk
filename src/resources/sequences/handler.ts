@@ -1,6 +1,8 @@
 import type { Kit } from "~/index";
 import { toDateString } from "~/utils/date";
 import type {
+  AddSubscriberByEmailParams,
+  AddSubscriberToSequence,
   ListSequences,
   ListSequencesParams,
   ListSequenceSubscribers,
@@ -39,7 +41,7 @@ export class SequencesHandler {
   /**
    * Get a paginated list of all Subscribers for a Sequence.
    *
-   * @param id The unique ID of the sequence.
+   * @param id The unique ID of the Sequence.
    * @param params Optional parameters to filter by.
    *
    * @returns The paginated list of Subscribers for a Sequence.
@@ -47,7 +49,7 @@ export class SequencesHandler {
   public async listSubscribers(
     id: number,
     params?: ListSequenceSubscribersParams
-  ): Promise<ListSequenceSubscribers> {
+  ): Promise<ListSequenceSubscribers | null> {
     const {
       added_after,
       added_before,
@@ -76,14 +78,42 @@ export class SequencesHandler {
 
     const url = `/sequences/${id}/subscribers`;
 
-    return await this.api.get<ListSequenceSubscribers>(url, { query });
+    return await this.api.get<ListSequenceSubscribers | null>(url, { query });
   }
 
-  public async addSubscriberByEmail(id: number) {
-    return await this.api.post(`/sequences/${id}/subscribers`);
+  /**
+   * Add a Subscriber to a Sequence by their email address.
+   *
+   * @param id The unique ID of the Sequence.
+   * @param params The email address of the Subscriber to add.
+   *
+   * @returns The Subscribers' details after being added to the Sequence.
+   */
+  public async addSubscriberByEmail(
+    id: number,
+    params: AddSubscriberByEmailParams
+  ): Promise<AddSubscriberToSequence | null> {
+    const body = JSON.stringify(params);
+
+    const url = `/sequences/${id}/subscribers`;
+
+    return await this.api.post<AddSubscriberToSequence | null>(url, { body });
   }
 
-  public async addSubscriberById(id: number, subscriberId: number) {
-    return await this.api.post(`/sequences/${id}/subscribers/${subscriberId}`);
+  /**
+   * Add a Subscriber to a Sequence by ID.
+   *
+   * @param id The unique ID of the Sequence.
+   * @param subscriberId The unique ID of the Subscriber.
+   *
+   * @returns The Subscribers' details after being added to the Sequence.
+   */
+  public async addSubscriberById(
+    id: number,
+    subscriberId: number
+  ): Promise<AddSubscriberToSequence | null> {
+    const url = `/sequences/${id}/subscribers/${subscriberId}`;
+
+    return await this.api.post<AddSubscriberToSequence | null>(url);
   }
 }

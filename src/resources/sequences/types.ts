@@ -65,4 +65,33 @@ export interface ListSequenceSubscribersParams {
     | undefined;
 }
 
-export interface ListSequenceSubscribers {}
+export interface ListSequenceSubscribers {
+  subscribers: {
+    id: number;
+    first_name: string | null;
+    email_address: string | null;
+    state: string;
+    created_at: string;
+    added_at: string;
+    fields: {
+      category: string;
+    };
+    pagination: Pagination;
+  }[];
+}
+
+export interface AddSubscriberByEmailParams {
+  email_address: string;
+}
+
+export interface AddSubscriberToSequence {
+  subscriber: {
+    id: number;
+    first_name: string;
+    email_address: string;
+    state: string;
+    created_at: string;
+    added_at: string;
+    fields: Record<string, unknown>;
+  };
+}
