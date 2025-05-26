@@ -1,8 +1,7 @@
 import process from "node:process";
 
-import { AccountsHandler } from "~/resources/accounts/handler";
-import { BroadcastsHandler } from "~/resources/broadcasts/handler";
 import { ApiClient } from "./api-client";
+import { AccountsHandler } from "./resources/accounts/handler";
 import type {
   GetCreatorProfile,
   GetCurrentAccount,
@@ -13,6 +12,8 @@ import type {
   UpdateColors,
   UpdateColorsParams,
 } from "./resources/accounts/types";
+import { BroadcastsHandler } from "./resources/broadcasts/handler";
+import { CustomFieldsHandler } from "./resources/custom-fields/handler";
 import type { ClientOptions } from "./types";
 
 export class Kit extends ApiClient {
@@ -20,6 +21,7 @@ export class Kit extends ApiClient {
 
   public readonly accounts: AccountsHandler;
   public readonly broadcasts: BroadcastsHandler;
+  public readonly customFields: CustomFieldsHandler;
 
   /**
    * API Client for interfacing with the Kit API.
@@ -52,6 +54,7 @@ export class Kit extends ApiClient {
 
     this.accounts = new AccountsHandler(this);
     this.broadcasts = new BroadcastsHandler(this);
+    this.customFields = new CustomFieldsHandler(this);
   }
 
   /**
