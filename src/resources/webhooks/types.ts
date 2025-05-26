@@ -22,14 +22,14 @@ export interface ListWebhooksParams {
    *
    * @example includeTotalCount: true
    */
-  includeTotalCount?: boolean | undefined;
+  include_total_count?: boolean | undefined;
 
   /**
    * Number of results per page. Default 500, maximum 1000.
    *
    * @example perPage: 500
    */
-  perPage?: number | undefined;
+  per_page?: number | undefined;
 }
 
 export interface ListWebhooks {

@@ -15,51 +15,51 @@ export class WebhooksHandler {
   }
 
   /**
+   * Get a paginated list of all Webhooks.
    *
-   * @param params
-   * @returns
+   * @param params Optional parameters to filter by.
+   *
+   * @returns The paginated list of Webhooks.
    */
   public async list(params?: ListWebhooksParams): Promise<ListWebhooks> {
-    const { after, before, includeTotalCount, perPage } = params || {};
-
-    const url = "/webhooks";
+    const { after, before, include_total_count, per_page } = params || {};
 
     const query = new URLSearchParams({
       ...(after && { after }),
       ...(before && { before }),
-      ...(includeTotalCount && {
-        include_total_count: String(includeTotalCount),
+      ...(include_total_count && {
+        include_total_count: String(include_total_count),
       }),
-      ...(perPage && { per_page: String(perPage) }),
+      ...(per_page && { per_page: String(per_page) }),
     });
 
-    return await this.api.get<ListWebhooks>(url, { query });
+    return await this.api.get<ListWebhooks>("/webhooks", { query });
   }
 
   /**
    * Create a new Webhook.
    *
-   * @returns
+   * @params params The required parameters to create a new Webhook.
+   *
+   * @throws Error when required parameters are missing.
+   *
+   * @returns The newly created Webhook.
    */
   public async create(params: CreateWebhookParams): Promise<CreateWebhook> {
-    const url = "/webhooks";
-
     const body = JSON.stringify(params);
 
-    return await this.api.post<CreateWebhook>(url, { body });
+    return await this.api.post<CreateWebhook>("/webhooks", { body });
   }
 
   /**
-   * Delete the unique Webhook.
+   * Delete a Webhook.
    *
    * @param id The unique ID of the Webhook to delete.
    *
-   * @returns An empty object, otherwise `null` if the Webhook was
-   * not found.
+   * @returns An empty object on successful deletion, otherwise `null`
+   * if the Webhook was not found.
    */
   public async delete(id: number): Promise<DeleteWebhook | null> {
-    const url = `/webhooks/${id}`;
-
-    return await this.api.delete<DeleteWebhook | null>(url);
+    return await this.api.delete<DeleteWebhook | null>(`/webhooks/${id}`);
   }
 }

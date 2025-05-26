@@ -1,3 +1,5 @@
+import type { Pagination } from "~/common/types";
+
 export interface ListBroadcastsParams {
   /**
    * Pass in the string from the previous request to move
@@ -74,13 +76,7 @@ export interface ListBroadcasts {
         }
       | undefined;
   }[];
-  pagination: {
-    has_previous_page: boolean;
-    has_next_page: boolean;
-    start_cursor: string | null;
-    end_cursor: string | null;
-    per_page: number;
-  };
+  pagination: Pagination;
 }
 
 export interface CreateBroadcastParams {
@@ -219,13 +215,7 @@ export interface GetBroadcastStats {
       click_tracking_disabled: boolean;
     };
   }[];
-  pagination: {
-    has_previous_page: boolean;
-    has_next_page: boolean;
-    start_cursor: string;
-    end_cursor: string;
-    per_page: number;
-  };
+  pagination: Pagination;
 }
 
 export interface GetLinkClicks {
@@ -238,13 +228,7 @@ export interface GetLinkClicks {
       click_to_open_rate: number;
     }[];
   };
-  pagination: {
-    has_previous_page: boolean;
-    has_next_page: boolean;
-    start_cursor: string;
-    end_cursor: string;
-    per_page: number;
-  };
+  pagination: Pagination;
 }
 
 export interface GetSingleBroadcastStats {
