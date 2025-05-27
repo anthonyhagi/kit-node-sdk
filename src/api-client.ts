@@ -15,10 +15,20 @@ export class ApiClient {
     this.baseUrl = baseUrl;
   }
 
+  /**
+   * Set the default auth headers.
+   *
+   * @returns The auth headers to set for each request.
+   */
   protected authHeaders(): Record<string, string> {
     return {};
   }
 
+  /**
+   * Set the default headers to attach to every request.
+   *
+   * @returns The default auth headers.
+   */
   protected defaultHeaders(): Record<string, string> {
     return {
       Accept: "application/json",
