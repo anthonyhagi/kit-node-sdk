@@ -15,24 +15,62 @@ import type {
 import { BroadcastsHandler } from "./resources/broadcasts/handler";
 import { CustomFieldsHandler } from "./resources/custom-fields/handler";
 import { EmailTemplatesHandler } from "./resources/email-templates/handler";
+import { FormsHandler } from "./resources/forms/handler";
 import { PurchasesHandler } from "./resources/purchases/handler";
 import { SegmentsHandler } from "./resources/segments/handler";
+import { SequencesHandler } from "./resources/sequences/handler";
 import { SubscribersHandler } from "./resources/subscribers/handler";
 import { TagsHandler } from "./resources/tags/handler";
+import { WebhooksHandler } from "./resources/webhooks/handler";
 import type { ClientOptions } from "./types";
 
 export class Kit extends ApiClient {
-  authType: Required<ClientOptions["authType"]>;
-
   protected options: Required<ClientOptions>;
 
+  /**
+   * @see {@link https://developers.kit.com/v4#kit-api-accounts}
+   */
   public readonly accounts: AccountsHandler;
+
+  /**
+   * @see {@link https://developers.kit.com/v4#kit-api-broadcasts}
+   */
   public readonly broadcasts: BroadcastsHandler;
+
+  /**
+   * @see {@link https://developers.kit.com/v4#kit-api-custom-fields}
+   */
   public readonly customFields: CustomFieldsHandler;
+
+  /**
+   * @see {@link https://developers.kit.com/v4#kit-api-email-templates}
+   */
   public readonly emailTemplates: EmailTemplatesHandler;
-  public readonly segments: SegmentsHandler;
-  public readonly subscribers: SubscribersHandler;
+
+  /**
+   * @see {@link https://developers.kit.com/v4#kit-api-forms}
+   */
+  public readonly forms: FormsHandler;
+
+  /**
+   * @see {@link https://developers.kit.com/v4#kit-api-purchases}
+   */
   public readonly purchases: PurchasesHandler;
+
+  /**
+   * @see {@link https://developers.kit.com/v4#kit-api-segments}
+   */
+  public readonly segments: SegmentsHandler;
+
+  /**
+   * @see {@link https://developers.kit.com/v4#kit-api-sequences}
+   */
+  public readonly sequences: SequencesHandler;
+
+  /**
+   * @see {@link https://developers.kit.com/v4#kit-api-subscribers}
+   */
+  public readonly subscribers: SubscribersHandler;
 
   /**
    * Tags are labels you can add to Subscribers to create fixed groups
@@ -43,8 +81,15 @@ export class Kit extends ApiClient {
    *
    * Subscribers can have multiple tags. There is no limit to the number
    * of tags a subscriber can be tagged with.
+   *
+   * @see {@link https://developers.kit.com/v4#kit-api-tags}
    */
   public readonly tags: TagsHandler;
+
+  /**
+   * @see {@link https://developers.kit.com/v4#kit-api-webhooks}
+   */
+  public readonly webhooks: WebhooksHandler;
 
   /**
    * API Client for interfacing with the Kit API.
@@ -73,17 +118,19 @@ export class Kit extends ApiClient {
 
     super({ baseUrl: options.baseUrl });
 
-    this.authType = options.authType;
     this.options = options;
 
     this.accounts = new AccountsHandler(this);
     this.broadcasts = new BroadcastsHandler(this);
     this.customFields = new CustomFieldsHandler(this);
     this.emailTemplates = new EmailTemplatesHandler(this);
-    this.segments = new SegmentsHandler(this);
-    this.subscribers = new SubscribersHandler(this);
+    this.forms = new FormsHandler(this);
     this.purchases = new PurchasesHandler(this);
+    this.segments = new SegmentsHandler(this);
+    this.sequences = new SequencesHandler(this);
+    this.subscribers = new SubscribersHandler(this);
     this.tags = new TagsHandler(this);
+    this.webhooks = new WebhooksHandler(this);
   }
 
   /**
