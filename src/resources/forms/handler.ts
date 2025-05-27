@@ -40,6 +40,7 @@ export class FormsHandler {
    * @returns a response with the list of subscribers and any failures
    * that may have occurred. For over 100 subscribers, an empty
    * object will be returned.
+   * @see {@link https://developers.kit.com/v4#bulk-add-subscribers-to-forms}
    */
   public async bulkAddSubscribers(
     params: BulkAddSubscribersParams
@@ -70,6 +71,7 @@ export class FormsHandler {
    * @param params
    *
    * @returns the paginated list of all forms and landing pages.
+   * @see {@link https://developers.kit.com/v4#list-forms}
    */
   public async list(params?: ListFormsParams): Promise<ListForms> {
     const { after, before, includeTotalCount, perPage, status, type } =
@@ -96,6 +98,7 @@ export class FormsHandler {
    * @param params
    *
    * @returns the paginated list of subscribers attached to the form.
+   * @see {@link https://developers.kit.com/v4#list-subscribers-for-a-form}
    */
   public async listSubscribers(
     id: number,
@@ -142,6 +145,7 @@ export class FormsHandler {
    * @param params.referrer The URL of the referrer if applicable.
    *
    * @returns The subscribers' details after being added to the form.
+   * @see {@link https://developers.kit.com/v4#add-subscriber-to-form-by-email-address}
    */
   public async addSubscriberByEmail(
     id: number,
@@ -167,6 +171,7 @@ export class FormsHandler {
    * @param params
    *
    * @returns The subscribers' details after being added to the form.
+   * @see {@link https://developers.kit.com/v4#add-subscriber-to-form}
    */
   public async addSubscriber(
     id: number,

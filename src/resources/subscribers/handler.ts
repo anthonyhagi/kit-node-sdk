@@ -22,6 +22,12 @@ export class SubscribersHandler {
     this.api = api;
   }
 
+  /**
+   *
+   * @param params
+   * @returns
+   * @see {@link https://developers.kit.com/v4#bulk-create-subscribers}
+   */
   public async bulkCreate(
     params: BulkCreateSubscribersParams
   ): Promise<BulkCreateSubscribers> {
@@ -43,6 +49,7 @@ export class SubscribersHandler {
    *
    * @param params
    * @returns
+   * @see {@link https://developers.kit.com/v4#list-subscribers}
    */
   public async list(params?: ListSubscribersParams): Promise<ListSubscribers> {
     const {
@@ -82,6 +89,12 @@ export class SubscribersHandler {
     return await this.api.get<ListSubscribers>(url, { query });
   }
 
+  /**
+   *
+   * @param params
+   * @returns
+   * @see {@link https://developers.kit.com/v4#create-a-subscriber}
+   */
   public async create(
     params: CreateSubscriberParams
   ): Promise<CreateSubscriber> {
@@ -92,12 +105,25 @@ export class SubscribersHandler {
     return await this.api.post<CreateSubscriber>(url, { body });
   }
 
+  /**
+   *
+   * @param id
+   * @returns
+   * @see {@link https://developers.kit.com/v4#get-a-subscriber}
+   */
   public async get(id: number): Promise<GetSubscriber | null> {
     const url = `/subscribers/${id}`;
 
     return await this.api.get<GetSubscriber | null>(url);
   }
 
+  /**
+   *
+   * @param id
+   * @param params
+   * @returns
+   * @see {@link https://developers.kit.com/v4#update-a-subscriber}
+   */
   public async update(
     id: number,
     params: UpdateSubscriberParams
@@ -114,6 +140,7 @@ export class SubscribersHandler {
    *
    * @param id
    * @returns
+   * @see {@link https://developers.kit.com/v4#unsubscribe-subscriber}
    */
   public async unsubscribe(id: number): Promise<{} | null> {
     const url = `/subscribers/${id}/unsubscribe`;
@@ -127,6 +154,7 @@ export class SubscribersHandler {
    * @param id
    * @param params
    * @returns
+   * @see {@link https://developers.kit.com/v4#list-tags-for-a-subscriber}
    */
   public async getTags(
     id: number,

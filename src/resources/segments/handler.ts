@@ -14,6 +14,7 @@ export class SegmentsHandler {
    * @param params Optional parameters for filter by.
    *
    * @returns The paginated list of Segments.
+   * @see {@link https://developers.kit.com/v4#list-segments}
    */
   public async list(params?: ListSegmentsParams): Promise<ListSegments> {
     const { after, before, include_total_count, per_page } = params || {};

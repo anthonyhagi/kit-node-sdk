@@ -71,6 +71,7 @@ export class TagsHandler {
    * @returns A `BulkCreateTags` object. If the operation is synchronous, it will
    *   have `type: "synchronous"` and include `tags` (created tags) and `failures`
    *   arrays. If asynchronous, it will have `type: "asynchronous"`.
+   * @see {@link https://developers.kit.com/v4#bulk-create-tags}
    *
    * @example Creating tags synchronously
    * ```typescript
@@ -115,6 +116,7 @@ export class TagsHandler {
    * @returns A `BulkRemoveTags` object. If the operation is synchronous, it will
    *   have `type: "synchronous"` and include a `failures` array. If asynchronous,
    *   it will have `type: "asynchronous"`.
+   * @see {@link https://developers.kit.com/v4#bulk-remove-tags-from-subscribers}
    *
    * @example Removing tags in bulk
    * ```typescript
@@ -162,6 +164,7 @@ export class TagsHandler {
    *   have `type: "synchronous"` and include a `subscribers` array with details
    *   of the affected subscribers and a `failures` array. If asynchronous,
    *   it will have `type: "asynchronous"`.
+   * @see {@link https://developers.kit.com/v4#bulk-tag-subscribers}
    *
    * @example Tagging subscribers in bulk
    * ```typescript
@@ -204,6 +207,7 @@ export class TagsHandler {
    *
    * @returns A `ListTags` object containing an array of `Tag` objects
    * and pagination details.
+   * @see {@link https://developers.kit.com/v4#list-tags}
    *
    * @example Listing tags
    * ```typescript
@@ -242,6 +246,7 @@ export class TagsHandler {
    *
    * @returns A `CreateTag` object containing the details of the newly
    * created `Tag`.
+   * @see {@link https://developers.kit.com/v4#create-a-tag}
    *
    * @example Creating a new tag
    * ```typescript
@@ -262,6 +267,7 @@ export class TagsHandler {
    *
    * @returns The updated Tag object on success, or `null` if the Tag
    * was not found.
+   * @see {@link https://developers.kit.com/v4#update-tag-name}
    */
   public async update(
     tagId: number,
@@ -283,6 +289,7 @@ export class TagsHandler {
    * @returns An empty object `{}` on success. Returns `null` if the
    * Tag or Subscriber was not found, or if the subscriber was not
    * tagged with the specified tag.
+   * @see {@link https://developers.kit.com/v4#remove-tag-from-subscriber-by-email-address}
    *
    * @example Removing a subscriber by email
    * ```typescript
@@ -327,6 +334,7 @@ export class TagsHandler {
    * @returns A `ListTagSubscribers` object containing an array of
    * subscriber details and pagination details, or `null` if the
    * Tag was not found.
+   * @see {@link https://developers.kit.com/v4#list-subscribers-for-a-tag}
    *
    * @example Listing subscribers for a tag
    * ```typescript
@@ -383,6 +391,7 @@ export class TagsHandler {
    * @returns A `TagSubscriberByEmail` object containing the details of
    * the `subscriber` who was tagged. Returns `null` if the Tag was not
    * found.
+   * @see {@link https://developers.kit.com/v4#tag-a-subscriber-by-email-address}
    *
    * @example Tagging a subscriber by email
    * ```typescript
@@ -409,6 +418,7 @@ export class TagsHandler {
    *
    * @returns An empty object `{}` on success. Returns `null` if the Tag or Subscriber
    *   was not found, or if the subscriber was not tagged with the specified tag.
+   * @see {@link https://developers.kit.com/v4#remove-tag-from-subscriber}
    *
    * @example Removing a subscriber by ID
    * ```/dev/null/example.ts
@@ -439,6 +449,7 @@ export class TagsHandler {
    *
    * @returns A `TagSubscriber` object containing the details of the `subscriber`
    *   who was tagged. Returns `null` if the Tag or Subscriber was not found.
+   * @see {@link https://developers.kit.com/v4#tag-a-subscriber}
    *
    * @example Tagging a subscriber by ID
    * ```typescript

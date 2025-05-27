@@ -38,6 +38,7 @@ export class CustomFieldsHandler {
    * @returns a response with the custom fields created and any
    * failures that may have occurred. For over 100 fields,
    * an empty object will be returned.
+   * @see {@link https://developers.kit.com/v4#bulk-create-custom-fields}
    */
   public async bulkCreate(params: BulkCreateParams): Promise<BulkCreate> {
     const body = JSON.stringify(params);
@@ -72,6 +73,7 @@ export class CustomFieldsHandler {
    * @param params The filtering to apply to the request.
    *
    * @returns a paginated list of all custom fields.
+   * @see {@link https://developers.kit.com/v4#list-custom-fields}
    */
   public async list(
     params?: ListCustomFieldsParams
@@ -108,6 +110,7 @@ export class CustomFieldsHandler {
    * the key of the custom field prefixed with `ck_field`.
    *
    * @returns the newly created custom field.
+   * @see {@link https://developers.kit.com/v4#create-a-custom-field}
    */
   public async create(
     params: CreateCustomFieldParams
@@ -127,6 +130,7 @@ export class CustomFieldsHandler {
    *
    * @returns an empty object when deleted successfully; `null` if
    * the custom field was not found.
+   * @see {@link https://developers.kit.com/v4#delete-custom-field}
    */
   public async delete(id: number): Promise<DeleteCustomField | null> {
     const url = `/custom_fields/${id}`;
@@ -153,6 +157,7 @@ export class CustomFieldsHandler {
    *
    * @returns the updated custom field; `null` if the custom
    * field was not found.
+   * @see {@link https://developers.kit.com/v4#update-a-custom-field}
    */
   public async update(
     id: number,

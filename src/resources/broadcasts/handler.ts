@@ -26,6 +26,7 @@ export class BroadcastsHandler {
    * @param params any filters that should be applied to the request.
    *
    * @returns the paginated list of broadcasts.
+   * @see {@link https://developers.kit.com/v4#list-broadcasts}
    */
   public async list(params?: ListBroadcastsParams): Promise<ListBroadcasts> {
     const { after, before, include_total_count, per_page } = params || {};
@@ -60,6 +61,7 @@ export class BroadcastsHandler {
    * @param params The required parameters to create a broadcast.
    *
    * @returns the created broadcast.
+   * @see {@link https://developers.kit.com/v4#create-a-broadcast}
    */
   public async create(params: CreateBroadcastParams): Promise<CreateBroadcast> {
     const body = JSON.stringify(params);
@@ -74,6 +76,7 @@ export class BroadcastsHandler {
    * developer authorization.
    *
    * @returns an array of stats for all broadcasts.
+   * @see {@link https://developers.kit.com/v4#get-stats-for-a-list-of-broadcasts}
    */
   public async getAllStats(): Promise<GetBroadcastStats> {
     return await this.api.get<GetBroadcastStats>("/broadcasts/stats");
@@ -86,6 +89,7 @@ export class BroadcastsHandler {
    *
    * @returns the broadcast link clicks in an array. Otherwise, `null`
    * if the broadcast cannot be found.
+   * @see {@link https://developers.kit.com/v4#get-link-clicks-for-a-broadcast}
    */
   public async getLinkClicksById(id: number): Promise<GetLinkClicks | null> {
     this.validateId(id);
@@ -99,6 +103,7 @@ export class BroadcastsHandler {
    * @param id the unique ID of the broadcast.
    *
    * @returns the broadcast if it exists, `null` otherwise.
+   * @see {@link https://developers.kit.com/v4#get-stats-for-a-broadcast}
    */
   public async getStats(id: number): Promise<GetSingleBroadcastStats | null> {
     this.validateId(id);
@@ -114,6 +119,7 @@ export class BroadcastsHandler {
    * @param id the unique ID of the broadcast.
    *
    * @returns `true` when deleted successfully, `false` if it was not found.
+   * @see {@link https://developers.kit.com/v4#delete-a-broadcast}
    */
   public async delete(id: number): Promise<boolean> {
     this.validateId(id);
@@ -133,6 +139,7 @@ export class BroadcastsHandler {
    * @param id the unique ID of the broadcast.
    *
    * @returns the broadcast if it was found; `null` otherwise.
+   * @see {@link https://developers.kit.com/v4#get-a-broadcast}
    */
   public async get(id: number): Promise<GetBroadcast | null> {
     this.validateId(id);
@@ -155,6 +162,7 @@ export class BroadcastsHandler {
    *
    * @returns the updated broadcast with attached details. If the
    * broadcast was not found, `null` is returned.
+   * @see {@link https://developers.kit.com/v4#update-a-broadcast}
    */
   public async update(
     id: number,

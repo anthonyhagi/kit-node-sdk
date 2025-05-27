@@ -22,6 +22,7 @@ export class SequencesHandler {
    * @param params Optional parameters to filter by.
    *
    * @returns The paginated list of Sequences.
+   * @see {@link https://developers.kit.com/v4#list-sequences}
    */
   public async list(params?: ListSequencesParams): Promise<ListSequences> {
     const { after, before, include_total_count, per_page } = params || {};
@@ -45,6 +46,7 @@ export class SequencesHandler {
    * @param params Optional parameters to filter by.
    *
    * @returns The paginated list of Subscribers for a Sequence.
+   * @see {@link https://developers.kit.com/v4#list-subscribers-for-a-sequence}
    */
   public async listSubscribers(
     id: number,
@@ -88,6 +90,7 @@ export class SequencesHandler {
    * @param params The email address of the Subscriber to add.
    *
    * @returns The Subscribers' details after being added to the Sequence.
+   * @see {@link https://developers.kit.com/v4#add-subscriber-to-sequence-by-email-address}
    */
   public async addSubscriberByEmail(
     id: number,
@@ -107,6 +110,7 @@ export class SequencesHandler {
    * @param subscriberId The unique ID of the Subscriber.
    *
    * @returns The Subscribers' details after being added to the Sequence.
+   * @see {@link https://developers.kit.com/v4#add-subscriber-to-sequence}
    */
   public async addSubscriberById(
     id: number,
