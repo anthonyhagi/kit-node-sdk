@@ -43,6 +43,7 @@
     "test": "vitest run"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.29.4",
     "@sxzz/eslint-config": "^7.0.1",
     "@types/node": "^22.15.21",
     "eslint": "^9.27.0",
