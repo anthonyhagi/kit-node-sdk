@@ -40,7 +40,8 @@
     "clean": "rm -rf dist",
     "typecheck": "tsc",
     "lint": "eslint .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "changeset": "changeset"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.4",
