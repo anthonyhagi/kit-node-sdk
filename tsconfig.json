@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "types": ["./global.d.ts"],
     "target": "ES2024",
     "lib": ["ES2024"],
     "moduleDetection": "force",
@@ -9,6 +8,7 @@
       "~/*": ["./src/*"]
     },
     "resolveJsonModule": true,
+    "types": ["./global.d.ts"],
     "allowJs": true,
     "strict": true,
     "noImplicitOverride": true,
