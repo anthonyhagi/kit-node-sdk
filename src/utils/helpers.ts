@@ -19,3 +19,9 @@ export type Snakify<T> = T extends object
     ? { [K in keyof T]: Snakify<T[K]> }
     : { [K in keyof T as CamelToSnakeCase<string & K>]: Snakify<T[K]> }
   : T;
+
+export type Nullable<T> = { [K in keyof T]: T[K] | null };
+
+export type DeepNullable<T> = {
+  [K in keyof T]: DeepNullable<T[K]> | null;
+};
