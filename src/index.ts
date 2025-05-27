@@ -17,6 +17,7 @@ import { CustomFieldsHandler } from "./resources/custom-fields/handler";
 import { EmailTemplatesHandler } from "./resources/email-templates/handler";
 import { PurchasesHandler } from "./resources/purchases/handler";
 import { SegmentsHandler } from "./resources/segments/handler";
+import { SubscribersHandler } from "./resources/subscribers/handler";
 import { TagsHandler } from "./resources/tags/handler";
 import type { ClientOptions } from "./types";
 
@@ -30,6 +31,7 @@ export class Kit extends ApiClient {
   public readonly customFields: CustomFieldsHandler;
   public readonly emailTemplates: EmailTemplatesHandler;
   public readonly segments: SegmentsHandler;
+  public readonly subscribers: SubscribersHandler;
   public readonly purchases: PurchasesHandler;
 
   /**
@@ -79,6 +81,7 @@ export class Kit extends ApiClient {
     this.customFields = new CustomFieldsHandler(this);
     this.emailTemplates = new EmailTemplatesHandler(this);
     this.segments = new SegmentsHandler(this);
+    this.subscribers = new SubscribersHandler(this);
     this.purchases = new PurchasesHandler(this);
     this.tags = new TagsHandler(this);
   }

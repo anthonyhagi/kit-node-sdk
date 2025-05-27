@@ -5,3 +5,10 @@ export type Pagination = {
   end_cursor: string | null;
   per_page: number;
 };
+
+export type SubscriberState =
+  | "active"
+  | "bounced"
+  | "cancelled"
+  | "complained"
+  | "inactive";
