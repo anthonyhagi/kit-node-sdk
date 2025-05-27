@@ -35,7 +35,7 @@ export class Kit extends ApiClient {
   public readonly purchases: PurchasesHandler;
 
   /**
-   * Tags are labels you can add to subscribers to create fixed groups
+   * Tags are labels you can add to Subscribers to create fixed groups
    * based on a certain shared characteristic.
    *
    * Tags will remain on a subscriber unless they have been intentionally
