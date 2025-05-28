@@ -33,60 +33,88 @@ export class Kit extends ApiClient {
   public readonly accounts: AccountsHandler;
 
   /**
+   * One-off, non-automated emails sent to subscribers, publishable
+   * as standalone posts.
+   *
    * @see {@link https://developers.kit.com/v4#kit-api-broadcasts}
    */
   public readonly broadcasts: BroadcastsHandler;
 
   /**
+   * Additional fields added to subscriber profiles or forms to
+   * collect and store extra information.
+   *
    * @see {@link https://developers.kit.com/v4#kit-api-custom-fields}
    */
   public readonly customFields: CustomFieldsHandler;
 
   /**
+   * Pre-designed layouts for emails, customizable and reusable for
+   * consistent communications.
+   *
    * @see {@link https://developers.kit.com/v4#kit-api-email-templates}
    */
   public readonly emailTemplates: EmailTemplatesHandler;
 
   /**
+   * Web forms for collecting subscriber information, such as email
+   * addresses, to build email lists.
+   *
    * @see {@link https://developers.kit.com/v4#kit-api-forms}
    */
   public readonly forms: FormsHandler;
 
   /**
+   * Transactions for buying products or services through Kit.com,
+   * including digital or affiliate sales.
+   *
    * @see {@link https://developers.kit.com/v4#kit-api-purchases}
    */
   public readonly purchases: PurchasesHandler;
 
   /**
+   * Dynamic groups of subscribers based on criteria or filters,
+   * used for targeted email campaigns.
+   *
    * @see {@link https://developers.kit.com/v4#kit-api-segments}
    */
   public readonly segments: SegmentsHandler;
 
   /**
+   * Automated email series sent at predefined intervals, often
+   * triggered by actions like form submissions.
+   *
    * @see {@link https://developers.kit.com/v4#kit-api-sequences}
    */
   public readonly sequences: SequencesHandler;
 
   /**
+   * Individuals opted in to receive emails from the creator
+   * through Kit.com.
+   *
    * @see {@link https://developers.kit.com/v4#kit-api-subscribers}
    */
   public readonly subscribers: SubscribersHandler;
 
   /**
-   * Tags are labels you can add to Subscribers to create fixed groups
-   * based on a certain shared characteristic.
+   * Labels assigned to subscribers for categorization based on
+   * attributes or behaviors, for organizing and targeting.
    *
-   * Tags will remain on a subscriber unless they have been intentionally
-   * removed (whether manually or through an automated process).
+   * Tags will remain on a subscriber unless they have been
+   * intentionally removed (whether manually or through an
+   * automated process).
    *
-   * Subscribers can have multiple tags. There is no limit to the number
-   * of tags a subscriber can be tagged with.
+   * Subscribers can have multiple tags. There is no limit to the
+   * number of tags a subscriber can be tagged with.
    *
    * @see {@link https://developers.kit.com/v4#kit-api-tags}
    */
   public readonly tags: TagsHandler;
 
   /**
+   * HTTP callbacks for external applications to receive real-time
+   * notifications from Kit.com for events like new subscribers.
+   *
    * @see {@link https://developers.kit.com/v4#kit-api-webhooks}
    */
   public readonly webhooks: WebhooksHandler;
@@ -94,11 +122,12 @@ export class Kit extends ApiClient {
   /**
    * API Client for interfacing with the Kit API.
    *
-   * @param {ClientOptions} opts the options to initialise the sdk with.
-   * @param {ClientOptions['apiKey']} opts.apiKey The API key to use for
-   * all requests.
-   * @param {ClientOptions['authType']} opts.authType Specify the type
-   * of api key you will be using for requests.
+   * @param {ClientOptions} opts The options to initialise the sdk
+   *   with.
+   * @param {ClientOptions['apiKey']} opts.apiKey The API key to use
+   *   for all requests.
+   * @param {ClientOptions['authType']} opts.authType Specify the
+   *   type of api key you will be using for requests.
    */
   constructor({
     apiKey = process.env.KIT_API_KEY,
