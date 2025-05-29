@@ -1,4 +1,5 @@
 import type { Kit } from "~/index";
+import { toDateString } from "~/utils/date";
 import type {
   GetCreatorProfile,
   GetCurrentAccount,
@@ -20,8 +21,10 @@ export class AccountsHandler {
   /**
    * Returns the current account and associated user information.
    *
+   * @see {@link https://developers.kit.com/v4#get-current-account} for
+   * the API route specification.
+   *
    * @returns the user and account information.
-   * @see {@link https://developers.kit.com/v4#get-current-account}
    */
   public async getCurrentAccount(): Promise<GetCurrentAccount> {
     return await this.api.get<GetCurrentAccount>("/account");
@@ -31,6 +34,7 @@ export class AccountsHandler {
    * Returns list of colors for the current account.
    *
    * @returns a list of colors as hex strings in an array.
+   *
    * @see {@link https://developers.kit.com/v4#list-colors}
    */
   public async listColors(): Promise<ListColors> {
@@ -40,14 +44,14 @@ export class AccountsHandler {
   /**
    * Update and return the newly set colors.
    *
-   * @param params the required parameters to send.
-   * @param params.colors The hex colours to set on the account.
+   * @param params - the required parameters to update the colors.
    *
-   * @returns the newly set list of hex colours in an array.
    * @see {@link https://developers.kit.com/v4#update-colors}
+   *
+   * @returns the newly set list of hex colors in an array.
    */
   public async updateColors(params: UpdateColorsParams): Promise<UpdateColors> {
-    const { colors = [] } = params;
+    const { colors = [] } = params || {};
 
     if (colors.length === 0) {
       throw new Error(
@@ -59,26 +63,31 @@ export class AccountsHandler {
       );
     }
 
-    return await this.api.put<UpdateColors>("/account/colors", {
-      body: JSON.stringify({ colors }),
-    });
+    const body = JSON.stringify({ colors });
+
+    return await this.api.put<UpdateColors>("/account/colors", { body });
   }
 
   /**
    * Returns the Creator Profile details.
    *
-   * @returns the details stored on the current profile.
    * @see {@link https://developers.kit.com/v4#get-creator-profile}
+   *
+   * @returns the details stored on the current profile or `null` if
+   * the creator profile does not exist.
    */
-  public async getCreatorProfile(): Promise<GetCreatorProfile> {
-    return await this.api.get<GetCreatorProfile>("/account/creator_profile");
+  public async getCreatorProfile(): Promise<GetCreatorProfile | null> {
+    const url = "/account/creator_profile";
+
+    return await this.api.get<GetCreatorProfile | null>(url);
   }
 
   /**
    * Returns your email stats for the last 90 days.
    *
-   * @returns the basic email statistics over the last 90 days.
    * @see {@link https://developers.kit.com/v4#get-email-stats}
+   *
+   * @returns the basic email statistics over the last 90 days.
    */
   public async getEmailStats(): Promise<GetEmailStats> {
     return await this.api.get<GetEmailStats>("/account/email_stats");
@@ -87,36 +96,31 @@ export class AccountsHandler {
   /**
    * Returns your growth stats for the provided starting and ending dates.
    *
-   * @param params the optional starting and ending dates to search between.
+   * @remarks This endpoint defaults to the last 90 days. It also
+   * returns your stats in your sending timezone. It does not
+   * return any timestamps in UTC.
    *
-   * @returns the growth stats as reported between the start and end dates.
+   * @param params - The optional `starting` and `ending` dates to
+   * search between. If these are not provided, the endpoint
+   * defaults to the last 90 days.
+   *
    * @see {@link https://developers.kit.com/v4#get-growth-stats}
+   *
+   * @returns the growth stats as reported between the start and
+   * end dates.
    */
   public async getGrowthStats(
     params?: GetGrowthStatsParams
   ): Promise<GetGrowthStats> {
     const { starting, ending } = params || {};
 
-    const query = new URLSearchParams();
-
-    if (starting != null && starting !== "") {
-      const value =
-        starting instanceof Date
-          ? starting.toISOString().split("T")[0]!
-          : starting;
-
-      query.append("starting", value);
-    }
-
-    if (ending != null && ending !== "") {
-      const value =
-        ending instanceof Date ? ending.toISOString().split("T")[0]! : ending;
-
-      query.append("ending", value);
-    }
-
-    return await this.api.get<GetGrowthStats>("/account/growth_stats", {
-      query,
+    const query = new URLSearchParams({
+      ...(starting && { starting: toDateString(starting) }),
+      ...(ending && { ending: toDateString(ending) }),
     });
+
+    const url = "/account/growth_stats";
+
+    return await this.api.get<GetGrowthStats>(url, { query });
   }
 }
