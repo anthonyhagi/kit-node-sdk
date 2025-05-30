@@ -1,5 +1,11 @@
 # @anthonyhagi/kit-node-sdk
 
+## 0.1.1
+
+### Patch Changes
+
+- 57e42dd: Update readme to reflect the publish status
+
 ## 0.1.0
 
 ### Minor Changes
