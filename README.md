@@ -5,7 +5,7 @@ convenient and simple way for Node.js developers to integrate with Kit.com servi
 
 **Note:** This is an unofficial SDK and is not maintained or endorsed by Kit.com.
 
-**Note:** This is NOT production ready nor is it published yet.
+**Note:** This is NOT production ready.
 
 ## Features
 
