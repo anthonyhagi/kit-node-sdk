@@ -1,8 +1,10 @@
+import type { Pagination } from "~/common/types";
+
 export interface BulkCreateParams {
   custom_fields: {
     label: string;
   }[];
-  callback_url: string | null;
+  callback_url?: string | null | undefined;
 }
 
 export interface BulkCreateAsynchronous {
@@ -76,13 +78,7 @@ export interface ListCustomFields {
     key: string;
     label: string;
   }[];
-  pagination: {
-    has_previous_page: boolean;
-    has_next_page: boolean;
-    start_cursor: string | null;
-    end_cursor: string | null;
-    per_page: number;
-  };
+  pagination: Pagination;
 }
 
 export interface CreateCustomFieldParams {
