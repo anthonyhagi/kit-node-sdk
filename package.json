@@ -42,9 +42,7 @@
     "lint": "eslint .",
     "test": "vitest run",
     "changeset": "changeset",
-    "release": "npm run build && npm run publish",
-    "publish": "npm publish --access public",
-    "publish:ci": "npm publish --provenance --access public"
+    "release": "npm run build && npm publish --provenance --access public"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.4",
