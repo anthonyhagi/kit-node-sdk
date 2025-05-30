@@ -15,6 +15,28 @@ export type BroadcastStats = {
   click_tracking_disabled: boolean;
 };
 
+export type BroadcastEmailTemplate = {
+  id: number;
+  name: string;
+};
+
+export type BroadcastLinkClick = {
+  url: string;
+  unique_clicks: number;
+  click_to_delivery_rate: number;
+  click_to_open_rate: number;
+};
+
+export type BasicSubscriberFilterItem = {
+  type: string;
+  ids: number[];
+};
+
+export type TypedSubscriberFilterItem = {
+  type: "segment" | "tag" | (string & {});
+  ids: number[];
+};
+
 export interface ListBroadcastsParams {
   /**
    * Pass in the string from the previous request to move
@@ -63,17 +85,14 @@ export interface ListBroadcasts {
     thumbnail_url: string | null;
     email_address: string | null;
     preview_text?: string | null | undefined;
-    email_template: {
-      id: number;
-      name: string;
-    };
+    email_template: BroadcastEmailTemplate;
     subscriber_filter: {
-      all: { type: string; ids: number[] }[];
-      any?: { type: string; ids: number[] }[];
-      none?: { type: string; ids: number[] }[];
+      all: BasicSubscriberFilterItem[];
+      any?: BasicSubscriberFilterItem[];
+      none?: BasicSubscriberFilterItem[];
     }[];
     publication_id?: number | undefined;
-    clicks?: unknown[] | undefined;
+    clicks?: BroadcastLinkClick[] | undefined;
     stats?: BroadcastStats | undefined;
   }[];
   pagination: Pagination;
@@ -134,30 +153,21 @@ export interface CreateBroadcastParams {
      * segment and tag ids, i.e. a subscriber would have to be part
      * of all segments and tags provided.
      */
-    all: {
-      type: "segment" | "tag" | (string & {});
-      ids: number[];
-    } | null;
+    all: TypedSubscriberFilterItem[] | null;
 
     /**
      * Filters your subscribers using a logical OR of all provided
      * segment and tag ids, i.e. a subscriber would have to be
      * part of at least one of the segments or tags provided.
      */
-    any: {
-      type: "segment" | "tag" | (string & {});
-      ids: number[];
-    } | null;
+    any: TypedSubscriberFilterItem[] | null;
 
     /**
      * Filters your subscribers using a logical NOT of all provided
      * segment and tag ids, i.e. a subscriber would have to be in
      * none of the segments or tags provided.
      */
-    none: {
-      type: "segment" | "tag" | (string & {});
-      ids: number[];
-    } | null;
+    none: TypedSubscriberFilterItem[] | null;
   } | null;
 }
 
@@ -172,26 +182,14 @@ export interface CreateBroadcast {
     public: boolean;
     published_at: string;
     send_at: string | null;
-    thumbnail_alt: unknown;
-    thumbnail_url: unknown;
+    thumbnail_alt: string | null;
+    thumbnail_url: string | null;
     email_address: string;
-    email_template: {
-      id: number;
-      name: string;
-    };
+    email_template: BroadcastEmailTemplate;
     subscriber_filter: {
-      all: {
-        type: string;
-        ids: number[];
-      };
-      any: {
-        type: string;
-        ids: number[];
-      };
-      none: {
-        type: string;
-        ids: number[];
-      };
+      all: BasicSubscriberFilterItem[];
+      any: BasicSubscriberFilterItem[] | null;
+      none: BasicSubscriberFilterItem[] | null;
     };
     publication_id: number;
   };
@@ -208,12 +206,7 @@ export interface GetBroadcastStats {
 export interface GetLinkClicks {
   broadcast: {
     id: number;
-    clicks: {
-      url: string;
-      unique_clicks: number;
-      click_to_delivery_rate: number;
-      click_to_open_rate: number;
-    }[];
+    clicks: BroadcastLinkClick[];
   };
   pagination: Pagination;
 }
@@ -230,33 +223,23 @@ export interface GetBroadcast {
     id: number;
     created_at: string;
     subject: string;
-    description: unknown;
-    content: unknown;
+    description: string | null;
+    content: string | null;
     public: boolean;
-    published_at: unknown;
-    send_at: unknown;
-    thumbnail_alt: unknown;
-    thumbnail_url: unknown;
+    published_at: string | null;
+    send_at: string | null;
+    thumbnail_alt: string | null;
+    thumbnail_url: string | null;
     email_address: string | null;
-    preview_text?: unknown | undefined;
-    email_template: {
-      id: number;
-      name: string;
-    };
+    preview_text?: string | null | undefined;
+    email_template: BroadcastEmailTemplate;
     subscriber_filter: {
-      all?: { type: string; ids?: number[] | undefined }[] | undefined;
-      any?: { type: string; ids: number[] }[] | undefined;
-      none?: { type: string; ids: number[] }[] | undefined;
+      all?: BasicSubscriberFilterItem[] | undefined;
+      any?: BasicSubscriberFilterItem[] | undefined;
+      none?: BasicSubscriberFilterItem[] | undefined;
     }[];
     publication_id?: number | undefined;
-    clicks?:
-      | {
-          url: string;
-          unique_clicks: number;
-          click_to_delivery_rate: number;
-          click_to_open_rate: number;
-        }[]
-      | undefined;
+    clicks?: BroadcastLinkClick[] | undefined;
     stats?: BroadcastStats | undefined;
   };
 }
@@ -317,27 +300,21 @@ export interface UpdateBroadcastParams {
          * segment and tag ids, i.e. a subscriber would have to be part
          * of all segments and tags provided.
          */
-        all:
-          | { type: "segment" | "tag" | (string & {}); ids: number[] }[]
-          | null;
+        all: TypedSubscriberFilterItem[] | null; // UpdateParams expects arrays of items or null for each type
 
         /**
          * Filters your subscribers using a logical OR of all provided
          * segment and tag ids, i.e. a subscriber would have to be
          * part of at least one of the segments or tags provided.
          */
-        any:
-          | { type: "segment" | "tag" | (string & {}); ids: number[] }[]
-          | null;
+        any: TypedSubscriberFilterItem[] | null;
 
         /**
          * Filters your subscribers using a logical NOT of all provided
          * segment and tag ids, i.e. a subscriber would have to be in
          * none of the segments or tags provided.
          */
-        none:
-          | { type: "segment" | "tag" | (string & {}); ids: number[] }[]
-          | null;
+        none: TypedSubscriberFilterItem[] | null;
       }[]
     | null;
 }
@@ -356,12 +333,9 @@ export interface UpdateBroadcast {
     thumbnail_alt: string | null;
     thumbnail_url: string | null;
     email_address: string;
-    email_template: {
-      id: number;
-      name: string;
-    };
+    email_template: BroadcastEmailTemplate;
     subscriber_filter: {
-      all: { type: string; ids: number[] }[];
+      all: BasicSubscriberFilterItem[];
     }[];
     publication_id?: number | undefined;
   };
