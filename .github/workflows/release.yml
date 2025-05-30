@@ -109,7 +109,7 @@ jobs:
       - name: 📦 Create Release Pull Request
         uses: changesets/action@v1
         with:
-          publish: npm run publish:ci
+          publish: npm run release:ci
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
