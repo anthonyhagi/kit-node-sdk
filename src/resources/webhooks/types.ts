@@ -177,5 +177,3 @@ export interface CreateWebhook {
     target_url: string;
   };
 }
-
-export interface DeleteWebhook {}

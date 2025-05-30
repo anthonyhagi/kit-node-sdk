@@ -2,7 +2,6 @@ import type { Kit } from "~/index";
 import type {
   CreateWebhook,
   CreateWebhookParams,
-  DeleteWebhook,
   ListWebhooks,
   ListWebhooksParams,
 } from "./types";
@@ -17,10 +16,11 @@ export class WebhooksHandler {
   /**
    * Get a paginated list of all Webhooks.
    *
-   * @param params Optional parameters to filter by.
+   * @param params - Optional parameters to filter by.
+   *
+   * @see {@link https://developers.kit.com/v4#list-webhooks}
    *
    * @returns The paginated list of Webhooks.
-   * @see {@link https://developers.kit.com/v4#list-webhooks}
    */
   public async list(params?: ListWebhooksParams): Promise<ListWebhooks> {
     const { after, before, include_total_count, per_page } = params || {};
@@ -40,15 +40,14 @@ export class WebhooksHandler {
   /**
    * Create a new Webhook.
    *
-   * @params params The required parameters to create a new Webhook.
+   * @params params - The required parameters to create a new Webhook.
    *
-   * @throws Error when required parameters are missing.
+   * @see {@link https://developers.kit.com/v4#create-a-webhook}
    *
    * @returns The newly created Webhook.
-   * @see {@link https://developers.kit.com/v4#create-a-webhook}
    */
   public async create(params: CreateWebhookParams): Promise<CreateWebhook> {
-    const body = JSON.stringify(params);
+    const body = JSON.stringify(params || {});
 
     return await this.api.post<CreateWebhook>("/webhooks", { body });
   }
@@ -56,13 +55,14 @@ export class WebhooksHandler {
   /**
    * Delete a Webhook.
    *
-   * @param id The unique ID of the Webhook to delete.
+   * @param id - The unique ID of the Webhook to delete.
+   *
+   * @see {@link https://developers.kit.com/v4#delete-a-webhook}
    *
    * @returns An empty object on successful deletion, otherwise `null`
    * if the Webhook was not found.
-   * @see {@link https://developers.kit.com/v4#delete-a-webhook}
    */
-  public async delete(id: number): Promise<DeleteWebhook | null> {
-    return await this.api.delete<DeleteWebhook | null>(`/webhooks/${id}`);
+  public async delete(id: number): Promise<{} | null> {
+    return await this.api.delete<{} | null>(`/webhooks/${id}`);
   }
 }
