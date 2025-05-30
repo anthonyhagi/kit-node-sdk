@@ -1,4 +1,4 @@
-import type { Pagination } from "~/common/types";
+import type { Pagination, SubscriberState } from "~/common/types";
 
 export interface ListSequencesParams {
   /**
@@ -13,7 +13,7 @@ export interface ListSequencesParams {
    * Pass in the string from the previous request to move
    * the cursor. This can be found in the following field:
    *
-   * @example after: pagination.start_cursor
+   * @example before: pagination.start_cursor
    */
   before?: string | undefined;
 
@@ -54,15 +54,7 @@ export interface ListSequenceSubscribersParams {
   created_before?: Date | string | undefined;
   include_total_count?: boolean | undefined;
   per_page?: number | undefined;
-  status?:
-    | "active"
-    | "inactive"
-    | "bounced"
-    | "complained"
-    | "cancelled"
-    | "all"
-    | (string & {})
-    | undefined;
+  status?: SubscriberState | "all" | (string & {}) | undefined;
 }
 
 export interface ListSequenceSubscribers {
@@ -73,11 +65,9 @@ export interface ListSequenceSubscribers {
     state: string;
     created_at: string;
     added_at: string;
-    fields: {
-      category: string;
-    };
-    pagination: Pagination;
+    fields: Record<string, string>;
   }[];
+  pagination: Pagination;
 }
 
 export interface AddSubscriberByEmailParams {
@@ -92,6 +82,6 @@ export interface AddSubscriberToSequence {
     state: string;
     created_at: string;
     added_at: string;
-    fields: Record<string, unknown>;
+    fields: Record<string, string>;
   };
 }

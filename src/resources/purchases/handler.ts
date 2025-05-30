@@ -17,10 +17,11 @@ export class PurchasesHandler {
   /**
    * Get a paginated list of all Purchases.
    *
-   * @param params Optional parameters to filter by.
+   * @param params - Optional parameters to filter by.
+   *
+   * @see {@link https://developers.kit.com/v4#list-purchases}
    *
    * @returns The paginated list of Purchases.
-   * @see {@link https://developers.kit.com/v4#list-purchases}
    */
   public async list(params?: ListPurchasesParams): Promise<ListPurchases> {
     const { after, before, include_total_count, per_page } = params || {};
@@ -40,13 +41,14 @@ export class PurchasesHandler {
   /**
    * Create a new Purchase for a Subscriber.
    *
-   * @param params The required details to record a Purchase.
+   * @param params - The required details to record a Purchase.
+   *
+   * @see {@link https://developers.kit.com/v4#create-a-purchase}
    *
    * @returns The created Purchase for a Subscriber.
-   * @see {@link https://developers.kit.com/v4#create-a-purchase}
    */
   public async create(params: CreatePurchaseParams): Promise<CreatePurchase> {
-    const body = JSON.stringify(params);
+    const body = JSON.stringify(params || {});
 
     return await this.api.post<CreatePurchase>("/purchases", { body });
   }
@@ -54,10 +56,11 @@ export class PurchasesHandler {
   /**
    * Get a unique Purchase.
    *
-   * @param id The unique ID of the Purchase.
+   * @param id - The unique ID of the Purchase.
+   *
+   * @see {@link https://developers.kit.com/v4#get-a-purchase}
    *
    * @returns The unique Purchase.
-   * @see {@link https://developers.kit.com/v4#get-a-purchase}
    */
   public async get(id: number): Promise<GetPurchase | null> {
     return await this.api.get<GetPurchase | null>(`/purchases/${id}`);

@@ -13,7 +13,7 @@ export interface ListSegmentsParams {
    * Pass in the string from the previous request to move
    * the cursor. This can be found in the following field:
    *
-   * @example after: pagination.start_cursor
+   * @example before: pagination.start_cursor
    */
   before?: string | undefined;
 
@@ -22,14 +22,14 @@ export interface ListSegmentsParams {
    * use `true`. For large collections, expect a slightly
    * slower response.
    *
-   * @example includeTotalCount: true
+   * @example include_total_count: true
    */
   include_total_count?: boolean | undefined;
 
   /**
    * Number of results per page. Default 500, maximum 1000.
    *
-   * @example perPage: 500
+   * @example per_page: 500
    */
   per_page?: number | undefined;
 }

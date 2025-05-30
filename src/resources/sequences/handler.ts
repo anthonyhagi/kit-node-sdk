@@ -19,10 +19,11 @@ export class SequencesHandler {
   /**
    * Get a paginated list of all Sequences.
    *
-   * @param params Optional parameters to filter by.
+   * @param params - Optional parameters to filter by.
+   *
+   * @see {@link https://developers.kit.com/v4#list-sequences}
    *
    * @returns The paginated list of Sequences.
-   * @see {@link https://developers.kit.com/v4#list-sequences}
    */
   public async list(params?: ListSequencesParams): Promise<ListSequences> {
     const { after, before, include_total_count, per_page } = params || {};
@@ -42,11 +43,12 @@ export class SequencesHandler {
   /**
    * Get a paginated list of all Subscribers for a Sequence.
    *
-   * @param id The unique ID of the Sequence.
-   * @param params Optional parameters to filter by.
+   * @param id - The unique ID of the Sequence.
+   * @param params - Optional parameters to filter by.
+   *
+   * @see {@link https://developers.kit.com/v4#list-subscribers-for-a-sequence}
    *
    * @returns The paginated list of Subscribers for a Sequence.
-   * @see {@link https://developers.kit.com/v4#list-subscribers-for-a-sequence}
    */
   public async listSubscribers(
     id: number,
@@ -86,17 +88,18 @@ export class SequencesHandler {
   /**
    * Add a Subscriber to a Sequence by their email address.
    *
-   * @param id The unique ID of the Sequence.
-   * @param params The email address of the Subscriber to add.
+   * @param id - The unique ID of the Sequence.
+   * @param params - The email address of the Subscriber to add.
+   *
+   * @see {@link https://developers.kit.com/v4#add-subscriber-to-sequence-by-email-address}
    *
    * @returns The Subscribers' details after being added to the Sequence.
-   * @see {@link https://developers.kit.com/v4#add-subscriber-to-sequence-by-email-address}
    */
   public async addSubscriberByEmail(
     id: number,
     params: AddSubscriberByEmailParams
   ): Promise<AddSubscriberToSequence | null> {
-    const body = JSON.stringify(params);
+    const body = JSON.stringify(params || {});
 
     const url = `/sequences/${id}/subscribers`;
 
@@ -106,17 +109,18 @@ export class SequencesHandler {
   /**
    * Add a Subscriber to a Sequence by ID.
    *
-   * @param id The unique ID of the Sequence.
-   * @param subscriberId The unique ID of the Subscriber.
+   * @param sequenceId - The unique ID of the Sequence.
+   * @param subscriberId - The unique ID of the Subscriber.
+   *
+   * @see {@link https://developers.kit.com/v4#add-subscriber-to-sequence}
    *
    * @returns The Subscribers' details after being added to the Sequence.
-   * @see {@link https://developers.kit.com/v4#add-subscriber-to-sequence}
    */
   public async addSubscriberById(
-    id: number,
+    sequenceId: number,
     subscriberId: number
   ): Promise<AddSubscriberToSequence | null> {
-    const url = `/sequences/${id}/subscribers/${subscriberId}`;
+    const url = `/sequences/${sequenceId}/subscribers/${subscriberId}`;
 
     return await this.api.post<AddSubscriberToSequence | null>(url);
   }
