@@ -5,5 +5,5 @@ export default defineConfig({
   dts: true,
   format: ["esm", "cjs"],
   platform: "node",
-  entry: ["./src"],
+  entry: ["./src/index.ts"],
 });
