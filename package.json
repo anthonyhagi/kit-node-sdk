@@ -24,14 +24,14 @@
     "dist"
   ],
   "main": "./dist/index.cjs",
-  "module": "./dist/headers.js",
-  "types": "./dist/headers.d.ts",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/headers.d.ts",
-      "require": "./dist/headers.cjs",
-      "import": "./dist/headers.js",
-      "default": "./dist/headers.js"
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     },
     "./package.json": "./package.json"
   },
@@ -41,7 +41,9 @@
     "typecheck": "tsc",
     "lint": "eslint .",
     "test": "vitest run",
-    "changeset": "changeset"
+    "changeset": "changeset",
+    "release": "npm run build && npm run publish",
+    "publish": "npm publish --provenance --access public"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.4",
