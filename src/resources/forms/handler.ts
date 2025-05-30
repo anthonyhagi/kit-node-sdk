@@ -24,23 +24,20 @@ export class FormsHandler {
   /**
    * Add subscribers to a form in bulk.
    *
-   * When 100 or less subscribers are requested to be added, this request
-   * runs synchronously on the remote API. For over 100, it is run
+   * @remarks When 100 or less subscribers are requested to be added, this
+   * request runs synchronously on the remote API. For over 100, it is run
    * asynchronously and only returns an empty response.
    *
    * When adding more than 100 subscribers, it's recommended to set the
    * callback URL. This will notify you of any failures in processing.
    *
-   * @param params the required fields to run this request.
-   * @param params.additions the subscribers to add to forms.
-   * @param params.callback_url the URL the api will trigger after
-   * processing an asynchronous request (> 100 subscribers need to
-   * be added).
+   * @param params - The required fields to run this request.
+   *
+   * @see {@link https://developers.kit.com/v4#bulk-add-subscribers-to-forms}
    *
    * @returns a response with the list of subscribers and any failures
    * that may have occurred. For over 100 subscribers, an empty
    * object will be returned.
-   * @see {@link https://developers.kit.com/v4#bulk-add-subscribers-to-forms}
    */
   public async bulkAddSubscribers(
     params: BulkAddSubscribersParams
@@ -68,22 +65,23 @@ export class FormsHandler {
    * Get a paginated list of all forms and landing pages (embedded and
    * hosted) for your account (including active and archived).
    *
-   * @param params
+   * @param params - Optional filters to apply.
+   *
+   * @see {@link https://developers.kit.com/v4#list-forms}
    *
    * @returns the paginated list of all forms and landing pages.
-   * @see {@link https://developers.kit.com/v4#list-forms}
    */
   public async list(params?: ListFormsParams): Promise<ListForms> {
-    const { after, before, includeTotalCount, perPage, status, type } =
+    const { after, before, include_total_count, per_page, status, type } =
       params || {};
 
     const query = new URLSearchParams({
       ...(after && { after }),
       ...(before && { before }),
-      ...(includeTotalCount && {
-        include_total_count: String(includeTotalCount),
+      ...(include_total_count && {
+        include_total_count: String(include_total_count),
       }),
-      ...(perPage && { per_page: String(perPage) }),
+      ...(per_page && { per_page: String(per_page) }),
       ...(status && { status }),
       ...(type && { type }),
     });
@@ -94,40 +92,41 @@ export class FormsHandler {
   /**
    * Get a paginated list of all subscribers attached to a form.
    *
-   * @param id The unique ID of the form.
-   * @param params
+   * @param id - The unique ID of the form.
+   * @param params - The optional filters to apply.
+   *
+   * @see {@link https://developers.kit.com/v4#list-subscribers-for-a-form}
    *
    * @returns the paginated list of subscribers attached to the form.
-   * @see {@link https://developers.kit.com/v4#list-subscribers-for-a-form}
    */
   public async listSubscribers(
     id: number,
     params?: ListSubscribersParams
   ): Promise<ListSubscribers | null> {
     const {
-      addedAfter,
-      addedBefore,
+      added_after,
+      added_before,
       after,
       before,
-      createdAfter,
-      createdBefore,
-      includeTotalCount,
-      perPage,
+      created_after,
+      created_before,
+      include_total_count,
+      per_page,
       status,
     } = params || {};
 
     const url = `/forms/${id}/subscribers`;
     const query = new URLSearchParams({
-      ...(addedAfter && { added_after: toDateString(addedAfter) }),
-      ...(addedBefore && { added_before: toDateString(addedBefore) }),
+      ...(added_after && { added_after: toDateString(added_after) }),
+      ...(added_before && { added_before: toDateString(added_before) }),
       ...(after && { after }),
       ...(before && { before }),
-      ...(createdAfter && { created_after: toDateString(createdAfter) }),
-      ...(createdBefore && { created_before: toDateString(createdBefore) }),
-      ...(includeTotalCount && {
-        include_total_count: String(includeTotalCount),
+      ...(created_after && { created_after: toDateString(created_after) }),
+      ...(created_before && { created_before: toDateString(created_before) }),
+      ...(include_total_count && {
+        include_total_count: String(include_total_count),
       }),
-      ...(perPage && { per_page: String(perPage) }),
+      ...(per_page && { per_page: String(per_page) }),
       ...(status && { status }),
     });
 
@@ -137,24 +136,25 @@ export class FormsHandler {
   /**
    * Adds the subscriber to the specified form.
    *
-   * @param id The unique ID of the form to add the subscriber to.
-   * @param params The required parameters to add the subscriber.
-   * @param params.emailAddress The subscribers' email address.
-   * This subscriber MUST exist in the remote API otherwise
+   * @remarks This subscriber MUST exist in the remote API otherwise
    * this call will fail.
-   * @param params.referrer The URL of the referrer if applicable.
+   *
+   * @param id - The unique ID of the form to add the subscriber to.
+   * @param params - The required and optional parameters to add
+   * the subscriber.
+   *
+   * @see {@link https://developers.kit.com/v4#add-subscriber-to-form-by-email-address}
    *
    * @returns The subscribers' details after being added to the form.
-   * @see {@link https://developers.kit.com/v4#add-subscriber-to-form-by-email-address}
    */
   public async addSubscriberByEmail(
     id: number,
     params: AddSubscriberByEmailParams
   ): Promise<AddSubscriberByEmail | null> {
-    const { emailAddress, referrer } = params || {};
+    const { email_address, referrer } = params || {};
 
     const body = JSON.stringify({
-      email_address: emailAddress,
+      email_address,
       ...(referrer && { referrer }),
     });
 
@@ -166,23 +166,23 @@ export class FormsHandler {
   /**
    * Add a subscriber to a form by the subscribers' ID.
    *
-   * @param id The unique ID of the form to add the subscriber to.
-   * @param subscriberId The unique ID of the subscriber.
-   * @param params
+   * @param formId - The unique ID of the form to add the subscriber to.
+   * @param subscriberId - The unique ID of the subscriber.
+   * @param params - Optional parameters to specify when adding the
+   * Subscriber.
+   *
+   * @see {@link https://developers.kit.com/v4#add-subscriber-to-form}
    *
    * @returns The subscribers' details after being added to the form.
-   * @see {@link https://developers.kit.com/v4#add-subscriber-to-form}
    */
   public async addSubscriber(
-    id: number,
+    formId: number,
     subscriberId: number,
-    params: AddSubscriberParams
+    params?: AddSubscriberParams
   ): Promise<AddSubscriber | null> {
-    const { referrer } = params;
+    const body = JSON.stringify(params || {});
 
-    const body = JSON.stringify({ referrer });
-
-    const url = `/forms/${id}/subscribers/${subscriberId}`;
+    const url = `/forms/${formId}/subscribers/${subscriberId}`;
 
     return await this.api.post<AddSubscriber | null>(url, { body });
   }

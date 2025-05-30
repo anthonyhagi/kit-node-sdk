@@ -1,10 +1,12 @@
+import type { Pagination } from "~/common/types";
+
 export interface BulkAddSubscribersParams {
   additions: {
     form_id: number;
     subscriber_id: number;
     referrer?: string | undefined;
   }[];
-  callback_url: string | null;
+  callback_url?: string | null | undefined;
 }
 
 export interface BulkAddSubscribersAsynchronous {
@@ -71,14 +73,14 @@ export interface ListFormsParams {
    *
    * @example includeTotalCount: true
    */
-  includeTotalCount?: boolean | undefined;
+  include_total_count?: boolean | undefined;
 
   /**
    * Number of results per page. Default 500, maximum 1000.
    *
    * @example perPage: 500
    */
-  perPage?: number | undefined;
+  per_page?: number | undefined;
 
   /**
    * Filter by a specific status. This defaults to "active" on
@@ -111,13 +113,7 @@ export interface ListForms {
     archived: boolean;
     uid: string;
   }[];
-  pagination: {
-    has_previous_page: boolean;
-    has_next_page: boolean;
-    start_cursor: string | null;
-    end_cursor: string | null;
-    per_page: number;
-  };
+  pagination: Pagination;
 }
 
 export interface ListSubscribersParams {
@@ -125,13 +121,13 @@ export interface ListSubscribersParams {
    * Filter subscribers who have been added to the form after this
    * date (format yyyy-mm-dd).
    */
-  addedAfter?: Date | string | undefined;
+  added_after?: Date | string | undefined;
 
   /**
    * Filter subscribers who have been added to the form before this
    * date (format yyyy-mm-dd).
    */
-  addedBefore?: Date | string | undefined;
+  added_before?: Date | string | undefined;
 
   /**
    * Pass in the string from the previous request to move
@@ -153,13 +149,13 @@ export interface ListSubscribersParams {
    * Filter subscribers who have been created after this date
    * (format yyyy-mm-dd).
    */
-  createdAfter?: Date | string | undefined;
+  created_after?: Date | string | undefined;
 
   /**
    * Filter subscribers who have been created before this date
    * (format yyyy-mm-dd).
    */
-  createdBefore?: Date | string | undefined;
+  created_before?: Date | string | undefined;
 
   /**
    * To include the total count of records in the response,
@@ -168,14 +164,14 @@ export interface ListSubscribersParams {
    *
    * @example includeTotalCount: true
    */
-  includeTotalCount?: boolean | undefined;
+  include_total_count?: boolean | undefined;
 
   /**
    * Number of results per page.
    *
    * @example perPage: 500
    */
-  perPage?: number | undefined;
+  per_page?: number | undefined;
 
   /**
    * Filter by a specific status. This defaults to "active" on
@@ -200,9 +196,7 @@ export interface ListSubscribers {
     state: string;
     created_at: string;
     added_at: string;
-    fields: {
-      category: string;
-    };
+    fields: Record<string, string>;
     referrer_utm_parameters?:
       | {
           source: string;
@@ -214,13 +208,7 @@ export interface ListSubscribers {
       | undefined;
     referrer?: string | undefined;
   }[];
-  pagination: {
-    has_previous_page: boolean;
-    has_next_page: boolean;
-    start_cursor: string | null;
-    end_cursor: string | null;
-    per_page: number;
-  };
+  pagination: Pagination;
 }
 
 export interface AddSubscriberByEmailParams {
@@ -230,7 +218,7 @@ export interface AddSubscriberByEmailParams {
    * This email address must already be in the remote API as a subscriber
    * to add it to the form.
    */
-  emailAddress: string;
+  email_address: string;
 
   /**
    * The referring URL.
@@ -250,7 +238,7 @@ export interface AddSubscriberByEmail {
     state: string;
     created_at: string;
     added_at: string;
-    fields: {};
+    fields: Record<string, string>;
     referrer_utm_parameters?:
       | {
           source: string;
@@ -276,7 +264,7 @@ export interface AddSubscriber {
     state: string;
     created_at: string;
     added_at: string;
-    fields: {};
+    fields: Record<string, string>;
     referrer_utm_parameters?:
       | {
           source: string;

@@ -11,10 +11,11 @@ export class EmailTemplatesHandler {
   /**
    * Get a paginated list of all Email Templates.
    *
-   * @param params Optional parameters to filter by.
+   * @param params - Optional parameters to filter by.
+   *
+   * @see {@link https://developers.kit.com/v4#list-email-templates}
    *
    * @returns The paginated list of Email Templates.
-   * @see {@link https://developers.kit.com/v4#list-email-templates}
    */
   public async list(
     params?: ListEmailTemplatesParams
