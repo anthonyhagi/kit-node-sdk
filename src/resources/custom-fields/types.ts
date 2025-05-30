@@ -59,14 +59,14 @@ export interface ListCustomFieldsParams {
    *
    * @example includeTotalCount: true
    */
-  includeTotalCount?: boolean | undefined;
+  include_total_count?: boolean | undefined;
 
   /**
    * Number of results per page. Default 500, maximum 1000.
    *
    * @example per_page: 500
    */
-  perPage?: number | undefined;
+  per_page?: number | undefined;
 }
 
 export interface ListCustomFields {
@@ -97,8 +97,6 @@ export interface CreateCustomField {
     label: string;
   };
 }
-
-export interface DeleteCustomField {}
 
 export interface UpdateCustomFieldParams {
   label: string;
