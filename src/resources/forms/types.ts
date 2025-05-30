@@ -116,7 +116,7 @@ export interface ListForms {
   pagination: Pagination;
 }
 
-export interface ListSubscribersParams {
+export interface ListFormSubscribersParams {
   /**
    * Filter subscribers who have been added to the form after this
    * date (format yyyy-mm-dd).
@@ -188,7 +188,7 @@ export interface ListSubscribersParams {
     | undefined;
 }
 
-export interface ListSubscribers {
+export interface ListFormSubscribers {
   subscribers: {
     id: number;
     first_name: string | null;
@@ -211,7 +211,7 @@ export interface ListSubscribers {
   pagination: Pagination;
 }
 
-export interface AddSubscriberByEmailParams {
+export interface AddSubscriberToFormByEmailParams {
   /**
    * The subscribers' email address.
    *
@@ -230,7 +230,7 @@ export interface AddSubscriberByEmailParams {
   referrer?: URL | string | undefined;
 }
 
-export interface AddSubscriberByEmail {
+export interface AddSubscriberToFormByEmail {
   subscriber: {
     id: number;
     first_name: string;
@@ -252,11 +252,11 @@ export interface AddSubscriberByEmail {
   };
 }
 
-export interface AddSubscriberParams {
+export interface AddSubscriberToFormParams {
   referrer?: URL | string | undefined;
 }
 
-export interface AddSubscriber {
+export interface AddSubscriberToForm {
   subscriber: {
     id: number;
     first_name: number;

@@ -2,16 +2,6 @@ import process from "node:process";
 
 import { ApiClient } from "./api-client";
 import { AccountsHandler } from "./resources/accounts/handler";
-import type {
-  GetCreatorProfile,
-  GetCurrentAccount,
-  GetEmailStats,
-  GetGrowthStats,
-  GetGrowthStatsParams,
-  ListColors,
-  UpdateColors,
-  UpdateColorsParams,
-} from "./resources/accounts/types";
 import { BroadcastsHandler } from "./resources/broadcasts/handler";
 import { CustomFieldsHandler } from "./resources/custom-fields/handler";
 import { EmailTemplatesHandler } from "./resources/email-templates/handler";
@@ -183,10 +173,9 @@ export class Kit extends ApiClient {
   }
 }
 
-export type {
-  ClientOptions,
+export type { ClientOptions };
 
-  // Accounts Types that should be exported.
+export type {
   GetCreatorProfile,
   GetCurrentAccount,
   GetEmailStats,
@@ -195,4 +184,132 @@ export type {
   ListColors,
   UpdateColors,
   UpdateColorsParams,
-};
+} from "./resources/accounts/types";
+
+export type {
+  BasicSubscriberFilterItem,
+  BroadcastEmailTemplate,
+  BroadcastLinkClick,
+  BroadcastStats,
+  CreateBroadcast,
+  CreateBroadcastParams,
+  GetBroadcast,
+  GetBroadcastStats,
+  GetLinkClicks,
+  GetSingleBroadcastStats,
+  ListBroadcasts,
+  ListBroadcastsParams,
+  TypedSubscriberFilterItem,
+  UpdateBroadcast,
+  UpdateBroadcastParams,
+} from "./resources/broadcasts/types";
+
+export type {
+  BulkCreate,
+  BulkCreateAsynchronous,
+  BulkCreateParams,
+  BulkCreateSynchronous,
+  BulkCreateWithoutResponseType,
+  CreateCustomField,
+  CreateCustomFieldParams,
+  ListCustomFields,
+  ListCustomFieldsParams,
+  UpdateCustomField,
+  UpdateCustomFieldParams,
+} from "./resources/custom-fields/types";
+
+export type {
+  ListEmailTemplates,
+  ListEmailTemplatesParams,
+} from "./resources/email-templates/types";
+
+export type {
+  AddSubscriberToForm,
+  AddSubscriberToFormByEmail,
+  AddSubscriberToFormByEmailParams,
+  AddSubscriberToFormParams,
+  BulkAddSubscribers,
+  BulkAddSubscribersAsynchronous,
+  BulkAddSubscribersParams,
+  BulkAddSubscribersSynchronous,
+  BulkAddSubscribersWithoutResponseType,
+  ListForms,
+  ListFormsParams,
+  ListFormSubscribers,
+  ListFormSubscribersParams,
+} from "./resources/forms/types";
+
+export type {
+  CreatePurchase,
+  CreatePurchaseParams,
+  GetPurchase,
+  ListPurchases,
+  ListPurchasesParams,
+} from "./resources/purchases/types";
+
+export type {
+  ListSegments,
+  ListSegmentsParams,
+} from "./resources/segments/types";
+
+export type {
+  AddSubscriberByEmailParams,
+  AddSubscriberToSequence,
+  ListSequences,
+  ListSequencesParams,
+  ListSequenceSubscribers,
+  ListSequenceSubscribersParams,
+} from "./resources/sequences/types";
+
+export type {
+  BulkCreateSubscribers,
+  BulkCreateSubscribersAsynchronous,
+  BulkCreateSubscribersParams,
+  BulkCreateSubscribersSynchronous,
+  CreateSubscriber,
+  CreateSubscriberParams,
+  GetSubscriber,
+  GetSubscriberTags,
+  GetSubscriberTagsParams,
+  ListSubscribers,
+  ListSubscribersParams,
+  UpdateSubscriber,
+  UpdateSubscriberParams,
+} from "./resources/subscribers/types";
+
+export type {
+  BulkCreateTags,
+  BulkCreateTagsAsynchronous,
+  BulkCreateTagsParams,
+  BulkCreateTagsSynchronous,
+  BulkRemoveTags,
+  BulkRemoveTagsAsynchronous,
+  BulkRemoveTagsParams,
+  BulkRemoveTagsSynchronous,
+  BulkTag,
+  BulkTagAsynchronous,
+  BulkTagParams,
+  BulkTagSynchronous,
+  CreateTag,
+  CreateTagParams,
+  ListTags,
+  ListTagsParams,
+  ListTagSubscribers,
+  ListTagSubscribersParams,
+  RemoveSubscriberByEmailParams,
+  Tag,
+  Tagging,
+  TagSubscriber,
+  TagSubscriberByEmail,
+  TagSubscriberByEmailParams,
+  UpdateTag,
+  UpdateTagParams,
+} from "./resources/tags/types";
+
+export type {
+  CreateWebhook,
+  CreateWebhookParams,
+  ListWebhooks,
+  ListWebhooksParams,
+  WebhookEvent,
+} from "./resources/webhooks/types";

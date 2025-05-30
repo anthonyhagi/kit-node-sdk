@@ -1,17 +1,17 @@
 import type { Kit } from "~/index";
 import { toDateString } from "~/utils/date";
 import type {
-  AddSubscriber,
-  AddSubscriberByEmail,
-  AddSubscriberByEmailParams,
-  AddSubscriberParams,
+  AddSubscriberToForm,
+  AddSubscriberToFormByEmail,
+  AddSubscriberToFormByEmailParams,
+  AddSubscriberToFormParams,
   BulkAddSubscribers,
   BulkAddSubscribersParams,
   BulkAddSubscribersWithoutResponseType,
   ListForms,
   ListFormsParams,
-  ListSubscribers,
-  ListSubscribersParams,
+  ListFormSubscribers,
+  ListFormSubscribersParams,
 } from "./types";
 
 export class FormsHandler {
@@ -101,8 +101,8 @@ export class FormsHandler {
    */
   public async listSubscribers(
     id: number,
-    params?: ListSubscribersParams
-  ): Promise<ListSubscribers | null> {
+    params?: ListFormSubscribersParams
+  ): Promise<ListFormSubscribers | null> {
     const {
       added_after,
       added_before,
@@ -130,7 +130,7 @@ export class FormsHandler {
       ...(status && { status }),
     });
 
-    return await this.api.get<ListSubscribers | null>(url, { query });
+    return await this.api.get<ListFormSubscribers | null>(url, { query });
   }
 
   /**
@@ -149,8 +149,8 @@ export class FormsHandler {
    */
   public async addSubscriberByEmail(
     id: number,
-    params: AddSubscriberByEmailParams
-  ): Promise<AddSubscriberByEmail | null> {
+    params: AddSubscriberToFormByEmailParams
+  ): Promise<AddSubscriberToFormByEmail | null> {
     const { email_address, referrer } = params || {};
 
     const body = JSON.stringify({
@@ -160,7 +160,9 @@ export class FormsHandler {
 
     const url = `/forms/${id}/subscribers`;
 
-    return await this.api.post<AddSubscriberByEmail | null>(url, { body });
+    return await this.api.post<AddSubscriberToFormByEmail | null>(url, {
+      body,
+    });
   }
 
   /**
@@ -178,12 +180,12 @@ export class FormsHandler {
   public async addSubscriber(
     formId: number,
     subscriberId: number,
-    params?: AddSubscriberParams
-  ): Promise<AddSubscriber | null> {
+    params?: AddSubscriberToFormParams
+  ): Promise<AddSubscriberToForm | null> {
     const body = JSON.stringify(params || {});
 
     const url = `/forms/${formId}/subscribers/${subscriberId}`;
 
-    return await this.api.post<AddSubscriber | null>(url, { body });
+    return await this.api.post<AddSubscriberToForm | null>(url, { body });
   }
 }
