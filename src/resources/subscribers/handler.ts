@@ -23,10 +23,20 @@ export class SubscribersHandler {
   }
 
   /**
+   * Create Subscribers in bulk.
    *
-   * @param params
-   * @returns
+   * @remarks This endpoint requires you to specify at least one
+   * new Subscriber to create them. When > 100 subscribers are
+   * provided, the endpoint runs asynchronously. When running
+   * it asynchronously, provide a `callback_url` to handle
+   * the result of the request.
+   *
+   * @param params - The required and optional parameters.
+   *
    * @see {@link https://developers.kit.com/v4#bulk-create-subscribers}
+   *
+   * @returns A response from the server when it is run synchronously;
+   * an empty object when it is run asynchronously.
    */
   public async bulkCreate(
     params: BulkCreateSubscribersParams
@@ -46,10 +56,14 @@ export class SubscribersHandler {
   }
 
   /**
+   * Get a paginated list of all Subscribers.
    *
-   * @param params
-   * @returns
+   * @param params - Optional filters.
+   *
    * @see {@link https://developers.kit.com/v4#list-subscribers}
+   *
+   * @returns the paginated list of subcribers based on any provided
+   * filters.
    */
   public async list(params?: ListSubscribersParams): Promise<ListSubscribers> {
     const {
@@ -90,10 +104,13 @@ export class SubscribersHandler {
   }
 
   /**
+   * Create a new Subscriber.
    *
-   * @param params
-   * @returns
+   * @param params - The parameters to create a new Subscriber.
+   *
    * @see {@link https://developers.kit.com/v4#create-a-subscriber}
+   *
+   * @returns The newly created Subscribers' details.
    */
   public async create(
     params: CreateSubscriberParams
@@ -106,10 +123,13 @@ export class SubscribersHandler {
   }
 
   /**
+   * Get a Subscriber by their unique ID.
    *
-   * @param id
-   * @returns
+   * @param id - The Subscribers' unique ID to search by.
+   *
    * @see {@link https://developers.kit.com/v4#get-a-subscriber}
+   *
+   * @returns The Subscriber if found; `null` otherwise.
    */
   public async get(id: number): Promise<GetSubscriber | null> {
     const url = `/subscribers/${id}`;
@@ -118,11 +138,14 @@ export class SubscribersHandler {
   }
 
   /**
+   * Update a Subscribers' details.
    *
-   * @param id
-   * @param params
-   * @returns
+   * @param id - The unique ID of the Subscriber.
+   * @param params - The new parameters to update on the Subscriber.
+   *
    * @see {@link https://developers.kit.com/v4#update-a-subscriber}
+   *
+   * @returns The Subscriber with the updated details.
    */
   public async update(
     id: number,
@@ -138,9 +161,12 @@ export class SubscribersHandler {
   /**
    * Unsubscribe the specified Subscriber.
    *
-   * @param id
-   * @returns
+   * @param id - The unique ID of the Subscriber.
+   *
    * @see {@link https://developers.kit.com/v4#unsubscribe-subscriber}
+   *
+   * @returns An empty object if the request was successful; `null`
+   * if the Subscriber was not found.
    */
   public async unsubscribe(id: number): Promise<{} | null> {
     const url = `/subscribers/${id}/unsubscribe`;
@@ -151,10 +177,13 @@ export class SubscribersHandler {
   /**
    * Get the associated Tags for a Subscriber.
    *
-   * @param id
-   * @param params
-   * @returns
+   * @param id - The unique ID of the Subscriber.
+   * @param params - Optional parameters to filter by.
+   *
    * @see {@link https://developers.kit.com/v4#list-tags-for-a-subscriber}
+   *
+   * @returns The Subscribers' Tags if the Subscriber exists;
+   * Otheriwse `null` if the Subscriber does not exist.
    */
   public async getTags(
     id: number,
