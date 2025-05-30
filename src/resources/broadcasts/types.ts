@@ -1,5 +1,20 @@
 import type { Pagination } from "~/common/types";
 
+export type BroadcastStats = {
+  recipients: number;
+  open_rate: number;
+  emails_opened: number;
+  click_rate: number;
+  unsubscribe_rate: number;
+  unsubscribes: number;
+  total_clicks: number;
+  show_total_clicks: boolean;
+  status: string;
+  progress: number;
+  open_tracking_disabled: boolean;
+  click_tracking_disabled: boolean;
+};
+
 export interface ListBroadcastsParams {
   /**
    * Pass in the string from the previous request to move
@@ -13,7 +28,7 @@ export interface ListBroadcastsParams {
    * Pass in the string from the previous request to move
    * the cursor. This can be found in the following field:
    *
-   * @example after: pagination.start_cursor
+   * @example before: pagination.start_cursor
    */
   before?: string | undefined;
 
@@ -59,22 +74,7 @@ export interface ListBroadcasts {
     }[];
     publication_id?: number | undefined;
     clicks?: unknown[] | undefined;
-    stats?:
-      | {
-          recipients: number;
-          open_rate: number;
-          emails_opened: number;
-          click_rate: number;
-          unsubscribe_rate: number;
-          unsubscribes: number;
-          total_clicks: number;
-          show_total_clicks: boolean;
-          status: string;
-          progress: number;
-          open_tracking_disabled: boolean;
-          click_tracking_disabled: boolean;
-        }
-      | undefined;
+    stats?: BroadcastStats | undefined;
   }[];
   pagination: Pagination;
 }
@@ -200,20 +200,7 @@ export interface CreateBroadcast {
 export interface GetBroadcastStats {
   broadcasts: {
     id: number;
-    stats: {
-      recipients: number;
-      open_rate: number;
-      emails_opened: number;
-      click_rate: number;
-      unsubscribe_rate: number;
-      unsubscribes: number;
-      total_clicks: number;
-      show_total_clicks: boolean;
-      status: string;
-      progress: number;
-      open_tracking_disabled: boolean;
-      click_tracking_disabled: boolean;
-    };
+    stats: BroadcastStats;
   }[];
   pagination: Pagination;
 }
@@ -234,20 +221,7 @@ export interface GetLinkClicks {
 export interface GetSingleBroadcastStats {
   broadcast: {
     id: number;
-    stats: {
-      recipients: number;
-      open_rate: number;
-      emails_opened: number;
-      click_rate: number;
-      unsubscribe_rate: number;
-      unsubscribes: number;
-      total_clicks: number;
-      show_total_clicks: boolean;
-      status: string;
-      progress: number;
-      open_tracking_disabled: boolean;
-      click_tracking_disabled: boolean;
-    };
+    stats: BroadcastStats;
   };
 }
 
@@ -283,22 +257,7 @@ export interface GetBroadcast {
           click_to_open_rate: number;
         }[]
       | undefined;
-    stats?:
-      | {
-          recipients: number[];
-          open_rate: number;
-          emails_opened: number;
-          click_rate: number;
-          unsubscribe_rate: number;
-          unsubscribes: number;
-          total_clicks: number;
-          show_total_clicks: boolean;
-          status: string;
-          progress: number;
-          open_tracking_disabled: boolean;
-          click_tracking_disabled: boolean;
-        }
-      | undefined;
+    stats?: BroadcastStats | undefined;
   };
 }
 
