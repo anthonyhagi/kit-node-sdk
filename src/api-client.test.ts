@@ -30,6 +30,7 @@ describe("api-client", () => {
 
     expect(fetchMock.requests().length).toBe(1);
     expect(fetchMock.requests()[0]?.url).toBe("http://localhost/some/route");
+    expect(fetchMock.requests()[0]?.method).toBe("GET");
   });
 
   it("correctly sends a POST request using the base url and path", async ({
@@ -43,6 +44,7 @@ describe("api-client", () => {
 
     expect(fetchMock.requests().length).toBe(1);
     expect(fetchMock.requests()[0]?.url).toBe("http://localhost/some/route");
+    expect(fetchMock.requests()[0]?.method).toBe("POST");
   });
 
   it("correctly sends a PUT request using the base url and path", async ({
@@ -56,6 +58,7 @@ describe("api-client", () => {
 
     expect(fetchMock.requests().length).toBe(1);
     expect(fetchMock.requests()[0]?.url).toBe("http://localhost/some/route");
+    expect(fetchMock.requests()[0]?.method).toBe("PUT");
   });
 
   it("correctly sends a DELETE request using the base url and path", async ({
@@ -69,5 +72,17 @@ describe("api-client", () => {
 
     expect(fetchMock.requests().length).toBe(1);
     expect(fetchMock.requests()[0]?.url).toBe("http://localhost/some/route");
+    expect(fetchMock.requests()[0]?.method).toBe("DELETE");
+  });
+
+  it("returns `null` for a 404 response", async () => {
+    fetchMock.mockResponseOnce({ status: 404 });
+
+    const api = new ApiClient({ baseUrl: "http://localhost" });
+
+    const resp = await api.get("/some/route");
+
+    expect(fetchMock.requests().length).toBe(1);
+    expect(resp).toBe(null);
   });
 });
