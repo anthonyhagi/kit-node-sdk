@@ -9,8 +9,8 @@ convenient and simple way for Node.js developers to integrate with Kit.com servi
 
 ## Features
 
-*   Easy integration with Node.js applications.
-*   Promise-based API for asynchronous operations.
+- Easy integration with Node.js applications.
+- Promise-based API for asynchronous operations.
 
 ## Installation
 
@@ -25,9 +25,9 @@ npm install @anthonyhagi/kit-node-sdk
 Here's a basic example of how to use the SDK with TypeScript and ESM imports:
 
 ```typescript
-import { Kit } from '@anthonyhagi/kit-node-sdk';
+import { Kit } from "@anthonyhagi/kit-node-sdk";
 
-const kit = new Kit({ apiKey: 'YOUR_API_KEY' });
+const kit = new Kit({ apiKey: "YOUR_API_KEY" });
 
 const myAccount = await kit.accounts.getCurrentAccount();
 ```

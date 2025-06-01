@@ -43,6 +43,7 @@
     "clean": "rm -rf dist",
     "typecheck": "tsc",
     "lint": "eslint .",
+    "format": "prettier -w .",
     "test": "vitest run",
     "changeset": "changeset",
     "prepack": "npm run build",
