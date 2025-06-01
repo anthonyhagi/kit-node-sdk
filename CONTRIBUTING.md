@@ -5,6 +5,7 @@ Thank you for your interest in contributing to the kit-node-sdk project! We welc
 ## Reporting Issues
 
 If you encounter a bug or have a feature request, please open an issue on the [issues page](https://github.com/anthonyhagi/kit-node-sdk/issues). When reporting a bug, include:
+
 - A clear description of the issue.
 - Steps to reproduce the problem.
 - Expected behavior.
@@ -15,6 +16,7 @@ For feature requests, please describe the proposed feature and its potential ben
 ## Submitting Pull Requests
 
 To contribute code or documentation-changes, please follow these steps:
+
 1. Fork the repository.
 2. Create a new branch for your changes.
 3. Make your changes and commit them.
@@ -24,6 +26,7 @@ To contribute code or documentation-changes, please follow these steps:
 ## Coding Standards
 
 Before submitting a pull request, please ensure that your code is linted and formatted correctly for the entire project. Run the following commands:
+
 - `npm run lint` to check for linting errors.
 - `npm run format` to format the code with Prettier.
 

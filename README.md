@@ -5,7 +5,6 @@ convenient and simple way for Node.js developers to integrate with Kit.com servi
 
 **Note:** This is an unofficial SDK and is not maintained or endorsed by Kit.com.
 
-
 ## Features
 
 - Easy integration with Node.js applications.
