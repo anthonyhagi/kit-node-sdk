@@ -1,5 +1,11 @@
 # @anthonyhagi/kit-node-sdk
 
+## 0.1.2
+
+### Patch Changes
+
+- 3c9c0fb: Update readme with api documentation and relevant information
+
 ## 0.1.1
 
 ### Patch Changes
