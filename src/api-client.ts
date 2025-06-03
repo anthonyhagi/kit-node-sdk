@@ -1,3 +1,5 @@
+import { delay } from "./utils/helpers";
+
 type HttpMethod =
   | "GET"
   | "POST"
@@ -8,11 +10,25 @@ type HttpMethod =
   | "OPTIONS"
   | (string & {});
 
+type ApiClientOptions = {
+  baseUrl: string;
+  maxRetries?: number;
+  retryDelay?: number;
+};
+
 export class ApiClient {
   baseUrl: string;
+  maxRetries: number;
+  retryDelay: number;
 
-  constructor({ baseUrl }: { baseUrl: string }) {
+  constructor({
+    baseUrl,
+    maxRetries = 3,
+    retryDelay = 1000,
+  }: ApiClientOptions) {
     this.baseUrl = baseUrl;
+    this.maxRetries = maxRetries;
+    this.retryDelay = retryDelay;
   }
 
   /**
@@ -112,23 +128,60 @@ export class ApiClient {
       body: options?.body,
     };
 
-    const resp = await fetch(url, fetchOptions);
+    let lastError: Error | null = null;
 
-    if (!resp.ok) {
-      return (await this.handleError(resp)) as TResponseType;
+    // Based on the number of attempts we should make, continue
+    // retrying the request. For specified errors, we should
+    // retry the request until we have exhausted
+    // all attempts.
+    for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
+      try {
+        const resp = await fetch(url, fetchOptions);
+
+        if (!resp.ok) {
+          // Check if this is a retryable error and we have attempts left
+          if (this.shouldRetry(resp.status) && attempt < this.maxRetries) {
+            lastError = new Error(`HTTP ${resp.status}: ${resp.statusText}`);
+
+            await delay(this.calculateDelay(attempt));
+
+            continue;
+          }
+
+          return (await this.handleError(resp)) as TResponseType;
+        }
+
+        // There's no need to return any data as the response
+        // indicates there is no content.
+        if (resp.status === 204) {
+          const emptyObj = {};
+
+          return emptyObj as TResponseType;
+        }
+
+        const data = await resp.json();
+
+        return data as TResponseType;
+      } catch (error: unknown) {
+        if (attempt < this.maxRetries) {
+          lastError = error instanceof Error ? error : new Error(String(error));
+
+          await delay(this.calculateDelay(attempt));
+
+          continue;
+        }
+
+        // If we've exhausted all retries, throw the last error
+        throw error;
+      }
     }
 
-    // There's no need to return any data as the response
-    // indicates there is no content.
-    if (resp.status === 204) {
-      const emptyObj = {};
-
-      return emptyObj as TResponseType;
+    // This should never be reached, but if it is, throw the last error
+    if (lastError) {
+      throw lastError;
     }
 
-    const data = await resp.json();
-
-    return data as TResponseType;
+    throw new Error("Request failed after all retry attempts");
   }
 
   private async handleError(resp: Response): Promise<null | never> {
@@ -182,6 +235,33 @@ export class ApiClient {
           `Unknown error. Status: ${resp.status} - Details: ${detailsString}`
         );
     }
+  }
+
+  /**
+   * Determines if a request should be retried based on the HTTP status code.
+   *
+   * @param statusCode - The HTTP status code to evaluate
+   * @returns true if the request should be retried, false otherwise
+   */
+  private shouldRetry(statusCode: number): boolean {
+    // Retry on server errors (5xx) and rate limiting (429)
+    return statusCode >= 500 || statusCode === 429;
+  }
+
+  /**
+   * Calculates the delay for exponential backoff.
+   *
+   * @param attempt - The current attempt number (0-based)
+   * @returns The delay in milliseconds
+   */
+  private calculateDelay(attempt: number): number {
+    // Exponential backoff: baseDelay * (2 ^ attempt) with some jitter
+    const exponentialDelay = this.retryDelay * 2 ** attempt;
+
+    // Add jitter to prevent thundering herd (±25% randomization)
+    const jitter = exponentialDelay * 0.25 * (Math.random() - 0.5);
+
+    return Math.floor(exponentialDelay + jitter);
   }
 
   private getUserAgent(): string {
