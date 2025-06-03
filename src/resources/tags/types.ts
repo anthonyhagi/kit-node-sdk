@@ -1,5 +1,5 @@
 import type { Pagination } from "~/common/types";
-import type { Nullable } from "~/utils/helpers";
+import type { Nullable } from "~/utils/types";
 
 export type Tag = {
   id: number;

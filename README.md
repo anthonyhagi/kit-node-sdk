@@ -35,6 +35,8 @@ convenient and simple way for Node.js developers to integrate with Kit.com servi
 
 - Easy integration with Node.js applications.
 - Promise-based API for asynchronous operations.
+- Built-in retry logic with exponential backoff for transient failures.
+- Configurable retry behavior and error handling.
 
 ## Installation
 
@@ -59,6 +61,13 @@ The SDK is fully typed and supports both TypeScript and JavaScript. Here are exa
 import { Kit } from "@anthonyhagi/kit-node-sdk";
 
 const kit = new Kit({ apiKey: "YOUR_API_KEY" });
+
+// With custom retry configuration
+const kitWithRetries = new Kit({ 
+  apiKey: "YOUR_API_KEY",
+  maxRetries: 5,        // Retry up to 5 times (default: 3)
+  retryDelay: 2000      // Start with 2 second delay (default: 1000ms)
+});
 
 // Get current account information
 const myAccount = await kit.accounts.getCurrentAccount();
@@ -209,6 +218,19 @@ const kit = new Kit({
 });
 ```
 
+#### Configuration Options
+
+The Kit constructor accepts the following options:
+
+```typescript
+const kit = new Kit({
+  apiKey: "your-api-key",    // Required: Your Kit.com API key
+  authType: "apikey",        // Optional: "apikey" (default) or "oauth"
+  maxRetries: 3,             // Optional: Number of retry attempts (default: 3)
+  retryDelay: 1000           // Optional: Base delay in ms for retries (default: 1000ms)
+});
+```
+
 ### Environment Variables
 
 You can set your API key as an environment variable:
@@ -225,7 +247,27 @@ const kit = new Kit(); // Uses KIT_API_KEY from environment
 
 ### Error Handling
 
-The SDK will throw errors for invalid requests. Always wrap API calls in try-catch blocks:
+The SDK provides robust error handling with automatic retry logic for transient failures:
+
+#### Automatic Retries
+
+The SDK automatically retries requests for:
+- **5xx server errors** (500, 502, 503, etc.) - Transient server issues
+- **429 rate limiting** - Too many requests 
+- **Network errors** - Connection failures, timeouts
+
+**Non-retryable errors** (handled immediately):
+- **4xx client errors** (400, 401, 403, 404, 422) - These indicate client-side issues
+
+#### Exponential Backoff
+
+Retries use exponential backoff with jitter to prevent overwhelming servers:
+- 1st retry: ~1 second delay
+- 2nd retry: ~2 seconds delay  
+- 3rd retry: ~4 seconds delay
+- Each with ±25% randomization to prevent thundering herd
+
+#### Error Handling Example
 
 ```typescript
 try {
@@ -233,19 +275,56 @@ try {
   console.log(account);
 } catch (error) {
   console.error('API Error:', error.message);
+  // The SDK has already attempted retries for transient errors
+  // This error represents a final failure after all retry attempts
 }
+```
+
+#### Custom Retry Configuration
+
+```typescript
+// Aggressive retry strategy for critical operations
+const kit = new Kit({ 
+  apiKey: "your-api-key",
+  maxRetries: 5,      // Retry up to 5 times
+  retryDelay: 2000    // Start with 2 second delays
+});
+
+// Conservative strategy for less critical operations  
+const kitConservative = new Kit({ 
+  apiKey: "your-api-key",
+  maxRetries: 1,      // Only retry once
+  retryDelay: 500     // Quick retries
+});
 ```
 
 ### Rate Limiting
 
-Please be mindful of Kit.com's API rate limits. The SDK does not implement automatic retry logic, so you may need to handle rate limiting in your application.
+The SDK automatically handles rate limiting (HTTP 429) responses with exponential backoff retries. When you encounter rate limits, the SDK will:
+
+1. **Automatically retry** the request after a delay
+2. **Use exponential backoff** to progressively increase wait times
+3. **Add jitter** to prevent multiple clients from retrying simultaneously
+4. **Respect your configured retry limits**
+
+```typescript
+// The SDK handles this automatically
+const subscribers = await kit.subscribers.list(); 
+// If rate limited, this will retry up to 3 times with increasing delays
+```
+
+For high-volume applications, consider:
+- Implementing request queuing in your application
+- Using larger retry delays: `retryDelay: 5000`
+- Increasing retry attempts: `maxRetries: 5`
+- Monitoring your retry patterns and adjusting configuration as needed
 
 ### TypeScript Support
 
 This SDK is written in TypeScript and provides full type definitions. All API responses, parameters, and options are fully typed:
 
 ```typescript
-import { Kit, type GetCurrentAccount, type CreateSubscriberParams } from "@anthonyhagi/kit-node-sdk";
+import { Kit, type CreateSubscriberParams, type GetCurrentAccount } from "@anthonyhagi/kit-node-sdk";
 
 const kit = new Kit({ apiKey: "YOUR_API_KEY" });
 
@@ -332,7 +411,7 @@ Tests are co-located with source files using the `.test.ts` suffix. The test sui
 When adding new features, include corresponding test files:
 
 ```typescript
-import { describe, it, expect, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { Kit } from '../src';
 
 describe('MyFeature', () => {
