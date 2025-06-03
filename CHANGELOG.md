@@ -1,5 +1,11 @@
 # @anthonyhagi/kit-node-sdk
 
+## 0.2.0
+
+### Minor Changes
+
+- cd89a2b: add retry logic for 5xx adn 429 requests if they fail
+
 ## 0.1.2
 
 ### Patch Changes
