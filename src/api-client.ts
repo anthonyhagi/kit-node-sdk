@@ -163,7 +163,13 @@ export class ApiClient {
 
         return data as TResponseType;
       } catch (error: unknown) {
-        if (attempt < this.maxRetries) {
+        // Only retry on network errors, not on handleError exceptions.
+        // `handleError` throws specific API errors that always
+        // include "Status:" in the message.
+        const isNetworkError =
+          error instanceof Error && !error.message.includes("Status:");
+
+        if (isNetworkError && attempt < this.maxRetries) {
           lastError = error instanceof Error ? error : new Error(String(error));
 
           await delay(this.calculateDelay(attempt));
@@ -171,7 +177,8 @@ export class ApiClient {
           continue;
         }
 
-        // If we've exhausted all retries, throw the last error
+        // If we've exhausted all retries or it's not a network error,
+        // throw the error.
         throw error;
       }
     }
@@ -185,11 +192,15 @@ export class ApiClient {
   }
 
   private async handleError(resp: Response): Promise<null | never> {
-    let errorDetails: any = null;
     let detailsString: string = "";
 
+    // Close the response such that we can read the body multiple times.
+    // This is only used if we receive an error AND the body could not
+    // be parsed as JSON.
+    const clonedResp = resp.clone();
+
     try {
-      errorDetails = await resp.json();
+      const errorDetails: any = await resp.json();
 
       if (
         resp.status >= 400 &&
@@ -202,8 +213,7 @@ export class ApiClient {
         detailsString = JSON.stringify(errorDetails);
       }
     } catch {
-      errorDetails = await resp.text();
-      detailsString = errorDetails;
+      detailsString = await clonedResp.text();
     }
 
     switch (resp.status) {
@@ -244,7 +254,6 @@ export class ApiClient {
    * @returns true if the request should be retried, false otherwise
    */
   private shouldRetry(statusCode: number): boolean {
-    // Retry on server errors (5xx) and rate limiting (429)
     return statusCode >= 500 || statusCode === 429;
   }
 
@@ -252,7 +261,7 @@ export class ApiClient {
    * Calculates the delay for exponential backoff.
    *
    * @param attempt - The current attempt number (0-based)
-   * @returns The delay in milliseconds
+   * @returns The delay in milliseconds.
    */
   private calculateDelay(attempt: number): number {
     // Exponential backoff: baseDelay * (2 ^ attempt) with some jitter
