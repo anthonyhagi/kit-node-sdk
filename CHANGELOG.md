@@ -1,5 +1,11 @@
 # @anthonyhagi/kit-node-sdk
 
+## 0.2.2
+
+### Patch Changes
+
+- 225269d: Bump dev dependencies to latest version
+
 ## 0.2.1
 
 ### Patch Changes
