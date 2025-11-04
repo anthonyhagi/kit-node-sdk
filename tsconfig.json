@@ -8,7 +8,7 @@
       "~/*": ["./src/*"]
     },
     "resolveJsonModule": true,
-    "types": ["./global.d.ts"],
+    "types": ["./global.d.ts", "@types/node"],
     "allowJs": true,
     "strict": true,
     "noImplicitOverride": true,
@@ -19,6 +19,6 @@
     "verbatimModuleSyntax": true,
     "skipLibCheck": true
   },
-  "include": ["./src/"],
+  "include": ["./src"],
   "exclude": ["node_modules", "dist"]
 }
