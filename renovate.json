@@ -1,4 +1,43 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["local>anthonyhagi/renovate-config"]
+  "extends": ["config:recommended"],
+  "rangeStrategy": "bump",
+  "branchConcurrentLimit": null,
+  "prConcurrentLimit": 0,
+  "ignoreTests": false,
+  "lockFileMaintenance": {
+    "automerge": true,
+    "automergeType": "pr"
+  },
+  "major": {
+    "labels": ["dependencies", "major"]
+  },
+  "minor": {
+    "labels": ["dependencies", "minor"]
+  },
+  "patch": {
+    "automerge": true,
+    "automergeType": "pr",
+    "platformAutomerge": true,
+    "labels": ["dependencies", "patch"]
+  },
+  "pin": {
+    "automerge": true,
+    "automergeType": "pr",
+    "platformAutomerge": true
+  },
+  "separateMinorPatch": true,
+  "platformAutomerge": true,
+  "packageRules": [
+    {
+      "groupName": "stripe group",
+      "groupSlug": "stripe-clientside",
+      "matchPackagePatterns": ["@stripe/*"]
+    },
+    {
+      "groupName": "conform-to group",
+      "groupSlug": "conform-to-group",
+      "matchPackagePatterns": ["@conform-to/*"]
+    }
+  ]
 }
