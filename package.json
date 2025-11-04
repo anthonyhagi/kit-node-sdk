@@ -53,7 +53,7 @@
     "release:ci": "changeset publish --access public"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.29.4",
+    "@changesets/cli": "^2.29.7",
     "@sxzz/eslint-config": "^7.0.1",
     "@types/node": "^24.1.0",
     "eslint": "^9.27.0",
