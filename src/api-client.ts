@@ -119,7 +119,7 @@ export class ApiClient {
     const headers: Record<string, string> = {
       ...this.defaultHeaders(),
       ...this.authHeaders(),
-      ...(options?.headers || {}),
+      ...options?.headers,
     };
 
     const fetchOptions: RequestInit = {
