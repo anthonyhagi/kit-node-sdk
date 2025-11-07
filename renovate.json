@@ -1,7 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
-  "rangeStrategy": "bump",
+  "rangeStrategy": "auto",
   "branchConcurrentLimit": null,
   "prConcurrentLimit": 0,
   "ignoreTests": false,
@@ -27,17 +27,5 @@
     "platformAutomerge": true
   },
   "separateMinorPatch": true,
-  "platformAutomerge": true,
-  "packageRules": [
-    {
-      "groupName": "stripe group",
-      "groupSlug": "stripe-clientside",
-      "matchPackagePatterns": ["@stripe/*"]
-    },
-    {
-      "groupName": "conform-to group",
-      "groupSlug": "conform-to-group",
-      "matchPackagePatterns": ["@conform-to/*"]
-    }
-  ]
+  "platformAutomerge": true
 }
