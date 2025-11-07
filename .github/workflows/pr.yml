@@ -61,6 +61,24 @@ jobs:
       - name: 🔬 Lint
         run: npm run lint
 
+  package:
+    name: 📦 Lint Package
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v5
+
+      - name: ⎔ Setup node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.11.0
+
+      - name: 📥 Download deps
+        uses: bahmutov/npm-install@v1
+
+      - name: 📦 Package
+        run: npm run lint:package
+
   vitest:
     name: ⚡ Vitest
     runs-on: ubuntu-latest
