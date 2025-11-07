@@ -31,10 +31,14 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.cjs",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      },
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
     },
     "./package.json": "./package.json"
   },
@@ -46,25 +50,27 @@
     "clean": "rm -rf dist",
     "typecheck": "tsc",
     "lint": "eslint .",
+    "lint:package": "publint",
     "format": "prettier -w .",
     "test": "vitest run",
     "changeset": "changeset",
-    "prepack": "npm run build",
     "release:ci": "changeset publish --access public"
   },
   "devDependencies": {
+    "@arethetypeswrong/core": "^0.18.2",
     "@changesets/cli": "^2.29.7",
     "@sxzz/eslint-config": "^7.0.1",
     "@types/node": "^24.10.0",
     "eslint": "^9.39.1",
     "jiti": "^2.6.1",
     "prettier": "^3.6.2",
+    "publint": "^0.3.15",
     "tsdown": "^0.15.12",
     "typescript": "^5.9.3",
     "vitest": "^4.0.6",
     "vitest-fetch-mock": "^0.4.5"
   },
   "engines": {
-    "node": ">=24.11.0"
+    "node": ">=18.0.0"
   }
 }
