@@ -1,5 +1,11 @@
 # @anthonyhagi/kit-node-sdk
 
+## 0.2.4
+
+### Patch Changes
+
+- 182cf9b: Fix issue with cjs types not resolving correctly
+
 ## 0.2.3
 
 ### Patch Changes
