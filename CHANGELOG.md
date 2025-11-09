@@ -1,5 +1,11 @@
 # @anthonyhagi/kit-node-sdk
 
+## 0.2.5
+
+### Patch Changes
+
+- d77f07a: Ensure build files generated before release
+
 ## 0.2.4
 
 ### Patch Changes
