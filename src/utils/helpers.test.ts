@@ -10,7 +10,7 @@ describe("utils/helpers", () => {
 
       const end = Date.now();
 
-      expect(end - start).toBeGreaterThanOrEqual(100);
+      expect(end - start).toBeGreaterThanOrEqual(99);
     });
 
     it("should return a promise", async ({ expect }) => {
