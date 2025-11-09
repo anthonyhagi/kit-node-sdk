@@ -54,6 +54,7 @@
     "format": "prettier -w .",
     "test": "vitest run",
     "changeset": "changeset",
+    "prerelease:ci": "npm run build",
     "release:ci": "changeset publish --access public"
   },
   "devDependencies": {
