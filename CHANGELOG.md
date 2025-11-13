@@ -1,5 +1,12 @@
 # @anthonyhagi/kit-node-sdk
 
+## 0.3.0
+
+### Minor Changes
+
+- 4a09457: add `/subscribers/filter` endpoint
+- 2a645ac: add `/subscriber/:id/stats` endpoint
+
 ## 0.2.5
 
 ### Patch Changes
