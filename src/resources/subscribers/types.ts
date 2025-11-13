@@ -86,6 +86,100 @@ export interface CreateSubscriber {
   };
 }
 
+export interface FilterSubscriberParams {
+  /**
+   * Number of results per page (max 100).
+   *
+   * As required from the api: 1 <= x <= 100
+   */
+  per_page?: number | undefined;
+  after?: string | undefined;
+  before?: string | undefined;
+
+  /**
+   * Include total count of matching subscribers in response.
+   *
+   * @default false.
+   */
+  include_total_count?: boolean | undefined;
+}
+
+export interface FilterSubscriberBodyAnyBroadcast {
+  type: "broadcast";
+  /** Array of broadcast IDs. Subscriber must match ANY of these. */
+  ids: number[];
+}
+
+export interface FilterSubscriberBodyAnyUrls {
+  type: "urls";
+
+  /** Array of URL IDs. Subscriber must have clicked ANY of these. */
+  ids: number[];
+
+  /** Array of URL patterns. Subscriber must have clicked ANY of these. */
+  urls: string[];
+
+  /** URL matching strategy */
+  matching: "exact" | "contains" | "starts_with" | "ends_with" | (string & {});
+}
+
+export interface FilterSubscriberBodyAllSubscribed {
+  type: "subscribed";
+
+  /** Start date (YYYY-MM-DD). This filters by `subscriber_created_at`. */
+  after?: string | undefined;
+
+  /** End date (YYYY-MM-DD). Filters by `subscriber_created_at`. */
+  before?: string | undefined;
+}
+
+export interface FilterSubscriberBodyAllBase {
+  /** Type of filter condition */
+  type: "opens" | "clicks" | "sent" | "delivered";
+
+  /** Minimum count (inclusive). */
+  count_greater_than?: number | undefined;
+
+  /** Maximum count (inclusive). */
+  count_less_than?: number | undefined;
+
+  /** Start date (YYYY-MM-DD). Filters by the event date. */
+  after?: string | undefined;
+
+  /** End date (YYYY-MM-DD). Filters by the event date. */
+  before?: string | undefined;
+
+  /**
+   * Array of OR conditions for filtering by specific broadcasts or URLs.
+   * Subscriber activity must match ANY of these conditions. Not
+   * applicable for 'subscribed' type.
+   */
+  any?: (FilterSubscriberBodyAnyBroadcast | FilterSubscriberBodyAnyUrls)[];
+}
+
+export interface FilterSubscriberBody {
+  all: (FilterSubscriberBodyAllSubscribed | FilterSubscriberBodyAllBase)[];
+}
+
+export interface FilterSubscribers {
+  subscribers: {
+    id: string;
+    first_name: string;
+    email_address: string;
+    created_at: string;
+    tag_names?: string[] | undefined;
+    tag_ids?: string[] | undefined;
+  }[];
+
+  pagination: Pagination & {
+    /**
+     * Total count of matching subscribers. Only included when the
+     * `include_total_count=true` query parameter is set.
+     */
+    total_count?: number | undefined;
+  };
+}
+
 export interface GetSubscriber {
   subscriber: {
     id: number;

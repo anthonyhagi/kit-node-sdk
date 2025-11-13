@@ -6,6 +6,9 @@ import type {
   BulkCreateSubscribersWithoutType,
   CreateSubscriber,
   CreateSubscriberParams,
+  FilterSubscriberBody,
+  FilterSubscriberParams,
+  FilterSubscribers,
   GetSubscriber,
   GetSubscriberTags,
   GetSubscriberTagsParams,
@@ -120,6 +123,37 @@ export class SubscribersHandler {
     const url = "/subscribers";
 
     return await this.api.post<CreateSubscriber>(url, { body });
+  }
+
+  /**
+   * Filter subscribers based on engagement.
+   *
+   * @param body - The parameters to filter the subscribers.
+   * @param params - The query parameters to filter the results.
+   *
+   * @see {@link https://developers.kit.com/api-reference/subscribers/filter-subscribers-based-on-engagement}
+   *
+   * @returns a paginated list of Subscribers.
+   */
+  public async filter(
+    body: FilterSubscriberBody,
+    params?: FilterSubscriberParams
+  ): Promise<FilterSubscribers> {
+    const { after, before, include_total_count, per_page } = params || {};
+
+    const query = new URLSearchParams({
+      ...(after && { after }),
+      ...(before && { before }),
+      ...(include_total_count && {
+        include_total_count: String(include_total_count),
+      }),
+      ...(per_page && { per_page: String(per_page) }),
+    });
+
+    return await this.api.post<FilterSubscribers>("/subscribers/filter", {
+      body: JSON.stringify(body || {}),
+      query,
+    });
   }
 
   /**
