@@ -1,6 +1,6 @@
 {
   "name": "@anthonyhagi/kit-node-sdk",
-  "version": "0.2.5",
+  "version": "0.3.0",
   "description": "An unofficial TypeScript/Node.js SDK for the KIT.com API, providing a simple and easy-to-use interface.",
   "type": "module",
   "keywords": [
