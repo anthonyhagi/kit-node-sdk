@@ -2,4 +2,4 @@
 "@anthonyhagi/kit-node-sdk": minor
 ---
 
-add `/subscribers/filter` endpoint
+add `/subscriber/:id/stats` endpoint

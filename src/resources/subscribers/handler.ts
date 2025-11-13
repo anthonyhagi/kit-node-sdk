@@ -10,6 +10,8 @@ import type {
   FilterSubscriberParams,
   FilterSubscribers,
   GetSubscriber,
+  GetSubscriberStats,
+  GetSubscriberStatsParams,
   GetSubscriberTags,
   GetSubscriberTagsParams,
   ListSubscribers,
@@ -206,6 +208,33 @@ export class SubscribersHandler {
     const url = `/subscribers/${id}/unsubscribe`;
 
     return await this.api.post<{} | null>(url);
+  }
+
+  /**
+   * Retrieve email stats for a specific Subscriber.
+   *
+   * @param id - The unique ID of the Subscriber.
+   * @param params - Optional parameters to filter by.
+   *
+   * @see {@link https://developers.kit.com/api-reference/subscribers/list-stats-for-a-subscriber}
+   *
+   * @returns The Subscriber's email stats if the Subscriber exists;
+   * Otherwise `null` if the Subscriber does not exist.
+   */
+  public async getStats(
+    id: number,
+    params?: GetSubscriberStatsParams
+  ): Promise<GetSubscriberStats | null> {
+    const { email_sent_after, email_sent_before } = params || {};
+
+    const query = new URLSearchParams({
+      ...(email_sent_after && { email_sent_after }),
+      ...(email_sent_before && { email_sent_before }),
+    });
+
+    const url = `/subscribers/${id}/stats`;
+
+    return await this.api.get<GetSubscriberStats | null>(url, { query });
   }
 
   /**

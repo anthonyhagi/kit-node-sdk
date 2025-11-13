@@ -208,6 +208,43 @@ export interface UpdateSubscriber {
   };
 }
 
+export interface GetSubscriberStatsParams {
+  /**
+   * Filter to stats for emails sent after this date (YYYY-MM-DD).
+   *
+   * NOTE: This functionality was added on 2025-06-28 and will only
+   * include stats for emails sent before this date.
+   */
+  email_sent_after?: string | undefined;
+
+  /**
+   * Filter to stats for emails sent before this date (YYYY-MM-DD).
+   *
+   * NOTE: This functionality was added on 2025-06-28 and will only
+   * include stats for emails sent before this date.
+   */
+  email_sent_before?: string | undefined;
+}
+
+export interface GetSubscriberStats {
+  subscriber: {
+    id: number;
+    stats: {
+      sent: number;
+      opened: number;
+      clicked: number;
+      bounced: number;
+      open_rate: number;
+      click_rate: number;
+      last_sent: string;
+      last_opened: string;
+      last_clicked: string;
+      sends_since_last_open: number;
+      sends_since_last_click: number;
+    };
+  };
+}
+
 export interface GetSubscriberTagsParams {
   after?: string | undefined;
   before?: string | undefined;
