@@ -1,5 +1,13 @@
 # @anthonyhagi/kit-node-sdk
 
+## 0.3.1
+
+### Patch Changes
+
+- 139a3eb: update doc block urls for api references
+- fa4f602: update all dev dependencies to latest versions
+- 139a3eb: resolve incorrect types for account and broadcasts
+
 ## 0.3.0
 
 ### Minor Changes
