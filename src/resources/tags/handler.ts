@@ -67,7 +67,7 @@ export class TagsHandler {
    *
    * @param params - The Tags to create and an optional `callback_url`.
    *
-   * @see {@link https://developers.kit.com/v4#bulk-create-tags}
+   * @see {@link https://developers.kit.com/api-reference/tags/bulk-create-tags}
    *
    * @returns A `BulkCreateTags` object. If the operation is synchronous, it will
    *   have `type: "synchronous"` and include `tags` (created tags) and `failures`
@@ -111,7 +111,7 @@ export class TagsHandler {
    *
    * @param params - The Tag combinations to remove and an optional `callback_url`.
    *
-   * @see {@link https://developers.kit.com/v4#bulk-remove-tags-from-subscribers}
+   * @see {@link https://developers.kit.com/api-reference/tags/bulk-remove-tags-from-subscribers}
    *
    * @returns A `BulkRemoveTags` object. If the operation is synchronous, it will
    *   have `type: "synchronous"` and include a `failures` array. If asynchronous,
@@ -157,7 +157,7 @@ export class TagsHandler {
    *
    * @param params - The Tag combinations to create and an optional `callback_url`.
    *
-   * @see {@link https://developers.kit.com/v4#bulk-tag-subscribers}
+   * @see {@link https://developers.kit.com/api-reference/tags/bulk-tag-subscribers}
    *
    * @returns A `BulkTag` object. If the operation is synchronous, it will
    *   have `type: "synchronous"` and include a `subscribers` array with details
@@ -193,7 +193,7 @@ export class TagsHandler {
    *
    * @param params - Optional parameters to filter by.
    *
-   * @see {@link https://developers.kit.com/v4#list-tags}
+   * @see {@link https://developers.kit.com/api-reference/tags/list-tags}
    *
    * @returns A `ListTags` object containing an array of `Tag` objects
    * and pagination details.
@@ -232,7 +232,7 @@ export class TagsHandler {
    *
    * @param params - The required parameters to create a new Tag.
    *
-   * @see {@link https://developers.kit.com/v4#create-a-tag}
+   * @see {@link https://developers.kit.com/api-reference/tags/create-a-tag}
    *
    * @returns A `CreateTag` object containing the details of the newly
    * created `Tag`.
@@ -254,7 +254,7 @@ export class TagsHandler {
    * @param tagId - The unique ID of the tag to update.
    * @param params - The parameters for the update, including the new name.
    *
-   * @see {@link https://developers.kit.com/v4#update-tag-name}
+   * @see {@link https://developers.kit.com/api-reference/tags/update-tag-name}
    *
    * @returns The updated Tag object on success, or `null` if the Tag
    * was not found.
@@ -276,7 +276,7 @@ export class TagsHandler {
    *   - `email_address` — The email address of the subscriber to remove
    *     from the tag.
    *
-   * @see {@link https://developers.kit.com/v4#remove-tag-from-subscriber-by-email-address}
+   * @see {@link https://developers.kit.com/api-reference/tags/remove-tag-from-subscriber-by-email-address}
    *
    * @returns An empty object `{}` on success. Returns `null` if the
    * Tag or Subscriber was not found, or if the subscriber was not
@@ -306,7 +306,7 @@ export class TagsHandler {
    * @param tagId - The unique ID of the tag.
    * @param params - Optional parameters for pagination and filtering.
    *
-   * @see {@link https://developers.kit.com/v4#list-subscribers-for-a-tag}
+   * @see {@link https://developers.kit.com/api-reference/tags/list-subscribers-for-a-tag}
    *
    * @returns A `ListTagSubscribers` object containing an array of
    * subscriber details and pagination details, or `null` if the
@@ -363,7 +363,7 @@ export class TagsHandler {
    * @param tagId - The unique ID of the tag.
    * @param params - An object with all required parameters.
    *
-   * @see {@link https://developers.kit.com/v4#tag-a-subscriber-by-email-address}
+   * @see {@link https://developers.kit.com/api-reference/tags/tag-a-subscriber-by-email-address}
    *
    * @returns A `TagSubscriberByEmail` object containing the details of
    * the `subscriber` who was tagged. Returns `null` if the Tag was not
@@ -392,7 +392,7 @@ export class TagsHandler {
    * @param tagId - The unique ID of the tag.
    * @param subscriberId - The unique ID of the subscriber to remove from the tag.
    *
-   * @see {@link https://developers.kit.com/v4#remove-tag-from-subscriber}
+   * @see {@link https://developers.kit.com/api-reference/tags/remove-tag-from-subscriber}
    *
    * @returns An empty object `{}` on success. Returns `null` if the Tag or Subscriber
    *   was not found, or if the subscriber was not tagged with the specified tag.
@@ -424,7 +424,7 @@ export class TagsHandler {
    * @param tagId - The unique ID of the Tag.
    * @param subscriberId - The unique ID of the Subscriber to tag.
    *
-   * @see {@link https://developers.kit.com/v4#tag-a-subscriber}
+   * @see {@link https://developers.kit.com/api-reference/tags/tag-a-subscriber}
    *
    * @returns A `TagSubscriber` object containing the details of the `subscriber`
    *   who was tagged. Returns `null` if the Tag or Subscriber was not found.

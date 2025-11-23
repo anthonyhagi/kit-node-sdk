@@ -18,7 +18,7 @@ export class WebhooksHandler {
    *
    * @param params - Optional parameters to filter by.
    *
-   * @see {@link https://developers.kit.com/v4#list-webhooks}
+   * @see {@link https://developers.kit.com/api-reference/webhooks/list-webhooks}
    *
    * @returns The paginated list of Webhooks.
    */
@@ -42,7 +42,7 @@ export class WebhooksHandler {
    *
    * @params params - The required parameters to create a new Webhook.
    *
-   * @see {@link https://developers.kit.com/v4#create-a-webhook}
+   * @see {@link https://developers.kit.com/api-reference/webhooks/create-a-webhook}
    *
    * @returns The newly created Webhook.
    */
@@ -57,7 +57,7 @@ export class WebhooksHandler {
    *
    * @param id - The unique ID of the Webhook to delete.
    *
-   * @see {@link https://developers.kit.com/v4#delete-a-webhook}
+   * @see {@link https://developers.kit.com/api-reference/webhooks/delete-a-webhook}
    *
    * @returns An empty object on successful deletion, otherwise `null`
    * if the Webhook was not found.

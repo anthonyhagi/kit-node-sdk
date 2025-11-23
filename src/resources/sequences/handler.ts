@@ -21,7 +21,7 @@ export class SequencesHandler {
    *
    * @param params - Optional parameters to filter by.
    *
-   * @see {@link https://developers.kit.com/v4#list-sequences}
+   * @see {@link https://developers.kit.com/api-reference/sequences/list-sequences}
    *
    * @returns The paginated list of Sequences.
    */
@@ -46,7 +46,7 @@ export class SequencesHandler {
    * @param id - The unique ID of the Sequence.
    * @param params - Optional parameters to filter by.
    *
-   * @see {@link https://developers.kit.com/v4#list-subscribers-for-a-sequence}
+   * @see {@link https://developers.kit.com/api-reference/sequences/list-subscribers-for-a-sequence}
    *
    * @returns The paginated list of Subscribers for a Sequence.
    */
@@ -91,7 +91,7 @@ export class SequencesHandler {
    * @param id - The unique ID of the Sequence.
    * @param params - The email address of the Subscriber to add.
    *
-   * @see {@link https://developers.kit.com/v4#add-subscriber-to-sequence-by-email-address}
+   * @see {@link https://developers.kit.com/api-reference/sequences/add-subscriber-to-sequence-by-email-address}
    *
    * @returns The Subscribers' details after being added to the Sequence.
    */
@@ -112,7 +112,7 @@ export class SequencesHandler {
    * @param sequenceId - The unique ID of the Sequence.
    * @param subscriberId - The unique ID of the Subscriber.
    *
-   * @see {@link https://developers.kit.com/v4#add-subscriber-to-sequence}
+   * @see {@link https://developers.kit.com/api-reference/sequences/add-subscriber-to-sequence}
    *
    * @returns The Subscribers' details after being added to the Sequence.
    */

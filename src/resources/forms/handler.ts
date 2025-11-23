@@ -33,7 +33,7 @@ export class FormsHandler {
    *
    * @param params - The required fields to run this request.
    *
-   * @see {@link https://developers.kit.com/v4#bulk-add-subscribers-to-forms}
+   * @see {@link https://developers.kit.com/api-reference/forms/bulk-add-subscribers-to-forms}
    *
    * @returns a response with the list of subscribers and any failures
    * that may have occurred. For over 100 subscribers, an empty
@@ -67,7 +67,7 @@ export class FormsHandler {
    *
    * @param params - Optional filters to apply.
    *
-   * @see {@link https://developers.kit.com/v4#list-forms}
+   * @see {@link https://developers.kit.com/api-reference/forms/list-forms}
    *
    * @returns the paginated list of all forms and landing pages.
    */
@@ -95,7 +95,7 @@ export class FormsHandler {
    * @param id - The unique ID of the form.
    * @param params - The optional filters to apply.
    *
-   * @see {@link https://developers.kit.com/v4#list-subscribers-for-a-form}
+   * @see {@link https://developers.kit.com/api-reference/forms/list-subscribers-for-a-form}
    *
    * @returns the paginated list of subscribers attached to the form.
    */
@@ -143,7 +143,7 @@ export class FormsHandler {
    * @param params - The required and optional parameters to add
    * the subscriber.
    *
-   * @see {@link https://developers.kit.com/v4#add-subscriber-to-form-by-email-address}
+   * @see {@link https://developers.kit.com/api-reference/forms/add-subscriber-to-form-by-email-address}
    *
    * @returns The subscribers' details after being added to the form.
    */
@@ -173,7 +173,7 @@ export class FormsHandler {
    * @param params - Optional parameters to specify when adding the
    * Subscriber.
    *
-   * @see {@link https://developers.kit.com/v4#add-subscriber-to-form}
+   * @see {@link https://developers.kit.com/api-reference/forms/add-subscriber-to-form}
    *
    * @returns The subscribers' details after being added to the form.
    */

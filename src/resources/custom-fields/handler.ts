@@ -30,7 +30,7 @@ export class CustomFieldsHandler {
    *
    * @param params - The required fields to run this request.
    *
-   * @see {@link https://developers.kit.com/v4#bulk-create-custom-fields}
+   * @see {@link https://developers.kit.com/api-reference/custom-fields/bulk-create-custom-fields}
    *
    * @returns a response with the custom fields created and any
    * failures that may have occurred. For over 100 fields,
@@ -69,7 +69,7 @@ export class CustomFieldsHandler {
    *
    * @param params - The optional filtering to apply to the request.
    *
-   * @see {@link https://developers.kit.com/v4#list-custom-fields}
+   * @see {@link https://developers.kit.com/api-reference/custom-fields/list-custom-fields}
    *
    * @returns a paginated list of all custom fields.
    */
@@ -110,7 +110,7 @@ export class CustomFieldsHandler {
    *
    * @param params - The required fields to create a new Custom Field.
    *
-   * @see {@link https://developers.kit.com/v4#create-a-custom-field}
+   * @see {@link https://developers.kit.com/api-reference/custom-fields/create-a-custom-field}
    *
    * @returns the newly created custom field.
    */
@@ -130,7 +130,7 @@ export class CustomFieldsHandler {
    *
    * @param id - The unique ID of the custom field.
    *
-   * @see {@link https://developers.kit.com/v4#delete-custom-field}
+   * @see {@link https://developers.kit.com/api-reference/custom-fields/delete-custom-field}
    *
    * @returns an empty object when deleted successfully; `null` if
    * the custom field was not found.
@@ -158,7 +158,7 @@ export class CustomFieldsHandler {
    * @param id - The unique ID of the custom field.
    * @param params - The details to update to.
    *
-   * @see {@link https://developers.kit.com/v4#update-a-custom-field}
+   * @see {@link https://developers.kit.com/api-reference/custom-fields/update-a-custom-field}
    *
    * @returns the updated custom field; `null` if the custom
    * field was not found.
