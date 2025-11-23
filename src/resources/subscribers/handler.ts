@@ -38,7 +38,7 @@ export class SubscribersHandler {
    *
    * @param params - The required and optional parameters.
    *
-   * @see {@link https://developers.kit.com/v4#bulk-create-subscribers}
+   * @see {@link https://developers.kit.com/api-reference/subscribers/bulk-create-subscribers}
    *
    * @returns A response from the server when it is run synchronously;
    * an empty object when it is run asynchronously.
@@ -65,7 +65,7 @@ export class SubscribersHandler {
    *
    * @param params - Optional filters.
    *
-   * @see {@link https://developers.kit.com/v4#list-subscribers}
+   * @see {@link https://developers.kit.com/api-reference/subscribers/list-subscribers}
    *
    * @returns the paginated list of subcribers based on any provided
    * filters.
@@ -113,7 +113,7 @@ export class SubscribersHandler {
    *
    * @param params - The parameters to create a new Subscriber.
    *
-   * @see {@link https://developers.kit.com/v4#create-a-subscriber}
+   * @see {@link https://developers.kit.com/api-reference/subscribers/create-a-subscriber}
    *
    * @returns The newly created Subscribers' details.
    */
@@ -163,7 +163,7 @@ export class SubscribersHandler {
    *
    * @param id - The Subscribers' unique ID to search by.
    *
-   * @see {@link https://developers.kit.com/v4#get-a-subscriber}
+   * @see {@link https://developers.kit.com/api-reference/subscribers/get-a-subscriber}
    *
    * @returns The Subscriber if found; `null` otherwise.
    */
@@ -179,7 +179,7 @@ export class SubscribersHandler {
    * @param id - The unique ID of the Subscriber.
    * @param params - The new parameters to update on the Subscriber.
    *
-   * @see {@link https://developers.kit.com/v4#update-a-subscriber}
+   * @see {@link https://developers.kit.com/api-reference/subscribers/update-a-subscriber}
    *
    * @returns The Subscriber with the updated details.
    */
@@ -199,7 +199,7 @@ export class SubscribersHandler {
    *
    * @param id - The unique ID of the Subscriber.
    *
-   * @see {@link https://developers.kit.com/v4#unsubscribe-subscriber}
+   * @see {@link https://developers.kit.com/api-reference/subscribers/unsubscribe-subscriber}
    *
    * @returns An empty object if the request was successful; `null`
    * if the Subscriber was not found.
@@ -243,7 +243,7 @@ export class SubscribersHandler {
    * @param id - The unique ID of the Subscriber.
    * @param params - Optional parameters to filter by.
    *
-   * @see {@link https://developers.kit.com/v4#list-tags-for-a-subscriber}
+   * @see {@link https://developers.kit.com/api-reference/subscribers/list-tags-for-a-subscriber}
    *
    * @returns The Subscribers' Tags if the Subscriber exists;
    * Otheriwse `null` if the Subscriber does not exist.

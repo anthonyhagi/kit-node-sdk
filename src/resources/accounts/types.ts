@@ -1,19 +1,17 @@
 export interface GetCurrentAccount {
   user: {
     email: string;
-    account: {
+  };
+  account: {
+    id: number;
+    name: string;
+    plan_type: string;
+    primary_email_address: string;
+    created_at: string;
+    timezone: {
       name: string;
-      plan_type: string;
-      primary_email_address: string;
-      created_at?: string | undefined;
-      id?: string | undefined;
-      timezone?:
-        | {
-            name: string;
-            friendly_name: string;
-            utc_offset: string;
-          }
-        | undefined;
+      friendly_name: string;
+      utc_offset: string;
     };
   };
 }

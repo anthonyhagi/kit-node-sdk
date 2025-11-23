@@ -74,8 +74,10 @@ export interface ListBroadcastsParams {
 export interface ListBroadcasts {
   broadcasts: {
     id: number;
+    publication_id: number;
     created_at: string;
     subject: string;
+    preview_text: string | null;
     description: string | null;
     content: string | null;
     public: boolean;
@@ -84,14 +86,10 @@ export interface ListBroadcasts {
     thumbnail_alt: string | null;
     thumbnail_url: string | null;
     email_address: string | null;
-    preview_text?: string | null | undefined;
     email_template: BroadcastEmailTemplate;
     subscriber_filter: {
       all: BasicSubscriberFilterItem[];
-      any?: BasicSubscriberFilterItem[];
-      none?: BasicSubscriberFilterItem[];
     }[];
-    publication_id?: number | undefined;
     clicks?: BroadcastLinkClick[] | undefined;
     stats?: BroadcastStats | undefined;
   }[];
@@ -104,19 +102,19 @@ export interface CreateBroadcastParams {
    * template if not provided. 'Starting point' template is not
    * supported.
    */
-  email_template_id: number | null;
+  email_template_id?: number | undefined;
 
   /**
    * The sending email address to use. Uses the account's
    * sending email address if not provided.
    */
-  email_address: string | null;
+  email_address?: string | null | undefined;
 
   /**
    * The HTML content of the email.
    */
-  content: string | null;
-  description: string | null;
+  content: string;
+  description: string;
 
   /**
    * Set to `true` to publish this broadcast to the web. The broadcast
@@ -129,17 +127,17 @@ export interface CreateBroadcastParams {
    * The published timestamp to display in ISO8601 format. If no
    * timezone is provided, UTC is assumed.
    */
-  published_at: Date | string | null;
+  published_at: Date | string;
 
   /**
    * The scheduled send time for this broadcast in ISO8601 format. If
    * no timezone is provided, UTC is assumed.
    */
-  send_at: Date | string | null;
-  thumbnail_alt: string | null;
-  thumbnail_url: string | null;
-  preview_text: string | null;
-  subject: string | null;
+  send_at?: Date | string | null | undefined;
+  thumbnail_alt?: string | null | undefined;
+  thumbnail_url?: string | null | undefined;
+  preview_text: string;
+  subject: string;
 
   /**
    * Filters your subscribers. At this time, Kit only supports using
@@ -153,7 +151,7 @@ export interface CreateBroadcastParams {
      * segment and tag ids, i.e. a subscriber would have to be part
      * of all segments and tags provided.
      */
-    all: TypedSubscriberFilterItem[] | null;
+    all: TypedSubscriberFilterItem[];
 
     /**
      * Filters your subscribers using a logical OR of all provided
@@ -174,6 +172,7 @@ export interface CreateBroadcastParams {
 export interface CreateBroadcast {
   broadcast: {
     id: number;
+    publication_id: number;
     created_at: string;
     subject: string;
     preview_text: string;
@@ -188,10 +187,7 @@ export interface CreateBroadcast {
     email_template: BroadcastEmailTemplate;
     subscriber_filter: {
       all: BasicSubscriberFilterItem[];
-      any: BasicSubscriberFilterItem[] | null;
-      none: BasicSubscriberFilterItem[] | null;
-    };
-    publication_id: number;
+    }[];
   };
 }
 
@@ -221,8 +217,10 @@ export interface GetSingleBroadcastStats {
 export interface GetBroadcast {
   broadcast: {
     id: number;
+    publication_id: number;
     created_at: string;
     subject: string;
+    preview_text: string | null;
     description: string | null;
     content: string | null;
     public: boolean;
@@ -230,17 +228,14 @@ export interface GetBroadcast {
     send_at: string | null;
     thumbnail_alt: string | null;
     thumbnail_url: string | null;
+    public_url: string | null;
     email_address: string | null;
-    preview_text?: string | null | undefined;
     email_template: BroadcastEmailTemplate;
     subscriber_filter: {
-      all?: BasicSubscriberFilterItem[] | undefined;
-      any?: BasicSubscriberFilterItem[] | undefined;
-      none?: BasicSubscriberFilterItem[] | undefined;
+      all: {
+        type: "all_subscribers" | (string & {});
+      }[];
     }[];
-    publication_id?: number | undefined;
-    clicks?: BroadcastLinkClick[] | undefined;
-    stats?: BroadcastStats | undefined;
   };
 }
 
@@ -293,50 +288,49 @@ export interface UpdateBroadcastParams {
    * combinations). If nothing is provided, will default to all of
    * your subscribers.
    */
-  subscriber_filter:
-    | {
-        /**
-         * Filters your subscribers using a logical AND of all provided
-         * segment and tag ids, i.e. a subscriber would have to be part
-         * of all segments and tags provided.
-         */
-        all: TypedSubscriberFilterItem[] | null; // UpdateParams expects arrays of items or null for each type
+  subscriber_filter: {
+    /**
+     * Filters your subscribers using a logical AND of all provided
+     * segment and tag ids, i.e. a subscriber would have to be part
+     * of all segments and tags provided.
+     */
+    all: TypedSubscriberFilterItem[];
 
-        /**
-         * Filters your subscribers using a logical OR of all provided
-         * segment and tag ids, i.e. a subscriber would have to be
-         * part of at least one of the segments or tags provided.
-         */
-        any: TypedSubscriberFilterItem[] | null;
+    /**
+     * Filters your subscribers using a logical OR of all provided
+     * segment and tag ids, i.e. a subscriber would have to be
+     * part of at least one of the segments or tags provided.
+     */
+    any: TypedSubscriberFilterItem[] | null;
 
-        /**
-         * Filters your subscribers using a logical NOT of all provided
-         * segment and tag ids, i.e. a subscriber would have to be in
-         * none of the segments or tags provided.
-         */
-        none: TypedSubscriberFilterItem[] | null;
-      }[]
-    | null;
+    /**
+     * Filters your subscribers using a logical NOT of all provided
+     * segment and tag ids, i.e. a subscriber would have to be in
+     * none of the segments or tags provided.
+     */
+    none: TypedSubscriberFilterItem[] | null;
+  }[];
 }
 
 export interface UpdateBroadcast {
   broadcast: {
     id: number;
+    publication_id: number;
     created_at: string;
     subject: string;
-    preview_text: string;
-    description: string;
-    content: string;
+    preview_text: string | null;
+    description: string | null;
+    content: string | null;
     public: boolean;
-    published_at: string;
-    send_at: string;
+    published_at: string | null;
+    send_at: string | null;
     thumbnail_alt: string | null;
     thumbnail_url: string | null;
-    email_address: string;
+    public_url: string | null;
+    email_address: string | null;
     email_template: BroadcastEmailTemplate;
     subscriber_filter: {
       all: BasicSubscriberFilterItem[];
     }[];
-    publication_id?: number | undefined;
   };
 }

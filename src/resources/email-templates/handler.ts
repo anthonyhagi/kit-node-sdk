@@ -13,7 +13,7 @@ export class EmailTemplatesHandler {
    *
    * @param params - Optional parameters to filter by.
    *
-   * @see {@link https://developers.kit.com/v4#list-email-templates}
+   * @see {@link https://developers.kit.com/api-reference/email-templates/list-email-templates}
    *
    * @returns The paginated list of Email Templates.
    */

@@ -13,7 +13,7 @@ export class SegmentsHandler {
    *
    * @param params - Optional parameters for filter by.
    *
-   * @see {@link https://developers.kit.com/v4#list-segments}
+   * @see {@link https://developers.kit.com/api-reference/segments/list-segments}
    *
    * @returns The paginated list of Segments.
    */

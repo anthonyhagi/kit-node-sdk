@@ -19,7 +19,7 @@ export class PurchasesHandler {
    *
    * @param params - Optional parameters to filter by.
    *
-   * @see {@link https://developers.kit.com/v4#list-purchases}
+   * @see {@link https://developers.kit.com/api-reference/purchases/list-purchases}
    *
    * @returns The paginated list of Purchases.
    */
@@ -43,7 +43,7 @@ export class PurchasesHandler {
    *
    * @param params - The required details to record a Purchase.
    *
-   * @see {@link https://developers.kit.com/v4#create-a-purchase}
+   * @see {@link https://developers.kit.com/api-reference/purchases/create-a-purchase}
    *
    * @returns The created Purchase for a Subscriber.
    */
@@ -58,7 +58,7 @@ export class PurchasesHandler {
    *
    * @param id - The unique ID of the Purchase.
    *
-   * @see {@link https://developers.kit.com/v4#get-a-purchase}
+   * @see {@link https://developers.kit.com/api-reference/purchases/get-a-purchase}
    *
    * @returns The unique Purchase.
    */

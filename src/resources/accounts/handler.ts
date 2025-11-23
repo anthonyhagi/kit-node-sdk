@@ -21,8 +21,8 @@ export class AccountsHandler {
   /**
    * Returns the current account and associated user information.
    *
-   * @see {@link https://developers.kit.com/v4#get-current-account} for
-   * the API route specification.
+   * @see {@link https://developers.kit.com/api-reference/accounts/get-current-account}
+   * for the API route specification.
    *
    * @returns the user and account information.
    */
@@ -33,9 +33,10 @@ export class AccountsHandler {
   /**
    * Returns list of colors for the current account.
    *
-   * @returns a list of colors as hex strings in an array.
+   * @see {@link https://developers.kit.com/api-reference/accounts/list-colors}
+   * for the API route specification.
    *
-   * @see {@link https://developers.kit.com/v4#list-colors}
+   * @returns a list of colors as hex strings in an array.
    */
   public async listColors(): Promise<ListColors> {
     return await this.api.get<ListColors>("/account/colors");
@@ -46,7 +47,7 @@ export class AccountsHandler {
    *
    * @param params - the required parameters to update the colors.
    *
-   * @see {@link https://developers.kit.com/v4#update-colors}
+   * @see {@link https://developers.kit.com/api-reference/accounts/update-colors}
    *
    * @returns the newly set list of hex colors in an array.
    */
@@ -57,9 +58,9 @@ export class AccountsHandler {
       throw new Error(
         "Cannot update colors to an empty list. Please enter up to 5 different hex colors"
       );
-    } else if (colors.length > 5) {
+    } else if (colors.length > 10) {
       throw new Error(
-        "Cannot update colors with more than 5 colors specified. Please specify between 1 and 5 different colors to update to"
+        "Cannot update colors with more than 10 colors specified. Please specify between 1 and 10 different colors to update to"
       );
     }
 
@@ -71,7 +72,7 @@ export class AccountsHandler {
   /**
    * Returns the Creator Profile details.
    *
-   * @see {@link https://developers.kit.com/v4#get-creator-profile}
+   * @see {@link https://developers.kit.com/api-reference/accounts/get-creator-profile}
    *
    * @returns the details stored on the current profile or `null` if
    * the creator profile does not exist.
@@ -85,7 +86,7 @@ export class AccountsHandler {
   /**
    * Returns your email stats for the last 90 days.
    *
-   * @see {@link https://developers.kit.com/v4#get-email-stats}
+   * @see {@link https://developers.kit.com/api-reference/accounts/get-email-stats}
    *
    * @returns the basic email statistics over the last 90 days.
    */
@@ -104,7 +105,7 @@ export class AccountsHandler {
    * search between. If these are not provided, the endpoint
    * defaults to the last 90 days.
    *
-   * @see {@link https://developers.kit.com/v4#get-growth-stats}
+   * @see {@link https://developers.kit.com/api-reference/accounts/get-growth-stats}
    *
    * @returns the growth stats as reported between the start and
    * end dates.

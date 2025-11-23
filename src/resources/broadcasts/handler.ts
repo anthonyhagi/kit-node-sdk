@@ -25,7 +25,7 @@ export class BroadcastsHandler {
    *
    * @param params - Filters that should be applied to the request.
    *
-   * @see {@link https://developers.kit.com/v4#list-broadcasts}
+   * @see {@link https://developers.kit.com/api-reference/broadcasts/list-broadcasts}
    *
    * @returns the paginated list of broadcasts.
    */
@@ -58,7 +58,7 @@ export class BroadcastsHandler {
    *
    * @param params - The required parameters to create a broadcast.
    *
-   * @see {@link https://developers.kit.com/v4#create-a-broadcast}
+   * @see {@link https://developers.kit.com/api-reference/broadcasts/create-a-broadcast}
    *
    * @returns the created broadcast.
    */
@@ -74,7 +74,7 @@ export class BroadcastsHandler {
    * @remarks This endpoint requires either a Pro level plan or
    * developer authorization.
    *
-   * @see {@link https://developers.kit.com/v4#get-stats-for-a-list-of-broadcasts}
+   * @see {@link https://developers.kit.com/api-reference/broadcasts/get-stats-for-a-list-of-broadcasts}
    *
    * @returns an array of stats for all Broadcasts.
    */
@@ -87,7 +87,7 @@ export class BroadcastsHandler {
    *
    * @param id - The specific Broadcast we are looking at.
    *
-   * @see {@link https://developers.kit.com/v4#get-link-clicks-for-a-broadcast}
+   * @see {@link https://developers.kit.com/api-reference/broadcasts/get-link-clicks-for-a-broadcast}
    *
    * @returns the broadcast link clicks in an array. Otherwise, `null`
    * if the broadcast cannot be found.
@@ -103,7 +103,7 @@ export class BroadcastsHandler {
    *
    * @param id - The unique ID of the Broadcast.
    *
-   * @see {@link https://developers.kit.com/v4#get-stats-for-a-broadcast}
+   * @see {@link https://developers.kit.com/api-reference/broadcasts/get-stats-for-a-broadcast}
    *
    * @returns the Broadcast if it exists; `null` otherwise.
    */
@@ -119,7 +119,7 @@ export class BroadcastsHandler {
    *
    * @param id the unique ID of the Broadcast.
    *
-   * @see {@link https://developers.kit.com/v4#delete-a-broadcast}
+   * @see {@link https://developers.kit.com/api-reference/broadcasts/delete-a-broadcast}
    *
    * @returns an empty object when deleted successfully; `null` if
    * the Broadcast was not found.
@@ -136,7 +136,7 @@ export class BroadcastsHandler {
    * @param id the unique ID of the broadcast.
    *
    * @returns the broadcast if it was found; `null` otherwise.
-   * @see {@link https://developers.kit.com/v4#get-a-broadcast}
+   * @see {@link https://developers.kit.com/api-reference/broadcasts/get-a-broadcast}
    */
   public async get(id: number): Promise<GetBroadcast | null> {
     this.validateId(id);
@@ -159,7 +159,7 @@ export class BroadcastsHandler {
    *
    * @returns the updated broadcast with attached details. If the
    * broadcast was not found, `null` is returned.
-   * @see {@link https://developers.kit.com/v4#update-a-broadcast}
+   * @see {@link https://developers.kit.com/api-reference/broadcasts/update-a-broadcast}
    */
   public async update(
     id: number,
