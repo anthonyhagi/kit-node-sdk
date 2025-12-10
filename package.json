@@ -1,8 +1,18 @@
 {
   "name": "@anthonyhagi/kit-node-sdk",
+  "type": "module",
   "version": "0.3.1",
   "description": "An unofficial TypeScript/Node.js SDK for the KIT.com API, providing a simple and easy-to-use interface.",
-  "type": "module",
+  "author": "Anthony Hagidimitriou <info@anthonyhagi.com.au>",
+  "license": "MIT",
+  "homepage": "https://github.com/anthonyhagi/kit-node-sdk#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anthonyhagi/kit-node-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/anthonyhagi/kit-node-sdk/issues"
+  },
   "keywords": [
     "kit.com",
     "kit",
@@ -11,24 +21,6 @@
     "convert kit.com",
     "convertkit"
   ],
-  "license": "MIT",
-  "homepage": "https://github.com/anthonyhagi/kit-node-sdk#readme",
-  "bugs": {
-    "url": "https://github.com/anthonyhagi/kit-node-sdk/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/anthonyhagi/kit-node-sdk.git"
-  },
-  "author": "Anthony Hagidimitriou <info@anthonyhagi.com.au>",
-  "files": [
-    "LICENSE",
-    "README.md",
-    "dist"
-  ],
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.mts",
   "exports": {
     ".": {
       "require": {
@@ -42,8 +34,19 @@
     },
     "./package.json": "./package.json"
   },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "files": [
+    "LICENSE",
+    "README.md",
+    "dist"
+  ],
   "publishConfig": {
     "access": "public"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "scripts": {
     "build": "tsdown",
@@ -70,8 +73,5 @@
     "typescript": "^5.9.3",
     "vitest": "^4.0.13",
     "vitest-fetch-mock": "^0.4.5"
-  },
-  "engines": {
-    "node": ">=18.0.0"
   }
 }
