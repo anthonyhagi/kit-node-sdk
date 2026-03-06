@@ -192,7 +192,7 @@ export class ApiClient {
   }
 
   private async handleError(resp: Response): Promise<null | never> {
-    let detailsString: string = "";
+    let detailsString: string;
 
     // Close the response such that we can read the body multiple times.
     // This is only used if we receive an error AND the body could not
