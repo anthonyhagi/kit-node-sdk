@@ -1,7 +1,7 @@
 {
   "name": "@anthonyhagi/kit-node-sdk",
   "type": "module",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "An unofficial TypeScript/Node.js SDK for the KIT.com API, providing a simple and easy-to-use interface.",
   "author": "Anthony Hagidimitriou <info@anthonyhagi.com.au>",
   "license": "MIT",
