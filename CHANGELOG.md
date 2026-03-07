@@ -1,5 +1,11 @@
 # @anthonyhagi/kit-node-sdk
 
+## 0.3.2
+
+### Patch Changes
+
+- 0717f8f: Update dev dependencies
+
 ## 0.3.1
 
 ### Patch Changes
