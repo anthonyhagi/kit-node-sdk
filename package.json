@@ -70,7 +70,7 @@
     "prettier": "^3.6.2",
     "publint": "^0.3.15",
     "tsdown": "^0.21.0",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.0",
     "vitest": "^4.0.13",
     "vitest-fetch-mock": "^0.4.5"
   }
