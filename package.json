@@ -58,7 +58,7 @@
     "test": "vitest run",
     "changeset": "changeset",
     "prerelease:ci": "npm run build",
-    "release:ci": "changeset publish --access public"
+    "release:ci": "changeset publish"
   },
   "devDependencies": {
     "@arethetypeswrong/core": "^0.18.2",
