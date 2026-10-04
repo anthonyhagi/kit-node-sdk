@@ -286,6 +286,45 @@ describe("subscriber requests through Kit", () => {
     expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
   });
 
+  it.each([
+    { sort_field: "id", sort_order: "asc" },
+    { sort_field: "first_name", sort_order: "desc" },
+    { sort_field: "email_address", sort_order: "asc" },
+    { sort_field: "created_at", sort_order: "desc" },
+    { sort_field: "engagement__sent", sort_order: "asc" },
+    { sort_field: "engagement__opens", sort_order: "desc" },
+    { sort_field: "engagement__clicks", sort_order: "asc" },
+    { sort_field: "engagement__open_rate", sort_order: "desc" },
+    { sort_field: "engagement__click_rate", sort_order: "asc" },
+  ] as const)(
+    "sorts filtered subscribers by $sort_field $sort_order",
+    async (sorting) => {
+      const body = { ...filterBody, ...sorting } satisfies FilterSubscriberBody;
+      const response = { subscribers: [], pagination };
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+
+      expect(await kit.subscribers.filter(body)).toEqual(response);
+      expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
+    }
+  );
+
+  it("accepts a sort field or direction independently", async () => {
+    const body = {
+      ...filterBody,
+      sort_field: "created_at",
+    } satisfies FilterSubscriberBody;
+    const directionOnly = {
+      ...filterBody,
+      sort_order: "asc",
+    } satisfies FilterSubscriberBody;
+    expectTypeOf(directionOnly).toExtend<FilterSubscriberBody>();
+    const response = { subscribers: [], pagination };
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+
+    expect(await kit.subscribers.filter(body)).toEqual(response);
+    expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
+  });
+
   it.each(["raw", "unique_email"] as const)(
     "sends the %s engagement counting mode in the filter body",
     async (counting_mode) => {

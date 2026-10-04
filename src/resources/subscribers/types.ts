@@ -175,6 +175,26 @@ export interface FilterSubscriberBody {
    * @default "raw"
    */
   counting_mode?: "raw" | "unique_email" | undefined;
+  /**
+   * Field to order results by. Engagement metrics use the trailing 90 days.
+   * location__distance requires a location condition in the same request.
+   *
+   * @default "created_at"
+   */
+  sort_field?:
+    | "id"
+    | "first_name"
+    | "email_address"
+    | "created_at"
+    | "engagement__sent"
+    | "engagement__opens"
+    | "engagement__clicks"
+    | "engagement__open_rate"
+    | "engagement__click_rate"
+    | "location__distance"
+    | undefined;
+  /** Sort direction. Defaults to desc, or asc for location__distance. */
+  sort_order?: "asc" | "desc" | undefined;
   all: (
     | FilterSubscriberBodyAllSubscribed
     | FilterSubscriberBodyAllBase
