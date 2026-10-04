@@ -36,9 +36,12 @@ const kit = new Kit({
   apiKey: "your-api-key", // Optional if KIT_API_KEY is set
   authType: "apikey", // Optional: "apikey" (default) or "oauth"
   maxRetries: 3, // Optional: Retry attempts; 0 disables retries (default: 3)
-  retryDelay: 1000, // Optional: Base delay; 0 skips the wait (default: 1000ms)
+  retryDelay: 1000, // Optional: Base delay; 0 disables backoff (default: 1000ms)
 });
 ```
+
+Retryable responses with a valid `Retry-After` header wait at least as long
+as the server requests, even when `retryDelay` is `0`.
 
 ## Environment Variables
 

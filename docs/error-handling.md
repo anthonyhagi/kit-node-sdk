@@ -32,6 +32,12 @@ Retries use exponential backoff with jitter to prevent overwhelming servers:
 - 3rd retry: ~4 seconds delay
 - Each with ±12.5% randomization to prevent thundering herd
 
+When a retryable response includes `Retry-After`, the SDK waits for the longer
+of its backoff delay and the server's requested delay. The header can specify
+whole seconds or an HTTP date. Missing, invalid, or expired values fall back to
+backoff. This minimum wait applies even when `retryDelay` is `0`; `maxRetries: 0`
+still disables retries entirely.
+
 ## Error Handling Example
 
 ```typescript

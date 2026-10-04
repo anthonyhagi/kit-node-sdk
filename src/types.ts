@@ -46,7 +46,10 @@ export interface ClientOptions {
    *
    * Jitter (±25%) is added to prevent thundering herd issues.
    *
-   * Set to 0 to retry without a delay. Defaults to 1000 (1 second).
+   * A valid Retry-After response header sets a minimum wait, even
+   * when this option is 0. Missing or invalid headers use backoff.
+   *
+   * Set to 0 to disable backoff. Defaults to 1000 (1 second).
    */
   retryDelay?: number;
 }
