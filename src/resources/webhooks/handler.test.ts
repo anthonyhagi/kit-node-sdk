@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
-import { Kit, type ListWebhooks, type WebhookEvent } from "~/index";
+import {
+  Kit,
+  type CreateWebhookParams,
+  type ListWebhooks,
+  type WebhookEvent,
+} from "~/index";
 
 const targetUrl = "https://example.com/hooks/kit?source=newsletter&token=a%2Bb";
 const pagination = {
@@ -25,6 +30,9 @@ const events = [
   { name: "subscriber.tag_add", tag_id: 10 },
   { name: "subscriber.tag_remove", tag_id: 10 },
   { name: "purchase.purchase_create" },
+  { name: "custom_field.field_created" },
+  { name: "custom_field.field_deleted" },
+  { name: "custom_field.field_value_updated", custom_field_id: 11 },
 ] satisfies WebhookEvent[];
 
 function request(method: string, path: string, query = {}) {
@@ -141,6 +149,7 @@ describe("webhook requests through Kit", () => {
         tag_id: null,
         product_id: null,
         initiator_value: null,
+        custom_field_id: null,
       },
     };
     const response = { webhook: { id: 1, account_id: 42, ...body } };
@@ -155,11 +164,40 @@ describe("webhook requests through Kit", () => {
       event: {
         name: "subscriber.future_event",
         initiator_value: "custom-value",
+        custom_field_id: 12,
       },
     };
     const response = { webhook: { id: 1, account_id: 42, ...body } };
     fetchMock.mockResponseOnce(JSON.stringify(response), { status: 201 });
     expect(await kit.webhooks.create(body)).toEqual(response);
+    expect(await request("POST", "/webhooks").json()).toEqual(body);
+  });
+
+  it("types the known value-updated event with a required numeric custom field ID", () => {
+    type ValueUpdatedEvent = Extract<
+      WebhookEvent,
+      { name: "custom_field.field_value_updated" }
+    >;
+    expectTypeOf<
+      ValueUpdatedEvent["custom_field_id"]
+    >().toEqualTypeOf<number>();
+    expectTypeOf<{
+      name: "custom_field.field_value_updated";
+    }>().not.toExtend<ValueUpdatedEvent>();
+  });
+
+  it("surfaces validation errors for custom-field webhook creation", async () => {
+    const body = {
+      target_url: targetUrl,
+      event: { name: "custom_field.field_value_updated", custom_field_id: 999 },
+    } satisfies CreateWebhookParams;
+    fetchMock.mockResponseOnce(
+      JSON.stringify({ errors: ["Invalid custom field"] }),
+      { status: 422 }
+    );
+    await expect(kit.webhooks.create(body)).rejects.toThrow(
+      "Invalid custom field"
+    );
     expect(await request("POST", "/webhooks").json()).toEqual(body);
   });
 
