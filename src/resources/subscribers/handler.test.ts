@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
 import {
   Kit,
+  type FilterSubscriberBody,
+  type FilterSubscriberParams,
+  type FilterSubscribers,
   type GetSubscriberStats,
   type GetSubscriberStatsParams,
 } from "~/index";
-import type { FilterSubscriberBody } from "./types";
 
 const subscriber = {
   id: 42,
@@ -151,10 +153,24 @@ describe("subscriber requests through Kit", () => {
   };
 
   it("filters using a nested JSON body without optional pagination", async () => {
-    const response = { subscribers: [], pagination };
+    const response = {
+      subscribers: [
+        {
+          id: "42",
+          first_name: "Ada",
+          email_address: "ada@example.com",
+          created_at: "2026-01-01T00:00:00Z",
+          tag_names: ["Newsletter"],
+          tag_ids: ["7"],
+        },
+      ],
+      pagination: { ...pagination, total_count: 1 },
+    } satisfies FilterSubscribers;
     fetchMock.mockResponseOnce(JSON.stringify(response));
 
-    expect(await kit.subscribers.filter(filterBody)).toEqual(response);
+    const result = await kit.subscribers.filter(filterBody);
+    expectTypeOf(result).toEqualTypeOf<FilterSubscribers>();
+    expect(result).toEqual(response);
     expect(await request("POST", "/subscribers/filter").json()).toEqual(
       filterBody
     );
@@ -183,13 +199,14 @@ describe("subscriber requests through Kit", () => {
       fetchMock.mockResponseOnce(
         JSON.stringify({ subscribers: [], pagination })
       );
-      // This is the API filter endpoint, not Array.prototype.filter.
-      // eslint-disable-next-line unicorn/no-array-method-this-argument
-      await kit.subscribers.filter(filterBody, {
+      const params: FilterSubscriberParams = {
         [cursor]: "next+/=",
         per_page: 25,
         include_total_count: true,
-      });
+      };
+      // This is the API filter endpoint, not Array.prototype.filter.
+      // eslint-disable-next-line unicorn/no-array-method-this-argument
+      await kit.subscribers.filter(filterBody, params);
 
       const req = request("POST", "/subscribers/filter", {
         [cursor]: "next+/=",
