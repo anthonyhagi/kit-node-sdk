@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
 import {
   Kit,
+  type CreateSnippet,
+  type CreateSnippetParams,
   type GetSnippet,
   type ListSnippets,
   type ListSnippetsParams,
@@ -289,5 +291,138 @@ describe("snippet get requests through Kit", () => {
     );
     await expect(kit.snippets.get(5)).rejects.toThrow("Authentication failed");
     expect(fetchMock.requests()).toHaveLength(1);
+  });
+});
+
+describe("snippet create requests through Kit", () => {
+  let kit: Kit;
+  beforeEach(() => {
+    fetchMock.resetMocks();
+    kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
+  });
+
+  it("creates inline Liquid content and preserves a document with null HTML", async () => {
+    const params = {
+      name: "Welcome message",
+      snippet_type: "inline",
+      content: "Hello {{ subscriber.first_name }}",
+    } satisfies CreateSnippetParams;
+    const response = {
+      snippet: {
+        ...snippet,
+        content: params.content,
+        document: {
+          id: 318,
+          value: null,
+          value_html: null,
+          value_plain: null,
+          version: 1,
+        },
+      },
+    } satisfies CreateSnippet;
+    fetchMock.mockResponseOnce(JSON.stringify(response), { status: 201 });
+    const result = await kit.snippets.create(params);
+    expectTypeOf(result).toEqualTypeOf<CreateSnippet>();
+    expectTypeOf(result.snippet.content).toEqualTypeOf<string>();
+    expectTypeOf(result.snippet.document.value_html).toEqualTypeOf<
+      string | null
+    >();
+    expect(result).toEqual(response);
+    expect(fetchMock.requests()).toHaveLength(1);
+    const req = fetchMock.requests()[0]!;
+    expect(req.url).toBe("https://api.kit.com/v4/snippets");
+    expect(req.method).toBe("POST");
+    expect(req.headers.get("X-Kit-Api-Key")).toBe("test-key");
+    expect(await req.json()).toEqual(params);
+  });
+
+  it("creates block HTML using nested document attributes", async () => {
+    const params = {
+      name: "Footer",
+      snippet_type: "block",
+      document_attributes: {
+        value_html: "<p>Thanks, {{ subscriber.first_name }}!</p>",
+      },
+    } satisfies CreateSnippetParams;
+    const response = {
+      snippet: {
+        ...snippet,
+        name: "Footer",
+        key: "footer",
+        snippet_type: "block",
+        content: "",
+        document: {
+          id: 319,
+          value: { blocks: [] },
+          value_html: params.document_attributes.value_html,
+          value_plain: null,
+          version: 1,
+        },
+      },
+    } satisfies CreateSnippet;
+    fetchMock.mockResponseOnce(JSON.stringify(response), { status: 201 });
+    expect(await kit.snippets.create(params)).toEqual(response);
+    const body = await fetchMock.requests()[0]!.json();
+    expect(body).toEqual(params);
+    expect(body).not.toHaveProperty("content");
+  });
+
+  it("requires the content field matching the snippet type", () => {
+    expectTypeOf<{
+      name: string;
+      snippet_type: "inline";
+    }>().not.toExtend<CreateSnippetParams>();
+    expectTypeOf<{
+      name: string;
+      snippet_type: "block";
+      content: string;
+    }>().not.toExtend<CreateSnippetParams>();
+    expectTypeOf<{
+      name: string;
+      snippet_type: "inline";
+      document_attributes: { value_html: string };
+    }>().not.toExtend<CreateSnippetParams>();
+    expectTypeOf<{
+      name: string;
+      snippet_type: "block";
+      document_attributes: {};
+    }>().not.toExtend<CreateSnippetParams>();
+    expectTypeOf<{
+      name: string;
+      snippet_type: "inline";
+      content: string;
+      document_attributes: { value_html: string };
+    }>().not.toExtend<CreateSnippetParams>();
+  });
+
+  it.each(["name can't be blank", "Circular snippet reference"])(
+    "surfaces API validation errors: %s",
+    async (message) => {
+      fetchMock.mockResponseOnce(JSON.stringify({ errors: [message] }), {
+        status: 422,
+      });
+      const params = {
+        name: "",
+        snippet_type: "inline",
+        content: "{{ snippet.welcome-message }}",
+      } satisfies CreateSnippetParams;
+      await expect(kit.snippets.create(params)).rejects.toThrow(message);
+      expect(await fetchMock.requests()[0]!.json()).toEqual(params);
+      expect(fetchMock.requests()).toHaveLength(1);
+    }
+  );
+
+  it("surfaces authentication errors", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({ errors: ["The access token is invalid"] }),
+      { status: 401 }
+    );
+    await expect(
+      kit.snippets.create({
+        name: "Welcome",
+        snippet_type: "inline",
+        content: "Hello",
+      })
+    ).rejects.toThrow("Authentication failed");
   });
 });

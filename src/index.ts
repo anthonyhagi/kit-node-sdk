@@ -316,6 +316,8 @@ export type {
 } from "./resources/sequences/types";
 
 export type {
+  CreateSnippet,
+  CreateSnippetParams,
   GetSnippet,
   ListSnippets,
   ListSnippetsParams,

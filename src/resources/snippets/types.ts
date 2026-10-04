@@ -2,6 +2,30 @@ import type { Pagination } from "~/common/types";
 
 export type SnippetType = "inline" | "block";
 
+/** Inline snippets use text content; block snippets use an HTML document. */
+export type CreateSnippetParams =
+  | {
+      name: string;
+      snippet_type: "inline";
+      content: string;
+      document_attributes?: never;
+    }
+  | {
+      name: string;
+      snippet_type: "block";
+      document_attributes: { value_html: string };
+      content?: never;
+    };
+
+export interface CreateSnippet {
+  snippet: Omit<GetSnippet["snippet"], "document"> & {
+    document: Omit<SnippetDocument, "value_html"> & {
+      /** Inline snippets can return a document without HTML. */
+      value_html: string | null;
+    };
+  };
+}
+
 export interface ListSnippetsParams {
   /** Cursor from the previous page's end_cursor. */
   after?: string | undefined;
