@@ -40,6 +40,8 @@
   "files": [
     "LICENSE",
     "README.md",
+    "CONTRIBUTING.md",
+    "docs",
     "dist"
   ],
   "publishConfig": {

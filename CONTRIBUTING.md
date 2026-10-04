@@ -25,6 +25,10 @@ To contribute code or documentation-changes, please follow these steps:
 
 ## Coding Standards
 
+See the [development guide](docs/development.md) for setup instructions, scripts,
+and testing examples. User-facing documentation lives in `docs/`; keep the root
+README focused on installation, a quick start, and links to the guides.
+
 Before submitting a pull request, please ensure that your code is linted and formatted correctly for the entire project. Run the following commands:
 
 - `npm run lint` to check for linting errors.
