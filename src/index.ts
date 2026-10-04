@@ -277,6 +277,8 @@ export type {
 } from "./resources/segments/types";
 
 export type {
+  GetSequenceEmail,
+  GetSequenceEmailParams,
   ListSequenceEmails,
   ListSequenceEmailsParams,
   SequenceEmailListItem,

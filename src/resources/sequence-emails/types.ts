@@ -44,3 +44,12 @@ export interface ListSequenceEmails {
   emails: SequenceEmailListItem[];
   pagination: Pagination;
 }
+
+export type GetSequenceEmailParams = Pick<ListSequenceEmailsParams, "include">;
+
+export interface GetSequenceEmail {
+  email: Omit<SequenceEmailListItem, "content"> & {
+    /** Single-email reads always include HTML content. */
+    content: string;
+  };
+}

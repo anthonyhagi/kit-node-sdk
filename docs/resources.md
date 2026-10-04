@@ -15,13 +15,30 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 | **`kit.forms`**          | Web forms for collecting subscriber information                    | `list()`, `addSubscriber()`, `addSubscriberByEmail()`, `listSubscribers()`                                                  |
 | **`kit.purchases`**      | Transaction records for products/services                          | `list()`, `create()`, `get()`                                                                                               |
 | **`kit.segments`**       | Dynamic subscriber groups based on criteria                        | `list()`                                                                                                                    |
-| **`kit.sequenceEmails`** | Individual emails inside automated sequences                       | `list()`                                                                                                                    |
+| **`kit.sequenceEmails`** | Individual emails inside automated sequences                       | `list()`, `get()`                                                                                                           |
 | **`kit.sequences`**      | Automated email series                                             | `list()`, `get()`, `create()`, `update()`, `delete()`, `addSubscriberById()`, `addSubscriberByEmail()`, `listSubscribers()` |
 | **`kit.subscribers`**    | Individual email recipients                                        | `list()`, `create()`, `get()`, `update()`, `bulkCreate()`, `getTags()`                                                      |
 | **`kit.tags`**           | Labels for categorizing subscribers                                | `list()`, `create()`, `update()`, `bulkCreate()`, `tagSubscriber()`, `listSubscribers()`                                    |
 | **`kit.webhooks`**       | HTTP callbacks for real-time notifications                         | `list()`, `create()`                                                                                                        |
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
+
+## Fetching a sequence email
+
+`kit.sequenceEmails.get(sequenceId, emailId, params)` always returns the email's
+HTML content. Use `include: "stats"` to request per-email performance metrics:
+
+```ts
+const result = await kit.sequenceEmails.get(123, 456, { include: "stats" });
+if (result) {
+  console.log(result.email.content, result.email.stats?.open_rate);
+}
+```
+
+The response uses `GetSequenceEmail`, where `content` is required and `stats`
+is optional. No `include_content` flag is needed. Missing sequences or emails
+return `null`. Options use the exported `GetSequenceEmailParams` type. See the
+[Kit API reference](https://developers.kit.com/api-reference/sequence-emails/get-a-sequence-email).
 
 ## Listing sequence emails
 

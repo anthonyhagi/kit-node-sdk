@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
-import { Kit, type ListSequenceEmails, type SequenceEmailStats } from "~/index";
+import {
+  Kit,
+  type GetSequenceEmail,
+  type ListSequenceEmails,
+  type SequenceEmailStats,
+} from "~/index";
 
 const email = {
   id: 6,
@@ -21,6 +26,81 @@ const pagination = {
   end_cursor: "next+/=",
   per_page: 25,
 };
+
+describe("sequence email get requests through Kit", () => {
+  let kit: Kit;
+  beforeEach(() => {
+    fetchMock.resetMocks();
+    kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
+  });
+
+  it("retrieves full content without a content flag or stats option", async () => {
+    const response = {
+      email: { ...email, content: "<p>Welcome!</p>" },
+    } satisfies GetSequenceEmail;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const result = await kit.sequenceEmails.get(108, 6);
+    expectTypeOf(result).toEqualTypeOf<GetSequenceEmail | null>();
+    expectTypeOf(result!.email.content).toEqualTypeOf<string>();
+    expectTypeOf(result!.email.stats).toEqualTypeOf<
+      SequenceEmailStats | undefined
+    >();
+    expectTypeOf<typeof email>().not.toExtend<GetSequenceEmail["email"]>();
+    expect(result).toEqual(response);
+    const req = fetchMock.requests()[0]!;
+    expect(req.url).toBe("https://api.kit.com/v4/sequences/108/emails/6");
+    expect(req.method).toBe("GET");
+    expect(await req.text()).toBe("");
+  });
+
+  it.each([0, 10])(
+    "includes per-email stats with %s recipients",
+    async (recipients) => {
+      const response = {
+        email: {
+          ...email,
+          email_template_id: 2,
+          content: "<p>Welcome!</p>",
+          stats: {
+            recipients,
+            opens: recipients,
+            open_rate: recipients ? 0.5 : 0,
+          },
+        },
+      } satisfies GetSequenceEmail;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      expect(
+        await kit.sequenceEmails.get(108, 6, { include: "stats" })
+      ).toEqual(response);
+      const req = fetchMock.requests()[0]!;
+      expect(req.url).toBe(
+        "https://api.kit.com/v4/sequences/108/emails/6?include=stats"
+      );
+      expect(await req.text()).toBe("");
+    }
+  );
+
+  it("handles empty options and empty HTML content", async () => {
+    const response = {
+      email: { ...email, content: "" },
+    } satisfies GetSequenceEmail;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.sequenceEmails.get(108, 6, {})).toEqual(response);
+    expect(new URL(fetchMock.requests()[0]!.url).search).toBe("");
+  });
+
+  it("returns null for missing emails", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
+      status: 404,
+    });
+    expect(
+      await kit.sequenceEmails.get(108, 404, { include: "stats" })
+    ).toBeNull();
+    expect(fetchMock.requests()[0]!.url).toBe(
+      "https://api.kit.com/v4/sequences/108/emails/404?include=stats"
+    );
+  });
+});
 
 describe("sequence email list requests through Kit", () => {
   let kit: Kit;
