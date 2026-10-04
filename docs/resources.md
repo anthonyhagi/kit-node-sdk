@@ -21,10 +21,29 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 | **`kit.snippets`**         | Reusable email content referenced by Liquid keys                   | `list()`, `get()`, `create()`, `update()`                                                                                   |
 | **`kit.subscribers`**      | Individual email recipients                                        | `list()`, `create()`, `get()`, `update()`, `bulkCreate()`, `getTags()`                                                      |
 | **`kit.tags`**             | Labels for categorizing subscribers                                | `list()`, `create()`, `update()`, `bulkCreate()`, `tagSubscriber()`, `listSubscribers()`                                    |
-| **`kit.webhookEndpoints`** | Webhook endpoints with multiple events and signed deliveries       | `list()`, `get()`, `create()`, `update()`, `delete()`, `rotateSecret()`                                                     |
+| **`kit.webhookEndpoints`** | Webhook endpoints with multiple events and signed deliveries       | `list()`, `get()`, `create()`, `update()`, `delete()`, `rotateSecret()`, `revokePreviousSecret()`                           |
 | **`kit.webhooks`**         | HTTP callbacks for real-time notifications                         | `list()`, `create()`                                                                                                        |
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
+
+## Revoking the previous webhook endpoint secret
+
+After switching your receiver to a rotated signing secret, call
+`kit.webhookEndpoints.revokePreviousSecret(id)` to close the overlap window early.
+The previous secret immediately stops verifying, and subsequent deliveries are
+signed only with the current secret.
+
+```ts
+const result = await kit.webhookEndpoints.revokePreviousSecret(2);
+if (result) {
+  console.log(result.webhook_endpoint.previous_secret_expires_at); // null
+}
+```
+
+The exported `RevokePreviousWebhookEndpointSecret` response contains endpoint
+metadata with `previous_secret_expires_at: null` and no signing secret. Missing
+endpoints return `null`; API errors throw.
+See the [Kit API reference](https://developers.kit.com/api-reference/webhooks/revoke-the-previous-webhook-endpoint-secret).
 
 ## Rotating a webhook endpoint secret
 

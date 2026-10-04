@@ -77,3 +77,10 @@ export interface RotateWebhookEndpointSecret {
     previous_secret_expires_at: string;
   };
 }
+
+export interface RevokePreviousWebhookEndpointSecret {
+  webhook_endpoint: Omit<WebhookEndpoint, "previous_secret_expires_at"> & {
+    /** The previous secret has been revoked and the overlap window is closed. */
+    previous_secret_expires_at: null;
+  };
+}
