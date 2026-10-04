@@ -163,6 +163,33 @@ export interface FilterSubscriberBodyAllBase {
   any?: (FilterSubscriberBodyAnyBroadcast | FilterSubscriberBodyAnyUrls)[];
 }
 
+export interface FilterSubscriberBodyAnyForms {
+  type: "forms";
+  /** Original signup form or legacy landing-page IDs to match. */
+  ids: number[];
+}
+
+/** Supplied fields are ANDed against the original signup attribution row. */
+export interface FilterSubscriberBodyAnyKitSource {
+  type: "kit_source";
+  /** Original Kit source type, such as form_subscription, api_subscription, or manual. */
+  source_type?: string | undefined;
+  /** Match any listed Kit source ID. */
+  source_ids?: number[] | undefined;
+  /** Match any listed Kit source name. */
+  source_names?: string[] | undefined;
+  /** Original Kit source mechanism. */
+  mechanism?: string | undefined;
+  /** Match any listed Kit source mechanism ID. */
+  mechanism_ids?: number[] | undefined;
+}
+
+export interface FilterSubscriberBodyAllAttribution {
+  type: "attribution";
+  /** Original signup attribution conditions combined with OR logic. */
+  any: (FilterSubscriberBodyAnyForms | FilterSubscriberBodyAnyKitSource)[];
+}
+
 export interface FilterSubscriberBodyAllState {
   type: "subscriber_state";
   /** Lifecycle states to match. Subscribers matching any listed state pass. */
@@ -245,6 +272,7 @@ export interface FilterSubscriberBody {
   all: (
     | FilterSubscriberBodyAllSubscribed
     | FilterSubscriberBodyAllBase
+    | FilterSubscriberBodyAllAttribution
     | FilterSubscriberBodyAllState
     | FilterSubscriberBodyAllTags
     | FilterSubscriberBodyAllCustomField
