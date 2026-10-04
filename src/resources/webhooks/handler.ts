@@ -28,7 +28,7 @@ export class WebhooksHandler {
     const query = new URLSearchParams({
       ...(after && { after }),
       ...(before && { before }),
-      ...(include_total_count && {
+      ...(include_total_count !== undefined && {
         include_total_count: String(include_total_count),
       }),
       ...(per_page && { per_page: String(per_page) }),

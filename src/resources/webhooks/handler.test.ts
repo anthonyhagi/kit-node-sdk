@@ -106,6 +106,26 @@ describe("webhook requests through Kit", () => {
     }
   );
 
+  it.each([true, false, undefined])(
+    "serializes include_total_count: %s only when supplied",
+    async (include_total_count) => {
+      const response = { webhooks: [], pagination };
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      expect(await kit.webhooks.list({ include_total_count })).toEqual(
+        response
+      );
+      request(
+        "GET",
+        "/webhooks",
+        include_total_count === undefined
+          ? {}
+          : {
+              include_total_count: String(include_total_count),
+            }
+      );
+    }
+  );
+
   it.each(["after", "before"] as const)(
     "encodes the %s cursor and pagination options",
     async (cursor) => {
