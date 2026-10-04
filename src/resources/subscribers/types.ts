@@ -167,6 +167,31 @@ export interface FilterSubscriberBodyAllTags {
   }[];
 }
 
+export type FilterSubscriberBodyAllCustomField = {
+  type: "custom_field";
+  /** ID of the custom field to filter by. */
+  subscriber_custom_field_id: number;
+} & (
+  | {
+      /** Match any non-empty stored value. */
+      comparison: "has_value";
+      /** Ignored for has_value. */
+      value?: string | undefined;
+    }
+  | {
+      /** Exact equality, case-insensitive substring, or numeric comparison. */
+      comparison:
+        | "is"
+        | "contains"
+        | "greater_than"
+        | "greater_than_or_equal"
+        | "less_than"
+        | "less_than_or_equal";
+      /** Numeric comparisons parse this string as a number. */
+      value: string;
+    }
+);
+
 export interface FilterSubscriberBody {
   /**
    * Count all engagement events (raw) or distinct emails (unique_email).
@@ -199,6 +224,7 @@ export interface FilterSubscriberBody {
     | FilterSubscriberBodyAllSubscribed
     | FilterSubscriberBodyAllBase
     | FilterSubscriberBodyAllTags
+    | FilterSubscriberBodyAllCustomField
   )[];
 }
 
