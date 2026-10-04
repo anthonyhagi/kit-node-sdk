@@ -4,6 +4,8 @@ export type Pagination = {
   start_cursor: string | null;
   end_cursor: string | null;
   per_page: number;
+  /** Total records when requested with `include_total_count: true`. */
+  total_count?: number | undefined;
 };
 
 export type SubscriberState =

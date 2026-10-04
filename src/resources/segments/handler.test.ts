@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { Kit } from "~/index";
+import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
+import { Kit, type ListSegments } from "~/index";
 
 const segment = {
   id: 75,
@@ -37,7 +37,12 @@ describe("segment requests through Kit", () => {
   it("lists segments with API-key authentication and no body or query", async () => {
     const response = { segments: [segment], pagination };
     fetchMock.mockResponseOnce(JSON.stringify(response));
-    expect(await kit.segments.list()).toEqual(response);
+    const result = await kit.segments.list();
+    expect(result).toEqual(response);
+    expectTypeOf(result.pagination.total_count).toEqualTypeOf<
+      number | undefined
+    >();
+    expect(result.pagination.total_count).toBeUndefined();
     const req = request();
     expect(req.headers.get("X-Kit-Api-Key")).toBe("test-key");
     expect(await req.text()).toBe("");
@@ -88,6 +93,23 @@ describe("segment requests through Kit", () => {
     await kit.segments.list({ per_page });
     request({ per_page: String(per_page) });
   });
+
+  it.each([0, 42])(
+    "exposes a total count of %i in the public response type",
+    async (total_count) => {
+      const response = {
+        segments: total_count === 0 ? [] : [segment],
+        pagination: { ...pagination, total_count },
+      } satisfies ListSegments;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      const result = await kit.segments.list({ include_total_count: true });
+      expectTypeOf(result.pagination.total_count).toEqualTypeOf<
+        number | undefined
+      >();
+      expect(result.pagination.total_count).toBe(total_count);
+      request({ include_total_count: "true" });
+    }
+  );
 
   it("omits a disabled total count while preserving the cursor", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ segments: [], pagination }));
