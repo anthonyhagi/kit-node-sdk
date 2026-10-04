@@ -25,6 +25,8 @@ export type BroadcastEmailTemplate = {
 };
 
 export type BroadcastLinkClick = {
+  /** Kit's identifier for the tracked link. */
+  id: number;
   url: string;
   unique_clicks: number;
   click_to_delivery_rate: number;
@@ -246,6 +248,12 @@ export interface GetBroadcastStats {
     total_count?: number | undefined;
   };
 }
+
+/** Pagination applies to the links within the broadcast. */
+export type GetLinkClicksParams = Pick<
+  ListBroadcastsParams,
+  "after" | "before" | "include_total_count" | "per_page"
+>;
 
 export interface GetLinkClicks {
   broadcast: {
