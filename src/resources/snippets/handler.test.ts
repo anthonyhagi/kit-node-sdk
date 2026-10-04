@@ -6,6 +6,8 @@ import {
   type ListSnippetsParams,
   type SnippetDocument,
   type SnippetType,
+  type UpdateSnippet,
+  type UpdateSnippetParams,
 } from "~/index";
 
 const snippet = {
@@ -289,5 +291,174 @@ describe("snippet get requests through Kit", () => {
     );
     await expect(kit.snippets.get(5)).rejects.toThrow("Authentication failed");
     expect(fetchMock.requests()).toHaveLength(1);
+  });
+});
+
+describe("snippet update requests through Kit", () => {
+  let kit: Kit;
+  const fullSnippet = {
+    ...snippet,
+    content: "Hello {{ subscriber.first_name }}",
+    document: {
+      id: 311,
+      value: null,
+      value_html: "Hello",
+      value_plain: null,
+      version: 1,
+    },
+  };
+  beforeEach(() => {
+    fetchMock.resetMocks();
+    kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
+  });
+
+  it("renames without sending a type or changing omitted content fields", async () => {
+    const params = {
+      name: "Updated name",
+      archived: undefined,
+    } satisfies UpdateSnippetParams;
+    const response = {
+      snippet: { ...fullSnippet, name: "Updated name" },
+    } satisfies UpdateSnippet;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const result = await kit.snippets.update(5, params);
+    expectTypeOf(result).toEqualTypeOf<UpdateSnippet | null>();
+    expectTypeOf(result!.snippet.content).toEqualTypeOf<string>();
+    expectTypeOf(result!.snippet.document).toEqualTypeOf<SnippetDocument>();
+    expect(result).toEqual(response);
+    expect(result!.snippet.key).toBe(snippet.key);
+    expect(fetchMock.requests()).toHaveLength(1);
+    const req = fetchMock.requests()[0]!;
+    expect(req.method).toBe("PUT");
+    expect(req.url).toBe("https://api.kit.com/v4/snippets/5");
+    expect(await req.json()).toEqual({ name: "Updated name" });
+  });
+
+  it.each([true, false])(
+    "preserves an archive-only update with archived: %s",
+    async (archived) => {
+      const response = {
+        snippet: { ...fullSnippet, archived },
+      } satisfies UpdateSnippet;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      expect(await kit.snippets.update(5, { archived })).toEqual(response);
+      expect(await fetchMock.requests()[0]!.json()).toEqual({ archived });
+    }
+  );
+
+  it.each(["", "Hello {{ subscriber.first_name }}!"])(
+    "updates inline text %j",
+    async (content) => {
+      const params = {
+        snippet_type: "inline",
+        content,
+      } satisfies UpdateSnippetParams;
+      const response = {
+        snippet: { ...fullSnippet, content },
+      } satisfies UpdateSnippet;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      expect(await kit.snippets.update(5, params)).toEqual(response);
+      expect(await fetchMock.requests()[0]!.json()).toEqual(params);
+    }
+  );
+
+  it("updates block HTML without requiring snippet_type", async () => {
+    const params = {
+      document_attributes: { value_html: "<p>Updated</p>" },
+    } satisfies UpdateSnippetParams;
+    const response = {
+      snippet: {
+        ...fullSnippet,
+        snippet_type: "block",
+        document: {
+          ...fullSnippet.document,
+          value_html: params.document_attributes.value_html,
+          version: 2,
+        },
+      },
+    } satisfies UpdateSnippet;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.snippets.update(5, params)).toEqual(response);
+    expect(await fetchMock.requests()[0]!.json()).toEqual(params);
+  });
+
+  it("accepts an explicit matching block type and combined metadata changes", async () => {
+    const params = {
+      name: "Footer",
+      archived: false,
+      snippet_type: "block",
+      document_attributes: { value_html: "" },
+    } satisfies UpdateSnippetParams;
+    const response = {
+      snippet: {
+        ...fullSnippet,
+        name: "Footer",
+        archived: false,
+        snippet_type: "block",
+        document: { ...fullSnippet.document, value_html: "" },
+      },
+    } satisfies UpdateSnippet;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.snippets.update(5, params)).toEqual(response);
+    expect(await fetchMock.requests()[0]!.json()).toEqual(params);
+  });
+
+  it("allows empty updates without adding defaults", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify({ snippet: fullSnippet }));
+    await kit.snippets.update(5, {});
+    expect(await fetchMock.requests()[0]!.json()).toEqual({});
+  });
+
+  it("excludes mixed or mismatched body fields from the request type", () => {
+    expectTypeOf<{
+      content: string;
+      document_attributes: { value_html: string };
+    }>().not.toExtend<UpdateSnippetParams>();
+    expectTypeOf<{
+      snippet_type: "block";
+      content: string;
+    }>().not.toExtend<UpdateSnippetParams>();
+    expectTypeOf<{
+      snippet_type: "inline";
+      document_attributes: { value_html: string };
+    }>().not.toExtend<UpdateSnippetParams>();
+    expectTypeOf<{
+      document_attributes: {};
+    }>().not.toExtend<UpdateSnippetParams>();
+  });
+
+  it("returns null for missing snippets", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
+      status: 404,
+    });
+    expect(await kit.snippets.update(404, { name: "Renamed" })).toBeNull();
+    expect(fetchMock.requests()[0]!.url).toBe(
+      "https://api.kit.com/v4/snippets/404"
+    );
+  });
+
+  it("surfaces validation errors for changes to the existing type", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({ errors: ["snippet_type cannot be changed"] }),
+      { status: 422 }
+    );
+    const params = {
+      snippet_type: "block",
+      document_attributes: { value_html: "<p>Updated</p>" },
+    } satisfies UpdateSnippetParams;
+    await expect(kit.snippets.update(5, params)).rejects.toThrow(
+      "snippet_type cannot be changed"
+    );
+    expect(await fetchMock.requests()[0]!.json()).toEqual(params);
+  });
+
+  it("surfaces authentication errors", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({ errors: ["The access token is invalid"] }),
+      { status: 401 }
+    );
+    await expect(kit.snippets.update(5, { archived: true })).rejects.toThrow(
+      "Authentication failed"
+    );
   });
 });
