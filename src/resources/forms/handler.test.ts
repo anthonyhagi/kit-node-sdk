@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
-import { type AddSubscriberToForm, Kit } from "~/index";
+import { Kit, type AddSubscriberToForm } from "~/index";
 
 const form = {
   id: 7,
