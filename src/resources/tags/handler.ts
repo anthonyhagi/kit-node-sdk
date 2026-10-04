@@ -293,10 +293,10 @@ export class TagsHandler {
     tagId: number,
     params: RemoveSubscriberByEmailParams
   ): Promise<{} | null> {
-    const body = JSON.stringify(params || {});
+    const query = new URLSearchParams({ email_address: params.email_address });
     const url = `/tags/${tagId}/subscribers`;
 
-    return await this.api.delete<{} | null>(url, { body });
+    return await this.api.delete<{} | null>(url, { query });
   }
 
   /**

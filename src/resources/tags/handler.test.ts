@@ -135,12 +135,21 @@ describe("tag requests through Kit", () => {
     expect(await request("POST", "/tags/7/subscribers/42").text()).toBe("");
   });
 
-  it("removes a tag by subscriber email with a DELETE body", async () => {
-    const body = { email_address: subscriber.email_address };
-    fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
-    expect(await kit.tags.removeSubscriberByEmail(7, body)).toEqual({});
-    expect(await request("DELETE", "/tags/7/subscribers").json()).toEqual(body);
-  });
+  it.each([
+    "ada@example.com",
+    "ada+newsletter@example.com",
+    "ada&news=updates@example.com",
+  ])(
+    "removes a tag with a bodyless DELETE and encoded email %s",
+    async (email_address) => {
+      fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
+      expect(
+        await kit.tags.removeSubscriberByEmail(7, { email_address })
+      ).toEqual({});
+      const req = request("DELETE", "/tags/7/subscribers", { email_address });
+      expect(await req.text()).toBe("");
+    }
+  );
 
   it("removes a tag by subscriber ID with a bodyless DELETE", async () => {
     fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
@@ -271,6 +280,11 @@ describe("tag requests through Kit", () => {
           result = await kit.tags.removeSubscriberByEmail(7, {
             email_address: subscriber.email_address,
           });
+          expect(
+            await request("DELETE", "/tags/7/subscribers", {
+              email_address: subscriber.email_address,
+            }).text()
+          ).toBe("");
           break;
       }
       expect(result).toBeNull();
