@@ -2,9 +2,10 @@ import type { Pagination, SubscriberState } from "~/common/types";
 
 export interface BulkCreateSubscribersParams {
   subscribers: {
-    first_name: string;
-    email_address: string;
-    state: SubscriberState;
+    first_name?: string | null | undefined;
+    /** Missing or invalid email addresses are reported in per-subscriber failures. */
+    email_address?: string | null | undefined;
+    state?: SubscriberState | null | undefined;
   }[];
   callback_url?: string | null | undefined;
 }
