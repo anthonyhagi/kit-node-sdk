@@ -16,6 +16,8 @@ import type {
   GetSubscriberTagsParams,
   ListSubscribers,
   ListSubscribersParams,
+  PinSubscriberLocation,
+  PinSubscriberLocationParams,
   UpdateSubscriber,
   UpdateSubscriberParams,
 } from "./types";
@@ -208,6 +210,25 @@ export class SubscribersHandler {
     const url = `/subscribers/${id}/unsubscribe`;
 
     return await this.api.post<{} | null>(url);
+  }
+
+  /**
+   * Pin an explicit location, overriding the Subscriber's inferred location.
+   * Replaces an existing pinned location.
+   *
+   * @param id - The unique ID of the Subscriber.
+   * @param params - The location to pin.
+   * @see {@link https://developers.kit.com/api-reference/subscribers/pin-a-subscribers-location}
+   * @returns The pinned location, or null when the Subscriber is not found.
+   */
+  public async pinLocation(
+    id: number,
+    params: PinSubscriberLocationParams
+  ): Promise<PinSubscriberLocation | null> {
+    return await this.api.post<PinSubscriberLocation | null>(
+      `/subscribers/${id}/location`,
+      { body: JSON.stringify(params) }
+    );
   }
 
   /**
