@@ -40,8 +40,8 @@ export interface ListWebhooks {
     account_id: number;
     event: {
       name: string;
-      tag_id?: number | undefined;
-      form_id?: number | undefined;
+      tag_id?: number | null | undefined;
+      form_id?: number | null | undefined;
       sequence_id?: number | undefined;
       product_id?: number | undefined;
       initiator_value?: number | undefined;

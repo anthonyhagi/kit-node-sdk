@@ -82,6 +82,30 @@ describe("webhook requests through Kit", () => {
     expect(await request("GET", "/webhooks").text()).toBe("");
   });
 
+  it.each([
+    { label: "null", event: { name: "tag_add", tag_id: null, form_id: null } },
+    { label: "numeric", event: { name: "tag_add", tag_id: 10, form_id: 7 } },
+    { label: "omitted", event: { name: "subscriber_activate" } },
+  ])(
+    "preserves $label tag and form IDs in list responses",
+    async ({ event }) => {
+      const response = {
+        webhooks: [{ id: 1, account_id: 42, event, target_url: targetUrl }],
+        pagination,
+      } satisfies ListWebhooks;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      const result = await kit.webhooks.list();
+      expect(result).toEqual(response);
+      expectTypeOf(result.webhooks[0]!.event.tag_id).toEqualTypeOf<
+        number | null | undefined
+      >();
+      expectTypeOf(result.webhooks[0]!.event.form_id).toEqualTypeOf<
+        number | null | undefined
+      >();
+      expect(await request("GET", "/webhooks").text()).toBe("");
+    }
+  );
+
   it.each(["after", "before"] as const)(
     "encodes the %s cursor and pagination options",
     async (cursor) => {
