@@ -361,6 +361,7 @@ export type {
   FilterSubscriberBody,
   FilterSubscriberBodyAllCustomField,
   FilterSubscriberBodyAllLocation,
+  FilterSubscriberBodyAllState,
   FilterSubscriberBodyAllTags,
   FilterSubscriberParams,
   FilterSubscribers,

@@ -5,6 +5,7 @@ import {
   type FilterSubscriberBody,
   type FilterSubscriberBodyAllCustomField,
   type FilterSubscriberBodyAllLocation,
+  type FilterSubscriberBodyAllState,
   type FilterSubscriberBodyAllTags,
   type FilterSubscriberParams,
   type FilterSubscribers,
@@ -465,6 +466,52 @@ describe("subscriber requests through Kit", () => {
     expect(await kit.subscribers.filter(body)).toEqual(response);
     expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
   });
+
+  it.each([
+    "active",
+    "inactive",
+    "bounced",
+    "cancelled",
+    "complained",
+  ] as const)(
+    "filters subscribers by the %s lifecycle state",
+    async (state) => {
+      const condition = {
+        type: "subscriber_state",
+        states: [state],
+      } satisfies FilterSubscriberBodyAllState;
+      const body = { all: [condition] } satisfies FilterSubscriberBody;
+      const response = { subscribers: [], pagination };
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+
+      expect(await kit.subscribers.filter(body)).toEqual(response);
+      expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
+    }
+  );
+
+  const stateCondition = {
+    type: "subscriber_state",
+    states: ["active", "inactive"],
+  } satisfies FilterSubscriberBodyAllState;
+
+  it.each([
+    { name: "multiple lifecycle states", body: { all: [stateCondition] } },
+    {
+      name: "lifecycle states combined with engagement",
+      body: {
+        all: [stateCondition, { type: "opens", count_greater_than: 5 }],
+      },
+    },
+  ] satisfies { name: string; body: FilterSubscriberBody }[])(
+    "filters by $name",
+    async ({ body }) => {
+      const response = { subscribers: [], pagination };
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+
+      expect(await kit.subscribers.filter(body)).toEqual(response);
+      expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
+    }
+  );
 
   const tagCondition: FilterSubscriberBodyAllTags = {
     type: "tags",
