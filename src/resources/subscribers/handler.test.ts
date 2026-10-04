@@ -3,10 +3,13 @@ import {
   Kit,
   type CreateSubscriber,
   type FilterSubscriberBody,
+  type FilterSubscriberBodyAllAttribution,
   type FilterSubscriberBodyAllCustomField,
   type FilterSubscriberBodyAllLocation,
   type FilterSubscriberBodyAllState,
   type FilterSubscriberBodyAllTags,
+  type FilterSubscriberBodyAnyForms,
+  type FilterSubscriberBodyAnyKitSource,
   type FilterSubscriberParams,
   type FilterSubscribers,
   type GetSubscriber,
@@ -512,6 +515,79 @@ describe("subscriber requests through Kit", () => {
       expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
     }
   );
+
+  const formAttribution = {
+    type: "forms",
+    ids: [789, 1001],
+  } satisfies FilterSubscriberBodyAnyForms;
+  const kitSourceAttribution = {
+    type: "kit_source",
+    source_type: "api_subscription",
+    source_ids: [555, 556],
+    source_names: ["Welcome", "Import"],
+    mechanism: "import",
+    mechanism_ids: [9, 10],
+  } satisfies FilterSubscriberBodyAnyKitSource;
+  const attributionCondition = {
+    type: "attribution",
+    any: [formAttribution, kitSourceAttribution],
+  } satisfies FilterSubscriberBodyAllAttribution;
+
+  it.each([
+    {
+      name: "signup forms",
+      body: { all: [{ type: "attribution", any: [formAttribution] }] },
+    },
+    {
+      name: "all Kit source fields",
+      body: { all: [{ type: "attribution", any: [kitSourceAttribution] }] },
+    },
+    {
+      name: "alternative attribution sources",
+      body: { all: [attributionCondition] },
+    },
+    {
+      name: "attribution combined with engagement and lifecycle state",
+      body: {
+        all: [
+          attributionCondition,
+          { type: "opens", count_greater_than: 5 },
+          { type: "subscriber_state", states: ["active"] },
+        ],
+      },
+    },
+  ] satisfies { name: string; body: FilterSubscriberBody }[])(
+    "filters by $name",
+    async ({ body }) => {
+      const response = { subscribers: [], pagination };
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+
+      expect(await kit.subscribers.filter(body)).toEqual(response);
+      expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
+    }
+  );
+
+  it.each([
+    {},
+    { source_type: "manual" },
+    { source_ids: [555] },
+    { source_names: ["Welcome"] },
+    { mechanism: "import" },
+    { mechanism_ids: [9] },
+  ])("allows independent Kit source constraints %j", async (constraints) => {
+    const source = {
+      type: "kit_source",
+      ...constraints,
+    } satisfies FilterSubscriberBodyAnyKitSource;
+    const body = {
+      all: [{ type: "attribution", any: [source] }],
+    } satisfies FilterSubscriberBody;
+    const response = { subscribers: [], pagination };
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+
+    expect(await kit.subscribers.filter(body)).toEqual(response);
+    expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
+  });
 
   const tagCondition: FilterSubscriberBodyAllTags = {
     type: "tags",
