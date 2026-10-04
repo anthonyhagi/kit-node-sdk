@@ -1,8 +1,25 @@
 import type { Kit } from "~/index";
-import type { ListWebhookEndpoints, ListWebhookEndpointsParams } from "./types";
+import type {
+  GetWebhookEndpoint,
+  ListWebhookEndpoints,
+  ListWebhookEndpointsParams,
+} from "./types";
 
 export class WebhookEndpointsHandler {
   constructor(private api: Kit) {}
+
+  /**
+   * Get webhook endpoint metadata without the signing secret.
+   *
+   * @param id - The webhook endpoint to retrieve.
+   * @returns The endpoint, or null when it was not found or is inaccessible.
+   * @see {@link https://developers.kit.com/api-reference/webhooks/get-a-webhook-endpoint}
+   */
+  public async get(id: number): Promise<GetWebhookEndpoint | null> {
+    return await this.api.get<GetWebhookEndpoint | null>(
+      `/webhook_endpoints/${id}`
+    );
+  }
 
   /**
    * List webhook endpoints, optionally filtered by active or disabled status.

@@ -21,10 +21,27 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 | **`kit.snippets`**         | Reusable email content referenced by Liquid keys                   | `list()`, `get()`, `create()`, `update()`                                                                                   |
 | **`kit.subscribers`**      | Individual email recipients                                        | `list()`, `create()`, `get()`, `update()`, `bulkCreate()`, `getTags()`                                                      |
 | **`kit.tags`**             | Labels for categorizing subscribers                                | `list()`, `create()`, `update()`, `bulkCreate()`, `tagSubscriber()`, `listSubscribers()`                                    |
-| **`kit.webhookEndpoints`** | Webhook endpoints with multiple events and signed deliveries       | `list()`                                                                                                                    |
+| **`kit.webhookEndpoints`** | Webhook endpoints with multiple events and signed deliveries       | `list()`, `get()`                                                                                                           |
 | **`kit.webhooks`**         | HTTP callbacks for real-time notifications                         | `list()`, `create()`                                                                                                        |
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
+
+## Fetching a webhook endpoint
+
+`kit.webhookEndpoints.get(id)` retrieves endpoint metadata, including subscribed
+events, status, source, and timestamps. Signing secrets are never included.
+
+```ts
+const result = await kit.webhookEndpoints.get(2);
+if (result) {
+  console.log(result.webhook_endpoint.url, result.webhook_endpoint.events);
+}
+```
+
+The exported `GetWebhookEndpoint` response wraps the shared `WebhookEndpoint`
+metadata type. Missing endpoints and endpoints inaccessible to the current
+account or app return `null`; authentication errors throw. See the
+[Kit API reference](https://developers.kit.com/api-reference/webhooks/get-a-webhook-endpoint).
 
 ## Listing webhook endpoints
 
