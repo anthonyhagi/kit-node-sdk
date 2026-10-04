@@ -6,6 +6,8 @@ import {
   type GetWebhookEndpoint,
   type ListWebhookEndpoints,
   type ListWebhookEndpointsParams,
+  type UpdateWebhookEndpoint,
+  type UpdateWebhookEndpointParams,
   type WebhookEndpoint,
   type WebhookEndpointStatus,
 } from "~/index";
@@ -393,6 +395,125 @@ describe("webhook endpoint create requests through Kit", () => {
         url: endpoint.url,
         events: ["subscriber.created"],
       })
+    ).rejects.toThrow("Authentication failed");
+  });
+});
+
+describe("webhook endpoint update requests through Kit", () => {
+  let kit: Kit;
+  beforeEach(() => {
+    fetchMock.resetMocks();
+    kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
+  });
+
+  it("PATCHes only supplied metadata and omits undefined fields", async () => {
+    const params = {
+      name: "Updated name",
+      description: undefined,
+    } satisfies UpdateWebhookEndpointParams;
+    const response = {
+      webhook_endpoint: { ...endpoint, name: "Updated name" },
+    } satisfies UpdateWebhookEndpoint;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const result = await kit.webhookEndpoints.update(2, params);
+    expectTypeOf(result).toEqualTypeOf<UpdateWebhookEndpoint | null>();
+    expectTypeOf(result!.webhook_endpoint).toEqualTypeOf<WebhookEndpoint>();
+    expectTypeOf<{
+      status: "invalid";
+    }>().not.toExtend<UpdateWebhookEndpointParams>();
+    expect(result).toEqual(response);
+    expect(result!.webhook_endpoint).not.toHaveProperty("secret");
+    expect(fetchMock.requests()).toHaveLength(1);
+    const req = fetchMock.requests()[0]!;
+    expect(req.method).toBe("PATCH");
+    expect(req.url).toBe("https://api.kit.com/v4/webhook_endpoints/2");
+    expect(req.headers.get("X-Kit-Api-Key")).toBe("test-key");
+    expect(await req.json()).toEqual({ name: "Updated name" });
+  });
+
+  it.each(["active", "disabled"] satisfies WebhookEndpointStatus[])(
+    "updates status to %s",
+    async (status) => {
+      const response = {
+        webhook_endpoint: { ...endpoint, status },
+      } satisfies UpdateWebhookEndpoint;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      expect(await kit.webhookEndpoints.update(2, { status })).toEqual(
+        response
+      );
+      expect(await fetchMock.requests()[0]!.json()).toEqual({ status });
+    }
+  );
+
+  it("replaces events without merging previous subscriptions and preserves empty metadata", async () => {
+    const params = {
+      name: "",
+      url: "https://hooks.example.com/v2",
+      description: "",
+      events: ["subscriber.activated", "future.event"],
+      status: "active",
+    } satisfies UpdateWebhookEndpointParams;
+    const response = {
+      webhook_endpoint: { ...endpoint, ...params },
+    } satisfies UpdateWebhookEndpoint;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.webhookEndpoints.update(2, params)).toEqual(response);
+    expect(await fetchMock.requests()[0]!.json()).toEqual(params);
+  });
+
+  it("preserves an explicit empty event list for server validation", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({ errors: ["events can't be blank"] }),
+      { status: 422 }
+    );
+    await expect(
+      kit.webhookEndpoints.update(2, { events: [] })
+    ).rejects.toThrow("events can't be blank");
+    expect(await fetchMock.requests()[0]!.json()).toEqual({ events: [] });
+  });
+
+  it("allows empty updates without injecting defaults", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify({ webhook_endpoint: endpoint }));
+    expect(await kit.webhookEndpoints.update(2, {})).toEqual({
+      webhook_endpoint: endpoint,
+    });
+    expect(await fetchMock.requests()[0]!.json()).toEqual({});
+  });
+
+  it("returns null for missing endpoints", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
+      status: 404,
+    });
+    expect(
+      await kit.webhookEndpoints.update(404, { status: "disabled" })
+    ).toBeNull();
+    expect(fetchMock.requests()[0]!.url).toBe(
+      "https://api.kit.com/v4/webhook_endpoints/404"
+    );
+  });
+
+  it("surfaces app ownership restrictions", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({
+        errors: ["Endpoint can only be updated by the app that created it"],
+      }),
+      { status: 403 }
+    );
+    await expect(
+      kit.webhookEndpoints.update(2, { name: "Updated" })
+    ).rejects.toThrow(
+      "Endpoint can only be updated by the app that created it"
+    );
+    expect(fetchMock.requests()).toHaveLength(1);
+  });
+
+  it("surfaces authentication errors", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({ errors: ["The access token is invalid"] }),
+      { status: 401 }
+    );
+    await expect(
+      kit.webhookEndpoints.update(2, { status: "disabled" })
     ).rejects.toThrow("Authentication failed");
   });
 });

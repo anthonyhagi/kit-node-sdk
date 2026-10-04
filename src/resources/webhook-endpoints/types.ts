@@ -51,3 +51,15 @@ export interface ListWebhookEndpoints {
 export interface GetWebhookEndpoint {
   webhook_endpoint: WebhookEndpoint;
 }
+
+/** Only supplied fields change. */
+export interface UpdateWebhookEndpointParams {
+  name?: string | undefined;
+  url?: string | undefined;
+  description?: string | undefined;
+  status?: WebhookEndpointStatus | undefined;
+  /** Replaces the entire event subscription list. */
+  events?: string[] | undefined;
+}
+
+export type UpdateWebhookEndpoint = GetWebhookEndpoint;

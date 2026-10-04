@@ -21,10 +21,33 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 | **`kit.snippets`**         | Reusable email content referenced by Liquid keys                   | `list()`, `get()`, `create()`, `update()`                                                                                   |
 | **`kit.subscribers`**      | Individual email recipients                                        | `list()`, `create()`, `get()`, `update()`, `bulkCreate()`, `getTags()`                                                      |
 | **`kit.tags`**             | Labels for categorizing subscribers                                | `list()`, `create()`, `update()`, `bulkCreate()`, `tagSubscriber()`, `listSubscribers()`                                    |
-| **`kit.webhookEndpoints`** | Webhook endpoints with multiple events and signed deliveries       | `list()`, `get()`, `create()`                                                                                               |
+| **`kit.webhookEndpoints`** | Webhook endpoints with multiple events and signed deliveries       | `list()`, `get()`, `create()`, `update()`                                                                                   |
 | **`kit.webhooks`**         | HTTP callbacks for real-time notifications                         | `list()`, `create()`                                                                                                        |
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
+
+## Updating a webhook endpoint
+
+Use `kit.webhookEndpoints.update(id, params)` to PATCH the supplied fields.
+`name`, `url`, `description`, `status`, and `events` are all optional.
+
+```ts
+const result = await kit.webhookEndpoints.update(2, {
+  status: "disabled",
+});
+console.log(result?.webhook_endpoint.status);
+```
+
+Set `status: "disabled"` to stop deliveries, or `"active"` to resume. Supplied
+`events` replace the complete subscription list; include every event you want
+the endpoint to receive. Omitted fields retain their existing values. Endpoints
+created through OAuth can only be updated by the app that created them; API-key
+updates return a permission error.
+
+Exported types are `UpdateWebhookEndpointParams` and `UpdateWebhookEndpoint`.
+Responses contain metadata without signing secrets. Missing endpoints return
+`null`; authentication, permission, and validation errors throw. See the
+[Kit API reference](https://developers.kit.com/api-reference/webhooks/update-a-webhook-endpoint).
 
 ## Creating a webhook endpoint
 

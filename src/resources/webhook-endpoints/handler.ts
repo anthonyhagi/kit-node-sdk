@@ -5,10 +5,30 @@ import type {
   GetWebhookEndpoint,
   ListWebhookEndpoints,
   ListWebhookEndpointsParams,
+  UpdateWebhookEndpoint,
+  UpdateWebhookEndpointParams,
 } from "./types";
 
 export class WebhookEndpointsHandler {
   constructor(private api: Kit) {}
+
+  /**
+   * Update supplied endpoint fields; events replace the full subscription list.
+   *
+   * @param id - The webhook endpoint to update.
+   * @param params - Metadata, status, or subscription changes.
+   * @returns The updated endpoint, or null when it was not found.
+   * @see {@link https://developers.kit.com/api-reference/webhooks/update-a-webhook-endpoint}
+   */
+  public async update(
+    id: number,
+    params: UpdateWebhookEndpointParams
+  ): Promise<UpdateWebhookEndpoint | null> {
+    return await this.api.patch<UpdateWebhookEndpoint | null>(
+      `/webhook_endpoints/${id}`,
+      { body: JSON.stringify(params) }
+    );
+  }
 
   /**
    * Create an endpoint subscribed to the supplied event types.
