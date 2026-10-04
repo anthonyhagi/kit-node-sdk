@@ -1,5 +1,41 @@
 import type { Pagination, SubscriberState } from "~/common/types";
 
+export type SequenceSendDay =
+  | "monday"
+  | "tuesday"
+  | "wednesday"
+  | "thursday"
+  | "friday"
+  | "saturday"
+  | "sunday";
+
+export interface CreateSequenceParams {
+  name: string;
+  /** Defaults to the account's sending address when omitted. */
+  email_address?: string | undefined;
+  email_template_id?: number | undefined;
+  send_days?: SequenceSendDay[] | undefined;
+  /** An integer from 0 to 23. Kit validates the range. */
+  send_hour?: number | undefined;
+  /** An IANA timezone name; defaults to the account timezone. */
+  time_zone?: string | undefined;
+  active?: boolean | undefined;
+  /** Allow subscribers to restart the sequence. */
+  repeat?: boolean | undefined;
+  /** Keep Visual Automation subscribers in the sequence after its last email. */
+  hold?: boolean | undefined;
+  exclude_subscriber_sources?:
+    | {
+        type: "tag" | "sequence" | "form" | "segment";
+        ids: number[];
+      }[]
+    | undefined;
+}
+
+export interface CreateSequence {
+  sequence: Omit<GetSequence["sequence"], "stats">;
+}
+
 export interface GetSequenceParams {
   /** Include deliverability statistics alongside the sequence details. */
   include?: "stats" | undefined;

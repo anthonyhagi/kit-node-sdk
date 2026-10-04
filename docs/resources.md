@@ -6,21 +6,52 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 
 ## Available Resources
 
-| Resource                 | Description                                                        | Key Methods                                                                              |
-| ------------------------ | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
-| **`kit.accounts`**       | Account and user information, creator profiles, email/growth stats | `getCurrentAccount()`, `getEmailStats()`, `getGrowthStats()`                             |
-| **`kit.broadcasts`**     | One-off emails sent to subscribers                                 | `list()`, `create()`, `update()`, `getStats()`                                           |
-| **`kit.customFields`**   | Additional fields for subscriber profiles and forms                | `list()`, `create()`, `update()`, `bulkCreate()`                                         |
-| **`kit.emailTemplates`** | Pre-designed email layouts                                         | `list()`                                                                                 |
-| **`kit.forms`**          | Web forms for collecting subscriber information                    | `list()`, `addSubscriber()`, `addSubscriberByEmail()`, `listSubscribers()`               |
-| **`kit.purchases`**      | Transaction records for products/services                          | `list()`, `create()`, `get()`                                                            |
-| **`kit.segments`**       | Dynamic subscriber groups based on criteria                        | `list()`                                                                                 |
-| **`kit.sequences`**      | Automated email series                                             | `list()`, `get()`, `addSubscriberById()`, `addSubscriberByEmail()`, `listSubscribers()`  |
-| **`kit.subscribers`**    | Individual email recipients                                        | `list()`, `create()`, `get()`, `update()`, `bulkCreate()`, `getTags()`                   |
-| **`kit.tags`**           | Labels for categorizing subscribers                                | `list()`, `create()`, `update()`, `bulkCreate()`, `tagSubscriber()`, `listSubscribers()` |
-| **`kit.webhooks`**       | HTTP callbacks for real-time notifications                         | `list()`, `create()`                                                                     |
+| Resource                 | Description                                                        | Key Methods                                                                                         |
+| ------------------------ | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| **`kit.accounts`**       | Account and user information, creator profiles, email/growth stats | `getCurrentAccount()`, `getEmailStats()`, `getGrowthStats()`                                        |
+| **`kit.broadcasts`**     | One-off emails sent to subscribers                                 | `list()`, `create()`, `update()`, `getStats()`                                                      |
+| **`kit.customFields`**   | Additional fields for subscriber profiles and forms                | `list()`, `create()`, `update()`, `bulkCreate()`                                                    |
+| **`kit.emailTemplates`** | Pre-designed email layouts                                         | `list()`                                                                                            |
+| **`kit.forms`**          | Web forms for collecting subscriber information                    | `list()`, `addSubscriber()`, `addSubscriberByEmail()`, `listSubscribers()`                          |
+| **`kit.purchases`**      | Transaction records for products/services                          | `list()`, `create()`, `get()`                                                                       |
+| **`kit.segments`**       | Dynamic subscriber groups based on criteria                        | `list()`                                                                                            |
+| **`kit.sequences`**      | Automated email series                                             | `list()`, `get()`, `create()`, `addSubscriberById()`, `addSubscriberByEmail()`, `listSubscribers()` |
+| **`kit.subscribers`**    | Individual email recipients                                        | `list()`, `create()`, `get()`, `update()`, `bulkCreate()`, `getTags()`                              |
+| **`kit.tags`**           | Labels for categorizing subscribers                                | `list()`, `create()`, `update()`, `bulkCreate()`, `tagSubscriber()`, `listSubscribers()`            |
+| **`kit.webhooks`**       | HTTP callbacks for real-time notifications                         | `list()`, `create()`                                                                                |
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
+
+## Creating a sequence
+
+Only `name` is required to create an empty sequence. Kit supplies the default
+sending settings and schedule for omitted options:
+
+```ts
+const result = await kit.sequences.create({ name: "Welcome" });
+console.log(result.sequence.id);
+```
+
+You can also provide `email_address`, `email_template_id`, `send_days`,
+`send_hour` (0–23), `time_zone` (an IANA timezone), `active`, `repeat`, `hold`, and
+`exclude_subscriber_sources`. Exclusions accept `tag`, `sequence`, `form`, or
+`segment` with an array of IDs. For example:
+
+```ts
+const result = await kit.sequences.create({
+  name: "Weekday onboarding",
+  send_days: ["monday", "tuesday", "wednesday", "thursday", "friday"],
+  send_hour: 9,
+  time_zone: "Australia/Adelaide",
+  active: false,
+  exclude_subscriber_sources: [{ type: "tag", ids: [42] }],
+});
+```
+
+The exported types are `CreateSequence`, `CreateSequenceParams`, and
+`SequenceSendDay`. Creation returns the server's sequence settings; it creates
+the container without adding emails. See the
+[Kit API reference](https://developers.kit.com/api-reference/sequences/create-a-sequence).
 
 ## Listing sequences with stats
 
