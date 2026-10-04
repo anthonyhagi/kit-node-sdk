@@ -57,7 +57,23 @@ export interface ListSubscribersParams {
   per_page?: number | undefined;
   /** Omit custom field values from the response for a smaller payload. */
   slim?: boolean | undefined;
-  sort_field?: "id" | "updated_at" | "cancelled_at" | (string & {}) | undefined;
+  /**
+   * Field to order by (defaults to id). Cancellation sorts require status: "cancelled".
+   * Engagement sorts use the trailing 90 days and cannot be combined with email_address.
+   */
+  sort_field?:
+    | "id"
+    | "created_at"
+    | "updated_at"
+    | "cancelled_at"
+    | "canceled_at"
+    | "engagement__sent"
+    | "engagement__opens"
+    | "engagement__clicks"
+    | "engagement__open_rate"
+    | "engagement__click_rate"
+    | (string & {})
+    | undefined;
   sort_order?: "asc" | "desc" | undefined;
   status?: SubscriberState | "all" | undefined;
   updated_after?: Date | string | undefined;

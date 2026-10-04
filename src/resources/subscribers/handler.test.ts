@@ -78,6 +78,84 @@ describe("subscriber requests through Kit", () => {
   });
 
   it.each([
+    "id",
+    "created_at",
+    "updated_at",
+    "cancelled_at",
+    "canceled_at",
+    "engagement__sent",
+    "engagement__opens",
+    "engagement__clicks",
+    "engagement__open_rate",
+    "engagement__click_rate",
+  ] as const)("serializes subscriber list sort %s", async (sort_field) => {
+    // Extract checks the named literals independently of the custom string fallback.
+    expectTypeOf<
+      Extract<ListSubscribersParams["sort_field"], typeof sort_field>
+    >().toEqualTypeOf<typeof sort_field>();
+    const params = {
+      sort_field,
+      sort_order: "desc",
+      status:
+        sort_field === "cancelled_at" || sort_field === "canceled_at"
+          ? "cancelled"
+          : "all",
+      after: "next+/=",
+      per_page: 25,
+    } satisfies ListSubscribersParams;
+    const response = {
+      subscribers: [subscriber],
+      pagination,
+    } satisfies ListSubscribers;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+
+    expect(await kit.subscribers.list(params)).toEqual(response);
+    expect(
+      await request("GET", "/subscribers", { ...params, per_page: "25" }).text()
+    ).toBe("");
+  });
+
+  it("preserves custom sort fields and ascending order", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify({ subscribers: [], pagination }));
+
+    await kit.subscribers.list({
+      sort_field: "future_sort",
+      sort_order: "asc",
+    });
+    request("GET", "/subscribers", {
+      sort_field: "future_sort",
+      sort_order: "asc",
+    });
+  });
+
+  it.each([
+    {
+      params: { sort_field: "canceled_at", status: "active" },
+      message: "Cancellation sorts require status=cancelled",
+    },
+    {
+      params: {
+        sort_field: "engagement__opens",
+        email_address: subscriber.email_address,
+      },
+      message: "Engagement sorts cannot be combined with email_address",
+    },
+  ] satisfies { params: ListSubscribersParams; message: string }[])(
+    "preserves API validation for $params.sort_field",
+    async ({ params, message }) => {
+      const details = { errors: [message] };
+      fetchMock.mockResponseOnce(JSON.stringify(details), { status: 422 });
+
+      await expect(kit.subscribers.list(params)).rejects.toMatchObject({
+        name: "ApiError",
+        status: 422,
+        details,
+      } satisfies Partial<ApiError>);
+      request("GET", "/subscribers", params);
+    }
+  );
+
+  it.each([
     { name: "true", params: { slim: true }, query: { slim: "true" } },
     { name: "false", params: { slim: false }, query: { slim: "false" } },
     { name: "omitted", params: {}, query: {} },
