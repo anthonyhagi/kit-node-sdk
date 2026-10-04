@@ -84,7 +84,7 @@ export class TagsHandler {
     params: BulkCreateTagsParams
   ): Promise<BulkCreateTags> {
     const body = JSON.stringify(params || {});
-    const url = "/bulk/tags/subscribers";
+    const url = "/bulk/tags";
 
     const resp = await this.api.post<BulkCreateTagsWithoutType>(url, { body });
 
