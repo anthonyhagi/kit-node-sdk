@@ -1,6 +1,126 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiClient } from "./api-client";
 
+describe("Retry-After", () => {
+  beforeEach(() => {
+    fetchMock.resetMocks();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+  });
+
+  async function expectRetryAfter(
+    status: number,
+    header: string | undefined,
+    wait: number,
+    retryDelay = 1000
+  ) {
+    fetchMock
+      .mockResponseOnce("", {
+        status,
+        headers: header === undefined ? {} : { "Retry-After": header },
+      })
+      .mockResponseOnce(JSON.stringify({ success: true }));
+    const api = new ApiClient({
+      baseUrl: "http://localhost",
+      maxRetries: 1,
+      retryDelay,
+    });
+    const result = api.get("/some/route");
+    await vi.advanceTimersByTimeAsync(wait - 1);
+    expect(fetchMock.requests()).toHaveLength(1);
+    await vi.advanceTimersByTimeAsync(1);
+    await expect(result).resolves.toEqual({ success: true });
+    expect(fetchMock.requests()).toHaveLength(2);
+  }
+
+  it.each([429, 503])(
+    "waits for delta seconds on status %i",
+    async (status) => {
+      await expectRetryAfter(status, "5", 5000);
+    }
+  );
+
+  it.each([
+    "Thu, 01 Jan 2026 00:00:05 GMT",
+    "Thursday, 01-Jan-26 00:00:05 GMT",
+    "Thu Jan  1 00:00:05 2026",
+  ])("waits until HTTP date %s", async (header) => {
+    await expectRetryAfter(429, header, 5000);
+  });
+
+  it("accepts whitespace around seconds", async () => {
+    await expectRetryAfter(429, " 5 ", 5000);
+  });
+
+  it("honors the server delay even when configured backoff is zero", async () => {
+    await expectRetryAfter(429, "2", 2000, 0);
+  });
+
+  it.each([
+    undefined,
+    "",
+    "not a date",
+    "Thu, not a date",
+    "-1",
+    "1.5",
+    "1e3",
+    "Infinity",
+    "999999999999999999999999999999999999",
+    "Thu, 01 Jan 2026 00:00:00 GMT",
+    "Wed, 31 Dec 2025 23:59:59 GMT",
+    "0",
+  ])(
+    "preserves backoff for missing, invalid, or expired value %j",
+    async (header) => {
+      await expectRetryAfter(429, header, 1000);
+    }
+  );
+
+  it("does not shorten a longer configured backoff", async () => {
+    await expectRetryAfter(503, "1", 2000, 2000);
+  });
+
+  it("honors delays beyond the Node timer limit without overflowing", async () => {
+    await expectRetryAfter(429, "2147484", 2147484000);
+  });
+
+  it.each([0, 1])("respects a retry limit of %i", async (maxRetries) => {
+    fetchMock.mockResponse(JSON.stringify({ errors: ["Rate limited"] }), {
+      status: 429,
+      headers: { "Retry-After": "2" },
+    });
+    const api = new ApiClient({ baseUrl: "http://localhost", maxRetries });
+    const result = expect(api.get("/some/route")).rejects.toThrow(
+      "Rate limit exceeded"
+    );
+    await vi.runAllTimersAsync();
+    await result;
+    expect(fetchMock.requests()).toHaveLength(maxRetries + 1);
+    expect(Date.now()).toBe(
+      new Date("2026-01-01T00:00:00Z").getTime() + maxRetries * 2000
+    );
+  });
+
+  it("does not retry a non-retryable response with the header", async () => {
+    fetchMock.mockResponseOnce("", {
+      status: 401,
+      headers: { "Retry-After": "5" },
+    });
+    const api = new ApiClient({ baseUrl: "http://localhost" });
+    await expect(api.get("/some/route")).rejects.toThrow(
+      "Authentication failed"
+    );
+    expect(fetchMock.requests()).toHaveLength(1);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+});
+
 describe("api-client", () => {
   beforeEach(() => {
     fetchMock.resetMocks();

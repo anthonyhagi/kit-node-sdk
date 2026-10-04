@@ -148,7 +148,7 @@ export class ApiClient {
 
       if (!resp.ok) {
         if (this.shouldRetry(resp.status) && attempt < this.maxRetries) {
-          await delay(this.calculateDelay(attempt));
+          await this.waitForRetry(attempt, resp);
           continue;
         }
 
@@ -239,6 +239,48 @@ export class ApiClient {
    */
   private shouldRetry(statusCode: number): boolean {
     return statusCode >= 500 || statusCode === 429;
+  }
+
+  private async waitForRetry(attempt: number, resp: Response): Promise<void> {
+    let remaining = Math.max(
+      this.calculateDelay(attempt),
+      this.retryAfterDelay(resp.headers.get("Retry-After"))
+    );
+
+    // Node turns delays above the signed 32-bit timer limit into 1ms.
+    // Split long server delays so they cannot trigger an immediate retry.
+    const maxTimerDelay = 2 ** 31 - 1;
+    while (remaining > maxTimerDelay) {
+      await delay(maxTimerDelay);
+      remaining -= maxTimerDelay;
+    }
+    await delay(remaining);
+  }
+
+  private retryAfterDelay(header: string | null): number {
+    if (header === null) return 0;
+    const value = header.trim();
+    let milliseconds: number;
+
+    if (/^\d+$/.test(value)) {
+      milliseconds = Number(value) * 1000;
+    } else {
+      // Require an HTTP-date weekday prefix; Date.parse also accepts
+      // values such as negative numbers that are not valid Retry-After.
+      if (!/^(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)/.test(value)) {
+        return 0;
+      }
+      // The obsolete asctime format has no timezone, but HTTP dates
+      // always use GMT. Prevent Date.parse from using the local timezone.
+      const date = /^\w{3} \w{3} {1,2}\d{1,2} \d{2}:\d{2}:\d{2} \d{4}$/.test(
+        value
+      )
+        ? `${value} GMT`
+        : value;
+      milliseconds = Date.parse(date) - Date.now();
+    }
+
+    return Number.isSafeInteger(milliseconds) ? Math.max(0, milliseconds) : 0;
   }
 
   /**
