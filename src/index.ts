@@ -181,6 +181,7 @@ export class Kit extends ApiClient {
   }
 }
 
+export { ApiError } from "./errors";
 export type { ClientOptions };
 
 export type {
