@@ -4,6 +4,7 @@ import {
   type BroadcastSubscriberFilterGroup,
   type CreateBroadcastParams,
   type GetBroadcastStatsParams,
+  type ListBroadcastsParams,
 } from "~/index";
 
 const pagination = {
@@ -13,6 +14,86 @@ const pagination = {
   end_cursor: "next+/=",
   per_page: 25,
 };
+
+describe("broadcast list filters through Kit", () => {
+  let kit: Kit;
+
+  beforeEach(() => {
+    fetchMock.resetMocks();
+    kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
+  });
+
+  it("preserves requests without options", async () => {
+    const response = { broadcasts: [], pagination };
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.broadcasts.list()).toEqual(response);
+    const requests = fetchMock.requests();
+    expect(requests).toHaveLength(1);
+    expect(requests[0]!.url).toBe("https://api.kit.com/v4/broadcasts");
+    expect(requests[0]!.method).toBe("GET");
+    expect(await requests[0]!.text()).toBe("");
+  });
+
+  it.each(["after", "before"] as const)(
+    "combines %s pagination with status and both date bounds",
+    async (cursor) => {
+      const response = { broadcasts: [], pagination };
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      const params = {
+        [cursor]: "next+/=",
+        per_page: 25,
+        include_total_count: true,
+        status: "completed",
+        sent_after: "2026-01-01",
+        sent_before: "2026-02-01",
+      } satisfies ListBroadcastsParams;
+
+      expect(await kit.broadcasts.list(params)).toEqual(response);
+      const requests = fetchMock.requests();
+      expect(requests).toHaveLength(1);
+      const req = requests[0]!;
+      const url = new URL(req.url);
+      expect(url.origin).toBe("https://api.kit.com");
+      expect(url.pathname).toBe("/v4/broadcasts");
+      expect(Object.fromEntries(url.searchParams)).toEqual({
+        [cursor]: "next+/=",
+        per_page: "25",
+        include_total_count: "true",
+        status: "completed",
+        sent_after: "2026-01-01",
+        sent_before: "2026-02-01",
+      });
+      expect(req.method).toBe("GET");
+      expect(await req.text()).toBe("");
+    }
+  );
+
+  it.each(["draft", "scheduled", "sending", "completed", "aborted"] as const)(
+    "sends the %s lifecycle status without other filters",
+    async (status) => {
+      fetchMock.mockResponseOnce(
+        JSON.stringify({ broadcasts: [], pagination })
+      );
+      await kit.broadcasts.list({ status });
+      expect(
+        Object.fromEntries(new URL(fetchMock.requests()[0]!.url).searchParams)
+      ).toEqual({ status });
+    }
+  );
+
+  it.each(["sent_after", "sent_before"] as const)(
+    "sends %s without requiring the other date bound",
+    async (bound) => {
+      fetchMock.mockResponseOnce(
+        JSON.stringify({ broadcasts: [], pagination })
+      );
+      await kit.broadcasts.list({ [bound]: "2026-01-01" });
+      expect(
+        Object.fromEntries(new URL(fetchMock.requests()[0]!.url).searchParams)
+      ).toEqual({ [bound]: "2026-01-01" });
+    }
+  );
+});
 
 describe("broadcast stats requests through Kit", () => {
   let kit: Kit;

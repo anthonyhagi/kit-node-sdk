@@ -45,6 +45,32 @@ Use `type: "segment"` to target segment IDs. Existing single-object filters are
 also accepted and wrapped in an array before sending. A `null` filter is passed
 through unchanged. See the [Kit API reference](https://developers.kit.com/api-reference/broadcasts/create-a-broadcast).
 
+## Broadcast list filters
+
+Filter `kit.broadcasts.list()` by lifecycle `status` (`draft`, `scheduled`,
+`sending`, `completed`, or `aborted`) and sent dates in `YYYY-MM-DD` format.
+These filters can be combined with cursor pagination:
+
+```typescript
+const filters = {
+  status: "completed" as const,
+  sent_after: "2026-01-01",
+  sent_before: "2026-02-01",
+  per_page: 100,
+};
+const firstPage = await kit.broadcasts.list(filters);
+
+if (firstPage.pagination.has_next_page && firstPage.pagination.end_cursor) {
+  const nextPage = await kit.broadcasts.list({
+    ...filters,
+    after: firstPage.pagination.end_cursor,
+  });
+}
+```
+
+Keep the same filters on subsequent pages. All filters are optional; calls
+without arguments continue to work. See the [Kit API reference](https://developers.kit.com/api-reference/broadcasts/list-broadcasts).
+
 ## Broadcast stats pagination
 
 `kit.broadcasts.getAllStats()` returns one page of stats (500 broadcasts by
