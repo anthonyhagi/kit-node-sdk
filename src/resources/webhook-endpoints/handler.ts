@@ -13,6 +13,17 @@ export class WebhookEndpointsHandler {
   constructor(private api: Kit) {}
 
   /**
+   * Delete an endpoint and stop future deliveries of its subscribed events.
+   *
+   * @param id - The webhook endpoint to delete.
+   * @returns An empty object on success, or null when it was not found or is inaccessible.
+   * @see {@link https://developers.kit.com/api-reference/webhooks/delete-a-webhook-endpoint}
+   */
+  public async delete(id: number): Promise<{} | null> {
+    return await this.api.delete<{} | null>(`/webhook_endpoints/${id}`);
+  }
+
+  /**
    * Update supplied endpoint fields; events replace the full subscription list.
    *
    * @param id - The webhook endpoint to update.

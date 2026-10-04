@@ -21,10 +21,29 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 | **`kit.snippets`**         | Reusable email content referenced by Liquid keys                   | `list()`, `get()`, `create()`, `update()`                                                                                   |
 | **`kit.subscribers`**      | Individual email recipients                                        | `list()`, `create()`, `get()`, `update()`, `bulkCreate()`, `getTags()`                                                      |
 | **`kit.tags`**             | Labels for categorizing subscribers                                | `list()`, `create()`, `update()`, `bulkCreate()`, `tagSubscriber()`, `listSubscribers()`                                    |
-| **`kit.webhookEndpoints`** | Webhook endpoints with multiple events and signed deliveries       | `list()`, `get()`, `create()`, `update()`                                                                                   |
+| **`kit.webhookEndpoints`** | Webhook endpoints with multiple events and signed deliveries       | `list()`, `get()`, `create()`, `update()`, `delete()`                                                                       |
 | **`kit.webhooks`**         | HTTP callbacks for real-time notifications                         | `list()`, `create()`                                                                                                        |
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
+
+## Deleting a webhook endpoint
+
+`kit.webhookEndpoints.delete(id)` deletes the endpoint and stops future
+deliveries of its subscribed events.
+
+```ts
+const result = await kit.webhookEndpoints.delete(2);
+if (result === null) {
+  console.log("Endpoint not found or inaccessible");
+}
+```
+
+Kit returns an empty `204` response, which the SDK exposes as `{}`. Missing or
+inaccessible endpoints return `null`; authentication and permission errors
+throw. OAuth-created endpoints can only be deleted by the app that created them;
+an API-key request returns a permission error. To stop deliveries temporarily,
+use `kit.webhookEndpoints.update(id, { status: "disabled" })`. See the
+[Kit API reference](https://developers.kit.com/api-reference/webhooks/delete-a-webhook-endpoint).
 
 ## Updating a webhook endpoint
 

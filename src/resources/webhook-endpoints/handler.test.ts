@@ -517,3 +517,60 @@ describe("webhook endpoint update requests through Kit", () => {
     ).rejects.toThrow("Authentication failed");
   });
 });
+
+describe("webhook endpoint delete requests through Kit", () => {
+  let kit: Kit;
+  beforeEach(() => {
+    fetchMock.resetMocks();
+    kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
+  });
+
+  it("deletes an endpoint with no body or query and handles an empty 204 response", async () => {
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
+    const result = await kit.webhookEndpoints.delete(2);
+    expectTypeOf(result).toEqualTypeOf<{} | null>();
+    expect(result).toEqual({});
+    expect(fetchMock.requests()).toHaveLength(1);
+    const req = fetchMock.requests()[0]!;
+    expect(req.method).toBe("DELETE");
+    expect(req.url).toBe("https://api.kit.com/v4/webhook_endpoints/2");
+    expect(req.headers.get("X-Kit-Api-Key")).toBe("test-key");
+    expect(await req.text()).toBe("");
+  });
+
+  it("returns null for a missing or inaccessible endpoint", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
+      status: 404,
+    });
+    expect(await kit.webhookEndpoints.delete(404)).toBeNull();
+    expect(fetchMock.requests()[0]!.url).toBe(
+      "https://api.kit.com/v4/webhook_endpoints/404"
+    );
+    expect(await fetchMock.requests()[0]!.text()).toBe("");
+  });
+
+  it("surfaces app ownership restrictions", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({
+        errors: ["Endpoint can only be deleted by the app that created it"],
+      }),
+      { status: 403 }
+    );
+    await expect(kit.webhookEndpoints.delete(2)).rejects.toThrow(
+      "Endpoint can only be deleted by the app that created it"
+    );
+    expect(fetchMock.requests()).toHaveLength(1);
+    expect(fetchMock.requests()[0]!.method).toBe("DELETE");
+  });
+
+  it("surfaces authentication errors", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({ errors: ["The access token is invalid"] }),
+      { status: 401 }
+    );
+    await expect(kit.webhookEndpoints.delete(2)).rejects.toThrow(
+      "Authentication failed"
+    );
+    expect(fetchMock.requests()).toHaveLength(1);
+  });
+});
