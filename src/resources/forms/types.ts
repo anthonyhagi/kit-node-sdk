@@ -2,8 +2,8 @@ import type { Pagination } from "~/common/types";
 
 export interface BulkAddSubscribersParams {
   additions: {
-    form_id: number;
-    subscriber_id: number;
+    form_id: number | null;
+    subscriber_id: number | null;
     referrer?: string | undefined;
   }[];
   callback_url?: string | null | undefined;
@@ -35,7 +35,7 @@ export interface BulkAddSubscribersSynchronous {
   failures: {
     errors: string[];
     subscription: {
-      form_id: number;
+      form_id: number | null;
       subscriber_id: number | null;
       referrer: string;
     };
