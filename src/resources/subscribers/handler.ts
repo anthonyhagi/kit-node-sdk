@@ -133,7 +133,7 @@ export class SubscribersHandler {
    * @param body - The parameters to filter the subscribers.
    * @param params - The query parameters to filter the results.
    *
-   * @see {@link https://developers.kit.com/api-reference/subscribers/filter-subscribers-based-on-engagement}
+   * @see {@link https://developers.kit.com/api-reference/subscribers/filter-subscribers-by-engagement-sign-up-date-state-and-tags}
    *
    * @returns a paginated list of Subscribers.
    */

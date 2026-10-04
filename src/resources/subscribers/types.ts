@@ -114,7 +114,7 @@ export interface FilterSubscriberBodyAnyUrls {
   type: "urls";
 
   /** Array of URL IDs. Subscriber must have clicked ANY of these. */
-  ids: number[];
+  ids?: number[] | undefined;
 
   /** Array of URL patterns. Subscriber must have clicked ANY of these. */
   urls: string[];
