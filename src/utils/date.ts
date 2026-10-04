@@ -17,3 +17,12 @@ export function toDateString(date: Date | string): string {
 
   return date;
 }
+
+/** Convert a Date to its UTC calendar date (YYYY-MM-DD), preserving strings. */
+export function toDateOnlyString(date: Date | string): string {
+  if (date instanceof Date) {
+    return date.toISOString().slice(0, 10);
+  }
+
+  return date;
+}

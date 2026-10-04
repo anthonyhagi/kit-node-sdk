@@ -60,16 +60,16 @@ export interface GetEmailStats {
 export interface GetGrowthStatsParams {
   /**
    * Get stats for time period ending on this date (format yyyy-mm-dd).
-   * Defaults to today. Dates are automatically converted into the
-   * expected format of "yyyy-mm-dd".
+   * Defaults to today. Date objects use their UTC calendar date;
+   * strings should already be formatted as "yyyy-mm-dd".
    */
   ending?: Date | string | undefined;
 
   /**
    * Get stats for time period beginning on this date (format
-   * yyyy-mm-dd). Defaults to 90 days ago. Dates are
-   * automatically converted into the expected
-   * format of "yyyy-mm-dd".
+   * yyyy-mm-dd). Defaults to 90 days ago. Date objects use their
+   * UTC calendar date; strings should already be formatted as
+   * "yyyy-mm-dd".
    */
   starting?: Date | string | undefined;
 }
