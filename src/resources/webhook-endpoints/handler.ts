@@ -1,5 +1,7 @@
 import type { Kit } from "~/index";
 import type {
+  CreateWebhookEndpoint,
+  CreateWebhookEndpointParams,
   GetWebhookEndpoint,
   ListWebhookEndpoints,
   ListWebhookEndpointsParams,
@@ -7,6 +9,21 @@ import type {
 
 export class WebhookEndpointsHandler {
   constructor(private api: Kit) {}
+
+  /**
+   * Create an endpoint subscribed to the supplied event types.
+   *
+   * @param params - Delivery URL, events, and optional name and description.
+   * @returns The created endpoint and its signing secret, which must be saved.
+   * @see {@link https://developers.kit.com/api-reference/webhooks/create-a-webhook-endpoint}
+   */
+  public async create(
+    params: CreateWebhookEndpointParams
+  ): Promise<CreateWebhookEndpoint> {
+    return await this.api.post<CreateWebhookEndpoint>("/webhook_endpoints", {
+      body: JSON.stringify(params),
+    });
+  }
 
   /**
    * Get webhook endpoint metadata without the signing secret.

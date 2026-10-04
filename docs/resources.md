@@ -21,10 +21,33 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 | **`kit.snippets`**         | Reusable email content referenced by Liquid keys                   | `list()`, `get()`, `create()`, `update()`                                                                                   |
 | **`kit.subscribers`**      | Individual email recipients                                        | `list()`, `create()`, `get()`, `update()`, `bulkCreate()`, `getTags()`                                                      |
 | **`kit.tags`**             | Labels for categorizing subscribers                                | `list()`, `create()`, `update()`, `bulkCreate()`, `tagSubscriber()`, `listSubscribers()`                                    |
-| **`kit.webhookEndpoints`** | Webhook endpoints with multiple events and signed deliveries       | `list()`, `get()`                                                                                                           |
+| **`kit.webhookEndpoints`** | Webhook endpoints with multiple events and signed deliveries       | `list()`, `get()`, `create()`                                                                                               |
 | **`kit.webhooks`**         | HTTP callbacks for real-time notifications                         | `list()`, `create()`                                                                                                        |
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
+
+## Creating a webhook endpoint
+
+Use `kit.webhookEndpoints.create(params)` to register a publicly reachable
+HTTP(S) delivery URL and the event types it should receive. `url` and `events`
+are required; `name` and `description` are optional.
+
+```ts
+const result = await kit.webhookEndpoints.create({
+  url: "https://hooks.example.com/incoming",
+  events: ["subscriber.created", "custom_field.created"],
+  name: "Subscriber notifications",
+});
+const signingSecret = result.webhook_endpoint.secret;
+// Save signingSecret securely for webhook signature verification.
+```
+
+The exported types are `CreateWebhookEndpointParams` and `CreateWebhookEndpoint`.
+Creation includes the signing secret; list/get responses omit it. Save the
+secret when creating the endpoint. If it is lost, Kit's secret rotation endpoint
+can issue a replacement. Kit rejects private, internal, and loopback delivery
+URLs. API authentication and validation errors throw. See the
+[Kit API reference](https://developers.kit.com/api-reference/webhooks/create-a-webhook-endpoint).
 
 ## Fetching a webhook endpoint
 
