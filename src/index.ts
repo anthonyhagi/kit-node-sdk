@@ -324,6 +324,8 @@ export type {
   SnippetDocument,
   SnippetListItem,
   SnippetType,
+  UpdateSnippet,
+  UpdateSnippetParams,
 } from "./resources/snippets/types";
 
 export type {

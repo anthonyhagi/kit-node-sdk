@@ -5,10 +5,29 @@ import type {
   GetSnippet,
   ListSnippets,
   ListSnippetsParams,
+  UpdateSnippet,
+  UpdateSnippetParams,
 } from "./types";
 
 export class SnippetsHandler {
   constructor(private api: Kit) {}
+
+  /**
+   * Rename, edit, archive, or restore a snippet, preserving omitted fields.
+   *
+   * @param id - The snippet to update.
+   * @param params - Changes matching the existing inline or block snippet type.
+   * @returns The updated snippet, or null when the snippet was not found.
+   * @see {@link https://developers.kit.com/api-reference/snippets/update-a-snippet}
+   */
+  public async update(
+    id: number,
+    params: UpdateSnippetParams
+  ): Promise<UpdateSnippet | null> {
+    return await this.api.put<UpdateSnippet | null>(`/snippets/${id}`, {
+      body: JSON.stringify(params),
+    });
+  }
 
   /**
    * Create reusable inline text or block HTML content.

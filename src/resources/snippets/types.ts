@@ -26,6 +26,27 @@ export interface CreateSnippet {
   };
 }
 
+/** Omitted fields are preserved; the body must match the existing snippet type. */
+export type UpdateSnippetParams = {
+  name?: string | undefined;
+  archived?: boolean | undefined;
+} & (
+  | {
+      /** If supplied, must match the existing type. */
+      snippet_type?: "inline" | undefined;
+      content?: string | undefined;
+      document_attributes?: never;
+    }
+  | {
+      /** If supplied, must match the existing type. */
+      snippet_type?: "block" | undefined;
+      document_attributes?: { value_html: string } | undefined;
+      content?: never;
+    }
+);
+
+export type UpdateSnippet = GetSnippet;
+
 export interface ListSnippetsParams {
   /** Cursor from the previous page's end_cursor. */
   after?: string | undefined;

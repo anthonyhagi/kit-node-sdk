@@ -17,7 +17,7 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 | **`kit.segments`**       | Dynamic subscriber groups based on criteria                        | `list()`                                                                                                                    |
 | **`kit.sequenceEmails`** | Individual emails inside automated sequences                       | `list()`, `get()`, `create()`, `update()`, `delete()`                                                                       |
 | **`kit.sequences`**      | Automated email series                                             | `list()`, `get()`, `create()`, `update()`, `delete()`, `addSubscriberById()`, `addSubscriberByEmail()`, `listSubscribers()` |
-| **`kit.snippets`**       | Reusable email content referenced by Liquid keys                   | `list()`, `get()`, `create()`                                                                                               |
+| **`kit.snippets`**       | Reusable email content referenced by Liquid keys                   | `list()`, `get()`, `create()`, `update()`                                                                                   |
 | **`kit.subscribers`**    | Individual email recipients                                        | `list()`, `create()`, `get()`, `update()`, `bulkCreate()`, `getTags()`                                                      |
 | **`kit.tags`**           | Labels for categorizing subscribers                                | `list()`, `create()`, `update()`, `bulkCreate()`, `tagSubscriber()`, `listSubscribers()`                                    |
 | **`kit.webhooks`**       | HTTP callbacks for real-time notifications                         | `list()`, `create()`                                                                                                        |
@@ -57,6 +57,33 @@ The exported `CreateSnippetParams` union requires the content fields matching
 the snippet type. `CreateSnippet` includes required content and document fields;
 its document HTML can be `null` for inline snippets. See the
 [Kit API reference](https://developers.kit.com/api-reference/snippets/create-a-snippet).
+
+## Updating a snippet
+
+Use `kit.snippets.update(id, params)` to rename, edit, archive, or restore a
+snippet. Fields are optional; omitted fields retain their existing values.
+
+```ts
+const inline = await kit.snippets.update(5, {
+  content: "Hello {{ subscriber.first_name }}!",
+  archived: false,
+});
+const block = await kit.snippets.update(6, {
+  document_attributes: { value_html: "<p>Updated footer</p>" },
+});
+console.log(inline?.snippet.key, block?.snippet.document.value_html);
+```
+
+Use `content` for existing inline snippets and `document_attributes.value_html`
+for existing block snippets. `snippet_type` is optional and must match the
+existing type if supplied; changing it or sending the wrong body shape produces
+a validation error. `archived: true` archives and `false` restores. Content
+changes apply on the next send of every email referencing the snippet key.
+
+Exported types are `UpdateSnippetParams` and `UpdateSnippet`. The response always
+includes content and document. Missing snippets return `null`; authentication
+and validation errors throw. See the
+[Kit API reference](https://developers.kit.com/api-reference/snippets/update-a-snippet).
 
 ## Fetching a snippet
 
