@@ -1,31 +1,87 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
+  "timezone": "Australia/Adelaide",
+  "schedule": ["* 3-6 * * 1"],
+  "dependencyDashboard": true,
+  "configMigration": true,
+  "labels": ["dependencies"],
   "rangeStrategy": "auto",
-  "branchConcurrentLimit": null,
-  "prConcurrentLimit": 0,
+  "prConcurrentLimit": 5,
+  "branchConcurrentLimit": 8,
+  "prHourlyLimit": 2,
+  "rebaseWhen": "behind-base-branch",
+  "automerge": false,
+  "automergeType": "pr",
+  "automergeStrategy": "squash",
+  "platformAutomerge": false,
   "ignoreTests": false,
   "lockFileMaintenance": {
-    "automerge": true,
-    "automergeType": "pr"
+    "enabled": true,
+    "schedule": ["* 3-6 * * 1"],
+    "automerge": true
   },
-  "major": {
-    "labels": ["dependencies", "major"]
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "schedule": ["at any time"],
+    "minimumReleaseAge": "0 days",
+    "dependencyDashboardApproval": false,
+    "groupName": null,
+    "automerge": false,
+    "addLabels": ["security"]
   },
-  "minor": {
-    "labels": ["dependencies", "minor"]
-  },
-  "patch": {
-    "automerge": true,
-    "automergeType": "pr",
-    "platformAutomerge": true,
-    "labels": ["dependencies", "patch"]
-  },
-  "pin": {
-    "automerge": true,
-    "automergeType": "pr",
-    "platformAutomerge": true
-  },
-  "separateMinorPatch": true,
-  "platformAutomerge": true
+  "packageRules": [
+    {
+      "description": "Wait three days for routine npm releases before opening PRs.",
+      "matchManagers": ["npm"],
+      "minimumReleaseAge": "3 days",
+      "internalChecksFilter": "strict"
+    },
+    {
+      "description": "Batch npm patches and automerge only after checks pass.",
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["patch"],
+      "groupName": "npm patch updates",
+      "automerge": true,
+      "addLabels": ["patch"]
+    },
+    {
+      "description": "Batch npm minors for manual review, including pre-1.0 changes.",
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["minor"],
+      "groupName": "npm minor updates",
+      "addLabels": ["minor"]
+    },
+    {
+      "description": "Review workflow version updates together.",
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "GitHub Actions updates"
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["digest", "pinDigest"],
+      "groupName": "GitHub Actions digest updates",
+      "automerge": true
+    },
+    {
+      "description": "Keep development Node and its types on the project's Node 24 line.",
+      "matchPackageNames": ["node", "@types/node"],
+      "allowedVersions": ">=24 <25"
+    },
+    {
+      "description": "Runtime support policy is maintained manually, independently of CI Node.",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["engines"],
+      "enabled": false
+    },
+    {
+      "description": "Approve major upgrades in the dashboard, then review each PR manually.",
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true,
+      "groupName": null,
+      "automerge": false,
+      "addLabels": ["major"]
+    }
+  ]
 }
