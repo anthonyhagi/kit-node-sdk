@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
 import {
   Kit,
   type AddSubscriberToForm,
+  type AddSubscriberToFormByEmail,
   type ListForms,
   type ListFormsParams,
 } from "~/index";
@@ -124,6 +125,44 @@ describe("form requests through Kit", () => {
     expect(await request("GET", "/forms").text()).toBe("");
   });
 
+  it.each([200, 201])(
+    "accepts a null first name when adding by ID with status %i",
+    async (status) => {
+      const response = {
+        subscriber: { ...subscriber, first_name: null },
+      } satisfies AddSubscriberToForm;
+      fetchMock.mockResponseOnce(JSON.stringify(response), { status });
+      const result = await kit.forms.addSubscriber(7, 42);
+      expect(result).toEqual(response);
+      expectTypeOf(result!.subscriber.first_name).toEqualTypeOf<
+        string | null
+      >();
+      expect(await request("POST", "/forms/7/subscribers/42").json()).toEqual(
+        {}
+      );
+    }
+  );
+
+  it.each([200, 201])(
+    "accepts a null first name when adding by email with status %i",
+    async (status) => {
+      const response = {
+        subscriber: { ...subscriber, first_name: null },
+      } satisfies AddSubscriberToFormByEmail;
+      fetchMock.mockResponseOnce(JSON.stringify(response), { status });
+      const result = await kit.forms.addSubscriberByEmail(7, {
+        email_address: subscriber.email_address,
+      });
+      expect(result).toEqual(response);
+      expectTypeOf(result!.subscriber.first_name).toEqualTypeOf<
+        string | null
+      >();
+      expect(await request("POST", "/forms/7/subscribers").json()).toEqual({
+        email_address: subscriber.email_address,
+      });
+    }
+  );
+
   it("lists form subscribers without optional filters", async () => {
     const response = { subscribers: [subscriber], pagination };
     fetchMock.mockResponseOnce(JSON.stringify(response));
@@ -195,7 +234,7 @@ describe("form requests through Kit", () => {
     expectTypeOf(result).toEqualTypeOf<AddSubscriberToForm | null>();
     expectTypeOf<
       NonNullable<typeof result>["subscriber"]["first_name"]
-    >().toEqualTypeOf<string>();
+    >().toEqualTypeOf<string | null>();
     expect(result).toEqual(response);
     expect(await request("POST", "/forms/7/subscribers/42").json()).toEqual({});
   });
