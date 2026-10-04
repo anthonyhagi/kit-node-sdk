@@ -9,6 +9,8 @@ import {
   type ListSequenceSubscribers,
   type SequenceListItem,
   type SequenceStats,
+  type UpdateSequence,
+  type UpdateSequenceParams,
 } from "~/index";
 
 const sequence = {
@@ -158,6 +160,84 @@ describe("sequence requests through Kit", () => {
       name: "Welcome",
       send_hour: 24,
     });
+  });
+
+  it("updates only the supplied activity flag and omits undefined settings", async () => {
+    const params = {
+      active: false,
+      name: undefined,
+    } satisfies UpdateSequenceParams;
+    const response = {
+      sequence: { ...details, active: false },
+    } satisfies UpdateSequence;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const result = await kit.sequences.update(7, params);
+    expectTypeOf(result).toEqualTypeOf<UpdateSequence | null>();
+    expect(result).toEqual(response);
+    const req = request("PUT", "/sequences/7");
+    expect(req.headers.get("Content-Type")).toBe("application/json");
+    expect(await req.json()).toEqual({ active: false });
+  });
+
+  it("updates all settings while preserving false, zero, and empty exclusions", async () => {
+    const params = {
+      name: "Updated sequence",
+      email_address: "hello@example.com",
+      email_template_id: 6,
+      send_days: ["tuesday", "thursday"],
+      send_hour: 0,
+      time_zone: "Australia/Adelaide",
+      active: false,
+      repeat: false,
+      hold: false,
+      exclude_subscriber_sources: [],
+    } satisfies UpdateSequenceParams;
+    const response = {
+      sequence: { ...details, ...params },
+    } satisfies UpdateSequence;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.sequences.update(7, params)).toEqual(response);
+    expect(await request("PUT", "/sequences/7").json()).toEqual(params);
+    expectTypeOf<{
+      send_days: ["holiday"];
+    }>().not.toExtend<UpdateSequenceParams>();
+  });
+
+  it("updates exclusions without requiring other settings", async () => {
+    const params = {
+      exclude_subscriber_sources: [
+        { type: "tag", ids: [3] },
+        { type: "sequence", ids: [30] },
+        { type: "form", ids: [4] },
+        { type: "segment", ids: [5] },
+      ],
+    } satisfies UpdateSequenceParams;
+    fetchMock.mockResponseOnce(
+      JSON.stringify({ sequence: { ...details, ...params } })
+    );
+    await kit.sequences.update(7, params);
+    expect(await request("PUT", "/sequences/7").json()).toEqual(params);
+  });
+
+  it("returns null when updating a missing sequence", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
+      status: 404,
+    });
+    expect(await kit.sequences.update(404, { name: "Missing" })).toBeNull();
+    expect(await request("PUT", "/sequences/404").json()).toEqual({
+      name: "Missing",
+    });
+  });
+
+  it("surfaces Kit validation errors when updating a sequence", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({ errors: ["name can't be blank"] }),
+      { status: 422 }
+    );
+    await expect(kit.sequences.update(7, { name: "" })).rejects.toThrow(
+      "name can't be blank"
+    );
+    expect(await request("PUT", "/sequences/7").json()).toEqual({ name: "" });
   });
 
   it("fetches full sequence details without requesting stats", async () => {
