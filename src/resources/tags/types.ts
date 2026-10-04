@@ -66,7 +66,7 @@ export type BulkRemoveTagsWithoutType =
   | Omit<BulkRemoveTagsAsynchronous, "type">;
 
 export interface BulkTagParams {
-  taggings: Tagging[];
+  taggings: Nullable<Tagging>[];
   callback_url?: string | null | undefined;
 }
 
