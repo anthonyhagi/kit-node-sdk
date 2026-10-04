@@ -23,6 +23,26 @@ export interface CreateSequenceEmail {
   email: Omit<GetSequenceEmail["email"], "stats">;
 }
 
+/** Only supplied fields change; omitted fields retain their existing values. */
+export interface UpdateSequenceEmailParams {
+  subject?: string | undefined;
+  preview_text?: string | null | undefined;
+  content?: string | null | undefined;
+  delay_value?: number | undefined;
+  delay_unit?: "days" | "hours" | undefined;
+  email_template_id?: number | null | undefined;
+  published?: boolean | undefined;
+  /** Day-based emails only; null resets the per-email schedule override. */
+  send_days?: SequenceSendDay[] | null | undefined;
+  position?: number | null | undefined;
+}
+
+export interface UpdateSequenceEmail {
+  email: Omit<CreateSequenceEmail["email"], "position"> & {
+    position: number | null;
+  };
+}
+
 export interface ListSequenceEmailsParams extends ListSequencesParams {
   /** Include each email's HTML content; omitted by default. */
   include_content?: boolean | undefined;

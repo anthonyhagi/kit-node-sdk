@@ -15,13 +15,41 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 | **`kit.forms`**          | Web forms for collecting subscriber information                    | `list()`, `addSubscriber()`, `addSubscriberByEmail()`, `listSubscribers()`                                                  |
 | **`kit.purchases`**      | Transaction records for products/services                          | `list()`, `create()`, `get()`                                                                                               |
 | **`kit.segments`**       | Dynamic subscriber groups based on criteria                        | `list()`                                                                                                                    |
-| **`kit.sequenceEmails`** | Individual emails inside automated sequences                       | `list()`, `get()`, `create()`                                                                                               |
+| **`kit.sequenceEmails`** | Individual emails inside automated sequences                       | `list()`, `get()`, `create()`, `update()`                                                                                   |
 | **`kit.sequences`**      | Automated email series                                             | `list()`, `get()`, `create()`, `update()`, `delete()`, `addSubscriberById()`, `addSubscriberByEmail()`, `listSubscribers()` |
 | **`kit.subscribers`**    | Individual email recipients                                        | `list()`, `create()`, `get()`, `update()`, `bulkCreate()`, `getTags()`                                                      |
 | **`kit.tags`**           | Labels for categorizing subscribers                                | `list()`, `create()`, `update()`, `bulkCreate()`, `tagSubscriber()`, `listSubscribers()`                                    |
 | **`kit.webhooks`**       | HTTP callbacks for real-time notifications                         | `list()`, `create()`                                                                                                        |
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
+
+## Updating a sequence email
+
+Use `kit.sequenceEmails.update(sequenceId, emailId, params)` to change content,
+timing, position, or publication state. All fields are optional; only supplied
+fields change:
+
+```ts
+const result = await kit.sequenceEmails.update(123, 456, {
+  subject: "Updated subject",
+  content: "<p>Updated content</p>",
+  published: false,
+});
+console.log(result?.email.subject);
+```
+
+Pass `email_template_id: null` to clear the template, or `send_days: null` to
+reset a day-based email's schedule override. Kit then returns all seven sending
+days to indicate no per-email restriction. Sending `send_days` for an hour-based
+email produces a validation error. Changing position while subscribers are
+progressing can cause deliveries to be reordered or skipped; publishing an email
+at position zero triggers processing of its queued subscribers.
+
+The exported types are `UpdateSequenceEmailParams` and `UpdateSequenceEmail`.
+The response includes the content field and allows nullable content, preview
+text, sending days, and position. Missing sequences or emails return `null`;
+validation errors throw. See the
+[Kit API reference](https://developers.kit.com/api-reference/sequence-emails/update-a-sequence-email).
 
 ## Creating a sequence email
 

@@ -6,6 +6,8 @@ import {
   type GetSequenceEmail,
   type ListSequenceEmails,
   type SequenceEmailStats,
+  type UpdateSequenceEmail,
+  type UpdateSequenceEmailParams,
 } from "~/index";
 
 const email = {
@@ -381,5 +383,139 @@ describe("sequence email create requests through Kit", () => {
         delay_unit: "days",
       })
     ).rejects.toThrow("subject can't be blank");
+  });
+});
+
+describe("sequence email update requests through Kit", () => {
+  let kit: Kit;
+  beforeEach(() => {
+    fetchMock.resetMocks();
+    kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
+  });
+
+  it("updates only the supplied subject and omits undefined fields", async () => {
+    const params = {
+      subject: "Updated subject",
+      content: undefined,
+    } satisfies UpdateSequenceEmailParams;
+    const response = {
+      email: {
+        ...email,
+        subject: "Updated subject",
+        content: "<p>Existing content</p>",
+      },
+    } satisfies UpdateSequenceEmail;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const result = await kit.sequenceEmails.update(108, 6, params);
+    expectTypeOf(result).toEqualTypeOf<UpdateSequenceEmail | null>();
+    expectTypeOf(result!.email.content).toEqualTypeOf<string | null>();
+    expectTypeOf(result!.email.position).toEqualTypeOf<number | null>();
+    expectTypeOf<{
+      delay_unit: "weeks";
+    }>().not.toExtend<UpdateSequenceEmailParams>();
+    expect(result).toEqual(response);
+    const req = fetchMock.requests()[0]!;
+    expect(req.method).toBe("PUT");
+    expect(req.url).toBe("https://api.kit.com/v4/sequences/108/emails/6");
+    expect(await req.json()).toEqual({ subject: "Updated subject" });
+  });
+
+  it.each([true, false])(
+    "preserves all explicit options with published: %s",
+    async (published) => {
+      const params = {
+        subject: "Updated subject",
+        preview_text: "Updated preview",
+        content: "<p>Updated</p>",
+        delay_value: 0,
+        delay_unit: "days",
+        email_template_id: 2,
+        published,
+        send_days: ["monday", "friday"],
+        position: 0,
+      } satisfies UpdateSequenceEmailParams;
+      const response = {
+        email: { ...email, ...params },
+      } satisfies UpdateSequenceEmail;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      expect(await kit.sequenceEmails.update(108, 6, params)).toEqual(response);
+      expect(await fetchMock.requests()[0]!.json()).toEqual(params);
+    }
+  );
+
+  it("preserves explicit null fields and the server's resolved sending days", async () => {
+    const params = {
+      preview_text: null,
+      content: null,
+      email_template_id: null,
+      send_days: null,
+      position: null,
+    } satisfies UpdateSequenceEmailParams;
+    const response = {
+      email: {
+        ...email,
+        ...params,
+        send_days: [
+          "monday",
+          "tuesday",
+          "wednesday",
+          "thursday",
+          "friday",
+          "saturday",
+          "sunday",
+        ],
+      },
+    } satisfies UpdateSequenceEmail;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.sequenceEmails.update(108, 6, params)).toEqual(response);
+    expect(await fetchMock.requests()[0]!.json()).toEqual(params);
+  });
+
+  it("changes to hourly delivery without injecting sending days", async () => {
+    const params = {
+      delay_value: 2,
+      delay_unit: "hours",
+    } satisfies UpdateSequenceEmailParams;
+    const response = {
+      email: { ...email, ...params, content: null, send_days: null },
+    } satisfies UpdateSequenceEmail;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.sequenceEmails.update(108, 6, params)).toEqual(response);
+    expect(await fetchMock.requests()[0]!.json()).toEqual(params);
+  });
+
+  it("allows an empty update without adding defaults", async () => {
+    const response = {
+      email: { ...email, content: "<p>Existing</p>" },
+    } satisfies UpdateSequenceEmail;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.sequenceEmails.update(108, 6, {})).toEqual(response);
+    expect(await fetchMock.requests()[0]!.json()).toEqual({});
+  });
+
+  it("returns null for missing sequences or emails", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
+      status: 404,
+    });
+    expect(
+      await kit.sequenceEmails.update(108, 404, { published: false })
+    ).toBeNull();
+  });
+
+  it("surfaces server validation errors for hourly schedule overrides", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({
+        errors: ["send_days only applies to day-based emails"],
+      }),
+      { status: 422 }
+    );
+    const params = {
+      delay_unit: "hours",
+      send_days: ["monday"],
+    } satisfies UpdateSequenceEmailParams;
+    await expect(kit.sequenceEmails.update(108, 6, params)).rejects.toThrow(
+      "send_days only applies to day-based emails"
+    );
+    expect(await fetchMock.requests()[0]!.json()).toEqual(params);
   });
 });
