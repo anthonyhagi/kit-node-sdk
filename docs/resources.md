@@ -13,6 +13,7 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 | **`kit.customFields`**   | Additional fields for subscriber profiles and forms                | `list()`, `create()`, `update()`, `bulkCreate()`                                                                            |
 | **`kit.emailTemplates`** | Pre-designed email layouts                                         | `list()`                                                                                                                    |
 | **`kit.forms`**          | Web forms for collecting subscriber information                    | `list()`, `addSubscriber()`, `addSubscriberByEmail()`, `listSubscribers()`                                                  |
+| **`kit.posts`**          | Content published to the creator’s Kit site or sent by email       | `list()`                                                                                                                    |
 | **`kit.purchases`**      | Transaction records for products/services                          | `list()`, `create()`, `get()`                                                                                               |
 | **`kit.segments`**       | Dynamic subscriber groups based on criteria                        | `list()`                                                                                                                    |
 | **`kit.sequenceEmails`** | Individual emails inside automated sequences                       | `list()`, `get()`, `create()`, `update()`, `delete()`                                                                       |
@@ -23,6 +24,39 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 | **`kit.webhooks`**       | HTTP callbacks for real-time notifications                         | `list()`, `create()`                                                                                                        |
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
+
+## Listing posts
+
+Use `kit.posts.list(params)` to fetch posts and their publishing metadata. HTML
+content is omitted by default; request `include_content: true` to include it.
+
+```ts
+const page = await kit.posts.list({
+  include_content: true,
+  include_total_count: true,
+  per_page: 25,
+});
+for (const post of page.posts) {
+  console.log(post.title, post.status, post.public_url, post.content);
+}
+if (page.pagination.has_next_page && page.pagination.end_cursor) {
+  const next = await kit.posts.list({
+    after: page.pagination.end_cursor,
+    include_content: true,
+    per_page: 25,
+  });
+  console.log(next.posts);
+}
+```
+
+Pagination supports `after`, `before`, `per_page` (default 500, maximum 1000),
+and `include_total_count`. Drafts can have null slugs, URLs, and publish/send
+timestamps. Description and thumbnail fields can also be null. `product_id` is
+optional and nullable when no paid-post product is configured. A post sent as a
+broadcast shares its `publication_id` with that broadcast. API errors throw.
+
+Exported types are `ListPosts`, `ListPostsParams`, and `PostListItem`. See the
+[Kit API reference](https://developers.kit.com/api-reference/posts/list-posts).
 
 ## Creating a snippet
 

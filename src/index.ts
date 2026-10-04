@@ -6,6 +6,7 @@ import { BroadcastsHandler } from "./resources/broadcasts/handler";
 import { CustomFieldsHandler } from "./resources/custom-fields/handler";
 import { EmailTemplatesHandler } from "./resources/email-templates/handler";
 import { FormsHandler } from "./resources/forms/handler";
+import { PostsHandler } from "./resources/posts/handler";
 import { PurchasesHandler } from "./resources/purchases/handler";
 import { SegmentsHandler } from "./resources/segments/handler";
 import { SequenceEmailsHandler } from "./resources/sequence-emails/handler";
@@ -55,6 +56,12 @@ export class Kit extends ApiClient {
    * @see {@link https://developers.kit.com/v4#kit-api-forms}
    */
   public readonly forms: FormsHandler;
+
+  /**
+   * Content published to the creator's Kit site or sent by email.
+   * @see {@link https://developers.kit.com/api-reference/posts/list-posts}
+   */
+  public readonly posts: PostsHandler;
 
   /**
    * Transactions for buying products or services through Kit.com,
@@ -166,6 +173,7 @@ export class Kit extends ApiClient {
     this.customFields = new CustomFieldsHandler(this);
     this.emailTemplates = new EmailTemplatesHandler(this);
     this.forms = new FormsHandler(this);
+    this.posts = new PostsHandler(this);
     this.purchases = new PurchasesHandler(this);
     this.segments = new SegmentsHandler(this);
     this.sequenceEmails = new SequenceEmailsHandler(this);
@@ -270,6 +278,12 @@ export type {
   ListFormSubscribers,
   ListFormSubscribersParams,
 } from "./resources/forms/types";
+
+export type {
+  ListPosts,
+  ListPostsParams,
+  PostListItem,
+} from "./resources/posts/types";
 
 export type {
   CreatePurchase,
