@@ -1,5 +1,50 @@
 import type { Pagination, SubscriberState } from "~/common/types";
 
+export interface GetSequenceParams {
+  /** Include deliverability statistics alongside the sequence details. */
+  include?: "stats" | undefined;
+}
+
+/** Deliverability fields may be null when the sequence has no delivery data. */
+export interface SequenceStats {
+  /** Current cancelled sequence subscriptions, distinct from email events. */
+  unsubscribers?: number | undefined;
+  recipients?: number | null | undefined;
+  opens?: number | null | undefined;
+  clicks?: number | null | undefined;
+  email_unsubscribes?: number | null | undefined;
+  bounces?: number | null | undefined;
+  complaints?: number | null | undefined;
+  open_rate?: number | null | undefined;
+  click_rate?: number | null | undefined;
+  click_to_open_rate?: number | null | undefined;
+  unsubscribe_rate?: number | null | undefined;
+  bounce_rate?: number | null | undefined;
+  complaint_rate?: number | null | undefined;
+}
+
+export interface GetSequence {
+  sequence: {
+    id: number;
+    name: string;
+    hold: boolean;
+    repeat: boolean;
+    created_at: string;
+    updated_at: string;
+    email_address: string | null;
+    email_template_id: number | null;
+    send_days: string[];
+    send_hour: number;
+    time_zone: string;
+    active: boolean;
+    exclude_subscriber_sources: { type: string; ids: number[] }[];
+    email_count?: number | undefined;
+    subscriber_count?: number | undefined;
+    /** Returned only when requested with include: "stats". */
+    stats?: SequenceStats | undefined;
+  };
+}
+
 export interface ListSequencesParams {
   /**
    * Pass in the string from the previous request to move

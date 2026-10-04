@@ -268,10 +268,13 @@ export type {
 export type {
   AddSubscriberByEmailParams,
   AddSubscriberToSequence,
+  GetSequence,
+  GetSequenceParams,
   ListSequences,
   ListSequencesParams,
   ListSequenceSubscribers,
   ListSequenceSubscribersParams,
+  SequenceStats,
 } from "./resources/sequences/types";
 
 export type {

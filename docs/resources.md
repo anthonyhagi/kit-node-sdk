@@ -15,12 +15,33 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 | **`kit.forms`**          | Web forms for collecting subscriber information                    | `list()`, `addSubscriber()`, `addSubscriberByEmail()`, `listSubscribers()`               |
 | **`kit.purchases`**      | Transaction records for products/services                          | `list()`, `create()`, `get()`                                                            |
 | **`kit.segments`**       | Dynamic subscriber groups based on criteria                        | `list()`                                                                                 |
-| **`kit.sequences`**      | Automated email series                                             | `list()`, `addSubscriberById()`, `addSubscriberByEmail()`, `listSubscribers()`           |
+| **`kit.sequences`**      | Automated email series                                             | `list()`, `get()`, `addSubscriberById()`, `addSubscriberByEmail()`, `listSubscribers()`  |
 | **`kit.subscribers`**    | Individual email recipients                                        | `list()`, `create()`, `get()`, `update()`, `bulkCreate()`, `getTags()`                   |
 | **`kit.tags`**           | Labels for categorizing subscribers                                | `list()`, `create()`, `update()`, `bulkCreate()`, `tagSubscriber()`, `listSubscribers()` |
 | **`kit.webhooks`**       | HTTP callbacks for real-time notifications                         | `list()`, `create()`                                                                     |
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
+
+## Fetching sequence details
+
+Use `kit.sequences.get(id)` to fetch a sequence's schedule, sending address and
+template, activity flags, and subscriber exclusions. Request `include: "stats"`
+to include deliverability statistics:
+
+```ts
+const result = await kit.sequences.get(123, { include: "stats" });
+if (result) {
+  console.log(result.sequence.name, result.sequence.time_zone);
+  console.log(result.sequence.stats?.open_rate);
+}
+```
+
+Missing sequences return `null`. The sending address and template can be null;
+email/subscriber counts and stats may be absent. Delivery metrics can be null
+when there is no delivery data. `stats.unsubscribers` counts current cancelled
+sequence subscriptions, while `stats.email_unsubscribes` counts email events.
+The exported types are `GetSequence`, `GetSequenceParams`, and `SequenceStats`.
+See the [Kit API reference](https://developers.kit.com/api-reference/sequences/get-a-sequence).
 
 ## Broadcast creation filters
 
