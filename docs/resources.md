@@ -17,12 +17,30 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 | **`kit.segments`**       | Dynamic subscriber groups based on criteria                        | `list()`                                                                                                                    |
 | **`kit.sequenceEmails`** | Individual emails inside automated sequences                       | `list()`, `get()`, `create()`, `update()`, `delete()`                                                                       |
 | **`kit.sequences`**      | Automated email series                                             | `list()`, `get()`, `create()`, `update()`, `delete()`, `addSubscriberById()`, `addSubscriberByEmail()`, `listSubscribers()` |
-| **`kit.snippets`**       | Reusable email content referenced by Liquid keys                   | `list()`                                                                                                                    |
+| **`kit.snippets`**       | Reusable email content referenced by Liquid keys                   | `list()`, `get()`                                                                                                           |
 | **`kit.subscribers`**    | Individual email recipients                                        | `list()`, `create()`, `get()`, `update()`, `bulkCreate()`, `getTags()`                                                      |
 | **`kit.tags`**           | Labels for categorizing subscribers                                | `list()`, `create()`, `update()`, `bulkCreate()`, `tagSubscriber()`, `listSubscribers()`                                    |
 | **`kit.webhooks`**       | HTTP callbacks for real-time notifications                         | `list()`, `create()`                                                                                                        |
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
+
+## Fetching a snippet
+
+`kit.snippets.get(id)` always includes the snippet's full content and document;
+no `include_content` flag is needed.
+
+```ts
+const result = await kit.snippets.get(5);
+if (result) {
+  console.log(result.snippet.key, result.snippet.content);
+  console.log(result.snippet.document.value_html);
+}
+```
+
+The exported `GetSnippet` response requires both `content` and `document`, while
+list items keep those fields optional. Missing snippets return `null`;
+authentication errors throw. See the
+[Kit API reference](https://developers.kit.com/api-reference/snippets/get-a-snippet).
 
 ## Listing snippets
 

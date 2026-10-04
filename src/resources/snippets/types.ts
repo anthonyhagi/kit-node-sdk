@@ -46,3 +46,11 @@ export interface ListSnippets {
   snippets: SnippetListItem[];
   pagination: Pagination;
 }
+
+export interface GetSnippet {
+  snippet: Omit<SnippetListItem, "content" | "document"> & {
+    /** Single-snippet reads always include content and document. */
+    content: string;
+    document: SnippetDocument;
+  };
+}

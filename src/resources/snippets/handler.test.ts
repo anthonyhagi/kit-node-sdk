@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
 import {
   Kit,
+  type GetSnippet,
   type ListSnippets,
   type ListSnippetsParams,
   type SnippetDocument,
@@ -209,5 +210,84 @@ describe("snippet list requests through Kit", () => {
     );
     await expect(kit.snippets.list()).rejects.toThrow("Authentication failed");
     request();
+  });
+});
+
+describe("snippet get requests through Kit", () => {
+  let kit: Kit;
+  beforeEach(() => {
+    fetchMock.resetMocks();
+    kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
+  });
+
+  it.each(["inline", "block"] satisfies SnippetType[])(
+    "retrieves full %s content and document without an inclusion flag",
+    async (snippet_type) => {
+      const response = {
+        snippet: {
+          ...snippet,
+          snippet_type,
+          content: "Hello {{ subscriber.first_name }}",
+          document: {
+            id: 311,
+            value: null,
+            value_html: "<p>Hello</p>",
+            value_plain: null,
+            version: 1,
+          },
+        },
+      } satisfies GetSnippet;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      const result = await kit.snippets.get(5);
+      expectTypeOf(result).toEqualTypeOf<GetSnippet | null>();
+      expectTypeOf(result!.snippet.content).toEqualTypeOf<string>();
+      expectTypeOf(result!.snippet.document).toEqualTypeOf<SnippetDocument>();
+      expectTypeOf<typeof snippet>().not.toExtend<GetSnippet["snippet"]>();
+      expect(result).toEqual(response);
+      expect(fetchMock.requests()).toHaveLength(1);
+      const req = fetchMock.requests()[0]!;
+      expect(req.method).toBe("GET");
+      expect(req.url).toBe("https://api.kit.com/v4/snippets/5");
+      expect(req.headers.get("X-Kit-Api-Key")).toBe("test-key");
+      expect(await req.text()).toBe("");
+    }
+  );
+
+  it("preserves archived status, empty content, and opaque document values", async () => {
+    const response = {
+      snippet: {
+        ...snippet,
+        archived: true,
+        content: "",
+        document: {
+          id: 311,
+          value: { blocks: [] },
+          value_html: "",
+          value_plain: "",
+          version: 2,
+        },
+      },
+    } satisfies GetSnippet;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.snippets.get(5)).toEqual(response);
+  });
+
+  it("returns null for a missing snippet", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
+      status: 404,
+    });
+    expect(await kit.snippets.get(404)).toBeNull();
+    expect(fetchMock.requests()[0]!.url).toBe(
+      "https://api.kit.com/v4/snippets/404"
+    );
+  });
+
+  it("surfaces authentication errors", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({ errors: ["The access token is invalid"] }),
+      { status: 401 }
+    );
+    await expect(kit.snippets.get(5)).rejects.toThrow("Authentication failed");
+    expect(fetchMock.requests()).toHaveLength(1);
   });
 });
