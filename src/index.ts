@@ -311,6 +311,8 @@ export type {
   CreateSubscriber,
   CreateSubscriberParams,
   GetSubscriber,
+  GetSubscriberStats,
+  GetSubscriberStatsParams,
   GetSubscriberTags,
   GetSubscriberTagsParams,
   ListSubscribers,

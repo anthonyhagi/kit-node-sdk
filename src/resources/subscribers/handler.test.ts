@@ -1,5 +1,9 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { Kit } from "~/index";
+import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
+import {
+  Kit,
+  type GetSubscriberStats,
+  type GetSubscriberStatsParams,
+} from "~/index";
 import type { FilterSubscriberBody } from "./types";
 
 const subscriber = {
@@ -197,15 +201,33 @@ describe("subscriber requests through Kit", () => {
   );
 
   it("gets stats with sent-date filters", async () => {
-    const response = { subscriber: { id: 42, stats: { sent: 10, opened: 5 } } };
+    const response = {
+      subscriber: {
+        id: 42,
+        stats: {
+          sent: 10,
+          opened: 5,
+          clicked: 2,
+          bounced: 0,
+          open_rate: 0.5,
+          click_rate: 0.2,
+          last_sent: "2026-01-31T12:00:00Z",
+          last_opened: "2026-01-31T12:01:00Z",
+          last_clicked: "2026-01-31T12:02:00Z",
+          sends_since_last_open: 0,
+          sends_since_last_click: 0,
+        },
+      },
+    } satisfies GetSubscriberStats;
+    const params = {
+      email_sent_after: "2026-01-01",
+      email_sent_before: "2026-02-01",
+    } satisfies GetSubscriberStatsParams;
     fetchMock.mockResponseOnce(JSON.stringify(response));
 
-    expect(
-      await kit.subscribers.getStats(42, {
-        email_sent_after: "2026-01-01",
-        email_sent_before: "2026-02-01",
-      })
-    ).toEqual(response);
+    const result = await kit.subscribers.getStats(42, params);
+    expectTypeOf(result).toEqualTypeOf<GetSubscriberStats | null>();
+    expect(result).toEqual(response);
     request("GET", "/subscribers/42/stats", {
       email_sent_after: "2026-01-01",
       email_sent_before: "2026-02-01",
