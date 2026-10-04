@@ -259,7 +259,7 @@ export interface AddSubscriberToFormParams {
 export interface AddSubscriberToForm {
   subscriber: {
     id: number;
-    first_name: number;
+    first_name: string;
     email_address: string;
     state: string;
     created_at: string;
