@@ -32,7 +32,8 @@ export interface ClientOptions {
    * - 429 rate limiting responses
    * - Network errors (connection failures, timeouts)
    *
-   * Set to 0 to disable retries. Defaults to 3.
+   * Must be a non-negative safe integer; invalid values throw at
+   * construction. Set to 0 to disable retries. Defaults to 3.
    */
   maxRetries?: number;
 
@@ -49,6 +50,8 @@ export interface ClientOptions {
    * A valid Retry-After response header sets a minimum wait, even
    * when this option is 0. Missing or invalid headers use backoff.
    *
+   * Must be a finite non-negative number; invalid values throw at
+   * construction. Fractional milliseconds are accepted.
    * Set to 0 to disable backoff. Defaults to 1000 (1 second).
    */
   retryDelay?: number;

@@ -1,5 +1,60 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { Kit } from "./index";
+import { ApiClient } from "./api-client";
+import { Kit, type ClientOptions } from "./index";
+
+type RetryOptions = Pick<ClientOptions, "maxRetries" | "retryDelay">;
+
+describe.each([
+  {
+    name: "Kit",
+    create: (options: RetryOptions) =>
+      new Kit({ apiKey: "test-key", ...options }),
+  },
+  {
+    name: "ApiClient",
+    create: (options: RetryOptions) =>
+      new ApiClient({ baseUrl: "http://localhost", ...options }),
+  },
+])("$name retry option validation", ({ create }) => {
+  beforeEach(() => {
+    fetchMock.resetMocks();
+  });
+
+  it.each([-1, 0.5, NaN, Infinity, -Infinity, Number.MAX_SAFE_INTEGER + 1])(
+    "rejects maxRetries=%s at construction",
+    (maxRetries) => {
+      expect(() => create({ maxRetries })).toThrow(
+        "maxRetries must be a non-negative safe integer"
+      );
+      expect(fetchMock.requests()).toHaveLength(0);
+    }
+  );
+
+  it.each([-1, NaN, Infinity, -Infinity])(
+    "rejects retryDelay=%s at construction",
+    (retryDelay) => {
+      expect(() => create({ retryDelay })).toThrow(
+        "retryDelay must be a finite non-negative number"
+      );
+      expect(fetchMock.requests()).toHaveLength(0);
+    }
+  );
+
+  it("accepts zero for both options", () => {
+    const client = create({ maxRetries: 0, retryDelay: 0 });
+    expect(client.maxRetries).toBe(0);
+    expect(client.retryDelay).toBe(0);
+  });
+
+  it("accepts fractional delays and a safe integer retry count", () => {
+    const client = create({
+      maxRetries: Number.MAX_SAFE_INTEGER,
+      retryDelay: 0.5,
+    });
+    expect(client.maxRetries).toBe(Number.MAX_SAFE_INTEGER);
+    expect(client.retryDelay).toBe(0.5);
+  });
+});
 
 describe("Kit retry configuration", () => {
   beforeEach(() => {
