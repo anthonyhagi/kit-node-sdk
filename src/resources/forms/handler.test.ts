@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
-import { Kit, type AddSubscriberToForm } from "~/index";
+import {
+  Kit,
+  type AddSubscriberToForm,
+  type ListForms,
+  type ListFormsParams,
+} from "~/index";
 
 const form = {
   id: 7,
@@ -77,6 +82,47 @@ describe("form requests through Kit", () => {
       });
     }
   );
+
+  it.each([0, 42])(
+    "requests and preserves a subscriber count of %i",
+    async (subscriber_count) => {
+      const response = {
+        forms: [{ ...form, subscriber_count }],
+        pagination,
+      } satisfies ListForms;
+      const params = {
+        include: "subscriber_count",
+        after: "next+/=",
+        per_page: 25,
+        include_total_count: false,
+        status: "archived",
+        type: "hosted",
+      } satisfies ListFormsParams;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      const result = await kit.forms.list(params);
+      expect(result).toEqual(response);
+      expectTypeOf(result.forms[0]!.subscriber_count).toEqualTypeOf<
+        number | undefined
+      >();
+      request("GET", "/forms", {
+        include: "subscriber_count",
+        after: "next+/=",
+        per_page: "25",
+        include_total_count: "false",
+        status: "archived",
+        type: "hosted",
+      });
+    }
+  );
+
+  it("omits undefined includes and accepts forms without subscriber counts", async () => {
+    const response = { forms: [form], pagination } satisfies ListForms;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const result = await kit.forms.list({ include: undefined });
+    expect(result).toEqual(response);
+    expect(result.forms[0]!.subscriber_count).toBeUndefined();
+    expect(await request("GET", "/forms").text()).toBe("");
+  });
 
   it("lists form subscribers without optional filters", async () => {
     const response = { subscribers: [subscriber], pagination };

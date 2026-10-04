@@ -72,12 +72,20 @@ export class FormsHandler {
    * @returns the paginated list of all forms and landing pages.
    */
   public async list(params?: ListFormsParams): Promise<ListForms> {
-    const { after, before, include_total_count, per_page, status, type } =
-      params || {};
+    const {
+      after,
+      before,
+      include,
+      include_total_count,
+      per_page,
+      status,
+      type,
+    } = params || {};
 
     const query = new URLSearchParams({
       ...(after && { after }),
       ...(before && { before }),
+      ...(include && { include }),
       ...(include_total_count !== undefined && {
         include_total_count: String(include_total_count),
       }),
