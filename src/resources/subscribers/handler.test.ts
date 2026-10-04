@@ -342,6 +342,31 @@ describe("subscriber requests through Kit", () => {
     }
   );
 
+  it.each([
+    { type: "opens", count_greater_than_or_equal: 5 },
+    { type: "clicks", count_less_than_or_equal: 0 },
+    {
+      type: "sent",
+      count_greater_than_or_equal: 0,
+      count_less_than_or_equal: 10,
+    },
+    {
+      type: "delivered",
+      count_greater_than: 2,
+      count_less_than_or_equal: 10,
+    },
+  ] satisfies FilterSubscriberBody["all"])(
+    "sends inclusive count thresholds for $type",
+    async (condition) => {
+      const body = { all: [condition] } satisfies FilterSubscriberBody;
+      const response = { subscribers: [], pagination };
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+
+      expect(await kit.subscribers.filter(body)).toEqual(response);
+      expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
+    }
+  );
+
   const locationCondition = {
     type: "location",
     latitude: -34.9285,
