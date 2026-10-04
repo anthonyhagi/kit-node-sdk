@@ -201,6 +201,7 @@ export type {
   CreateBroadcastParams,
   GetBroadcast,
   GetBroadcastStats,
+  GetBroadcastStatsParams,
   GetLinkClicks,
   GetSingleBroadcastStats,
   ListBroadcasts,
