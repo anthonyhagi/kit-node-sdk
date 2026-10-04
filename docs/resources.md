@@ -6,21 +6,39 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 
 ## Available Resources
 
-| Resource                 | Description                                                        | Key Methods                                                                                                     |
-| ------------------------ | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| **`kit.accounts`**       | Account and user information, creator profiles, email/growth stats | `getCurrentAccount()`, `getEmailStats()`, `getGrowthStats()`                                                    |
-| **`kit.broadcasts`**     | One-off emails sent to subscribers                                 | `list()`, `create()`, `update()`, `getStats()`                                                                  |
-| **`kit.customFields`**   | Additional fields for subscriber profiles and forms                | `list()`, `create()`, `update()`, `bulkCreate()`                                                                |
-| **`kit.emailTemplates`** | Pre-designed email layouts                                         | `list()`                                                                                                        |
-| **`kit.forms`**          | Web forms for collecting subscriber information                    | `list()`, `addSubscriber()`, `addSubscriberByEmail()`, `listSubscribers()`                                      |
-| **`kit.purchases`**      | Transaction records for products/services                          | `list()`, `create()`, `get()`                                                                                   |
-| **`kit.segments`**       | Dynamic subscriber groups based on criteria                        | `list()`                                                                                                        |
-| **`kit.sequences`**      | Automated email series                                             | `list()`, `get()`, `create()`, `update()`, `addSubscriberById()`, `addSubscriberByEmail()`, `listSubscribers()` |
-| **`kit.subscribers`**    | Individual email recipients                                        | `list()`, `create()`, `get()`, `update()`, `bulkCreate()`, `getTags()`                                          |
-| **`kit.tags`**           | Labels for categorizing subscribers                                | `list()`, `create()`, `update()`, `bulkCreate()`, `tagSubscriber()`, `listSubscribers()`                        |
-| **`kit.webhooks`**       | HTTP callbacks for real-time notifications                         | `list()`, `create()`                                                                                            |
+| Resource                 | Description                                                        | Key Methods                                                                                                                 |
+| ------------------------ | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| **`kit.accounts`**       | Account and user information, creator profiles, email/growth stats | `getCurrentAccount()`, `getEmailStats()`, `getGrowthStats()`                                                                |
+| **`kit.broadcasts`**     | One-off emails sent to subscribers                                 | `list()`, `create()`, `update()`, `getStats()`                                                                              |
+| **`kit.customFields`**   | Additional fields for subscriber profiles and forms                | `list()`, `create()`, `update()`, `bulkCreate()`                                                                            |
+| **`kit.emailTemplates`** | Pre-designed email layouts                                         | `list()`                                                                                                                    |
+| **`kit.forms`**          | Web forms for collecting subscriber information                    | `list()`, `addSubscriber()`, `addSubscriberByEmail()`, `listSubscribers()`                                                  |
+| **`kit.purchases`**      | Transaction records for products/services                          | `list()`, `create()`, `get()`                                                                                               |
+| **`kit.segments`**       | Dynamic subscriber groups based on criteria                        | `list()`                                                                                                                    |
+| **`kit.sequences`**      | Automated email series                                             | `list()`, `get()`, `create()`, `update()`, `delete()`, `addSubscriberById()`, `addSubscriberByEmail()`, `listSubscribers()` |
+| **`kit.subscribers`**    | Individual email recipients                                        | `list()`, `create()`, `get()`, `update()`, `bulkCreate()`, `getTags()`                                                      |
+| **`kit.tags`**           | Labels for categorizing subscribers                                | `list()`, `create()`, `update()`, `bulkCreate()`, `tagSubscriber()`, `listSubscribers()`                                    |
+| **`kit.webhooks`**       | HTTP callbacks for real-time notifications                         | `list()`, `create()`                                                                                                        |
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
+
+## Deleting a sequence
+
+`kit.sequences.delete(id)` soft-deletes a sequence and stops active deliveries
+immediately. Associated state is cleaned up in the background, and Visual
+Automations referencing the sequence need updating. If you only need to pause
+delivery, use `kit.sequences.update(id, { active: false })`.
+
+```ts
+const result = await kit.sequences.delete(123);
+if (result === null) {
+  console.log("Sequence not found");
+}
+```
+
+The method sends a bodyless DELETE and returns `{}` for Kit's successful
+`204 No Content` response, or `null` when the sequence is missing. See the
+[Kit API reference](https://developers.kit.com/api-reference/sequences/delete-a-sequence).
 
 ## Updating a sequence
 

@@ -99,6 +99,18 @@ export class SequencesHandler {
   }
 
   /**
+   * Soft-delete a sequence, stopping active deliveries immediately.
+   * Associated state is cleaned up in the background.
+   *
+   * @param id - The unique ID of the sequence.
+   * @returns An empty object on success, or null if the sequence was not found.
+   * @see {@link https://developers.kit.com/api-reference/sequences/delete-a-sequence}
+   */
+  public async delete(id: number): Promise<{} | null> {
+    return await this.api.delete<{} | null>(`/sequences/${id}`);
+  }
+
+  /**
    * Get a paginated list of all Subscribers for a Sequence.
    *
    * @param id - The unique ID of the Sequence.
