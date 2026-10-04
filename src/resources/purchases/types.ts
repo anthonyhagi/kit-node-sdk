@@ -37,7 +37,7 @@ export interface ListPurchasesParams {
 export interface ListPurchases {
   purchases: {
     id: number;
-    transaction_id: number;
+    transaction_id: string;
     status: string;
     email_address: string;
     currency: string;
@@ -48,7 +48,7 @@ export interface ListPurchases {
     total: number;
     products: {
       quantity: number;
-      lid: number;
+      lid: string;
       unit_price: number;
       sku: string | null;
       name: string;
