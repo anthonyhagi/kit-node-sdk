@@ -100,6 +100,7 @@ describe("broadcast list filters through Kit", () => {
 describe("slim broadcast lists through Kit", () => {
   let kit: Kit;
   const broadcast = {
+    status: "draft",
     id: 1,
     publication_id: 2,
     created_at: "2026-01-01T00:00:00Z",
