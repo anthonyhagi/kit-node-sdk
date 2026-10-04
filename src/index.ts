@@ -133,8 +133,8 @@ export class Kit extends ApiClient {
       apiKey,
       authType: opts.authType || "apikey",
       baseUrl: opts.baseUrl || "https://api.kit.com/v4",
-      maxRetries: opts.maxRetries || 3,
-      retryDelay: opts.retryDelay || 1000,
+      maxRetries: opts.maxRetries ?? 3,
+      retryDelay: opts.retryDelay ?? 1000,
     } satisfies Required<ClientOptions>;
 
     super({
