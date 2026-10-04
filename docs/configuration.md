@@ -43,6 +43,11 @@ const kit = new Kit({
 Retryable responses with a valid `Retry-After` header wait at least as long
 as the server requests, even when `retryDelay` is `0`.
 
+`maxRetries` must be a non-negative safe integer. `retryDelay` must be a finite
+non-negative number; fractional milliseconds are accepted. Invalid values throw
+a `RangeError` when constructing the client. Omitted or `undefined` options use
+the defaults, and both options accept `0`.
+
 ## Environment Variables
 
 You can set your API key as an environment variable:

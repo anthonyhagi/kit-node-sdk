@@ -26,6 +26,13 @@ export class ApiClient {
     maxRetries = 3,
     retryDelay = 1000,
   }: ApiClientOptions) {
+    if (!Number.isSafeInteger(maxRetries) || maxRetries < 0) {
+      throw new RangeError("maxRetries must be a non-negative safe integer");
+    }
+    if (!Number.isFinite(retryDelay) || retryDelay < 0) {
+      throw new RangeError("retryDelay must be a finite non-negative number");
+    }
+
     this.baseUrl = baseUrl;
     this.maxRetries = maxRetries;
     this.retryDelay = retryDelay;
