@@ -1,9 +1,13 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiClient } from "./api-client";
 
 describe("api-client", () => {
   beforeEach(() => {
     fetchMock.resetMocks();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("initialises correctly", () => {
@@ -84,6 +88,59 @@ describe("api-client", () => {
 
     expect(fetchMock.requests().length).toBe(1);
     expect(resp).toBe(null);
+  });
+
+  describe("successful response bodies", () => {
+    it.each([200, 201, 202, 204, 205])(
+      "returns an empty object for an empty %i response without repeating a POST",
+      async (status) => {
+        fetchMock.mockResolvedValue(new Response(null, { status }));
+        const api = new ApiClient({
+          baseUrl: "http://localhost",
+          retryDelay: 0,
+        });
+
+        await expect(api.post("/some/route")).resolves.toEqual({});
+        expect(fetchMock.requests()).toHaveLength(1);
+      }
+    );
+
+    it("throws for invalid JSON without repeating a successful POST", async () => {
+      fetchMock.mockResponse("not json", { status: 201 });
+      const api = new ApiClient({
+        baseUrl: "http://localhost",
+        retryDelay: 0,
+      });
+
+      await expect(api.post("/some/route")).rejects.toBeInstanceOf(SyntaxError);
+      expect(fetchMock.requests()).toHaveLength(1);
+    });
+
+    it("does not repeat a POST when reading its successful response fails", async () => {
+      const response = new Response("{}", { status: 201 });
+      const error = new TypeError("Response body stream failed");
+      vi.spyOn(response, "json").mockRejectedValue(error);
+      vi.spyOn(response, "text").mockRejectedValue(error);
+      fetchMock.mockResolvedValue(response);
+      const api = new ApiClient({
+        baseUrl: "http://localhost",
+        retryDelay: 0,
+      });
+
+      await expect(api.post("/some/route")).rejects.toBe(error);
+      expect(fetchMock.requests()).toHaveLength(1);
+    });
+
+    it.each([null, false, 0, "", [], { success: true }])(
+      "preserves the JSON value %j",
+      async (value) => {
+        fetchMock.mockResponseOnce(JSON.stringify(value));
+        const api = new ApiClient({ baseUrl: "http://localhost" });
+
+        await expect(api.post("/some/route")).resolves.toEqual(value);
+        expect(fetchMock.requests()).toHaveLength(1);
+      }
+    );
   });
 
   describe("retry logic", () => {

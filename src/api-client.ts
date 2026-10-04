@@ -128,64 +128,48 @@ export class ApiClient {
       body: options?.body,
     };
 
-    let lastError: Error | null = null;
-
     // Based on the number of attempts we should make, continue
     // retrying the request. For specified errors, we should
     // retry the request until we have exhausted
     // all attempts.
     for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
+      let resp: Response;
+
       try {
-        const resp = await fetch(url, fetchOptions);
-
-        if (!resp.ok) {
-          // Check if this is a retryable error and we have attempts left
-          if (this.shouldRetry(resp.status) && attempt < this.maxRetries) {
-            lastError = new Error(`HTTP ${resp.status}: ${resp.statusText}`);
-
-            await delay(this.calculateDelay(attempt));
-
-            continue;
-          }
-
-          return (await this.handleError(resp)) as TResponseType;
-        }
-
-        // There's no need to return any data as the response
-        // indicates there is no content.
-        if (resp.status === 204) {
-          const emptyObj = {};
-
-          return emptyObj as TResponseType;
-        }
-
-        const data = await resp.json();
-
-        return data as TResponseType;
+        resp = await fetch(url, fetchOptions);
       } catch (error: unknown) {
-        // Only retry on network errors, not on handleError exceptions.
-        // `handleError` throws specific API errors that always
-        // include "Status:" in the message.
-        const isNetworkError =
-          error instanceof Error && !error.message.includes("Status:");
-
-        if (isNetworkError && attempt < this.maxRetries) {
-          lastError = error instanceof Error ? error : new Error(String(error));
-
+        // Only fetch failures are eligible for network retries.
+        if (error instanceof Error && attempt < this.maxRetries) {
           await delay(this.calculateDelay(attempt));
+          continue;
+        }
+        throw error;
+      }
 
+      if (!resp.ok) {
+        if (this.shouldRetry(resp.status) && attempt < this.maxRetries) {
+          await delay(this.calculateDelay(attempt));
           continue;
         }
 
-        // If we've exhausted all retries or it's not a network error,
-        // throw the error.
-        throw error;
+        return (await this.handleError(resp)) as TResponseType;
       }
-    }
 
-    // This should never be reached, but if it is, throw the last error
-    if (lastError) {
-      throw lastError;
+      if (resp.status === 204) {
+        const emptyObj = {};
+        return emptyObj as TResponseType;
+      }
+
+      // A successful operation must not be repeated if reading or parsing
+      // its response fails. Keep body handling outside the fetch catch.
+      const body = await resp.text();
+
+      if (body.length === 0) {
+        const emptyObj = {};
+        return emptyObj as TResponseType;
+      }
+
+      return JSON.parse(body) as TResponseType;
     }
 
     throw new Error("Request failed after all retry attempts");
