@@ -35,11 +35,11 @@ See the [documentation index](docs/README.md) for the complete guides:
 - [API resources](docs/resources.md): supported resources and methods.
 - [Examples](docs/examples.md): pagination, subscribers, tags, forms, and sequences.
 - [Errors, retries, and rate limits](docs/error-handling.md): response handling and retry behavior.
-- [Development](docs/development.md): setup, scripts, testing, and contribution checks.
 
 ## Contributing and license
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before contributing. This project is
+See [DEVELOPMENT.md](DEVELOPMENT.md) for setup, scripts, and testing, and read
+[CONTRIBUTING.md](CONTRIBUTING.md) before contributing. This project is
 licensed under the [MIT License](LICENSE).
 
 Use this unofficial SDK in accordance with Kit.com's terms and API policies.

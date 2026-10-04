@@ -25,7 +25,7 @@ To contribute code or documentation-changes, please follow these steps:
 
 ## Coding Standards
 
-See the [development guide](docs/development.md) for setup instructions, scripts,
+See the [development guide](DEVELOPMENT.md) for setup instructions, scripts,
 and testing examples. User-facing documentation lives in `docs/`; keep the root
 README focused on installation, a quick start, and links to the guides.
 

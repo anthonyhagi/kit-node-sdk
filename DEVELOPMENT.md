@@ -1,6 +1,6 @@
 # Development
 
-[Documentation index](README.md) · [Project overview](../README.md)
+[Project overview](README.md) · [Documentation index](docs/README.md)
 
 ## Prerequisites
 
@@ -92,7 +92,7 @@ describe("accounts", () => {
 
 ## Contributing
 
-See [CONTRIBUTING.md](../CONTRIBUTING.md) for detailed contribution guidelines.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed contribution guidelines.
 
 ## Code Quality
 

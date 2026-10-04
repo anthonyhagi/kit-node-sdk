@@ -9,8 +9,9 @@
 | [API resources](resources.md)                         | Supported resources and their methods                                    |
 | [Examples](examples.md)                               | Cursor pagination, subscribers, tags, forms, and sequences               |
 | [Errors, retries, and rate limits](error-handling.md) | Error responses, empty bodies, backoff, and retry settings               |
-| [Development](development.md)                         | Local setup, scripts, tests, and contribution checks                     |
 
 This SDK is unofficial. See the [Kit API documentation](https://developers.kit.com/v4)
 for the upstream API specification and [Contributing](../CONTRIBUTING.md) for
 contribution guidelines and dependency-update policy.
+
+For local setup, scripts, and tests, see [DEVELOPMENT.md](../DEVELOPMENT.md).
