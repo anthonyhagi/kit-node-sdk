@@ -245,7 +245,7 @@ export interface TagSubscriberByEmailParams {
 export interface TagSubscriberByEmail {
   subscriber: {
     id: number;
-    first_name: string;
+    first_name: string | null;
     email_address: string;
     state: string;
     created_at: string;
@@ -257,7 +257,7 @@ export interface TagSubscriberByEmail {
 export interface TagSubscriber {
   subscriber: {
     id: number;
-    first_name: string;
+    first_name: string | null;
     email_address: string;
     state: string;
     created_at: string;

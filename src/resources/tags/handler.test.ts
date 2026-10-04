@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { Kit } from "~/index";
+import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
+import { Kit, type TagSubscriber, type TagSubscriberByEmail } from "~/index";
 
 const tag = { id: 7, name: "Newsletter", created_at: "2026-01-01T00:00:00Z" };
 const subscriber = {
@@ -134,6 +134,45 @@ describe("tag requests through Kit", () => {
     expect(await kit.tags.tagSubscriber(7, 42)).toEqual(response);
     expect(await request("POST", "/tags/7/subscribers/42").text()).toBe("");
   });
+
+  it.each([200, 201])(
+    "returns a nullable first name when tagging by ID with status %s",
+    async (status) => {
+      const response = {
+        subscriber: { ...subscriber, first_name: null },
+      } satisfies TagSubscriber;
+      fetchMock.mockResponseOnce(JSON.stringify(response), { status });
+
+      const result = await kit.tags.tagSubscriber(7, 42);
+      expectTypeOf(result).toEqualTypeOf<TagSubscriber | null>();
+      expectTypeOf(result!.subscriber.first_name).toEqualTypeOf<
+        string | null
+      >();
+      expect(result).toEqual(response);
+      expect(result?.subscriber.first_name).toBeNull();
+      expect(await request("POST", "/tags/7/subscribers/42").text()).toBe("");
+    }
+  );
+
+  it.each([200, 201])(
+    "returns a nullable first name when tagging by email with status %s",
+    async (status) => {
+      const body = { email_address: subscriber.email_address };
+      const response = {
+        subscriber: { ...subscriber, first_name: null },
+      } satisfies TagSubscriberByEmail;
+      fetchMock.mockResponseOnce(JSON.stringify(response), { status });
+
+      const result = await kit.tags.tagSubscriberByEmail(7, body);
+      expectTypeOf(result).toEqualTypeOf<TagSubscriberByEmail | null>();
+      expectTypeOf(result!.subscriber.first_name).toEqualTypeOf<
+        string | null
+      >();
+      expect(result).toEqual(response);
+      expect(result?.subscriber.first_name).toBeNull();
+      expect(await request("POST", "/tags/7/subscribers").json()).toEqual(body);
+    }
+  );
 
   it.each([
     "ada@example.com",
