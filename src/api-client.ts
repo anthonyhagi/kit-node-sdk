@@ -191,6 +191,11 @@ export class ApiClient {
         if (!resp.ok) {
           if (this.shouldRetry(resp.status) && attempt < this.maxRetries) {
             clearTimeout(timer);
+            try {
+              await resp.body?.cancel();
+            } catch {
+              // A failed stream cleanup must not prevent the HTTP retry.
+            }
             await this.waitForRetry(attempt, resp);
             continue;
           }
