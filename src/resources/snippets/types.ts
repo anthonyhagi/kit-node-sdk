@@ -1,0 +1,48 @@
+import type { Pagination } from "~/common/types";
+
+export type SnippetType = "inline" | "block";
+
+export interface ListSnippetsParams {
+  /** Cursor from the previous page's end_cursor. */
+  after?: string | undefined;
+  /** Cursor from the next page's start_cursor. */
+  before?: string | undefined;
+  /** Return only archived snippets when true; defaults to false. */
+  archived?: boolean | undefined;
+  snippet_type?: SnippetType | undefined;
+  /** Include content and document fields; omitted by default. */
+  include_content?: boolean | undefined;
+  include_total_count?: boolean | undefined;
+  /** Number of results per page. Default 500, maximum 1000. */
+  per_page?: number | undefined;
+}
+
+export interface SnippetDocument {
+  id: number;
+  /** Kit leaves this nullable document value's structure unspecified. */
+  value: unknown;
+  value_html: string;
+  /** Kit leaves this nullable document value's structure unspecified. */
+  value_plain: unknown;
+  version: number;
+}
+
+export interface SnippetListItem {
+  id: number;
+  name: string;
+  snippet_type: string;
+  archived: boolean;
+  /** Identifier used in Liquid as {{ snippet.key }}. */
+  key: string;
+  created_at: string;
+  updated_at: string;
+  /** Included when requested with include_content: true. */
+  content?: string | undefined;
+  /** Included when requested with include_content: true. */
+  document?: SnippetDocument | undefined;
+}
+
+export interface ListSnippets {
+  snippets: SnippetListItem[];
+  pagination: Pagination;
+}

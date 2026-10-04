@@ -10,6 +10,7 @@ import { PurchasesHandler } from "./resources/purchases/handler";
 import { SegmentsHandler } from "./resources/segments/handler";
 import { SequenceEmailsHandler } from "./resources/sequence-emails/handler";
 import { SequencesHandler } from "./resources/sequences/handler";
+import { SnippetsHandler } from "./resources/snippets/handler";
 import { SubscribersHandler } from "./resources/subscribers/handler";
 import { TagsHandler } from "./resources/tags/handler";
 import { WebhooksHandler } from "./resources/webhooks/handler";
@@ -84,6 +85,12 @@ export class Kit extends ApiClient {
    * @see {@link https://developers.kit.com/v4#kit-api-sequences}
    */
   public readonly sequences: SequencesHandler;
+
+  /**
+   * Reusable email content referenced by Liquid snippet keys.
+   * @see {@link https://developers.kit.com/api-reference/snippets/list-snippets}
+   */
+  public readonly snippets: SnippetsHandler;
 
   /**
    * Individuals opted in to receive emails from the creator
@@ -163,6 +170,7 @@ export class Kit extends ApiClient {
     this.segments = new SegmentsHandler(this);
     this.sequenceEmails = new SequenceEmailsHandler(this);
     this.sequences = new SequencesHandler(this);
+    this.snippets = new SnippetsHandler(this);
     this.subscribers = new SubscribersHandler(this);
     this.tags = new TagsHandler(this);
     this.webhooks = new WebhooksHandler(this);
@@ -306,6 +314,14 @@ export type {
   UpdateSequence,
   UpdateSequenceParams,
 } from "./resources/sequences/types";
+
+export type {
+  ListSnippets,
+  ListSnippetsParams,
+  SnippetDocument,
+  SnippetListItem,
+  SnippetType,
+} from "./resources/snippets/types";
 
 export type {
   BulkCreateSubscribers,
