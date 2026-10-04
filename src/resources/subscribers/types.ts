@@ -47,6 +47,11 @@ export interface ListSubscribersParams {
   created_after?: Date | string | undefined;
   created_before?: Date | string | undefined;
   email_address?: string | undefined;
+  /**
+   * Comma-separated fields: attribution, tags, location, canceled_at.
+   * Including canceled_at requires status: "cancelled".
+   */
+  include?: string | undefined;
   include_total_count?: boolean | undefined;
   per_page?: number | undefined;
   /** Omit custom field values from the response for a smaller payload. */
@@ -67,6 +72,40 @@ export interface ListSubscribers {
     created_at: string;
     /** Omitted when slim is true. */
     fields?: Record<string, string | null> | undefined;
+    /** Included when attribution is requested. */
+    attribution?:
+      | {
+          referrer: string | null;
+          utm_source: string | null;
+          utm_medium: string | null;
+          utm_campaign: string | null;
+          utm_term: string | null;
+          utm_content: string | null;
+          source_type: string | null;
+          source_name: string | null;
+          source_mechanism: string | null;
+          source_mechanism_id: number | null;
+        }
+      | null
+      | undefined;
+    /** Included when tags are requested. */
+    tags?:
+      | { id?: number | null | undefined; name?: string | null | undefined }[]
+      | undefined;
+    /** Included when location is requested. */
+    location?:
+      | {
+          city: string | null;
+          state: string | null;
+          country: string | null;
+          latitude: number | null;
+          longitude: number | null;
+          timezone: string | null;
+        }
+      | null
+      | undefined;
+    /** Included when canceled_at is requested with status: "cancelled". */
+    canceled_at?: string | null | undefined;
   }[];
   pagination: Pagination;
 }
