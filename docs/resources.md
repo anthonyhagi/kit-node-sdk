@@ -100,6 +100,34 @@ for (const broadcast of page.broadcasts) {
 Slim responses retain pagination and support the same list filters. See the
 [Kit API reference](https://developers.kit.com/api-reference/broadcasts/list-broadcasts).
 
+## Broadcast response status and targeting
+
+Full broadcast responses from `list()`, `get()`, `create()`, and `update()` expose
+`status` as `BroadcastStatus`: `draft`, `scheduled`, `sending`, `completed`, or
+`aborted`. Slim list responses retain `status`.
+
+Full responses share `BroadcastSubscriberFilterResponseGroup[]` for
+`subscriber_filter`. Each group can contain `all`, `any`, or `none`; inactive
+groups may be absent or null. The default `{ type: "all_subscribers" }` item has
+no IDs, while targeted items include `ids`:
+
+```ts
+const result = await kit.broadcasts.get(123);
+if (result) {
+  console.log(result.broadcast.status);
+  for (const group of result.broadcast.subscriber_filter) {
+    for (const item of group.all ?? group.any ?? group.none ?? []) {
+      console.log(item.type, item.ids);
+    }
+  }
+}
+```
+
+When constructing typed response fixtures, provide `status` and handle missing
+or null filter groups before accessing their items. Slim responses omit
+`subscriber_filter`. See the
+[Kit API reference](https://developers.kit.com/api-reference/broadcasts/get-a-broadcast).
+
 ## Broadcast stats pagination
 
 `kit.broadcasts.getAllStats()` returns one page of stats (500 broadcasts by

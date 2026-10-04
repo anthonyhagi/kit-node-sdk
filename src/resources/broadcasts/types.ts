@@ -1,5 +1,9 @@
 import type { Pagination } from "~/common/types";
 
+/** Lifecycle states returned by Kit for a broadcast. */
+export type BroadcastStatus =
+  "draft" | "scheduled" | "sending" | "completed" | "aborted";
+
 export type BroadcastStats = {
   recipients: number;
   open_rate: number;
@@ -30,6 +34,17 @@ export type BroadcastLinkClick = {
 export type BasicSubscriberFilterItem = {
   type: string;
   ids: number[];
+};
+
+/** The default all-subscribers filter has no IDs. Targeted filters include IDs. */
+export type BroadcastSubscriberFilterResponseItem =
+  { type: "all_subscribers"; ids?: undefined } | BasicSubscriberFilterItem;
+
+/** A response includes the active filter group; inactive groups may be absent or null. */
+export type BroadcastSubscriberFilterResponseGroup = {
+  all?: BroadcastSubscriberFilterResponseItem[] | null | undefined;
+  any?: BroadcastSubscriberFilterResponseItem[] | null | undefined;
+  none?: BroadcastSubscriberFilterResponseItem[] | null | undefined;
 };
 
 export type TypedSubscriberFilterItem = {
@@ -90,12 +105,12 @@ export interface ListBroadcastsParams {
   sent_before?: string | undefined;
 
   /** Filter broadcasts by lifecycle status. */
-  status?:
-    "draft" | "scheduled" | "sending" | "completed" | "aborted" | undefined;
+  status?: BroadcastStatus | undefined;
 }
 
 export interface ListBroadcasts {
   broadcasts: {
+    status: BroadcastStatus;
     id: number;
     publication_id: number;
     created_at: string;
@@ -111,9 +126,7 @@ export interface ListBroadcasts {
     thumbnail_url: string | null;
     email_address: string | null;
     email_template: BroadcastEmailTemplate;
-    subscriber_filter: {
-      all: BasicSubscriberFilterItem[];
-    }[];
+    subscriber_filter: BroadcastSubscriberFilterResponseGroup[];
     clicks?: BroadcastLinkClick[] | undefined;
     stats?: BroadcastStats | undefined;
   }[];
@@ -190,6 +203,7 @@ export interface CreateBroadcastParams {
 
 export interface CreateBroadcast {
   broadcast: {
+    status: BroadcastStatus;
     id: number;
     publication_id: number;
     created_at: string;
@@ -204,9 +218,7 @@ export interface CreateBroadcast {
     thumbnail_url: string | null;
     email_address: string;
     email_template: BroadcastEmailTemplate;
-    subscriber_filter: {
-      all: BasicSubscriberFilterItem[];
-    }[];
+    subscriber_filter: BroadcastSubscriberFilterResponseGroup[];
   };
 }
 
@@ -221,8 +233,7 @@ export interface GetBroadcastStatsParams extends Omit<
   sent_before?: string | undefined;
 
   /** Filter broadcasts by lifecycle status. */
-  status?:
-    "draft" | "scheduled" | "sending" | "completed" | "aborted" | undefined;
+  status?: BroadcastStatus | undefined;
 }
 
 export interface GetBroadcastStats {
@@ -253,6 +264,7 @@ export interface GetSingleBroadcastStats {
 
 export interface GetBroadcast {
   broadcast: {
+    status: BroadcastStatus;
     id: number;
     publication_id: number;
     created_at: string;
@@ -268,11 +280,7 @@ export interface GetBroadcast {
     public_url: string | null;
     email_address: string | null;
     email_template: BroadcastEmailTemplate;
-    subscriber_filter: {
-      all: {
-        type: "all_subscribers" | (string & {});
-      }[];
-    }[];
+    subscriber_filter: BroadcastSubscriberFilterResponseGroup[];
   };
 }
 
@@ -351,6 +359,7 @@ export interface UpdateBroadcastParams {
 
 export interface UpdateBroadcast {
   broadcast: {
+    status: BroadcastStatus;
     id: number;
     publication_id: number;
     created_at: string;
@@ -366,8 +375,6 @@ export interface UpdateBroadcast {
     public_url: string | null;
     email_address: string | null;
     email_template: BroadcastEmailTemplate;
-    subscriber_filter: {
-      all: BasicSubscriberFilterItem[];
-    }[];
+    subscriber_filter: BroadcastSubscriberFilterResponseGroup[];
   };
 }
