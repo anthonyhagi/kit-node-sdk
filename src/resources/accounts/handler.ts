@@ -1,5 +1,5 @@
 import type { Kit } from "~/index";
-import { toDateString } from "~/utils/date";
+import { toDateOnlyString } from "~/utils/date";
 import type {
   GetCreatorProfile,
   GetCurrentAccount,
@@ -116,8 +116,8 @@ export class AccountsHandler {
     const { starting, ending } = params || {};
 
     const query = new URLSearchParams({
-      ...(starting && { starting: toDateString(starting) }),
-      ...(ending && { ending: toDateString(ending) }),
+      ...(starting && { starting: toDateOnlyString(starting) }),
+      ...(ending && { ending: toDateOnlyString(ending) }),
     });
 
     const url = "/account/growth_stats";
