@@ -17,12 +17,46 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 | **`kit.segments`**       | Dynamic subscriber groups based on criteria                        | `list()`                                                                                                                    |
 | **`kit.sequenceEmails`** | Individual emails inside automated sequences                       | `list()`, `get()`, `create()`, `update()`, `delete()`                                                                       |
 | **`kit.sequences`**      | Automated email series                                             | `list()`, `get()`, `create()`, `update()`, `delete()`, `addSubscriberById()`, `addSubscriberByEmail()`, `listSubscribers()` |
-| **`kit.snippets`**       | Reusable email content referenced by Liquid keys                   | `list()`, `get()`, `update()`                                                                                               |
+| **`kit.snippets`**       | Reusable email content referenced by Liquid keys                   | `list()`, `get()`, `create()`, `update()`                                                                                   |
 | **`kit.subscribers`**    | Individual email recipients                                        | `list()`, `create()`, `get()`, `update()`, `bulkCreate()`, `getTags()`                                                      |
 | **`kit.tags`**           | Labels for categorizing subscribers                                | `list()`, `create()`, `update()`, `bulkCreate()`, `tagSubscriber()`, `listSubscribers()`                                    |
 | **`kit.webhooks`**       | HTTP callbacks for real-time notifications                         | `list()`, `create()`                                                                                                        |
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
+
+## Creating a snippet
+
+Use `kit.snippets.create(params)` to create reusable email content. Inline
+snippets require `name`, `snippet_type: "inline"`, and Liquid-enabled `content`:
+
+```ts
+const inline = await kit.snippets.create({
+  name: "Welcome message",
+  snippet_type: "inline",
+  content: "Hello {{ subscriber.first_name }}!",
+});
+console.log(inline.snippet.key);
+```
+
+Block snippets require HTML in `document_attributes.value_html`:
+
+```ts
+const block = await kit.snippets.create({
+  name: "Footer",
+  snippet_type: "block",
+  document_attributes: { value_html: "<p>Thanks for reading!</p>" },
+});
+console.log(block.snippet.document.value_html);
+```
+
+Use the returned key in emails as `{{ snippet.key }}`. Kit derives the key from
+the name, and the snippet type is fixed at creation. Circular snippet references
+produce a validation error. Authentication and validation errors throw.
+
+The exported `CreateSnippetParams` union requires the content fields matching
+the snippet type. `CreateSnippet` includes required content and document fields;
+its document HTML can be `null` for inline snippets. See the
+[Kit API reference](https://developers.kit.com/api-reference/snippets/create-a-snippet).
 
 ## Updating a snippet
 

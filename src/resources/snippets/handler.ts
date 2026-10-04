@@ -1,5 +1,7 @@
 import type { Kit } from "~/index";
 import type {
+  CreateSnippet,
+  CreateSnippetParams,
   GetSnippet,
   ListSnippets,
   ListSnippetsParams,
@@ -23,6 +25,19 @@ export class SnippetsHandler {
     params: UpdateSnippetParams
   ): Promise<UpdateSnippet | null> {
     return await this.api.put<UpdateSnippet | null>(`/snippets/${id}`, {
+      body: JSON.stringify(params),
+    });
+  }
+
+  /**
+   * Create reusable inline text or block HTML content.
+   *
+   * @param params - The name, snippet type, and corresponding content fields.
+   * @returns The created snippet, including its Liquid key and document.
+   * @see {@link https://developers.kit.com/api-reference/snippets/create-a-snippet}
+   */
+  public async create(params: CreateSnippetParams): Promise<CreateSnippet> {
+    return await this.api.post<CreateSnippet>("/snippets", {
       body: JSON.stringify(params),
     });
   }
