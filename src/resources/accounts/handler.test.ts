@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { Kit } from "~/index";
+import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
+import { Kit, type GetEmailStats } from "~/index";
 
 const response = {
   stats: {
@@ -159,15 +159,49 @@ describe("account requests through Kit", () => {
         sent: 100,
         clicked: 0,
         opened: 0,
+        open_rate: 0,
+        click_rate: 0,
+        unsubscribe_rate: 0,
+        bounce_rate: 0,
         email_stats_mode: "last_90",
         open_tracking_enabled: false,
         click_tracking_enabled: false,
         starting: "2026-01-01",
         ending: "2026-04-01",
       },
-    };
+    } satisfies GetEmailStats;
     fetchMock.mockResponseOnce(JSON.stringify(response));
     expect(await kit.accounts.getEmailStats()).toEqual(response);
+    expect(await request("GET", "/account/email_stats").text()).toBe("");
+  });
+
+  it("exposes numeric engagement, unsubscribe, and bounce rates", async () => {
+    // https://developers.kit.com/api-reference/accounts/get-email-stats
+    const response = {
+      stats: {
+        sent: 6,
+        clicked: 3,
+        opened: 6,
+        open_rate: 100,
+        click_rate: 50,
+        unsubscribe_rate: 16.67,
+        bounce_rate: 16.67,
+        email_stats_mode: "last_90",
+        open_tracking_enabled: true,
+        click_tracking_enabled: true,
+        starting: "2022-11-19T11:43:55Z",
+        ending: "2023-02-17T11:43:55Z",
+      },
+    } satisfies GetEmailStats;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+
+    const result = await kit.accounts.getEmailStats();
+    expectTypeOf(result).toEqualTypeOf<GetEmailStats>();
+    expectTypeOf(result.stats.open_rate).toEqualTypeOf<number>();
+    expectTypeOf(result.stats.click_rate).toEqualTypeOf<number>();
+    expectTypeOf(result.stats.unsubscribe_rate).toEqualTypeOf<number>();
+    expectTypeOf(result.stats.bounce_rate).toEqualTypeOf<number>();
+    expect(result).toEqual(response);
     expect(await request("GET", "/account/email_stats").text()).toBe("");
   });
 

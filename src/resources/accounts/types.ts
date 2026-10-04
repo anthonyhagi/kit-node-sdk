@@ -49,6 +49,10 @@ export interface GetEmailStats {
     sent: number;
     clicked: number;
     opened: number;
+    open_rate: number;
+    click_rate: number;
+    unsubscribe_rate: number;
+    bounce_rate: number;
     email_stats_mode: "last_90" | (string & {});
     open_tracking_enabled: boolean;
     click_tracking_enabled: boolean;
