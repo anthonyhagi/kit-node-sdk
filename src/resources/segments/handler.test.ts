@@ -111,10 +111,10 @@ describe("segment requests through Kit", () => {
     }
   );
 
-  it("omits a disabled total count while preserving the cursor", async () => {
+  it("preserves a disabled total count and the cursor", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ segments: [], pagination }));
     await kit.segments.list({ after: "next+/=", include_total_count: false });
-    request({ after: "next+/=" });
+    request({ after: "next+/=", include_total_count: "false" });
   });
 
   it.each([

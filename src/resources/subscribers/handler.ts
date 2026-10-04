@@ -99,7 +99,7 @@ export class SubscribersHandler {
       ...(created_before && { created_before: toDateString(created_before) }),
       ...(email_address && { email_address }),
       ...(include && { include }),
-      ...(include_total_count && {
+      ...(include_total_count !== undefined && {
         include_total_count: String(include_total_count),
       }),
       ...(per_page && { per_page: String(per_page) }),
@@ -154,7 +154,7 @@ export class SubscribersHandler {
     const query = new URLSearchParams({
       ...(after && { after }),
       ...(before && { before }),
-      ...(include_total_count && {
+      ...(include_total_count !== undefined && {
         include_total_count: String(include_total_count),
       }),
       ...(per_page && { per_page: String(per_page) }),
@@ -315,7 +315,7 @@ export class SubscribersHandler {
     const query = new URLSearchParams({
       ...(after && { after }),
       ...(before && { before }),
-      ...(include_total_count && {
+      ...(include_total_count !== undefined && {
         include_total_count: String(include_total_count),
       }),
       ...(per_page && { per_page: String(per_page) }),

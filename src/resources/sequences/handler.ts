@@ -143,7 +143,7 @@ export class SequencesHandler {
       ...(before && { before }),
       ...(created_after && { created_after: toDateString(created_after) }),
       ...(created_before && { created_before: toDateString(created_before) }),
-      ...(include_total_count && {
+      ...(include_total_count !== undefined && {
         include_total_count: String(include_total_count),
       }),
       ...(per_page && { per_page: String(per_page) }),
