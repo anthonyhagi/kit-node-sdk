@@ -81,6 +81,7 @@ export class SubscribersHandler {
       created_after,
       created_before,
       email_address,
+      include,
       include_total_count,
       per_page,
       slim,
@@ -97,6 +98,7 @@ export class SubscribersHandler {
       ...(created_after && { created_after: toDateString(created_after) }),
       ...(created_before && { created_before: toDateString(created_before) }),
       ...(email_address && { email_address }),
+      ...(include && { include }),
       ...(include_total_count && {
         include_total_count: String(include_total_count),
       }),

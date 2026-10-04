@@ -123,6 +123,127 @@ describe("subscriber requests through Kit", () => {
     });
   });
 
+  it.each(["attribution", "tags", "location", "canceled_at"] as const)(
+    "requests subscriber list include %s",
+    async (include) => {
+      const params = {
+        include,
+        ...(include === "canceled_at" && { status: "cancelled" as const }),
+      } satisfies ListSubscribersParams;
+      const response = {
+        subscribers: [],
+        pagination,
+      } satisfies ListSubscribers;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+
+      expect(await kit.subscribers.list(params)).toEqual(response);
+      request("GET", "/subscribers", params);
+    }
+  );
+
+  it("returns typed list includes alongside slim and pagination", async () => {
+    const params = {
+      include: "attribution,tags,location,canceled_at",
+      status: "cancelled",
+      slim: true,
+      after: "next+/=",
+      per_page: 25,
+    } satisfies ListSubscribersParams;
+    const { fields: _fields, ...base } = subscriber;
+    const response = {
+      subscribers: [
+        {
+          ...base,
+          attribution: {
+            referrer: "https://example.com",
+            utm_source: "newsletter",
+            utm_medium: null,
+            utm_campaign: "launch",
+            utm_term: null,
+            utm_content: null,
+            source_type: "form_subscription",
+            source_name: "Welcome",
+            source_mechanism: "landing_page",
+            source_mechanism_id: 0,
+          },
+          tags: [{ id: 123, name: "Newsletter" }, { id: null, name: null }, {}],
+          location: {
+            city: "Adelaide",
+            state: null,
+            country: "AU",
+            latitude: 0,
+            longitude: 0,
+            timezone: "Australia/Adelaide",
+          },
+          canceled_at: "2026-05-01T00:00:00Z",
+        },
+        {
+          ...base,
+          id: 43,
+          attribution: null,
+          tags: [],
+          location: null,
+          canceled_at: null,
+        },
+        {
+          ...base,
+          id: 44,
+          attribution: {
+            referrer: null,
+            utm_source: null,
+            utm_medium: null,
+            utm_campaign: null,
+            utm_term: null,
+            utm_content: null,
+            source_type: null,
+            source_name: null,
+            source_mechanism: null,
+            source_mechanism_id: null,
+          },
+          location: {
+            city: null,
+            state: null,
+            country: null,
+            latitude: null,
+            longitude: null,
+            timezone: null,
+          },
+        },
+        { ...base, id: 45 },
+      ],
+      pagination,
+    } satisfies ListSubscribers;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+
+    const result = await kit.subscribers.list(params);
+    expectTypeOf(result).toEqualTypeOf<ListSubscribers>();
+    expectTypeOf(result.subscribers[0]?.location?.latitude).toEqualTypeOf<
+      number | null | undefined
+    >();
+    expectTypeOf(result.subscribers[0]?.canceled_at).toEqualTypeOf<
+      string | null | undefined
+    >();
+    expect(result).toEqual(response);
+    request("GET", "/subscribers", { ...params, slim: "true", per_page: "25" });
+  });
+
+  it("preserves the API's canceled_at status validation error", async () => {
+    const details = { errors: ["canceled_at requires status=cancelled"] };
+    fetchMock.mockResponseOnce(JSON.stringify(details), { status: 422 });
+
+    await expect(
+      kit.subscribers.list({ include: "canceled_at", status: "active" })
+    ).rejects.toMatchObject({
+      name: "ApiError",
+      status: 422,
+      details,
+    } satisfies Partial<ApiError>);
+    request("GET", "/subscribers", {
+      include: "canceled_at",
+      status: "active",
+    });
+  });
+
   it.each(["after", "before"] as const)(
     "encodes the %s cursor and list filters, normalizing Date values",
     async (cursor) => {
