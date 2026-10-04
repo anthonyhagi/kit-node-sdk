@@ -1,6 +1,88 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiClient } from "./api-client";
 
+describe("safe retry backoff", () => {
+  beforeEach(() => {
+    fetchMock.resetMocks();
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+  });
+
+  it.each(["network", "http"])(
+    "preserves long %s retry delays across timer chunks",
+    async (failure) => {
+      if (failure === "network") {
+        fetchMock.mockRejectOnce(new TypeError("Network failed"));
+      } else {
+        fetchMock.mockResponseOnce("", { status: 503 });
+      }
+      fetchMock.mockResponseOnce(JSON.stringify({ success: true }));
+      const api = new ApiClient({
+        baseUrl: "http://localhost",
+        maxRetries: 1,
+        retryDelay: 2 ** 31 + 1000,
+      });
+
+      const result = api.get("/retry");
+      await vi.advanceTimersByTimeAsync(2 ** 31 - 1);
+      expect(fetchMock.requests()).toHaveLength(1);
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(fetchMock.requests()).toHaveLength(1);
+      await vi.advanceTimersByTimeAsync(1);
+      await expect(result).resolves.toEqual({ success: true });
+      expect(fetchMock.requests()).toHaveLength(2);
+    }
+  );
+
+  it.each([0, 0.5, 1])(
+    "schedules finite timer chunks for extreme backoff with random value %s",
+    async (random) => {
+      vi.mocked(Math.random).mockReturnValue(random);
+      const timer = vi.spyOn(globalThis, "setTimeout");
+      fetchMock.mockRejectOnce(new TypeError("Network failed"));
+      const api = new ApiClient({
+        baseUrl: "http://localhost",
+        maxRetries: 1,
+        retryDelay: Number.MAX_VALUE,
+      });
+
+      const result = api.get("/retry");
+      expect(result).toBeInstanceOf(Promise);
+      await vi.advanceTimersByTimeAsync(0);
+      expect(timer).toHaveBeenLastCalledWith(expect.any(Function), 2 ** 31 - 1);
+      await vi.advanceTimersByTimeAsync(2 ** 31 - 1);
+      expect(fetchMock.requests()).toHaveLength(1);
+      expect(timer).toHaveBeenLastCalledWith(expect.any(Function), 2 ** 31 - 1);
+    }
+  );
+
+  it("keeps zero backoff disabled beyond exponential numeric overflow", async () => {
+    for (let attempt = 0; attempt < 1025; attempt++) {
+      fetchMock.mockRejectOnce(new TypeError("Network failed"));
+    }
+    fetchMock.mockResponseOnce(JSON.stringify({ success: true }));
+    const timer = vi.spyOn(globalThis, "setTimeout");
+    const api = new ApiClient({
+      baseUrl: "http://localhost",
+      maxRetries: 1025,
+      retryDelay: 0,
+    });
+
+    const result = api.get("/retry");
+    await vi.runAllTimersAsync();
+    await expect(result).resolves.toEqual({ success: true });
+    expect(fetchMock.requests()).toHaveLength(1026);
+    expect(
+      timer.mock.calls.every(([, milliseconds]) => milliseconds === 0)
+    ).toBe(true);
+  });
+});
+
 describe("Retry-After", () => {
   beforeEach(() => {
     fetchMock.resetMocks();

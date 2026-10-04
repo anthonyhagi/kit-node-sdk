@@ -182,7 +182,7 @@ export class ApiClient {
           clearTimeout(timer);
           // Only fetch failures are eligible for network retries.
           if (error instanceof Error && attempt < this.maxRetries) {
-            await delay(this.calculateDelay(attempt));
+            await this.waitForRetry(attempt);
             continue;
           }
           throw error;
@@ -306,14 +306,14 @@ export class ApiClient {
     return statusCode >= 500 || statusCode === 429;
   }
 
-  private async waitForRetry(attempt: number, resp: Response): Promise<void> {
+  private async waitForRetry(attempt: number, resp?: Response): Promise<void> {
     let remaining = Math.max(
       this.calculateDelay(attempt),
-      this.retryAfterDelay(resp.headers.get("Retry-After"))
+      this.retryAfterDelay(resp?.headers.get("Retry-After") ?? null)
     );
 
     // Node turns delays above the signed 32-bit timer limit into 1ms.
-    // Split long server delays so they cannot trigger an immediate retry.
+    // Split long backoff and server delays to preserve the intended wait.
     const maxTimerDelay = 2 ** 31 - 1;
     while (remaining > maxTimerDelay) {
       await delay(maxTimerDelay);
@@ -355,13 +355,21 @@ export class ApiClient {
    * @returns The delay in milliseconds.
    */
   private calculateDelay(attempt: number): number {
+    // Avoid 0 * Infinity at high attempt counts when backoff is disabled.
+    if (this.retryDelay === 0) return 0;
+
     // Exponential backoff: baseDelay * (2 ^ attempt) with some jitter
     const exponentialDelay = this.retryDelay * 2 ** attempt;
 
     // Add jitter to prevent thundering herd (±25% randomization)
     const jitter = exponentialDelay * 0.25 * (Math.random() - 0.5);
 
-    return Math.floor(exponentialDelay + jitter);
+    const milliseconds = exponentialDelay + jitter;
+    // Saturate before waiting so numeric overflow cannot produce NaN,
+    // Infinity, or a remaining delay too large to decrement precisely.
+    return Number.isFinite(milliseconds)
+      ? Math.min(Number.MAX_SAFE_INTEGER, Math.floor(milliseconds))
+      : Number.MAX_SAFE_INTEGER;
   }
 
   private getUserAgent(): string {

@@ -46,6 +46,11 @@ whole seconds or an HTTP date. Missing, invalid, or expired values fall back to
 backoff. This minimum wait applies even when `retryDelay` is `0`; `maxRetries: 0`
 still disables retries entirely.
 
+Both network and HTTP retries split long waits into timer-safe chunks, avoiding
+Node's 1ms fallback for overflowing timers. Calculated backoff saturates at
+`Number.MAX_SAFE_INTEGER` milliseconds if exponential growth exceeds that
+limit. A `retryDelay` of `0` keeps backoff disabled at every attempt.
+
 ## Request Timeouts
 
 Set `timeoutMs` on the client to abort an attempt that takes too long:
