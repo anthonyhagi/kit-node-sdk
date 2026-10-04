@@ -197,6 +197,7 @@ export type {
   BroadcastEmailTemplate,
   BroadcastLinkClick,
   BroadcastStats,
+  BroadcastSubscriberFilterGroup,
   CreateBroadcast,
   CreateBroadcastParams,
   GetBroadcast,

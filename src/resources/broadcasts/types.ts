@@ -37,6 +37,16 @@ export type TypedSubscriberFilterItem = {
   ids: number[];
 };
 
+/** Use one of all, any, or none in a broadcast filter group. */
+export type BroadcastSubscriberFilterGroup = {
+  /** Subscribers must belong to all specified segments and tags. */
+  all?: TypedSubscriberFilterItem[] | null | undefined;
+  /** Subscribers must belong to at least one specified segment or tag. */
+  any?: TypedSubscriberFilterItem[] | null | undefined;
+  /** Subscribers must belong to none of the specified segments and tags. */
+  none?: TypedSubscriberFilterItem[] | null | undefined;
+};
+
 export interface ListBroadcastsParams {
   /**
    * Pass in the string from the previous request to move
@@ -144,29 +154,12 @@ export interface CreateBroadcastParams {
    * one filter group type via the API (e.g. all, any, or none but
    * no combinations). If nothing is provided, will default to all
    * of your subscribers.
+   * Pass an array of filter groups to match the API format. A single
+   * group object is also accepted for backward compatibility and
+   * is wrapped in an array before sending.
    */
-  subscriber_filter: {
-    /**
-     * Filters your subscribers using a logical AND of all provided
-     * segment and tag ids, i.e. a subscriber would have to be part
-     * of all segments and tags provided.
-     */
-    all: TypedSubscriberFilterItem[];
-
-    /**
-     * Filters your subscribers using a logical OR of all provided
-     * segment and tag ids, i.e. a subscriber would have to be
-     * part of at least one of the segments or tags provided.
-     */
-    any: TypedSubscriberFilterItem[] | null;
-
-    /**
-     * Filters your subscribers using a logical NOT of all provided
-     * segment and tag ids, i.e. a subscriber would have to be in
-     * none of the segments or tags provided.
-     */
-    none: TypedSubscriberFilterItem[] | null;
-  } | null;
+  subscriber_filter:
+    BroadcastSubscriberFilterGroup[] | BroadcastSubscriberFilterGroup | null;
 }
 
 export interface CreateBroadcast {
