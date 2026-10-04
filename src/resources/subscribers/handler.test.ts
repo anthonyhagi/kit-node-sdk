@@ -254,6 +254,29 @@ describe("subscriber requests through Kit", () => {
     expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
   });
 
+  it("filters clicks by URL patterns without requiring URL IDs", async () => {
+    const body = {
+      all: [
+        {
+          type: "clicks",
+          count_greater_than: 2,
+          any: [
+            {
+              type: "urls",
+              urls: ["kit.com", "amazon.com"],
+              matching: "contains",
+            },
+          ],
+        },
+      ],
+    } satisfies FilterSubscriberBody;
+    const response = { subscribers: [], pagination };
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+
+    expect(await kit.subscribers.filter(body)).toEqual(response);
+    expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
+  });
+
   it.each(["after", "before"] as const)(
     "paginates filter results with %s",
     async (cursor) => {
