@@ -4,6 +4,9 @@ import type {
   BulkCreateTags,
   BulkCreateTagsParams,
   BulkCreateTagsWithoutType,
+  BulkDeleteTags,
+  BulkDeleteTagsParams,
+  BulkDeleteTagsWithoutType,
   BulkRemoveTags,
   BulkRemoveTagsParams,
   BulkRemoveTagsWithoutType,
@@ -53,6 +56,32 @@ export class TagsHandler {
 
   constructor(api: Kit) {
     this.api = api;
+  }
+
+  /**
+   * Delete tag definitions belonging to the authenticated account.
+   * Requires OAuth authentication. Batches of up to 100 tags run synchronously;
+   * larger batches are queued, with results sent to callback_url when provided.
+   *
+   * @param params - Tag IDs to delete and an optional callback URL.
+   * @see {@link https://developers.kit.com/api-reference/tags/bulk-delete-tags}
+   * @returns Synchronous per-tag failures, or an asynchronous acknowledgement.
+   */
+  public async bulkDelete(
+    params: BulkDeleteTagsParams
+  ): Promise<BulkDeleteTags> {
+    const resp = await this.api.delete<BulkDeleteTagsWithoutType>(
+      "/bulk/tags",
+      {
+        body: JSON.stringify(params),
+      }
+    );
+
+    if ("failures" in resp) {
+      return { type: "synchronous", ...resp };
+    }
+
+    return { type: "asynchronous", ...resp };
   }
 
   /**
