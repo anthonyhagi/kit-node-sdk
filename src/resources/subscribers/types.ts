@@ -163,6 +163,12 @@ export interface FilterSubscriberBodyAllBase {
   any?: (FilterSubscriberBodyAnyBroadcast | FilterSubscriberBodyAnyUrls)[];
 }
 
+export interface FilterSubscriberBodyAllState {
+  type: "subscriber_state";
+  /** Lifecycle states to match. Subscribers matching any listed state pass. */
+  states: SubscriberState[];
+}
+
 export interface FilterSubscriberBodyAllTags {
   type: "tags";
   /** Tag conditions combined with OR logic. */
@@ -239,6 +245,7 @@ export interface FilterSubscriberBody {
   all: (
     | FilterSubscriberBodyAllSubscribed
     | FilterSubscriberBodyAllBase
+    | FilterSubscriberBodyAllState
     | FilterSubscriberBodyAllTags
     | FilterSubscriberBodyAllCustomField
     | FilterSubscriberBodyAllLocation
