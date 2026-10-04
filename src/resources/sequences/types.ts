@@ -36,6 +36,13 @@ export interface CreateSequence {
   sequence: Omit<GetSequence["sequence"], "stats">;
 }
 
+/** Only supplied fields change; omitted fields retain their current values. */
+export type UpdateSequenceParams = Partial<CreateSequenceParams>;
+
+export interface UpdateSequence {
+  sequence: CreateSequence["sequence"];
+}
+
 export interface GetSequenceParams {
   /** Include deliverability statistics alongside the sequence details. */
   include?: "stats" | undefined;

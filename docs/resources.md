@@ -6,21 +6,43 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 
 ## Available Resources
 
-| Resource                 | Description                                                        | Key Methods                                                                                         |
-| ------------------------ | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| **`kit.accounts`**       | Account and user information, creator profiles, email/growth stats | `getCurrentAccount()`, `getEmailStats()`, `getGrowthStats()`                                        |
-| **`kit.broadcasts`**     | One-off emails sent to subscribers                                 | `list()`, `create()`, `update()`, `getStats()`                                                      |
-| **`kit.customFields`**   | Additional fields for subscriber profiles and forms                | `list()`, `create()`, `update()`, `bulkCreate()`                                                    |
-| **`kit.emailTemplates`** | Pre-designed email layouts                                         | `list()`                                                                                            |
-| **`kit.forms`**          | Web forms for collecting subscriber information                    | `list()`, `addSubscriber()`, `addSubscriberByEmail()`, `listSubscribers()`                          |
-| **`kit.purchases`**      | Transaction records for products/services                          | `list()`, `create()`, `get()`                                                                       |
-| **`kit.segments`**       | Dynamic subscriber groups based on criteria                        | `list()`                                                                                            |
-| **`kit.sequences`**      | Automated email series                                             | `list()`, `get()`, `create()`, `addSubscriberById()`, `addSubscriberByEmail()`, `listSubscribers()` |
-| **`kit.subscribers`**    | Individual email recipients                                        | `list()`, `create()`, `get()`, `update()`, `bulkCreate()`, `getTags()`                              |
-| **`kit.tags`**           | Labels for categorizing subscribers                                | `list()`, `create()`, `update()`, `bulkCreate()`, `tagSubscriber()`, `listSubscribers()`            |
-| **`kit.webhooks`**       | HTTP callbacks for real-time notifications                         | `list()`, `create()`                                                                                |
+| Resource                 | Description                                                        | Key Methods                                                                                                     |
+| ------------------------ | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| **`kit.accounts`**       | Account and user information, creator profiles, email/growth stats | `getCurrentAccount()`, `getEmailStats()`, `getGrowthStats()`                                                    |
+| **`kit.broadcasts`**     | One-off emails sent to subscribers                                 | `list()`, `create()`, `update()`, `getStats()`                                                                  |
+| **`kit.customFields`**   | Additional fields for subscriber profiles and forms                | `list()`, `create()`, `update()`, `bulkCreate()`                                                                |
+| **`kit.emailTemplates`** | Pre-designed email layouts                                         | `list()`                                                                                                        |
+| **`kit.forms`**          | Web forms for collecting subscriber information                    | `list()`, `addSubscriber()`, `addSubscriberByEmail()`, `listSubscribers()`                                      |
+| **`kit.purchases`**      | Transaction records for products/services                          | `list()`, `create()`, `get()`                                                                                   |
+| **`kit.segments`**       | Dynamic subscriber groups based on criteria                        | `list()`                                                                                                        |
+| **`kit.sequences`**      | Automated email series                                             | `list()`, `get()`, `create()`, `update()`, `addSubscriberById()`, `addSubscriberByEmail()`, `listSubscribers()` |
+| **`kit.subscribers`**    | Individual email recipients                                        | `list()`, `create()`, `get()`, `update()`, `bulkCreate()`, `getTags()`                                          |
+| **`kit.tags`**           | Labels for categorizing subscribers                                | `list()`, `create()`, `update()`, `bulkCreate()`, `tagSubscriber()`, `listSubscribers()`                        |
+| **`kit.webhooks`**       | HTTP callbacks for real-time notifications                         | `list()`, `create()`                                                                                            |
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
+
+## Updating a sequence
+
+Use `kit.sequences.update(id, params)` to change only the supplied settings.
+All creation settings are optional in `UpdateSequenceParams`; omitted fields
+retain their current values. For example, pause a sequence without changing
+its name or schedule:
+
+```ts
+const result = await kit.sequences.update(123, { active: false });
+if (result) {
+  console.log(result.sequence.active);
+}
+```
+
+An empty `exclude_subscriber_sources` array clears exclusions. False flags and
+`send_hour: 0` are sent as supplied. Updates return `UpdateSequence`, or `null`
+if the sequence is missing; Kit validation errors are thrown.
+
+Setting `active: true` resumes queued subscribers. Schedule changes affect
+future sends and do not reschedule emails already queued. See the
+[Kit API reference](https://developers.kit.com/api-reference/sequences/update-a-sequence).
 
 ## Creating a sequence
 

@@ -11,6 +11,8 @@ import type {
   ListSequencesParams,
   ListSequenceSubscribers,
   ListSequenceSubscribersParams,
+  UpdateSequence,
+  UpdateSequenceParams,
 } from "./types";
 
 export class SequencesHandler {
@@ -76,6 +78,23 @@ export class SequencesHandler {
     });
     return await this.api.get<GetSequence | null>(`/sequences/${id}`, {
       query,
+    });
+  }
+
+  /**
+   * Update only the supplied sequence settings, preserving omitted fields.
+   *
+   * @param id - The unique ID of the sequence.
+   * @param params - The settings to change.
+   * @returns The updated sequence, or null if it was not found.
+   * @see {@link https://developers.kit.com/api-reference/sequences/update-a-sequence}
+   */
+  public async update(
+    id: number,
+    params: UpdateSequenceParams
+  ): Promise<UpdateSequence | null> {
+    return await this.api.put<UpdateSequence | null>(`/sequences/${id}`, {
+      body: JSON.stringify(params),
     });
   }
 
