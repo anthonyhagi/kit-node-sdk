@@ -1,8 +1,27 @@
 import type { Kit } from "~/index";
-import type { GetSnippet, ListSnippets, ListSnippetsParams } from "./types";
+import type {
+  CreateSnippet,
+  CreateSnippetParams,
+  GetSnippet,
+  ListSnippets,
+  ListSnippetsParams,
+} from "./types";
 
 export class SnippetsHandler {
   constructor(private api: Kit) {}
+
+  /**
+   * Create reusable inline text or block HTML content.
+   *
+   * @param params - The name, snippet type, and corresponding content fields.
+   * @returns The created snippet, including its Liquid key and document.
+   * @see {@link https://developers.kit.com/api-reference/snippets/create-a-snippet}
+   */
+  public async create(params: CreateSnippetParams): Promise<CreateSnippet> {
+    return await this.api.post<CreateSnippet>("/snippets", {
+      body: JSON.stringify(params),
+    });
+  }
 
   /**
    * Get a snippet's full content and document without an inclusion flag.
