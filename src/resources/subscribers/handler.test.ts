@@ -342,6 +342,39 @@ describe("subscriber requests through Kit", () => {
     }
   );
 
+  it("deletes a pinned location with a bodyless DELETE and handles 204", async () => {
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
+
+    const result = await kit.subscribers.deleteLocation(42);
+    expectTypeOf(result).toEqualTypeOf<{} | null>();
+    expect(result).toEqual({});
+    expect(await request("DELETE", "/subscribers/42/location").text()).toBe("");
+    expect(fetchMock.requests()).toHaveLength(1);
+  });
+
+  it("returns null when deleting a missing subscriber's location", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
+      status: 404,
+    });
+
+    expect(await kit.subscribers.deleteLocation(42)).toBeNull();
+    expect(await request("DELETE", "/subscribers/42/location").text()).toBe("");
+    expect(fetchMock.requests()).toHaveLength(1);
+  });
+
+  it("preserves authentication errors when deleting a location", async () => {
+    const details = { errors: ["The access token is invalid"] };
+    fetchMock.mockResponseOnce(JSON.stringify(details), { status: 401 });
+
+    await expect(kit.subscribers.deleteLocation(42)).rejects.toMatchObject({
+      name: "ApiError",
+      status: 401,
+      details,
+    } satisfies Partial<ApiError>);
+    expect(await request("DELETE", "/subscribers/42/location").text()).toBe("");
+    expect(fetchMock.requests()).toHaveLength(1);
+  });
+
   const filterBody: FilterSubscriberBody = {
     all: [
       { type: "subscribed", after: "2026-01-01", before: "2026-02-01" },

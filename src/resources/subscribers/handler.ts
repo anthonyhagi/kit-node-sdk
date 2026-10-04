@@ -253,6 +253,18 @@ export class SubscribersHandler {
   }
 
   /**
+   * Remove the Subscriber's pinned location. Kit may infer a new location
+   * from future open events.
+   *
+   * @param id - The unique ID of the Subscriber.
+   * @see {@link https://developers.kit.com/api-reference/subscribers/delete-a-subscribers-location}
+   * @returns An empty object on success, or null when the Subscriber is not found.
+   */
+  public async deleteLocation(id: number): Promise<{} | null> {
+    return await this.api.delete<{} | null>(`/subscribers/${id}/location`);
+  }
+
+  /**
    * Retrieve email stats for a specific Subscriber.
    *
    * @param id - The unique ID of the Subscriber.
