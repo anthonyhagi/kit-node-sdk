@@ -118,6 +118,8 @@ export interface CreateSubscriberParams {
 }
 
 export interface CreateSubscriber {
+  /** Unknown custom field keys that were ignored while creating the subscriber. */
+  warnings?: string[] | undefined;
   subscriber: {
     id: number;
     first_name: string | null;
@@ -440,6 +442,8 @@ export interface UpdateSubscriberParams {
 }
 
 export interface UpdateSubscriber {
+  /** Unknown custom field keys that were ignored while updating the subscriber. */
+  warnings?: string[] | undefined;
   subscriber: {
     id: number;
     first_name: string | null;

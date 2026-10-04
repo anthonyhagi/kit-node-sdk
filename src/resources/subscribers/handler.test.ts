@@ -296,6 +296,64 @@ describe("subscriber requests through Kit", () => {
     expect(await req.json()).toEqual(body);
   });
 
+  it.each([
+    { status: 200, warnings: ["unknown_field", "another_unknown_field"] },
+    { status: 202, warnings: ["unknown_field"] },
+    { status: 201, warnings: undefined },
+  ])(
+    "preserves create warnings for status $status",
+    async ({ status, warnings }) => {
+      const body = {
+        email_address: subscriber.email_address,
+        fields: {
+          interest: "TypeScript",
+          ...Object.fromEntries(
+            (warnings ?? []).map((key) => [key, "ignored"])
+          ),
+        },
+      };
+      const response = {
+        subscriber,
+        ...(warnings !== undefined && { warnings }),
+      } satisfies CreateSubscriber;
+      fetchMock.mockResponseOnce(JSON.stringify(response), { status });
+
+      const result = await kit.subscribers.create(body);
+      expectTypeOf(result.warnings).toEqualTypeOf<string[] | undefined>();
+      expect(result).toEqual(response);
+      expect(await request("POST", "/subscribers").json()).toEqual(body);
+    }
+  );
+
+  it.each([
+    { status: 200, warnings: ["unknown_field", "another_unknown_field"] },
+    { status: 202, warnings: ["unknown_field"] },
+    { status: 200, warnings: undefined },
+  ])(
+    "preserves update warnings for status $status",
+    async ({ status, warnings }) => {
+      const body = {
+        email_address: subscriber.email_address,
+        fields: {
+          interest: "TypeScript",
+          ...Object.fromEntries(
+            (warnings ?? []).map((key) => [key, "ignored"])
+          ),
+        },
+      };
+      const response = {
+        subscriber,
+        ...(warnings !== undefined && { warnings }),
+      } satisfies UpdateSubscriber;
+      fetchMock.mockResponseOnce(JSON.stringify(response), { status });
+
+      const result = await kit.subscribers.update(42, body);
+      expectTypeOf(result?.warnings).toEqualTypeOf<string[] | undefined>();
+      expect(result).toEqual(response);
+      expect(await request("PUT", "/subscribers/42").json()).toEqual(body);
+    }
+  );
+
   it("gets a subscriber by ID", async () => {
     const response = { subscriber };
     fetchMock.mockResponseOnce(JSON.stringify(response));
