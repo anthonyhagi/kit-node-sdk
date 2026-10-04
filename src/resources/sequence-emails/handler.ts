@@ -1,5 +1,7 @@
 import type { Kit } from "~/index";
 import type {
+  CreateSequenceEmail,
+  CreateSequenceEmailParams,
   GetSequenceEmail,
   GetSequenceEmailParams,
   ListSequenceEmails,
@@ -8,6 +10,24 @@ import type {
 
 export class SequenceEmailsHandler {
   constructor(private api: Kit) {}
+
+  /**
+   * Create a sequence email with a subject and delay; emails are drafts by default.
+   *
+   * @param sequenceId - The sequence containing the new email.
+   * @param params - Content, timing, and optional publishing settings.
+   * @returns The created email, or null when the sequence was not found.
+   * @see {@link https://developers.kit.com/api-reference/sequence-emails/create-a-sequence-email}
+   */
+  public async create(
+    sequenceId: number,
+    params: CreateSequenceEmailParams
+  ): Promise<CreateSequenceEmail | null> {
+    return await this.api.post<CreateSequenceEmail | null>(
+      `/sequences/${sequenceId}/emails`,
+      { body: JSON.stringify(params) }
+    );
+  }
 
   /**
    * Get an email's full content, timing, and publish state, with optional stats.
