@@ -230,13 +230,12 @@ export class ApiClient {
     let detailsString: string;
     let details: unknown;
 
-    // Close the response such that we can read the body multiple times.
-    // This is only used if we receive an error AND the body could not
-    // be parsed as JSON.
-    const clonedResp = resp.clone();
+    // Read once so JSON parsing does not leave an unread cloned stream.
+    // Stream failures propagate directly; only invalid JSON falls back to text.
+    const body = await resp.text();
 
     try {
-      details = await resp.json();
+      details = JSON.parse(body);
 
       if (
         resp.status >= 400 &&
@@ -251,7 +250,7 @@ export class ApiClient {
         detailsString = JSON.stringify(details);
       }
     } catch {
-      detailsString = await clonedResp.text();
+      detailsString = body;
       details = detailsString;
     }
 

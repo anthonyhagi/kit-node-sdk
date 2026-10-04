@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
+import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 import { ApiError, Kit } from "./index";
 
 describe("public API errors", () => {
@@ -99,6 +99,50 @@ describe("public API errors", () => {
       expect(fetchMock.requests()).toHaveLength(2);
     }
   );
+
+  it.each([
+    { body: '{ "errors": ["Invalid"] }', details: { errors: ["Invalid"] } },
+    { body: "<html>Invalid</html>", details: "<html>Invalid</html>" },
+    { body: "", details: "" },
+  ])(
+    "reads error body $body once without cloning it",
+    async ({ body, details }) => {
+      const response = new Response(body, { status: 422 });
+      const clone = vi.spyOn(response, "clone");
+      const text = vi.spyOn(response, "text");
+      fetchMock.mockResolvedValueOnce(response);
+
+      const error = await getError();
+      expect(error.details).toEqual(details);
+      expect(error.message).toBe(
+        `Bad data in request. Status: 422 - ${body.startsWith("{") ? "Errors: Invalid" : body}`
+      );
+      expect(clone).not.toHaveBeenCalled();
+      expect(text).toHaveBeenCalledOnce();
+      expect(response.bodyUsed).toBe(true);
+    }
+  );
+
+  it("preserves error response stream failures without cloning or retrying", async () => {
+    const failure = new TypeError("Error response stream failed");
+    const response = new Response(
+      new ReadableStream({
+        start(controller) {
+          controller.error(failure);
+        },
+      }),
+      { status: 422 }
+    );
+    const clone = vi.spyOn(response, "clone");
+    const text = vi.spyOn(response, "text");
+    fetchMock.mockResolvedValueOnce(response);
+    kit = new Kit({ apiKey: "test-key", maxRetries: 2, retryDelay: 0 });
+
+    await expect(kit.accounts.getCurrentAccount()).rejects.toBe(failure);
+    expect(clone).not.toHaveBeenCalled();
+    expect(text).toHaveBeenCalledOnce();
+    expect(fetchMock.requests()).toHaveLength(1);
+  });
 
   it("continues returning null for 404 responses", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not found"] }), {
