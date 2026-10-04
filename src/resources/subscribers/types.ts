@@ -395,6 +395,26 @@ export interface UpdateSubscriber {
   };
 }
 
+export interface PinSubscriberLocationParams {
+  location: {
+    city: string;
+    state_province: string;
+    /** ISO 3166-1 alpha-2 country code. */
+    country_code: string;
+    latitude: number;
+    longitude: number;
+    /** IANA timezone name, such as America/Denver. */
+    timezone: string;
+  };
+}
+
+export interface PinSubscriberLocation {
+  subscriber: {
+    id: number;
+    location: PinSubscriberLocationParams["location"];
+  };
+}
+
 export interface GetSubscriberStatsParams {
   /**
    * Filter to stats for emails sent after this date (YYYY-MM-DD).

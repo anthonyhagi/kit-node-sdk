@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
 import {
   Kit,
+  type ApiError,
   type CreateSubscriber,
   type FilterSubscriberBody,
   type FilterSubscriberBodyAllAttribution,
@@ -17,6 +18,8 @@ import {
   type GetSubscriberStats,
   type GetSubscriberStatsParams,
   type ListSubscribers,
+  type PinSubscriberLocation,
+  type PinSubscriberLocationParams,
   type UpdateSubscriber,
 } from "~/index";
 
@@ -202,6 +205,72 @@ describe("subscriber requests through Kit", () => {
       ""
     );
   });
+
+  const pinnedLocation = {
+    location: {
+      city: "Boise",
+      state_province: "Idaho",
+      country_code: "US",
+      latitude: 43.62,
+      longitude: -116.2,
+      timezone: "America/Denver",
+    },
+  } satisfies PinSubscriberLocationParams;
+
+  it.each([
+    pinnedLocation,
+    { location: { ...pinnedLocation.location, latitude: 0, longitude: 0 } },
+  ] satisfies PinSubscriberLocationParams[])(
+    "pins subscriber location %j",
+    async (body) => {
+      const response = {
+        subscriber: { id: 42, location: body.location },
+      } satisfies PinSubscriberLocation;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+
+      const result = await kit.subscribers.pinLocation(42, body);
+      expectTypeOf(result).toEqualTypeOf<PinSubscriberLocation | null>();
+      expect(result).toEqual(response);
+      expect(await request("POST", "/subscribers/42/location").json()).toEqual(
+        body
+      );
+    }
+  );
+
+  it("returns null when pinning a missing subscriber's location", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
+      status: 404,
+    });
+
+    expect(await kit.subscribers.pinLocation(42, pinnedLocation)).toBeNull();
+    expect(await request("POST", "/subscribers/42/location").json()).toEqual(
+      pinnedLocation
+    );
+    expect(fetchMock.requests()).toHaveLength(1);
+  });
+
+  it.each([401, 422])(
+    "preserves location API errors with status %s",
+    async (status) => {
+      const details = {
+        errors: [
+          status === 422
+            ? "Country code is invalid"
+            : "The access token is invalid",
+        ],
+      };
+      fetchMock.mockResponseOnce(JSON.stringify(details), { status });
+
+      await expect(
+        kit.subscribers.pinLocation(42, pinnedLocation)
+      ).rejects.toMatchObject({
+        name: "ApiError",
+        status,
+        details,
+      } satisfies Partial<ApiError>);
+      expect(fetchMock.requests()).toHaveLength(1);
+    }
+  );
 
   const filterBody: FilterSubscriberBody = {
     all: [
