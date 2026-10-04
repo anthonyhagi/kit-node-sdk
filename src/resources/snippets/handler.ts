@@ -1,8 +1,19 @@
 import type { Kit } from "~/index";
-import type { ListSnippets, ListSnippetsParams } from "./types";
+import type { GetSnippet, ListSnippets, ListSnippetsParams } from "./types";
 
 export class SnippetsHandler {
   constructor(private api: Kit) {}
+
+  /**
+   * Get a snippet's full content and document without an inclusion flag.
+   *
+   * @param id - The snippet to retrieve.
+   * @returns The snippet details, or null when the snippet was not found.
+   * @see {@link https://developers.kit.com/api-reference/snippets/get-a-snippet}
+   */
+  public async get(id: number): Promise<GetSnippet | null> {
+    return await this.api.get<GetSnippet | null>(`/snippets/${id}`);
+  }
 
   /**
    * List reusable email snippets, with optional content and document fields.
