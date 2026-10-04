@@ -18,6 +18,7 @@ import {
   type GetSubscriberStats,
   type GetSubscriberStatsParams,
   type ListSubscribers,
+  type ListSubscribersParams,
   type PinSubscriberLocation,
   type PinSubscriberLocationParams,
   type UpdateSubscriber,
@@ -73,6 +74,53 @@ describe("subscriber requests through Kit", () => {
 
     expect(await kit.subscribers.list()).toEqual(response);
     expect(await request("GET", "/subscribers").text()).toBe("");
+  });
+
+  it.each([
+    { name: "true", params: { slim: true }, query: { slim: "true" } },
+    { name: "false", params: { slim: false }, query: { slim: "false" } },
+    { name: "omitted", params: {}, query: {} },
+    { name: "explicit undefined", params: { slim: undefined }, query: {} },
+  ] satisfies {
+    name: string;
+    params: ListSubscribersParams;
+    query: Record<string, string>;
+  }[])("lists subscribers with slim $name", async ({ params, query }) => {
+    const { fields, ...slimSubscriber } = subscriber;
+    const response = {
+      subscribers: [
+        params.slim ? slimSubscriber : { ...slimSubscriber, fields },
+      ],
+      pagination,
+    } satisfies ListSubscribers;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+
+    const result = await kit.subscribers.list(params);
+    expectTypeOf(result).toEqualTypeOf<ListSubscribers>();
+    expectTypeOf(result.subscribers[0]?.fields).toEqualTypeOf<
+      Record<string, string | null> | undefined
+    >();
+    expect(result).toEqual(response);
+    expect(await request("GET", "/subscribers", query).text()).toBe("");
+  });
+
+  it("combines slim with subscriber list filters and pagination", async () => {
+    const params = {
+      slim: true,
+      status: "inactive",
+      per_page: 25,
+      after: "next+/=",
+    } satisfies ListSubscribersParams;
+    const response = { subscribers: [], pagination } satisfies ListSubscribers;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+
+    expect(await kit.subscribers.list(params)).toEqual(response);
+    request("GET", "/subscribers", {
+      slim: "true",
+      status: "inactive",
+      per_page: "25",
+      after: "next+/=",
+    });
   });
 
   it.each(["after", "before"] as const)(
