@@ -80,6 +80,9 @@ export interface ListBroadcastsParams {
    */
   per_page?: number | undefined;
 
+  /** Omit content, public URL, sending address, template, and subscriber filter. */
+  slim?: boolean | undefined;
+
   /** Filter broadcasts sent after this date (YYYY-MM-DD). */
   sent_after?: string | undefined;
 
@@ -100,6 +103,7 @@ export interface ListBroadcasts {
     preview_text: string | null;
     description: string | null;
     content: string | null;
+    public_url?: string | null | undefined;
     public: boolean;
     published_at: string | null;
     send_at: string | null;
@@ -113,6 +117,18 @@ export interface ListBroadcasts {
     clicks?: BroadcastLinkClick[] | undefined;
     stats?: BroadcastStats | undefined;
   }[];
+  pagination: Pagination;
+}
+
+export interface ListSlimBroadcasts {
+  broadcasts: Omit<
+    ListBroadcasts["broadcasts"][number],
+    | "content"
+    | "public_url"
+    | "email_address"
+    | "email_template"
+    | "subscriber_filter"
+  >[];
   pagination: Pagination;
 }
 
@@ -194,7 +210,10 @@ export interface CreateBroadcast {
   };
 }
 
-export interface GetBroadcastStatsParams extends ListBroadcastsParams {
+export interface GetBroadcastStatsParams extends Omit<
+  ListBroadcastsParams,
+  "slim"
+> {
   /** Filter broadcasts sent after this date (YYYY-MM-DD). */
   sent_after?: string | undefined;
 

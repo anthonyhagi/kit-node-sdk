@@ -71,6 +71,35 @@ if (firstPage.pagination.has_next_page && firstPage.pagination.end_cursor) {
 Keep the same filters on subsequent pages. All filters are optional; calls
 without arguments continue to work. See the [Kit API reference](https://developers.kit.com/api-reference/broadcasts/list-broadcasts).
 
+## Slim broadcast lists
+
+Use `slim: true` when you only need broadcast metadata. Kit omits `content`,
+`public_url`, `email_address`, `email_template`, and `subscriber_filter` for a
+smaller, faster response:
+
+```ts
+const page = await kit.broadcasts.list({ slim: true, per_page: 25 });
+for (const broadcast of page.broadcasts) {
+  console.log(broadcast.id, broadcast.subject);
+}
+```
+
+Literal `slim: true` calls return `ListSlimBroadcasts`. Calls without `slim`, or
+with `slim: false`, return `ListBroadcasts`. A runtime boolean returns a union
+of both types; check for a full-response field before accessing it:
+
+```ts
+const page = await kit.broadcasts.list({ slim: useSlim }); // useSlim: boolean
+for (const broadcast of page.broadcasts) {
+  if ("content" in broadcast) {
+    console.log(broadcast.content);
+  }
+}
+```
+
+Slim responses retain pagination and support the same list filters. See the
+[Kit API reference](https://developers.kit.com/api-reference/broadcasts/list-broadcasts).
+
 ## Broadcast stats pagination
 
 `kit.broadcasts.getAllStats()` returns one page of stats (500 broadcasts by
