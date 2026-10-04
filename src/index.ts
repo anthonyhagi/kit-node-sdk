@@ -366,6 +366,7 @@ export type {
   FilterSubscriberBodyAllTags,
   FilterSubscriberBodyAnyForms,
   FilterSubscriberBodyAnyKitSource,
+  FilterSubscriberInclude,
   FilterSubscriberParams,
   FilterSubscribers,
   GetSubscriber,
