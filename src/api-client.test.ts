@@ -58,6 +58,76 @@ describe("Retry-After", () => {
     await expectRetryAfter(429, " 5 ", 5000);
   });
 
+  it.each([429, 500, 503])(
+    "cancels the discarded %i response before waiting to retry",
+    async (status) => {
+      const cancel = vi.fn();
+      const body = new ReadableStream({ cancel });
+      const response = new Response(body, {
+        status,
+        headers: { "Retry-After": "2" },
+      });
+      fetchMock
+        .mockResolvedValueOnce(response)
+        .mockResponseOnce(JSON.stringify({ success: true }));
+      const api = new ApiClient({
+        baseUrl: "http://localhost",
+        maxRetries: 1,
+        retryDelay: 0,
+        timeoutMs: 100,
+      });
+
+      const result = api.get("/some/route");
+      await vi.advanceTimersByTimeAsync(0);
+      expect(cancel).toHaveBeenCalledOnce();
+      expect(fetchMock.requests()).toHaveLength(1);
+      await vi.advanceTimersByTimeAsync(1999);
+      expect(fetchMock.requests()).toHaveLength(1);
+      await vi.advanceTimersByTimeAsync(1);
+      await expect(result).resolves.toEqual({ success: true });
+      expect(fetchMock.requests()).toHaveLength(2);
+      expect(vi.getTimerCount()).toBe(0);
+    }
+  );
+
+  it("continues retrying when cancellation of the discarded body fails", async () => {
+    const cancel = vi
+      .fn()
+      .mockRejectedValue(new Error("Stream cleanup failed"));
+    fetchMock
+      .mockResolvedValueOnce(
+        new Response(new ReadableStream({ cancel }), { status: 503 })
+      )
+      .mockResponseOnce(JSON.stringify({ success: true }));
+    const api = new ApiClient({
+      baseUrl: "http://localhost",
+      maxRetries: 1,
+      retryDelay: 0,
+    });
+
+    const result = api.get("/some/route");
+    await vi.runAllTimersAsync();
+    await expect(result).resolves.toEqual({ success: true });
+    expect(cancel).toHaveBeenCalledOnce();
+    expect(fetchMock.requests()).toHaveLength(2);
+  });
+
+  it("retries responses with no body", async () => {
+    fetchMock
+      .mockResolvedValueOnce(new Response(null, { status: 503 }))
+      .mockResponseOnce(JSON.stringify({ success: true }));
+    const api = new ApiClient({
+      baseUrl: "http://localhost",
+      maxRetries: 1,
+      retryDelay: 0,
+    });
+
+    const result = api.get("/some/route");
+    await vi.runAllTimersAsync();
+    await expect(result).resolves.toEqual({ success: true });
+    expect(fetchMock.requests()).toHaveLength(2);
+  });
+
   it("honors the server delay even when configured backoff is zero", async () => {
     await expectRetryAfter(429, "2", 2000, 0);
   });
