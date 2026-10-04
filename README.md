@@ -412,7 +412,6 @@ For JavaScript projects, the types are available for IDEs that support TypeScrip
 - `npm run build` - Build the TypeScript code using tsdown
 - `npm run clean` - Remove the dist directory
 - `npm run typecheck` - Run TypeScript type checking
-- `npm run typecheck:readme` - Typecheck the README's TypeScript and JavaScript examples
 - `npm run lint` - Lint code with ESLint
 - `npm run format` - Format code with Prettier
 - `npm run test` - Run the test suite with Vitest
@@ -491,7 +490,6 @@ Before submitting changes:
 npm run lint      # Check for linting issues
 npm run format    # Format code
 npm run typecheck # Verify TypeScript types
-npm run typecheck:readme # Verify documentation examples
 npm run test      # Run test suite
 ```
 

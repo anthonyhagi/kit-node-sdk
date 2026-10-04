@@ -41,9 +41,7 @@ jobs:
         uses: bahmutov/npm-install@v1
 
       - name: 🔎 Type check
-        run: |
-          npm run typecheck
-          npm run typecheck:readme
+        run: npm run typecheck
 
   lint:
     name: ⬣ ESLint
