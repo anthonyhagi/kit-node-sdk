@@ -13,7 +13,7 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 | **`kit.customFields`**   | Additional fields for subscriber profiles and forms                | `list()`, `create()`, `update()`, `bulkCreate()`                                                                            |
 | **`kit.emailTemplates`** | Pre-designed email layouts                                         | `list()`                                                                                                                    |
 | **`kit.forms`**          | Web forms for collecting subscriber information                    | `list()`, `addSubscriber()`, `addSubscriberByEmail()`, `listSubscribers()`                                                  |
-| **`kit.posts`**          | Content published to the creator’s Kit site or sent by email       | `list()`                                                                                                                    |
+| **`kit.posts`**          | Content published to the creator’s Kit site or sent by email       | `list()`, `get()`                                                                                                           |
 | **`kit.purchases`**      | Transaction records for products/services                          | `list()`, `create()`, `get()`                                                                                               |
 | **`kit.segments`**       | Dynamic subscriber groups based on criteria                        | `list()`                                                                                                                    |
 | **`kit.sequenceEmails`** | Individual emails inside automated sequences                       | `list()`, `get()`, `create()`, `update()`, `delete()`                                                                       |
@@ -24,6 +24,24 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 | **`kit.webhooks`**       | HTTP callbacks for real-time notifications                         | `list()`, `create()`                                                                                                        |
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
+
+## Fetching a post
+
+`kit.posts.get(id)` returns the post's full HTML content and publishing metadata.
+No `include_content` flag is needed.
+
+```ts
+const result = await kit.posts.get(6);
+if (result) {
+  console.log(result.post.title, result.post.content, result.post.public_url);
+}
+```
+
+The exported `GetPost` response requires `content`; list items keep it optional.
+Publishing, SEO, and thumbnail metadata retain their nullable types, and
+`product_id` remains optional and nullable. Missing posts return `null`;
+authentication errors throw. See the
+[Kit API reference](https://developers.kit.com/api-reference/posts/get-a-post).
 
 ## Listing posts
 

@@ -280,6 +280,7 @@ export type {
 } from "./resources/forms/types";
 
 export type {
+  GetPost,
   ListPosts,
   ListPostsParams,
   PostListItem,
