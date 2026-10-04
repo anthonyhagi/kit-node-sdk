@@ -285,6 +285,8 @@ export type {
   ListSequenceEmailsParams,
   SequenceEmailListItem,
   SequenceEmailStats,
+  UpdateSequenceEmail,
+  UpdateSequenceEmailParams,
 } from "./resources/sequence-emails/types";
 
 export type {
