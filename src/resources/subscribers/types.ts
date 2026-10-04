@@ -137,11 +137,17 @@ export interface FilterSubscriberBodyAllBase {
   /** Type of filter condition */
   type: "opens" | "clicks" | "sent" | "delivered";
 
-  /** Minimum count (inclusive). */
+  /** Minimum count (exclusive). */
   count_greater_than?: number | undefined;
 
-  /** Maximum count (inclusive). */
+  /** Minimum count (inclusive). */
+  count_greater_than_or_equal?: number | undefined;
+
+  /** Maximum count (exclusive). */
   count_less_than?: number | undefined;
+
+  /** Maximum count (inclusive). */
+  count_less_than_or_equal?: number | undefined;
 
   /** Start date (YYYY-MM-DD). Filters by the event date. */
   after?: string | undefined;
