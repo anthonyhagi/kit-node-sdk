@@ -17,11 +17,50 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 | **`kit.segments`**       | Dynamic subscriber groups based on criteria                        | `list()`                                                                                                                    |
 | **`kit.sequenceEmails`** | Individual emails inside automated sequences                       | `list()`, `get()`, `create()`, `update()`, `delete()`                                                                       |
 | **`kit.sequences`**      | Automated email series                                             | `list()`, `get()`, `create()`, `update()`, `delete()`, `addSubscriberById()`, `addSubscriberByEmail()`, `listSubscribers()` |
+| **`kit.snippets`**       | Reusable email content referenced by Liquid keys                   | `list()`                                                                                                                    |
 | **`kit.subscribers`**    | Individual email recipients                                        | `list()`, `create()`, `get()`, `update()`, `bulkCreate()`, `getTags()`                                                      |
 | **`kit.tags`**           | Labels for categorizing subscribers                                | `list()`, `create()`, `update()`, `bulkCreate()`, `tagSubscriber()`, `listSubscribers()`                                    |
 | **`kit.webhooks`**       | HTTP callbacks for real-time notifications                         | `list()`, `create()`                                                                                                        |
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
+
+## Listing snippets
+
+Use `kit.snippets.list(params)` to discover reusable email content. Each snippet's
+`key` is used in Liquid as `{{ snippet.key }}` in broadcasts and sequence emails.
+
+```ts
+const page = await kit.snippets.list({
+  snippet_type: "inline",
+  archived: false,
+  include_content: true,
+  per_page: 25,
+});
+for (const snippet of page.snippets) {
+  console.log(snippet.key, snippet.content, snippet.document?.value_html);
+}
+if (page.pagination.has_next_page && page.pagination.end_cursor) {
+  const next = await kit.snippets.list({
+    after: page.pagination.end_cursor,
+    snippet_type: "inline",
+    archived: false,
+    include_content: true,
+    per_page: 25,
+  });
+  console.log(next.snippets);
+}
+```
+
+Content and document fields are omitted by default; `include_content: true`
+requests both. `snippet_type` accepts `"inline"` or `"block"`. Archived snippets
+are excluded by default; `archived: true` returns only archived snippets.
+Pagination supports `after`, `before`, `per_page` (default 500, maximum 1000),
+and `include_total_count`. API errors throw.
+
+Exported types are `ListSnippets`, `ListSnippetsParams`, `SnippetListItem`,
+`SnippetDocument`, and `SnippetType`. Document `value` and `value_plain` use
+`unknown` because Kit's schema leaves their nullable structure unspecified.
+See the [Kit API reference](https://developers.kit.com/api-reference/snippets/list-snippets).
 
 ## Deleting a sequence email
 
