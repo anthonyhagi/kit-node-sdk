@@ -1,3 +1,4 @@
+import { ApiError } from "./errors";
 import { delay } from "./utils/helpers";
 
 type HttpMethod =
@@ -222,6 +223,7 @@ export class ApiClient {
 
   private async handleError(resp: Response): Promise<null | never> {
     let detailsString: string;
+    let details: unknown;
 
     // Close the response such that we can read the body multiple times.
     // This is only used if we receive an error AND the body could not
@@ -229,49 +231,62 @@ export class ApiClient {
     const clonedResp = resp.clone();
 
     try {
-      const errorDetails: any = await resp.json();
+      details = await resp.json();
 
       if (
         resp.status >= 400 &&
         resp.status < 500 &&
-        errorDetails &&
-        Array.isArray(errorDetails.errors)
+        typeof details === "object" &&
+        details !== null &&
+        "errors" in details &&
+        Array.isArray(details.errors)
       ) {
-        detailsString = `Errors: ${errorDetails.errors.join(", ")}`;
+        detailsString = `Errors: ${details.errors.join(", ")}`;
       } else {
-        detailsString = JSON.stringify(errorDetails);
+        detailsString = JSON.stringify(details);
       }
     } catch {
       detailsString = await clonedResp.text();
+      details = detailsString;
     }
 
     switch (resp.status) {
       case 401:
-        throw new Error(
-          `Authentication failed: Invalid or expired access token. Status: ${resp.status} - ${detailsString}`
+        throw new ApiError(
+          `Authentication failed: Invalid or expired access token. Status: ${resp.status} - ${detailsString}`,
+          resp.status,
+          details
         );
 
       case 404:
         return null;
 
       case 429:
-        throw new Error(
-          `Rate limit exceeded. Status: ${resp.status} - ${detailsString}`
+        throw new ApiError(
+          `Rate limit exceeded. Status: ${resp.status} - ${detailsString}`,
+          resp.status,
+          details
         );
 
       case 422:
-        throw new Error(
-          `Bad data in request. Status: ${resp.status} - ${detailsString}`
+        throw new ApiError(
+          `Bad data in request. Status: ${resp.status} - ${detailsString}`,
+          resp.status,
+          details
         );
 
       case 500:
-        throw new Error(
-          `Internal server error. Status: ${resp.status} - Details: ${detailsString}`
+        throw new ApiError(
+          `Internal server error. Status: ${resp.status} - Details: ${detailsString}`,
+          resp.status,
+          details
         );
 
       default:
-        throw new Error(
-          `Unknown error. Status: ${resp.status} - Details: ${detailsString}`
+        throw new ApiError(
+          `Unknown error. Status: ${resp.status} - Details: ${detailsString}`,
+          resp.status,
+          details
         );
     }
   }

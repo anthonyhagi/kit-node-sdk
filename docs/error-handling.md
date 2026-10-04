@@ -23,6 +23,14 @@ A 404 response returns `null`. Other non-retryable client errors throw.
 Empty successful response bodies return `{}`. Errors reading or parsing a
 successful response body throw without repeating the request.
 
+HTTP failures throw the exported `ApiError`, an `Error` subclass with a numeric
+`status` and `details` containing the parsed JSON response body or raw text for
+non-JSON bodies. Its message retains the existing human-readable error text.
+Treat `details` as `unknown` and validate its shape before accessing fields.
+Retryable failures expose the final response after exhausting retry attempts.
+Network errors, timeouts, and successful response parsing failures retain their
+original error types. A 404 continues to return `null`.
+
 ## Exponential Backoff
 
 Retries use exponential backoff with jitter to prevent overwhelming servers:
@@ -59,14 +67,20 @@ operation. Timers are cleared when attempts finish or enter retry backoff.
 ## Error Handling Example
 
 ```typescript
+import { ApiError } from "@anthonyhagi/kit-node-sdk";
+
 try {
   const account = await kit.accounts.getCurrentAccount();
   console.log(account);
 } catch (error) {
-  console.error(
-    "API Error:",
-    error instanceof Error ? error.message : String(error)
-  );
+  if (error instanceof ApiError) {
+    console.error("API failure:", error.status, error.message, error.details);
+  } else {
+    console.error(
+      "Request failure:",
+      error instanceof Error ? error.message : String(error)
+    );
+  }
   // Retryable failures throw after exhausting the configured attempts.
   // Client errors and response parsing failures throw without retries.
 }
