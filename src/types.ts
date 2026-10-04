@@ -32,7 +32,7 @@ export interface ClientOptions {
    * - 429 rate limiting responses
    * - Network errors (connection failures, timeouts)
    *
-   * Defaults to 3.
+   * Set to 0 to disable retries. Defaults to 3.
    */
   maxRetries?: number;
 
@@ -46,7 +46,7 @@ export interface ClientOptions {
    *
    * Jitter (±25%) is added to prevent thundering herd issues.
    *
-   * Defaults to 1000 (1 second).
+   * Set to 0 to retry without a delay. Defaults to 1000 (1 second).
    */
   retryDelay?: number;
 }
