@@ -337,6 +337,24 @@ describe("api-client", () => {
     expect(fetchMock.requests()[0]?.method).toBe("PUT");
   });
 
+  it("sends PATCH requests with body, query, and custom headers", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify({ updated: true }));
+    const api = new ApiClient({ baseUrl: "http://localhost" });
+    const body = JSON.stringify({ name: "Updated" });
+    const result = await api.patch<{ updated: boolean }>("/some/route", {
+      body,
+      query: new URLSearchParams({ include: "details" }),
+      headers: { "X-Custom": "test" },
+    });
+    expect(result).toEqual({ updated: true });
+    expect(fetchMock.requests()).toHaveLength(1);
+    const req = fetchMock.requests()[0]!;
+    expect(req.method).toBe("PATCH");
+    expect(req.url).toBe("http://localhost/some/route?include=details");
+    expect(req.headers.get("X-Custom")).toBe("test");
+    expect(await req.text()).toBe(body);
+  });
+
   it("correctly sends a DELETE request using the base url and path", async ({
     expect,
   }) => {

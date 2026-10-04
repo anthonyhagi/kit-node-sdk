@@ -106,6 +106,17 @@ export class ApiClient {
     return await this.request<TResponseType>("PUT", path, options);
   }
 
+  public async patch<TResponseType = unknown>(
+    path: string,
+    options?: {
+      headers?: Record<string, string>;
+      query?: URLSearchParams | undefined;
+      body?: RequestInit["body"];
+    }
+  ) {
+    return await this.request<TResponseType>("PATCH", path, options);
+  }
+
   public async delete<TResponseType = unknown>(
     path: string,
     options?: {

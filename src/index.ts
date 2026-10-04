@@ -410,6 +410,8 @@ export type {
   GetWebhookEndpoint,
   ListWebhookEndpoints,
   ListWebhookEndpointsParams,
+  UpdateWebhookEndpoint,
+  UpdateWebhookEndpointParams,
   WebhookEndpoint,
   WebhookEndpointStatus,
 } from "./resources/webhook-endpoints/types";
