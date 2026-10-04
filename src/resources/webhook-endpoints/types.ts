@@ -13,7 +13,7 @@ export interface ListWebhookEndpointsParams {
   status?: WebhookEndpointStatus | undefined;
 }
 
-/** Endpoint metadata; list responses never include the signing secret. */
+/** Endpoint metadata; list and get responses never include the signing secret. */
 export interface WebhookEndpoint {
   id: number;
   name: string;
@@ -31,4 +31,8 @@ export interface WebhookEndpoint {
 export interface ListWebhookEndpoints {
   webhook_endpoints: WebhookEndpoint[];
   pagination: Pagination;
+}
+
+export interface GetWebhookEndpoint {
+  webhook_endpoint: WebhookEndpoint;
 }

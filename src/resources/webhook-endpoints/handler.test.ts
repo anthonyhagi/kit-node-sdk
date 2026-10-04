@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
 import {
   Kit,
+  type GetWebhookEndpoint,
   type ListWebhookEndpoints,
   type ListWebhookEndpointsParams,
   type WebhookEndpoint,
@@ -214,5 +215,72 @@ describe("webhook endpoint list requests through Kit", () => {
       "Authentication failed"
     );
     request();
+  });
+});
+
+describe("webhook endpoint get requests through Kit", () => {
+  let kit: Kit;
+  beforeEach(() => {
+    fetchMock.resetMocks();
+    kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
+  });
+
+  it("retrieves endpoint metadata without a signing secret, query, or body", async () => {
+    const response = {
+      webhook_endpoint: endpoint,
+    } satisfies GetWebhookEndpoint;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const result = await kit.webhookEndpoints.get(2);
+    expectTypeOf(result).toEqualTypeOf<GetWebhookEndpoint | null>();
+    expectTypeOf(result!.webhook_endpoint).toEqualTypeOf<WebhookEndpoint>();
+    expectTypeOf<"secret">().not.toExtend<
+      keyof GetWebhookEndpoint["webhook_endpoint"]
+    >();
+    expect(result).toEqual(response);
+    expect(result!.webhook_endpoint).not.toHaveProperty("secret");
+    expect(fetchMock.requests()).toHaveLength(1);
+    const req = fetchMock.requests()[0]!;
+    expect(req.method).toBe("GET");
+    expect(req.url).toBe("https://api.kit.com/v4/webhook_endpoints/2");
+    expect(req.headers.get("X-Kit-Api-Key")).toBe("test-key");
+    expect(await req.text()).toBe("");
+  });
+
+  it("preserves disabled status, opaque app metadata, and secret expiry", async () => {
+    const response = {
+      webhook_endpoint: {
+        ...endpoint,
+        status: "disabled",
+        source: "app",
+        created_by_app: { id: 42, name: "Integration" },
+        description: "",
+        events: ["subscriber.created", "future.event"],
+        previous_secret_expires_at: "2026-10-05T12:00:00Z",
+      },
+    } satisfies GetWebhookEndpoint;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.webhookEndpoints.get(2)).toEqual(response);
+  });
+
+  it("returns null for missing or inaccessible endpoints", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
+      status: 404,
+    });
+    expect(await kit.webhookEndpoints.get(404)).toBeNull();
+    expect(fetchMock.requests()[0]!.url).toBe(
+      "https://api.kit.com/v4/webhook_endpoints/404"
+    );
+    expect(await fetchMock.requests()[0]!.text()).toBe("");
+  });
+
+  it("surfaces authentication errors", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({ errors: ["The access token is invalid"] }),
+      { status: 401 }
+    );
+    await expect(kit.webhookEndpoints.get(2)).rejects.toThrow(
+      "Authentication failed"
+    );
+    expect(fetchMock.requests()).toHaveLength(1);
   });
 });
