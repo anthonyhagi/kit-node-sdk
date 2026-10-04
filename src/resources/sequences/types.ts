@@ -45,7 +45,7 @@ export interface GetSequence {
   };
 }
 
-export interface ListSequencesParams {
+export interface ListSequencesParams extends GetSequenceParams {
   /**
    * Pass in the string from the previous request to move
    * the cursor. This can be found in the following field:
@@ -79,14 +79,20 @@ export interface ListSequencesParams {
   per_page?: number | undefined;
 }
 
+/** List responses require core metadata; additional sequence details are optional. */
+export type SequenceListItem = Pick<
+  GetSequence["sequence"],
+  "id" | "name" | "hold" | "repeat" | "created_at"
+> &
+  Partial<
+    Omit<
+      GetSequence["sequence"],
+      "id" | "name" | "hold" | "repeat" | "created_at"
+    >
+  >;
+
 export interface ListSequences {
-  sequences: {
-    id: number;
-    name: string;
-    hold: boolean;
-    repeat: boolean;
-    created_at: string;
-  }[];
+  sequences: SequenceListItem[];
   pagination: Pagination;
 }
 

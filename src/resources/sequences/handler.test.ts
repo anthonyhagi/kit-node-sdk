@@ -5,6 +5,7 @@ import {
   type GetSequence,
   type ListSequences,
   type ListSequenceSubscribers,
+  type SequenceListItem,
   type SequenceStats,
 } from "~/index";
 
@@ -168,6 +169,101 @@ describe("sequence requests through Kit", () => {
       });
     }
   );
+
+  it.each(["after", "before"] as const)(
+    "combines included stats with %s pagination and exposes sequence settings",
+    async (cursor) => {
+      const response = {
+        sequences: [
+          {
+            ...details,
+            stats: { unsubscribers: 2, recipients: 10, open_rate: 0.5 },
+          },
+        ],
+        pagination: { ...pagination, total_count: 1 },
+      } satisfies ListSequences;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      const result = await kit.sequences.list({
+        [cursor]: "next+/=",
+        per_page: 25,
+        include_total_count: true,
+        include: "stats",
+      });
+      expect(result).toEqual(response);
+      expectTypeOf(result.sequences[0]!).toEqualTypeOf<SequenceListItem>();
+      expectTypeOf(result.sequences[0]!.stats).toEqualTypeOf<
+        SequenceStats | undefined
+      >();
+      expectTypeOf(result.sequences[0]!.email_address).toEqualTypeOf<
+        string | null | undefined
+      >();
+      expectTypeOf(result.sequences[0]!.send_days).toEqualTypeOf<
+        string[] | undefined
+      >();
+      expect(
+        await request("GET", "/sequences", {
+          [cursor]: "next+/=",
+          per_page: "25",
+          include_total_count: "true",
+          include: "stats",
+        }).text()
+      ).toBe("");
+    }
+  );
+
+  it("supports stats with null delivery metrics and explicit false total counts", async () => {
+    const response = {
+      sequences: [
+        {
+          ...sequence,
+          stats: {
+            unsubscribers: 0,
+            recipients: null,
+            open_rate: null,
+            click_rate: null,
+          },
+        },
+      ],
+      pagination,
+    } satisfies ListSequences;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const result = await kit.sequences.list({
+      include: "stats",
+      include_total_count: false,
+    });
+    expect(result).toEqual(response);
+    expectTypeOf(result.sequences[0]!.stats?.open_rate).toEqualTypeOf<
+      number | null | undefined
+    >();
+    request("GET", "/sequences", {
+      include: "stats",
+      include_total_count: "false",
+    });
+  });
+
+  it("retains stats inclusion when requesting the second sequence page", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({ sequences: [details], pagination })
+    );
+    const response = {
+      sequences: [{ ...sequence, id: 8 }],
+      pagination: { ...pagination, has_next_page: false },
+    } satisfies ListSequences;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const first = await kit.sequences.list({ include: "stats", per_page: 25 });
+    const second = await kit.sequences.list({
+      include: "stats",
+      per_page: 25,
+      after: first.pagination.end_cursor!,
+    });
+    expect(second).toEqual(response);
+    expect(
+      Object.fromEntries(new URL(fetchMock.requests()[1]!.url).searchParams)
+    ).toEqual({ include: "stats", per_page: "25", after: "next+/=" });
+    expectTypeOf(second.sequences[0]!.subscriber_count).toEqualTypeOf<
+      number | undefined
+    >();
+  });
 
   it("lists sequence subscribers without optional filters, preserving nullable names and emails", async () => {
     const response = {

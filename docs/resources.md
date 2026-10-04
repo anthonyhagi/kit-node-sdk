@@ -22,6 +22,33 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
 
+## Listing sequences with stats
+
+Request `include: "stats"` with `kit.sequences.list()` to fetch performance data
+for a page of sequences:
+
+```ts
+const first = await kit.sequences.list({ include: "stats", per_page: 25 });
+for (const sequence of first.sequences) {
+  console.log(sequence.name, sequence.stats?.open_rate);
+}
+if (first.pagination.has_next_page && first.pagination.end_cursor) {
+  const next = await kit.sequences.list({
+    include: "stats",
+    per_page: 25,
+    after: first.pagination.end_cursor,
+  });
+  console.log(next.sequences);
+}
+```
+
+List items use the exported `SequenceListItem` type. Core metadata (`id`, `name`,
+`hold`, `repeat`, `created_at`) remains required; additional settings, schedule,
+exclusions, counts, and stats are optional. Stats reuse `SequenceStats`, including
+nullable delivery metrics. Keep `include: "stats"` on subsequent page requests.
+Existing calls without stats continue to work. See the
+[Kit API reference](https://developers.kit.com/api-reference/sequences/list-sequences).
+
 ## Fetching sequence details
 
 Use `kit.sequences.get(id)` to fetch a sequence's schedule, sending address and

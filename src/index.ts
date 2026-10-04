@@ -274,6 +274,7 @@ export type {
   ListSequencesParams,
   ListSequenceSubscribers,
   ListSequenceSubscribersParams,
+  SequenceListItem,
   SequenceStats,
 } from "./resources/sequences/types";
 

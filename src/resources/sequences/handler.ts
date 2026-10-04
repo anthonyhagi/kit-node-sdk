@@ -21,19 +21,21 @@ export class SequencesHandler {
   /**
    * Get a paginated list of all Sequences.
    *
-   * @param params - Optional parameters to filter by.
+   * @param params - Optional pagination and stats inclusion parameters.
    *
    * @see {@link https://developers.kit.com/api-reference/sequences/list-sequences}
    *
    * @returns The paginated list of Sequences.
    */
   public async list(params?: ListSequencesParams): Promise<ListSequences> {
-    const { after, before, include_total_count, per_page } = params || {};
+    const { after, before, include, include_total_count, per_page } =
+      params || {};
 
     const query = new URLSearchParams({
       ...(after && { after }),
       ...(before && { before }),
-      ...(include_total_count && {
+      ...(include && { include }),
+      ...(include_total_count !== undefined && {
         include_total_count: String(include_total_count),
       }),
       ...(per_page && { per_page: String(per_page) }),
