@@ -1,8 +1,36 @@
 import type { Kit } from "~/index";
-import type { ListSequenceEmails, ListSequenceEmailsParams } from "./types";
+import type {
+  GetSequenceEmail,
+  GetSequenceEmailParams,
+  ListSequenceEmails,
+  ListSequenceEmailsParams,
+} from "./types";
 
 export class SequenceEmailsHandler {
   constructor(private api: Kit) {}
+
+  /**
+   * Get an email's full content, timing, and publish state, with optional stats.
+   *
+   * @param sequenceId - The sequence containing the email.
+   * @param emailId - The email to retrieve.
+   * @param params - Optional stats inclusion.
+   * @returns The email details, or null when the sequence or email was not found.
+   * @see {@link https://developers.kit.com/api-reference/sequence-emails/get-a-sequence-email}
+   */
+  public async get(
+    sequenceId: number,
+    emailId: number,
+    params?: GetSequenceEmailParams
+  ): Promise<GetSequenceEmail | null> {
+    const query = new URLSearchParams({
+      ...(params?.include && { include: params.include }),
+    });
+    return await this.api.get<GetSequenceEmail | null>(
+      `/sequences/${sequenceId}/emails/${emailId}`,
+      { query }
+    );
+  }
 
   /**
    * List a sequence's emails in position order, with optional content and stats.
