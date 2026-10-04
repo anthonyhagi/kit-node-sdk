@@ -4,6 +4,7 @@ import {
   type CreateSubscriber,
   type FilterSubscriberBody,
   type FilterSubscriberBodyAllCustomField,
+  type FilterSubscriberBodyAllLocation,
   type FilterSubscriberBodyAllTags,
   type FilterSubscriberParams,
   type FilterSubscribers,
@@ -340,6 +341,54 @@ describe("subscriber requests through Kit", () => {
       expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
     }
   );
+
+  const locationCondition = {
+    type: "location",
+    latitude: -34.9285,
+    longitude: 138.6007,
+    radius: 25,
+  } satisfies FilterSubscriberBodyAllLocation;
+
+  it.each([
+    { name: "location alone", body: { all: [locationCondition] } },
+    {
+      name: "location combined with engagement",
+      body: {
+        all: [locationCondition, { type: "opens", count_greater_than: 5 }],
+      },
+    },
+    {
+      name: "nearest location first",
+      body: { all: [locationCondition], sort_field: "location__distance" },
+    },
+    {
+      name: "farthest location first",
+      body: {
+        all: [locationCondition],
+        sort_field: "location__distance",
+        sort_order: "desc",
+      },
+    },
+  ] satisfies { name: string; body: FilterSubscriberBody }[])(
+    "filters by $name",
+    async ({ body }) => {
+      const response = { subscribers: [], pagination };
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+
+      expect(await kit.subscribers.filter(body)).toEqual(response);
+      expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
+    }
+  );
+
+  it("preserves zero coordinates in location conditions", async () => {
+    const body = {
+      all: [{ type: "location", latitude: 0, longitude: 0, radius: 10 }],
+    } satisfies FilterSubscriberBody;
+    fetchMock.mockResponseOnce(JSON.stringify({ subscribers: [], pagination }));
+
+    await kit.subscribers.filter(body);
+    expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
+  });
 
   const customFieldCondition = {
     type: "custom_field",
