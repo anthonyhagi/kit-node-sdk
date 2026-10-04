@@ -6,24 +6,61 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 
 ## Available Resources
 
-| Resource                 | Description                                                        | Key Methods                                                                                                                 |
-| ------------------------ | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| **`kit.accounts`**       | Account and user information, creator profiles, email/growth stats | `getCurrentAccount()`, `getEmailStats()`, `getGrowthStats()`                                                                |
-| **`kit.broadcasts`**     | One-off emails sent to subscribers                                 | `list()`, `create()`, `update()`, `getStats()`                                                                              |
-| **`kit.customFields`**   | Additional fields for subscriber profiles and forms                | `list()`, `create()`, `update()`, `bulkCreate()`                                                                            |
-| **`kit.emailTemplates`** | Pre-designed email layouts                                         | `list()`                                                                                                                    |
-| **`kit.forms`**          | Web forms for collecting subscriber information                    | `list()`, `addSubscriber()`, `addSubscriberByEmail()`, `listSubscribers()`                                                  |
-| **`kit.posts`**          | Content published to the creator’s Kit site or sent by email       | `list()`, `get()`                                                                                                           |
-| **`kit.purchases`**      | Transaction records for products/services                          | `list()`, `create()`, `get()`                                                                                               |
-| **`kit.segments`**       | Dynamic subscriber groups based on criteria                        | `list()`                                                                                                                    |
-| **`kit.sequenceEmails`** | Individual emails inside automated sequences                       | `list()`, `get()`, `create()`, `update()`, `delete()`                                                                       |
-| **`kit.sequences`**      | Automated email series                                             | `list()`, `get()`, `create()`, `update()`, `delete()`, `addSubscriberById()`, `addSubscriberByEmail()`, `listSubscribers()` |
-| **`kit.snippets`**       | Reusable email content referenced by Liquid keys                   | `list()`, `get()`, `create()`, `update()`                                                                                   |
-| **`kit.subscribers`**    | Individual email recipients                                        | `list()`, `create()`, `get()`, `update()`, `bulkCreate()`, `getTags()`                                                      |
-| **`kit.tags`**           | Labels for categorizing subscribers                                | `list()`, `create()`, `update()`, `bulkCreate()`, `tagSubscriber()`, `listSubscribers()`                                    |
-| **`kit.webhooks`**       | HTTP callbacks for real-time notifications                         | `list()`, `create()`                                                                                                        |
+| Resource                   | Description                                                        | Key Methods                                                                                                                 |
+| -------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| **`kit.accounts`**         | Account and user information, creator profiles, email/growth stats | `getCurrentAccount()`, `getEmailStats()`, `getGrowthStats()`                                                                |
+| **`kit.broadcasts`**       | One-off emails sent to subscribers                                 | `list()`, `create()`, `update()`, `getStats()`                                                                              |
+| **`kit.customFields`**     | Additional fields for subscriber profiles and forms                | `list()`, `create()`, `update()`, `bulkCreate()`                                                                            |
+| **`kit.emailTemplates`**   | Pre-designed email layouts                                         | `list()`                                                                                                                    |
+| **`kit.forms`**            | Web forms for collecting subscriber information                    | `list()`, `addSubscriber()`, `addSubscriberByEmail()`, `listSubscribers()`                                                  |
+| **`kit.posts`**            | Content published to the creator’s Kit site or sent by email       | `list()`, `get()`                                                                                                           |
+| **`kit.purchases`**        | Transaction records for products/services                          | `list()`, `create()`, `get()`                                                                                               |
+| **`kit.segments`**         | Dynamic subscriber groups based on criteria                        | `list()`                                                                                                                    |
+| **`kit.sequenceEmails`**   | Individual emails inside automated sequences                       | `list()`, `get()`, `create()`, `update()`, `delete()`                                                                       |
+| **`kit.sequences`**        | Automated email series                                             | `list()`, `get()`, `create()`, `update()`, `delete()`, `addSubscriberById()`, `addSubscriberByEmail()`, `listSubscribers()` |
+| **`kit.snippets`**         | Reusable email content referenced by Liquid keys                   | `list()`, `get()`, `create()`, `update()`                                                                                   |
+| **`kit.subscribers`**      | Individual email recipients                                        | `list()`, `create()`, `get()`, `update()`, `bulkCreate()`, `getTags()`                                                      |
+| **`kit.tags`**             | Labels for categorizing subscribers                                | `list()`, `create()`, `update()`, `bulkCreate()`, `tagSubscriber()`, `listSubscribers()`                                    |
+| **`kit.webhookEndpoints`** | Webhook endpoints with multiple events and signed deliveries       | `list()`                                                                                                                    |
+| **`kit.webhooks`**         | HTTP callbacks for real-time notifications                         | `list()`, `create()`                                                                                                        |
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
+
+## Listing webhook endpoints
+
+Use `kit.webhookEndpoints.list(params)` to discover Kit's current webhook
+endpoints. These subscribe to multiple event types and receive signed,
+automatically retried deliveries. `kit.webhooks` continues to expose the legacy
+webhooks resource.
+
+```ts
+const page = await kit.webhookEndpoints.list({
+  status: "active",
+  include_total_count: true,
+  per_page: 25,
+});
+for (const endpoint of page.webhook_endpoints) {
+  console.log(endpoint.name, endpoint.url, endpoint.events);
+}
+if (page.pagination.has_next_page && page.pagination.end_cursor) {
+  const next = await kit.webhookEndpoints.list({
+    after: page.pagination.end_cursor,
+    status: "active",
+    per_page: 25,
+  });
+  console.log(next.webhook_endpoints);
+}
+```
+
+The optional status filter accepts `"active"` or `"disabled"`. Pagination supports
+`after`, `before`, `per_page` (default 500, maximum 1000), and
+`include_total_count`. List responses contain endpoint metadata and omit signing
+secrets. `previous_secret_expires_at` can be null. `created_by_app` uses `unknown`
+because Kit leaves its nullable structure unspecified. API errors throw.
+
+Exported types are `ListWebhookEndpoints`, `ListWebhookEndpointsParams`,
+`WebhookEndpoint`, and `WebhookEndpointStatus`. See the
+[Kit API reference](https://developers.kit.com/api-reference/webhooks/list-webhook-endpoints).
 
 ## Fetching a post
 
