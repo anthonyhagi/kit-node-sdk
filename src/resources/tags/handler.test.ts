@@ -160,22 +160,16 @@ describe("tag requests through Kit", () => {
       type: "synchronous",
       ...response,
     });
-    const req = singleRequest();
-    expect(req.method).toBe("POST");
+    const req = request("POST", "/bulk/tags");
     expect(req.headers.get("Authorization")).toBe("Bearer oauth-token");
     expect(await req.json()).toEqual(body);
   });
 
-  // Known bug: bulkCreate targets /bulk/tags/subscribers. Correct separately
-  // and remove .fails; the API endpoint is /bulk/tags.
-  it.fails(
-    "bulk creates tags at the documented /bulk/tags endpoint",
-    async () => {
-      fetchMock.mockResponseOnce(JSON.stringify({ tags: [tag], failures: [] }));
-      await kit.tags.bulkCreate({ tags: [{ name: "Newsletter" }] });
-      request("POST", "/bulk/tags");
-    }
-  );
+  it("bulk creates tags at the documented /bulk/tags endpoint", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify({ tags: [tag], failures: [] }));
+    await kit.tags.bulkCreate({ tags: [{ name: "Newsletter" }] });
+    request("POST", "/bulk/tags");
+  });
 
   it("bulk creates tags asynchronously and preserves the callback", async () => {
     const body = {
@@ -184,7 +178,7 @@ describe("tag requests through Kit", () => {
     };
     fetchMock.mockResponseOnce("{}", { status: 202 });
     expect(await kit.tags.bulkCreate(body)).toEqual({ type: "asynchronous" });
-    expect(await singleRequest().json()).toEqual(body);
+    expect(await request("POST", "/bulk/tags").json()).toEqual(body);
   });
 
   it("bulk tags subscribers and preserves synchronous results and failures", async () => {
