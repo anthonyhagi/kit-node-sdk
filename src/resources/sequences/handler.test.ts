@@ -1,9 +1,11 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
 import {
   Kit,
   type AddSubscriberToSequence,
+  type GetSequence,
   type ListSequences,
   type ListSequenceSubscribers,
+  type SequenceStats,
 } from "~/index";
 
 const sequence = {
@@ -57,6 +59,94 @@ describe("sequence requests through Kit", () => {
     fetchMock.mockResponseOnce(JSON.stringify(response));
     expect(await kit.sequences.list()).toEqual(response);
     expect(await request("GET", "/sequences").text()).toBe("");
+  });
+
+  const details = {
+    ...sequence,
+    updated_at: "2026-02-01T00:00:00Z",
+    email_address: null,
+    email_template_id: null,
+    send_days: ["monday", "wednesday"],
+    send_hour: 11,
+    time_zone: "America/New_York",
+    active: true,
+    exclude_subscriber_sources: [
+      { type: "tag", ids: [3] },
+      { type: "sequence", ids: [30] },
+    ],
+    email_count: 2,
+    subscriber_count: 10,
+  } satisfies GetSequence["sequence"];
+
+  it("fetches full sequence details without requesting stats", async () => {
+    const response = { sequence: details } satisfies GetSequence;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const result = await kit.sequences.get(7);
+    expectTypeOf(result).toEqualTypeOf<GetSequence | null>();
+    expectTypeOf(result!.sequence.email_address).toEqualTypeOf<string | null>();
+    expectTypeOf(result!.sequence.email_template_id).toEqualTypeOf<
+      number | null
+    >();
+    expectTypeOf(result!.sequence.stats).toEqualTypeOf<
+      SequenceStats | undefined
+    >();
+    expect(result).toEqual(response);
+    expect(await request("GET", "/sequences/7").text()).toBe("");
+  });
+
+  it.each([false, true])(
+    "requests stats with nullable delivery data: %s",
+    async (empty) => {
+      const metric = empty ? null : 5;
+      const stats = {
+        unsubscribers: 2,
+        recipients: metric,
+        opens: metric,
+        clicks: metric,
+        email_unsubscribes: metric,
+        bounces: metric,
+        complaints: metric,
+        open_rate: empty ? null : 0.5,
+        click_rate: empty ? null : 0.25,
+        click_to_open_rate: empty ? null : 0.5,
+        unsubscribe_rate: empty ? null : 0.01,
+        bounce_rate: empty ? null : 0.02,
+        complaint_rate: empty ? null : 0.001,
+      } satisfies SequenceStats;
+      const response = {
+        sequence: {
+          ...details,
+          email_address: "hello@example.com",
+          email_template_id: 6,
+          stats,
+        },
+      } satisfies GetSequence;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      const result = await kit.sequences.get(7, { include: "stats" });
+      expect(result).toEqual(response);
+      expectTypeOf(result!.sequence.stats?.open_rate).toEqualTypeOf<
+        number | null | undefined
+      >();
+      expect(
+        await request("GET", "/sequences/7", { include: "stats" }).text()
+      ).toBe("");
+    }
+  );
+
+  it("handles omitted counts and stats with an empty options object", async () => {
+    const { email_count, subscriber_count, ...withoutCounts } = details;
+    const response = { sequence: withoutCounts } satisfies GetSequence;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.sequences.get(7, {})).toEqual(response);
+    request("GET", "/sequences/7");
+  });
+
+  it("returns null for a missing sequence", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
+      status: 404,
+    });
+    expect(await kit.sequences.get(404, { include: "stats" })).toBeNull();
+    request("GET", "/sequences/404", { include: "stats" });
   });
 
   it.each(["after", "before"] as const)(

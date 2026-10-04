@@ -3,6 +3,8 @@ import { toDateString } from "~/utils/date";
 import type {
   AddSubscriberByEmailParams,
   AddSubscriberToSequence,
+  GetSequence,
+  GetSequenceParams,
   ListSequences,
   ListSequencesParams,
   ListSequenceSubscribers,
@@ -38,6 +40,26 @@ export class SequencesHandler {
     });
 
     return await this.api.get<ListSequences>("/sequences", { query });
+  }
+
+  /**
+   * Fetch a sequence's settings, schedule, and optional deliverability stats.
+   *
+   * @param id - The unique ID of the sequence.
+   * @param params - Optional data to include in the response.
+   * @returns The sequence details, or null if the sequence was not found.
+   * @see {@link https://developers.kit.com/api-reference/sequences/get-a-sequence}
+   */
+  public async get(
+    id: number,
+    params?: GetSequenceParams
+  ): Promise<GetSequence | null> {
+    const query = new URLSearchParams({
+      ...(params?.include && { include: params.include }),
+    });
+    return await this.api.get<GetSequence | null>(`/sequences/${id}`, {
+      query,
+    });
   }
 
   /**
