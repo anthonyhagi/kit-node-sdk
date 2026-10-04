@@ -31,7 +31,15 @@ export class BroadcastsHandler {
    * @returns the paginated list of broadcasts.
    */
   public async list(params?: ListBroadcastsParams): Promise<ListBroadcasts> {
-    const { after, before, include_total_count, per_page } = params || {};
+    const {
+      after,
+      before,
+      include_total_count,
+      per_page,
+      sent_after,
+      sent_before,
+      status,
+    } = params || {};
 
     const query = new URLSearchParams({
       ...(after && { after }),
@@ -40,6 +48,9 @@ export class BroadcastsHandler {
         include_total_count: String(include_total_count),
       }),
       ...(per_page && { per_page: String(per_page) }),
+      ...(sent_after && { sent_after }),
+      ...(sent_before && { sent_before }),
+      ...(status && { status }),
     });
 
     return await this.api.get<ListBroadcasts>("/broadcasts", { query });
