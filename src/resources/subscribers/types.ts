@@ -105,7 +105,7 @@ export interface FilterSubscriberParams {
 }
 
 export interface FilterSubscriberBodyAnyBroadcast {
-  type: "broadcast";
+  type: "broadcasts";
   /** Array of broadcast IDs. Subscriber must match ANY of these. */
   ids: number[];
 }

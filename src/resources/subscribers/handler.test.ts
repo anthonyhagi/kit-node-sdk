@@ -156,6 +156,23 @@ describe("subscriber requests through Kit", () => {
     );
   });
 
+  it("filters engagement by broadcast IDs using the API's plural discriminator", async () => {
+    const body: FilterSubscriberBody = {
+      all: [
+        {
+          type: "clicks",
+          count_greater_than: 2,
+          any: [{ type: "broadcasts", ids: [7, 8] }],
+        },
+      ],
+    };
+    const response = { subscribers: [], pagination };
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+
+    expect(await kit.subscribers.filter(body)).toEqual(response);
+    expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
+  });
+
   it.each(["after", "before"] as const)(
     "paginates filter results with %s",
     async (cursor) => {
