@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
-import { Kit, type ListPosts, type PostListItem } from "~/index";
+import { Kit, type GetPost, type ListPosts, type PostListItem } from "~/index";
 
 const draft = {
   id: 5,
@@ -187,5 +187,92 @@ describe("post list requests through Kit", () => {
     );
     await expect(kit.posts.list()).rejects.toThrow("Authentication failed");
     request();
+  });
+});
+
+describe("post get requests through Kit", () => {
+  let kit: Kit;
+  beforeEach(() => {
+    fetchMock.resetMocks();
+    kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
+  });
+
+  it("retrieves full HTML and publishing metadata without a content flag", async () => {
+    const response = {
+      post: {
+        ...draft,
+        id: 6,
+        publication_id: 21,
+        title: "Newsletter",
+        status: "published",
+        slug: "newsletter",
+        published_at: "2026-09-28T09:51:41Z",
+        public_url: "https://example.kit.com/posts/newsletter",
+        content: "<p>Newsletter HTML</p>",
+        product_id: 2,
+      },
+    } satisfies GetPost;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const result = await kit.posts.get(6);
+    expectTypeOf(result).toEqualTypeOf<GetPost | null>();
+    expectTypeOf(result!.post.content).toEqualTypeOf<string>();
+    expectTypeOf(result!.post.product_id).toEqualTypeOf<
+      number | null | undefined
+    >();
+    expectTypeOf<typeof draft>().not.toExtend<GetPost["post"]>();
+    expect(result).toEqual(response);
+    expect(fetchMock.requests()).toHaveLength(1);
+    const req = fetchMock.requests()[0]!;
+    expect(req.method).toBe("GET");
+    expect(req.url).toBe("https://api.kit.com/v4/posts/6");
+    expect(req.headers.get("X-Kit-Api-Key")).toBe("test-key");
+    expect(await req.text()).toBe("");
+  });
+
+  it("preserves draft metadata and empty content without a product field", async () => {
+    const response = { post: { ...draft, content: "" } } satisfies GetPost;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const result = await kit.posts.get(5);
+    expect(result).toEqual(response);
+    expect(result!.post).not.toHaveProperty("product_id");
+  });
+
+  it("preserves paid metadata, SEO fields, thumbnails, and nullable product IDs", async () => {
+    const response = {
+      post: {
+        ...draft,
+        status: "scheduled",
+        content: "<p>Paid post</p>",
+        description: "Description",
+        meta_description: "SEO description",
+        thumbnail_alt: "Cover",
+        thumbnail_url: "https://example.com/cover.png",
+        sent_at: "2026-09-29T09:51:41Z",
+        is_paid: true,
+        product_id: null,
+      },
+    } satisfies GetPost;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.posts.get(5)).toEqual(response);
+  });
+
+  it("returns null for missing posts", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
+      status: 404,
+    });
+    expect(await kit.posts.get(404)).toBeNull();
+    expect(fetchMock.requests()[0]!.url).toBe(
+      "https://api.kit.com/v4/posts/404"
+    );
+    expect(await fetchMock.requests()[0]!.text()).toBe("");
+  });
+
+  it("surfaces authentication errors", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({ errors: ["The access token is invalid"] }),
+      { status: 401 }
+    );
+    await expect(kit.posts.get(6)).rejects.toThrow("Authentication failed");
+    expect(fetchMock.requests()).toHaveLength(1);
   });
 });

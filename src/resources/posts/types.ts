@@ -38,3 +38,10 @@ export interface ListPosts {
   posts: PostListItem[];
   pagination: Pagination;
 }
+
+export interface GetPost {
+  post: Omit<PostListItem, "content"> & {
+    /** Single-post reads always include HTML content. */
+    content: string;
+  };
+}
