@@ -14,6 +14,20 @@ export class SequenceEmailsHandler {
   constructor(private api: Kit) {}
 
   /**
+   * Permanently delete an email; queued subscribers skip to the next email.
+   *
+   * @param sequenceId - The sequence containing the email.
+   * @param emailId - The email to delete.
+   * @returns An empty object on success, or null when the sequence or email was not found.
+   * @see {@link https://developers.kit.com/api-reference/sequence-emails/delete-a-sequence-email}
+   */
+  public async delete(sequenceId: number, emailId: number): Promise<{} | null> {
+    return await this.api.delete<{} | null>(
+      `/sequences/${sequenceId}/emails/${emailId}`
+    );
+  }
+
+  /**
    * Update a sequence email, changing only the supplied fields.
    *
    * @param sequenceId - The sequence containing the email.
