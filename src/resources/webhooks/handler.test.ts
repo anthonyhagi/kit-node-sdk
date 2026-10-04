@@ -126,6 +126,37 @@ describe("webhook requests through Kit", () => {
     }
   );
 
+  it.each([
+    {
+      label: "URL",
+      event: {
+        name: "link_click",
+        initiator_value:
+          "https://example.com/article?topic=kit&source=email%2Bweb",
+      },
+    },
+    {
+      label: "null",
+      event: { name: "subscriber_activate", initiator_value: null },
+    },
+    { label: "omitted", event: { name: "subscriber_activate" } },
+  ])(
+    "preserves $label initiator values in list responses",
+    async ({ event }) => {
+      const response = {
+        webhooks: [{ id: 1, account_id: 42, event, target_url: targetUrl }],
+        pagination,
+      } satisfies ListWebhooks;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      const result = await kit.webhooks.list();
+      expect(result).toEqual(response);
+      expectTypeOf(result.webhooks[0]!.event.initiator_value).toEqualTypeOf<
+        string | null | undefined
+      >();
+      expect(await request("GET", "/webhooks").text()).toBe("");
+    }
+  );
+
   it.each(["after", "before"] as const)(
     "encodes the %s cursor and pagination options",
     async (cursor) => {

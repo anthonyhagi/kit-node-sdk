@@ -44,7 +44,8 @@ export interface ListWebhooks {
       form_id?: number | null | undefined;
       sequence_id?: number | undefined;
       product_id?: number | undefined;
-      initiator_value?: number | undefined;
+      /** Link URL for link-click subscriptions, otherwise null or omitted. */
+      initiator_value?: string | null | undefined;
     };
     target_url: string;
   }[];
