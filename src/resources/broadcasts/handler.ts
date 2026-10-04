@@ -6,6 +6,7 @@ import type {
   GetBroadcastStats,
   GetBroadcastStatsParams,
   GetLinkClicks,
+  GetLinkClicksParams,
   GetSingleBroadcastStats,
   ListBroadcasts,
   ListBroadcastsParams,
@@ -149,19 +150,38 @@ export class BroadcastsHandler {
   }
 
   /**
-   * Get the specific number of link clicks for a Broadcast.
+   * Get a page of tracked links and their click performance for a broadcast.
    *
    * @param id - The specific Broadcast we are looking at.
+   * @param params - Optional pagination parameters for the list of links.
    *
    * @see {@link https://developers.kit.com/api-reference/broadcasts/get-link-clicks-for-a-broadcast}
    *
-   * @returns the broadcast link clicks in an array. Otherwise, `null`
+   * @returns the broadcast link clicks with pagination. Otherwise, `null`
    * if the broadcast cannot be found.
    */
-  public async getLinkClicksById(id: number): Promise<GetLinkClicks | null> {
+  public async getLinkClicksById(
+    id: number,
+    params?: GetLinkClicksParams
+  ): Promise<GetLinkClicks | null> {
     this.validateId(id);
 
-    return await this.api.get<GetLinkClicks | null>(`/broadcasts/${id}/clicks`);
+    const { after, before, include_total_count, per_page } = params || {};
+    const query = new URLSearchParams({
+      ...(after && { after }),
+      ...(before && { before }),
+      ...(include_total_count !== undefined && {
+        include_total_count: String(include_total_count),
+      }),
+      ...(per_page !== undefined && { per_page: String(per_page) }),
+    });
+
+    return await this.api.get<GetLinkClicks | null>(
+      `/broadcasts/${id}/clicks`,
+      {
+        query,
+      }
+    );
   }
 
   /**

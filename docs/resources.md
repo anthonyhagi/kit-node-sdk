@@ -128,6 +128,28 @@ or null filter groups before accessing their items. Slim responses omit
 `subscriber_filter`. See the
 [Kit API reference](https://developers.kit.com/api-reference/broadcasts/get-a-broadcast).
 
+## Broadcast link click pagination
+
+`kit.broadcasts.getLinkClicksById(id, params)` accepts `after`, `before`,
+`per_page`, and `include_total_count`. These options paginate the tracked links
+within a broadcast. Each click item includes its tracked link `id`.
+
+```ts
+const first = await kit.broadcasts.getLinkClicksById(123, { per_page: 25 });
+if (first?.pagination.has_next_page && first.pagination.end_cursor) {
+  const next = await kit.broadcasts.getLinkClicksById(123, {
+    after: first.pagination.end_cursor,
+    per_page: 25,
+  });
+  console.log(next?.broadcast.clicks);
+}
+```
+
+Existing calls with only an ID continue to work. Typed `BroadcastLinkClick`
+fixtures must include `id`. See the
+[endpoint reference](https://developers.kit.com/api-reference/broadcasts/get-link-clicks-for-a-broadcast)
+and [pagination guide](https://developers.kit.com/api-reference/pagination).
+
 ## Broadcast stats pagination
 
 `kit.broadcasts.getAllStats()` returns one page of stats (500 broadcasts by

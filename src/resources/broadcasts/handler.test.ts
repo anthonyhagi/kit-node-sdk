@@ -4,6 +4,8 @@ import {
   type BroadcastSubscriberFilterGroup,
   type CreateBroadcastParams,
   type GetBroadcastStatsParams,
+  type GetLinkClicks,
+  type GetLinkClicksParams,
   type ListBroadcasts,
   type ListBroadcastsParams,
   type ListSlimBroadcasts,
@@ -283,6 +285,111 @@ describe("broadcast stats requests through Kit", () => {
       after: "next+/=",
       per_page: "25",
     });
+  });
+});
+
+describe("broadcast link click pagination through Kit", () => {
+  let kit: Kit;
+  const click = {
+    id: 52,
+    url: "https://example.com/52",
+    unique_clicks: 3,
+    click_to_delivery_rate: 0.006,
+    click_to_open_rate: 0.03,
+  };
+  const response = {
+    broadcast: { id: 171, clicks: [click] },
+    pagination,
+  } satisfies GetLinkClicks;
+
+  beforeEach(() => {
+    fetchMock.resetMocks();
+    kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
+  });
+
+  it("preserves single-ID requests and exposes tracked link IDs", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const result = await kit.broadcasts.getLinkClicksById(171);
+    expectTypeOf(result).toEqualTypeOf<GetLinkClicks | null>();
+    expectTypeOf(result!.broadcast.clicks[0]!.id).toEqualTypeOf<number>();
+    expect(result).toEqual(response);
+    const req = fetchMock.requests()[0]!;
+    expect(req.url).toBe("https://api.kit.com/v4/broadcasts/171/clicks");
+    expect(req.method).toBe("GET");
+    expect(await req.text()).toBe("");
+  });
+
+  it.each(["after", "before"] as const)(
+    "encodes the %s cursor and pagination options",
+    async (cursor) => {
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      const params = {
+        [cursor]: "next+/=",
+        per_page: 25,
+        include_total_count: true,
+      } satisfies GetLinkClicksParams;
+      await kit.broadcasts.getLinkClicksById(171, params);
+      const url = new URL(fetchMock.requests()[0]!.url);
+      expect(url.pathname).toBe("/v4/broadcasts/171/clicks");
+      expect(Object.fromEntries(url.searchParams)).toEqual({
+        [cursor]: "next+/=",
+        per_page: "25",
+        include_total_count: "true",
+      });
+    }
+  );
+
+  it("preserves an explicit false total-count option", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    await kit.broadcasts.getLinkClicksById(171, { include_total_count: false });
+    expect(
+      Object.fromEntries(new URL(fetchMock.requests()[0]!.url).searchParams)
+    ).toEqual({ include_total_count: "false" });
+  });
+
+  it("retrieves a second page using the returned cursor", async () => {
+    const lastPage = {
+      broadcast: {
+        id: 171,
+        clicks: [{ ...click, id: 53, url: "https://example.com/53" }],
+      },
+      pagination: {
+        ...pagination,
+        has_previous_page: true,
+        has_next_page: false,
+        total_count: 2,
+      },
+    } satisfies GetLinkClicks;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    fetchMock.mockResponseOnce(JSON.stringify(lastPage));
+    const first = await kit.broadcasts.getLinkClicksById(171, { per_page: 1 });
+    const second = await kit.broadcasts.getLinkClicksById(171, {
+      after: first!.pagination.end_cursor!,
+      per_page: 1,
+      include_total_count: true,
+    });
+    expect(second).toEqual(lastPage);
+    expectTypeOf(second!.pagination.total_count).toEqualTypeOf<
+      number | undefined
+    >();
+    expect(
+      new URL(fetchMock.requests()[1]!.url).searchParams.get("after")
+    ).toBe("next+/=");
+    expect(second!.broadcast.clicks[0]!.id).not.toBe(
+      first!.broadcast.clicks[0]!.id
+    );
+  });
+
+  it("preserves null responses and validates IDs before making a request", async () => {
+    fetchMock.mockResponseOnce("null");
+    expect(
+      await kit.broadcasts.getLinkClicksById(171, { per_page: 25 })
+    ).toBeNull();
+    fetchMock.resetMocks();
+    await expect(
+      kit.broadcasts.getLinkClicksById(0, { after: "next" })
+    ).rejects.toThrow("valid broadcast id");
+    expect(fetchMock.requests()).toHaveLength(0);
   });
 });
 
