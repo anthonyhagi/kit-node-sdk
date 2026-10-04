@@ -286,6 +286,21 @@ describe("subscriber requests through Kit", () => {
     expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
   });
 
+  it.each(["raw", "unique_email"] as const)(
+    "sends the %s engagement counting mode in the filter body",
+    async (counting_mode) => {
+      const body = {
+        all: [{ type: "opens", count_greater_than: 5 }],
+        counting_mode,
+      } satisfies FilterSubscriberBody;
+      const response = { subscribers: [], pagination };
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+
+      expect(await kit.subscribers.filter(body)).toEqual(response);
+      expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
+    }
+  );
+
   const tagCondition: FilterSubscriberBodyAllTags = {
     type: "tags",
     any: [{ type: "ids", matching: [123, 456] }],
