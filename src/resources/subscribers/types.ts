@@ -49,6 +49,8 @@ export interface ListSubscribersParams {
   email_address?: string | undefined;
   include_total_count?: boolean | undefined;
   per_page?: number | undefined;
+  /** Omit custom field values from the response for a smaller payload. */
+  slim?: boolean | undefined;
   sort_field?: "id" | "updated_at" | "cancelled_at" | (string & {}) | undefined;
   sort_order?: "asc" | "desc" | undefined;
   status?: SubscriberState | "all" | undefined;
@@ -63,7 +65,8 @@ export interface ListSubscribers {
     email_address: string;
     state: SubscriberState;
     created_at: string;
-    fields: Record<string, string | null>;
+    /** Omitted when slim is true. */
+    fields?: Record<string, string | null> | undefined;
   }[];
   pagination: Pagination;
 }
