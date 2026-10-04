@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
 import {
   Kit,
   type ApiError,
+  type BulkCreateSubscribersParams,
   type CreateSubscriber,
   type FilterSubscriberBody,
   type FilterSubscriberBodyAllAttribution,
@@ -1289,6 +1290,71 @@ describe("subscriber requests through Kit", () => {
     await kit.subscribers.getTags(42);
     request("GET", "/subscribers/42/tags");
   });
+
+  it.each([
+    { name: "email only", row: { email_address: "ada@example.com" } },
+    {
+      name: "nullable name and state",
+      row: { email_address: "ada@example.com", first_name: null, state: null },
+    },
+    {
+      name: "undefined optional fields",
+      row: {
+        email_address: "ada@example.com",
+        first_name: undefined,
+        state: undefined,
+      },
+    },
+  ] satisfies {
+    name: string;
+    row: BulkCreateSubscribersParams["subscribers"][number];
+  }[])("bulk creates subscribers with $name", async ({ row }) => {
+    const body = { subscribers: [row] } satisfies BulkCreateSubscribersParams;
+    const response = { subscribers: [subscriber], failures: [] };
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+
+    expect(await kit.subscribers.bulkCreate(body)).toEqual({
+      type: "synchronous",
+      ...response,
+    });
+    expect(await request("POST", "/bulk/subscribers").text()).toBe(
+      JSON.stringify(body)
+    );
+  });
+
+  it.each([
+    { first_name: "Missing email" },
+    { email_address: null },
+    {},
+  ] satisfies BulkCreateSubscribersParams["subscribers"])(
+    "preserves per-subscriber failures for missing or null email %j",
+    async (row) => {
+      const body = {
+        subscribers: [{ email_address: subscriber.email_address }, row],
+      } satisfies BulkCreateSubscribersParams;
+      const response = {
+        subscribers: [subscriber],
+        failures: [
+          {
+            subscriber: {
+              first_name: row.first_name ?? null,
+              email_address: null,
+              state: "active",
+              created_at: null,
+            },
+            errors: ["Email address is invalid"],
+          },
+        ],
+      };
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+
+      expect(await kit.subscribers.bulkCreate(body)).toEqual({
+        type: "synchronous",
+        ...response,
+      });
+      expect(await request("POST", "/bulk/subscribers").json()).toEqual(body);
+    }
+  );
 
   it("bulk creates subscribers and marks a synchronous response", async () => {
     const body = {
