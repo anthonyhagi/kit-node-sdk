@@ -32,6 +32,26 @@ Before submitting a pull request, please ensure that your code is linted and for
 
 **Note**: If your project uses different script names for linting and formatting, replace `npm run lint` and `npm run format` with the appropriate commands from your `package.json`.
 
+## Dependency updates
+
+Renovate manages dependency updates through `renovate.json`. Routine updates
+run on Mondays between 03:00 and 07:00 Australia/Adelaide time, with at most five
+open update PRs. npm patch updates are grouped separately from minor updates.
+Routine npm releases wait three days before a PR is opened. Major upgrades
+require approval in the Dependency Dashboard and manual PR review; minor
+updates also require manual review.
+
+Patch updates, action digest pins, and weekly lockfile maintenance can merge
+after CI passes. Renovate performs the merge itself because GitHub automerge is
+disabled. Development Node and `@types/node` stay on version 24; changes to the
+SDK's supported Node versions in `package.json` are made manually.
+
+Dependabot version updates are not configured, and its automatic security
+updates are disabled in repository settings. Keep GitHub vulnerability alerts
+enabled so Renovate can open security-fix PRs, including fixes for transitive
+dependencies. Security fixes bypass the routine schedule and release-age delay
+and require manual review.
+
 ## License and Agreement
 
 This project is licensed under the MIT License. By contributing to this project, you agree that your contributions will be licensed under the MIT License and that you have read and understood the guidelines outlined in this CONTRIBUTING file.
