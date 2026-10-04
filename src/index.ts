@@ -360,6 +360,7 @@ export type {
   CreateSubscriberParams,
   FilterSubscriberBody,
   FilterSubscriberBodyAllCustomField,
+  FilterSubscriberBodyAllLocation,
   FilterSubscriberBodyAllTags,
   FilterSubscriberParams,
   FilterSubscribers,

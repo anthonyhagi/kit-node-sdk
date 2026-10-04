@@ -192,6 +192,16 @@ export type FilterSubscriberBodyAllCustomField = {
     }
 );
 
+export interface FilterSubscriberBodyAllLocation {
+  type: "location";
+  /** Center latitude in decimal degrees. */
+  latitude: number;
+  /** Center longitude in decimal degrees. */
+  longitude: number;
+  /** Radius in miles. Matches primary locations inside the bounding box. */
+  radius: number;
+}
+
 export interface FilterSubscriberBody {
   /**
    * Count all engagement events (raw) or distinct emails (unique_email).
@@ -225,6 +235,7 @@ export interface FilterSubscriberBody {
     | FilterSubscriberBodyAllBase
     | FilterSubscriberBodyAllTags
     | FilterSubscriberBodyAllCustomField
+    | FilterSubscriberBodyAllLocation
   )[];
 }
 
