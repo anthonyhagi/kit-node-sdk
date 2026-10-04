@@ -415,6 +415,11 @@ export interface PinSubscriberLocation {
   };
 }
 
+/** All location fields are required: updates replace the entire pinned location. */
+export type UpdateSubscriberLocationParams = PinSubscriberLocationParams;
+
+export type UpdateSubscriberLocation = PinSubscriberLocation;
+
 export interface GetSubscriberStatsParams {
   /**
    * Filter to stats for emails sent after this date (YYYY-MM-DD).

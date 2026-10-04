@@ -21,6 +21,8 @@ import {
   type PinSubscriberLocation,
   type PinSubscriberLocationParams,
   type UpdateSubscriber,
+  type UpdateSubscriberLocation,
+  type UpdateSubscriberLocationParams,
 } from "~/index";
 
 const subscriber = {
@@ -268,6 +270,74 @@ describe("subscriber requests through Kit", () => {
         status,
         details,
       } satisfies Partial<ApiError>);
+      expect(fetchMock.requests()).toHaveLength(1);
+    }
+  );
+
+  it.each([
+    pinnedLocation,
+    { location: { ...pinnedLocation.location, latitude: 0, longitude: 0 } },
+  ] satisfies UpdateSubscriberLocationParams[])(
+    "updates the complete pinned location %j",
+    async (body) => {
+      const response = {
+        subscriber: { id: 42, location: body.location },
+      } satisfies UpdateSubscriberLocation;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+
+      const result = await kit.subscribers.updateLocation(42, body);
+      expectTypeOf(result).toEqualTypeOf<UpdateSubscriberLocation | null>();
+      expect(result).toEqual(response);
+      expect(await request("PATCH", "/subscribers/42/location").json()).toEqual(
+        body
+      );
+    }
+  );
+
+  it("requires all six fields for a location replacement", () => {
+    type Location = UpdateSubscriberLocationParams["location"];
+    expectTypeOf<Omit<Location, "city">>().not.toExtend<Location>();
+    expectTypeOf<Omit<Location, "state_province">>().not.toExtend<Location>();
+    expectTypeOf<Omit<Location, "country_code">>().not.toExtend<Location>();
+    expectTypeOf<Omit<Location, "latitude">>().not.toExtend<Location>();
+    expectTypeOf<Omit<Location, "longitude">>().not.toExtend<Location>();
+    expectTypeOf<Omit<Location, "timezone">>().not.toExtend<Location>();
+  });
+
+  it("returns null when updating a missing subscriber's location", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
+      status: 404,
+    });
+
+    expect(await kit.subscribers.updateLocation(42, pinnedLocation)).toBeNull();
+    expect(await request("PATCH", "/subscribers/42/location").json()).toEqual(
+      pinnedLocation
+    );
+    expect(fetchMock.requests()).toHaveLength(1);
+  });
+
+  it.each([401, 422])(
+    "preserves location update errors with status %s",
+    async (status) => {
+      const details = {
+        errors: [
+          status === 422
+            ? "Country code is invalid"
+            : "The access token is invalid",
+        ],
+      };
+      fetchMock.mockResponseOnce(JSON.stringify(details), { status });
+
+      await expect(
+        kit.subscribers.updateLocation(42, pinnedLocation)
+      ).rejects.toMatchObject({
+        name: "ApiError",
+        status,
+        details,
+      } satisfies Partial<ApiError>);
+      expect(await request("PATCH", "/subscribers/42/location").json()).toEqual(
+        pinnedLocation
+      );
       expect(fetchMock.requests()).toHaveLength(1);
     }
   );
