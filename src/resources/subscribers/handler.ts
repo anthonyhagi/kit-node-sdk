@@ -19,6 +19,8 @@ import type {
   PinSubscriberLocation,
   PinSubscriberLocationParams,
   UpdateSubscriber,
+  UpdateSubscriberLocation,
+  UpdateSubscriberLocationParams,
   UpdateSubscriberParams,
 } from "./types";
 
@@ -226,6 +228,25 @@ export class SubscribersHandler {
     params: PinSubscriberLocationParams
   ): Promise<PinSubscriberLocation | null> {
     return await this.api.post<PinSubscriberLocation | null>(
+      `/subscribers/${id}/location`,
+      { body: JSON.stringify(params) }
+    );
+  }
+
+  /**
+   * Replace the Subscriber's pinned location. All six location fields are
+   * required; resend the current value for any field that is not changing.
+   *
+   * @param id - The unique ID of the Subscriber.
+   * @param params - The complete replacement location.
+   * @see {@link https://developers.kit.com/api-reference/subscribers/update-a-subscribers-pinned-location}
+   * @returns The updated location, or null when the Subscriber is not found.
+   */
+  public async updateLocation(
+    id: number,
+    params: UpdateSubscriberLocationParams
+  ): Promise<UpdateSubscriberLocation | null> {
+    return await this.api.patch<UpdateSubscriberLocation | null>(
       `/subscribers/${id}/location`,
       { body: JSON.stringify(params) }
     );

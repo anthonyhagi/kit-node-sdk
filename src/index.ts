@@ -379,6 +379,8 @@ export type {
   PinSubscriberLocation,
   PinSubscriberLocationParams,
   UpdateSubscriber,
+  UpdateSubscriberLocation,
+  UpdateSubscriberLocationParams,
   UpdateSubscriberParams,
 } from "./resources/subscribers/types";
 
