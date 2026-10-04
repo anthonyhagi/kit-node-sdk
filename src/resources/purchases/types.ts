@@ -39,6 +39,8 @@ export interface ListPurchases {
     id: number;
     transaction_id: string;
     status: string;
+    subscriber_id: number;
+    source: string;
     email_address: string;
     currency: string;
     transaction_time: string;
@@ -130,6 +132,8 @@ export interface CreatePurchase {
     id: number;
     transaction_id: string;
     status: string;
+    subscriber_id: number;
+    source: string;
     email_address: string;
     currency: string;
     transaction_time: string;
@@ -153,6 +157,8 @@ export interface GetPurchase {
     id: number;
     transaction_id: string;
     status: string;
+    subscriber_id: number;
+    source: string;
     email_address: string;
     currency: string;
     transaction_time: string;
