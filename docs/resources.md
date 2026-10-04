@@ -21,10 +21,35 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 | **`kit.snippets`**         | Reusable email content referenced by Liquid keys                   | `list()`, `get()`, `create()`, `update()`                                                                                   |
 | **`kit.subscribers`**      | Individual email recipients                                        | `list()`, `create()`, `get()`, `update()`, `bulkCreate()`, `getTags()`                                                      |
 | **`kit.tags`**             | Labels for categorizing subscribers                                | `list()`, `create()`, `update()`, `bulkCreate()`, `tagSubscriber()`, `listSubscribers()`                                    |
-| **`kit.webhookEndpoints`** | Webhook endpoints with multiple events and signed deliveries       | `list()`, `get()`, `create()`, `update()`, `delete()`                                                                       |
+| **`kit.webhookEndpoints`** | Webhook endpoints with multiple events and signed deliveries       | `list()`, `get()`, `create()`, `update()`, `delete()`, `rotateSecret()`                                                     |
 | **`kit.webhooks`**         | HTTP callbacks for real-time notifications                         | `list()`, `create()`                                                                                                        |
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
+
+## Rotating a webhook endpoint secret
+
+`kit.webhookEndpoints.rotateSecret(id, params)` generates a new signing secret
+and returns the expiry timestamp for the previous secret's overlap window.
+
+```ts
+const result = await kit.webhookEndpoints.rotateSecret(2);
+if (result) {
+  const signingSecret = result.webhook_endpoint.secret;
+  // Save signingSecret securely and use it for signature verification.
+  console.log(result.webhook_endpoint.previous_secret_expires_at);
+}
+```
+
+Save the new secret from this response; list/get responses do not expose it.
+During the overlap window, deliveries are signed with both secrets. Rotating
+again while the window is open throws a `409` conflict. Passing `{ force: true }`
+rotates anyway and immediately expires the older secret. The SDK sends force
+only when supplied and leaves conflict handling to the caller.
+
+Exported types are `RotateWebhookEndpointSecretParams` and
+`RotateWebhookEndpointSecret`. The response requires both the new secret and a
+string expiry timestamp. Missing endpoints return `null`; API errors throw.
+See the [Kit API reference](https://developers.kit.com/api-reference/webhooks/rotate-a-webhook-endpoint-secret).
 
 ## Deleting a webhook endpoint
 

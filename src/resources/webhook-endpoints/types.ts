@@ -63,3 +63,17 @@ export interface UpdateWebhookEndpointParams {
 }
 
 export type UpdateWebhookEndpoint = GetWebhookEndpoint;
+
+export interface RotateWebhookEndpointSecretParams {
+  /** Rotate during an open overlap window, immediately expiring the older secret. */
+  force?: boolean | undefined;
+}
+
+export interface RotateWebhookEndpointSecret {
+  webhook_endpoint: Omit<WebhookEndpoint, "previous_secret_expires_at"> & {
+    /** New signing secret; save it for signature verification. */
+    secret: string;
+    /** The previous signing secret remains valid until this timestamp. */
+    previous_secret_expires_at: string;
+  };
+}

@@ -5,12 +5,32 @@ import type {
   GetWebhookEndpoint,
   ListWebhookEndpoints,
   ListWebhookEndpointsParams,
+  RotateWebhookEndpointSecret,
+  RotateWebhookEndpointSecretParams,
   UpdateWebhookEndpoint,
   UpdateWebhookEndpointParams,
 } from "./types";
 
 export class WebhookEndpointsHandler {
   constructor(private api: Kit) {}
+
+  /**
+   * Rotate the signing secret and return the new secret and overlap expiry.
+   *
+   * @param id - The webhook endpoint whose secret should rotate.
+   * @param params - Optional force flag for rotation during an open overlap window.
+   * @returns The rotated endpoint, or null when it was not found.
+   * @see {@link https://developers.kit.com/api-reference/webhooks/rotate-a-webhook-endpoint-secret}
+   */
+  public async rotateSecret(
+    id: number,
+    params?: RotateWebhookEndpointSecretParams
+  ): Promise<RotateWebhookEndpointSecret | null> {
+    return await this.api.post<RotateWebhookEndpointSecret | null>(
+      `/webhook_endpoints/${id}/rotate_secret`,
+      { body: JSON.stringify(params || {}) }
+    );
+  }
 
   /**
    * Delete an endpoint and stop future deliveries of its subscribed events.

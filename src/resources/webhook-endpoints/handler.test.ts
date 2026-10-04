@@ -6,6 +6,8 @@ import {
   type GetWebhookEndpoint,
   type ListWebhookEndpoints,
   type ListWebhookEndpointsParams,
+  type RotateWebhookEndpointSecret,
+  type RotateWebhookEndpointSecretParams,
   type UpdateWebhookEndpoint,
   type UpdateWebhookEndpointParams,
   type WebhookEndpoint,
@@ -569,6 +571,95 @@ describe("webhook endpoint delete requests through Kit", () => {
       { status: 401 }
     );
     await expect(kit.webhookEndpoints.delete(2)).rejects.toThrow(
+      "Authentication failed"
+    );
+    expect(fetchMock.requests()).toHaveLength(1);
+  });
+});
+
+describe("webhook endpoint secret rotation requests through Kit", () => {
+  let kit: Kit;
+  const response = {
+    webhook_endpoint: {
+      ...endpoint,
+      secret: "whsec_rotated_test_fixture",
+      previous_secret_expires_at: "2026-10-05T12:00:00Z",
+    },
+  } satisfies RotateWebhookEndpointSecret;
+  beforeEach(() => {
+    fetchMock.resetMocks();
+    kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
+  });
+
+  it("rotates without forcing and returns the new secret and required expiry", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const result = await kit.webhookEndpoints.rotateSecret(2);
+    expectTypeOf(result).toEqualTypeOf<RotateWebhookEndpointSecret | null>();
+    expectTypeOf(result!.webhook_endpoint.secret).toEqualTypeOf<string>();
+    expectTypeOf(
+      result!.webhook_endpoint.previous_secret_expires_at
+    ).toEqualTypeOf<string>();
+    expect(result).toEqual(response);
+    expect(fetchMock.requests()).toHaveLength(1);
+    const req = fetchMock.requests()[0]!;
+    expect(req.method).toBe("POST");
+    expect(req.url).toBe(
+      "https://api.kit.com/v4/webhook_endpoints/2/rotate_secret"
+    );
+    expect(req.headers.get("X-Kit-Api-Key")).toBe("test-key");
+    expect(await req.json()).toEqual({});
+  });
+
+  it.each([true, false])("preserves force: %s", async (force) => {
+    const params = { force } satisfies RotateWebhookEndpointSecretParams;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.webhookEndpoints.rotateSecret(2, params)).toEqual(
+      response
+    );
+    expect(await fetchMock.requests()[0]!.json()).toEqual({ force });
+  });
+
+  it.each([{}, { force: undefined }])(
+    "does not add force for empty or undefined options",
+    async (params) => {
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      await kit.webhookEndpoints.rotateSecret(2, params);
+      expect(await fetchMock.requests()[0]!.json()).toEqual({});
+    }
+  );
+
+  it("returns null for missing endpoints", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
+      status: 404,
+    });
+    expect(await kit.webhookEndpoints.rotateSecret(404)).toBeNull();
+    expect(fetchMock.requests()[0]!.url).toBe(
+      "https://api.kit.com/v4/webhook_endpoints/404/rotate_secret"
+    );
+  });
+
+  it("surfaces open-window conflicts without automatically forcing rotation", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({
+        errors: [
+          "The previous signing secret is still within its rotation window.",
+        ],
+      }),
+      { status: 409 }
+    );
+    await expect(kit.webhookEndpoints.rotateSecret(2)).rejects.toThrow(
+      "The previous signing secret is still within its rotation window."
+    );
+    expect(fetchMock.requests()).toHaveLength(1);
+    expect(await fetchMock.requests()[0]!.json()).toEqual({});
+  });
+
+  it("surfaces authentication errors", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({ errors: ["The access token is invalid"] }),
+      { status: 401 }
+    );
+    await expect(kit.webhookEndpoints.rotateSecret(2)).rejects.toThrow(
       "Authentication failed"
     );
     expect(fetchMock.requests()).toHaveLength(1);
