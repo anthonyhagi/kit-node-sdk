@@ -15,13 +15,30 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 | **`kit.forms`**          | Web forms for collecting subscriber information                    | `list()`, `addSubscriber()`, `addSubscriberByEmail()`, `listSubscribers()`                                                  |
 | **`kit.purchases`**      | Transaction records for products/services                          | `list()`, `create()`, `get()`                                                                                               |
 | **`kit.segments`**       | Dynamic subscriber groups based on criteria                        | `list()`                                                                                                                    |
-| **`kit.sequenceEmails`** | Individual emails inside automated sequences                       | `list()`, `get()`, `create()`, `update()`                                                                                   |
+| **`kit.sequenceEmails`** | Individual emails inside automated sequences                       | `list()`, `get()`, `create()`, `update()`, `delete()`                                                                       |
 | **`kit.sequences`**      | Automated email series                                             | `list()`, `get()`, `create()`, `update()`, `delete()`, `addSubscriberById()`, `addSubscriberByEmail()`, `listSubscribers()` |
 | **`kit.subscribers`**    | Individual email recipients                                        | `list()`, `create()`, `get()`, `update()`, `bulkCreate()`, `getTags()`                                                      |
 | **`kit.tags`**           | Labels for categorizing subscribers                                | `list()`, `create()`, `update()`, `bulkCreate()`, `tagSubscriber()`, `listSubscribers()`                                    |
 | **`kit.webhooks`**       | HTTP callbacks for real-time notifications                         | `list()`, `create()`                                                                                                        |
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
+
+## Deleting a sequence email
+
+`kit.sequenceEmails.delete(sequenceId, emailId)` permanently removes one email
+from a sequence. Subscribers already queued for it skip to the next email.
+
+```ts
+const result = await kit.sequenceEmails.delete(123, 456);
+if (result === null) {
+  console.log("Sequence or email not found");
+}
+```
+
+Kit returns an empty `204` response, which the SDK exposes as `{}`. Missing
+sequences or emails return `null`; authentication errors throw. To pause delivery,
+use `kit.sequenceEmails.update(sequenceId, emailId, { published: false })`.
+See the [Kit API reference](https://developers.kit.com/api-reference/sequence-emails/delete-a-sequence-email).
 
 ## Updating a sequence email
 

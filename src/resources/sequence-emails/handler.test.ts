@@ -519,3 +519,52 @@ describe("sequence email update requests through Kit", () => {
     expect(await fetchMock.requests()[0]!.json()).toEqual(params);
   });
 });
+
+describe("sequence email delete requests through Kit", () => {
+  let kit: Kit;
+  beforeEach(() => {
+    fetchMock.resetMocks();
+    kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
+  });
+
+  it("deletes an email with a bodyless request and handles an empty 204 response", async () => {
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
+    const result = await kit.sequenceEmails.delete(108, 6);
+    expectTypeOf(result).toEqualTypeOf<{} | null>();
+    expect(result).toEqual({});
+    expect(fetchMock.requests()).toHaveLength(1);
+    const req = fetchMock.requests()[0]!;
+    expect(req.method).toBe("DELETE");
+    expect(req.url).toBe("https://api.kit.com/v4/sequences/108/emails/6");
+    expect(await req.text()).toBe("");
+  });
+
+  it.each([
+    [404, 6],
+    [108, 404],
+  ])(
+    "returns null for a missing sequence or email (%s, %s)",
+    async (sequenceId, emailId) => {
+      fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
+        status: 404,
+      });
+      expect(await kit.sequenceEmails.delete(sequenceId, emailId)).toBeNull();
+      expect(fetchMock.requests()[0]!.url).toBe(
+        `https://api.kit.com/v4/sequences/${sequenceId}/emails/${emailId}`
+      );
+      expect(await fetchMock.requests()[0]!.text()).toBe("");
+    }
+  );
+
+  it("surfaces authentication errors", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({ errors: ["The access token is invalid"] }),
+      { status: 401 }
+    );
+    await expect(kit.sequenceEmails.delete(108, 6)).rejects.toThrow(
+      "Authentication failed"
+    );
+    expect(fetchMock.requests()).toHaveLength(1);
+    expect(fetchMock.requests()[0]!.method).toBe("DELETE");
+  });
+});
