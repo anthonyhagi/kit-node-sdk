@@ -104,7 +104,7 @@ describe("email-template requests through Kit", () => {
     request({ include_total_count: "true" });
   });
 
-  it("omits a disabled total count while preserving the cursor", async () => {
+  it("preserves a disabled total count and the cursor", async () => {
     fetchMock.mockResponseOnce(
       JSON.stringify({ email_templates: [], pagination })
     );
@@ -112,7 +112,7 @@ describe("email-template requests through Kit", () => {
       after: "next+/=",
       include_total_count: false,
     });
-    request({ after: "next+/=" });
+    request({ after: "next+/=", include_total_count: "false" });
   });
 
   it.each([
