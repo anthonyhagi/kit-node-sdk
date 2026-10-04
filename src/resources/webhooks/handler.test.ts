@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { Kit, type WebhookEvent } from "~/index";
+import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
+import { Kit, type ListWebhooks, type WebhookEvent } from "~/index";
 
 const targetUrl = "https://example.com/hooks/kit?source=newsletter&token=a%2Bb";
 const pagination = {
@@ -65,7 +65,12 @@ describe("webhook requests through Kit", () => {
       pagination,
     };
     fetchMock.mockResponseOnce(JSON.stringify(response));
-    expect(await kit.webhooks.list()).toEqual(response);
+    const result = await kit.webhooks.list();
+    expect(result).toEqual(response);
+    expectTypeOf(result.pagination.total_count).toEqualTypeOf<
+      number | undefined
+    >();
+    expect(result.pagination.total_count).toBeUndefined();
     expect(await request("GET", "/webhooks").text()).toBe("");
   });
 
@@ -86,6 +91,23 @@ describe("webhook requests through Kit", () => {
         per_page: "25",
         include_total_count: "true",
       });
+    }
+  );
+
+  it.each([0, 42])(
+    "exposes a total count of %i in the public response type",
+    async (total_count) => {
+      const response = {
+        webhooks: [],
+        pagination: { ...pagination, total_count },
+      } satisfies ListWebhooks;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      const result = await kit.webhooks.list({ include_total_count: true });
+      expectTypeOf(result.pagination.total_count).toEqualTypeOf<
+        number | undefined
+      >();
+      expect(result.pagination.total_count).toBe(total_count);
+      request("GET", "/webhooks", { include_total_count: "true" });
     }
   );
 

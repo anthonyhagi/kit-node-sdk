@@ -1,3 +1,5 @@
+import type { Pagination } from "~/common/types";
+
 export interface ListWebhooksParams {
   /**
    * Pass in the string from the previous request to move
@@ -46,13 +48,7 @@ export interface ListWebhooks {
     };
     target_url: string;
   }[];
-  pagination: {
-    has_previous_page: boolean;
-    has_next_page: boolean;
-    start_cursor: string | null;
-    end_cursor: string | null;
-    per_page: number;
-  };
+  pagination: Pagination;
 }
 
 export type WebhookEvent =
