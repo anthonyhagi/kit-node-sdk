@@ -1,11 +1,15 @@
 import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
 import {
   Kit,
+  type CreateSubscriber,
   type FilterSubscriberBody,
   type FilterSubscriberParams,
   type FilterSubscribers,
+  type GetSubscriber,
   type GetSubscriberStats,
   type GetSubscriberStatsParams,
+  type ListSubscribers,
+  type UpdateSubscriber,
 } from "~/index";
 
 const subscriber = {
@@ -15,13 +19,19 @@ const subscriber = {
   state: "active",
   created_at: "2026-01-01T00:00:00Z",
   fields: { interest: "TypeScript" },
-};
+} satisfies GetSubscriber["subscriber"];
 const pagination = {
   has_previous_page: false,
   has_next_page: true,
   start_cursor: "start",
   end_cursor: "next+/=",
   per_page: 25,
+};
+
+const namelessSubscriber = {
+  ...subscriber,
+  first_name: null,
+  fields: { interest: "TypeScript", birthday: null },
 };
 
 function request(method: string, path: string, query = {}) {
@@ -112,13 +122,64 @@ describe("subscriber requests through Kit", () => {
     expect(await request("GET", "/subscribers/42").text()).toBe("");
   });
 
+  it("lists subscribers with null names and unset custom fields", async () => {
+    const response = {
+      subscribers: [namelessSubscriber],
+      pagination,
+    } satisfies ListSubscribers;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+
+    const result = await kit.subscribers.list();
+    expectTypeOf(result).toEqualTypeOf<ListSubscribers>();
+    expect(result).toEqual(response);
+    request("GET", "/subscribers");
+  });
+
+  it("gets a subscriber with a null name and unset custom fields", async () => {
+    const response = { subscriber: namelessSubscriber } satisfies GetSubscriber;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+
+    const result = await kit.subscribers.get(42);
+    expectTypeOf(result).toEqualTypeOf<GetSubscriber | null>();
+    expect(result).toEqual(response);
+    request("GET", "/subscribers/42");
+  });
+
+  it("creates a subscriber with a null name and unset custom fields in the response", async () => {
+    const body = { email_address: subscriber.email_address, first_name: null };
+    const response = {
+      subscriber: namelessSubscriber,
+    } satisfies CreateSubscriber;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+
+    const result = await kit.subscribers.create(body);
+    expectTypeOf(result).toEqualTypeOf<CreateSubscriber>();
+    expect(result).toEqual(response);
+    expect(await request("POST", "/subscribers").json()).toEqual(body);
+  });
+
+  it("updates a subscriber with a null name and unset custom fields in the response", async () => {
+    const body = { email_address: subscriber.email_address, first_name: null };
+    const response = {
+      subscriber: namelessSubscriber,
+    } satisfies UpdateSubscriber;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+
+    const result = await kit.subscribers.update(42, body);
+    expectTypeOf(result).toEqualTypeOf<UpdateSubscriber | null>();
+    expect(result).toEqual(response);
+    expect(await request("PUT", "/subscribers/42").json()).toEqual(body);
+  });
+
   it("updates a subscriber using PUT with the ID only in the path", async () => {
     const body = {
       email_address: "updated@example.com",
       first_name: null,
       fields: null,
     };
-    const response = { subscriber: { ...subscriber, ...body } };
+    const response = {
+      subscriber: { ...subscriber, first_name: null },
+    };
     fetchMock.mockResponseOnce(JSON.stringify(response));
 
     expect(await kit.subscribers.update(42, body)).toEqual(response);
