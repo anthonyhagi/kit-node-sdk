@@ -3,6 +3,8 @@ import {
   Kit,
   type AddSubscriberToForm,
   type AddSubscriberToFormByEmail,
+  type BulkAddSubscribersParams,
+  type BulkAddSubscribersSynchronous,
   type ListForms,
   type ListFormsParams,
 } from "~/index";
@@ -292,6 +294,48 @@ describe("form requests through Kit", () => {
     const req = request("POST", "/bulk/forms/subscribers");
     expect(req.headers.get("Authorization")).toBe("Bearer oauth-token");
     expect(await req.json()).toEqual(body);
+  });
+
+  it("preserves null bulk request IDs and nullable failure IDs", async () => {
+    const body = {
+      additions: [
+        { form_id: null, subscriber_id: 42, referrer },
+        { form_id: 7, subscriber_id: null },
+        { form_id: null, subscriber_id: null },
+        { form_id: 7, subscriber_id: 42 },
+      ],
+    } satisfies BulkAddSubscribersParams;
+    const response = {
+      subscribers: [subscriber],
+      failures: [
+        {
+          errors: ["Form does not exist"],
+          subscription: { form_id: null, subscriber_id: 42, referrer },
+        },
+        {
+          errors: ["Subscriber does not exist"],
+          subscription: { form_id: 7, subscriber_id: null, referrer: "" },
+        },
+        {
+          errors: ["Form does not exist", "Subscriber does not exist"],
+          subscription: { form_id: null, subscriber_id: null, referrer: "" },
+        },
+      ],
+    } satisfies Omit<BulkAddSubscribersSynchronous, "type">;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const result = await kit.forms.bulkAddSubscribers(body);
+    expect(result).toEqual({ type: "synchronous", ...response });
+    if (result.type !== "synchronous")
+      throw new Error("Expected synchronous response");
+    expectTypeOf(result.failures[0]!.subscription.form_id).toEqualTypeOf<
+      number | null
+    >();
+    expectTypeOf(result.failures[0]!.subscription.subscriber_id).toEqualTypeOf<
+      number | null
+    >();
+    expect(await request("POST", "/bulk/forms/subscribers").json()).toEqual(
+      body
+    );
   });
 
   it("recognizes an empty subscribers array as a synchronous bulk response", async () => {
