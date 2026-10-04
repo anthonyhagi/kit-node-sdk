@@ -59,11 +59,11 @@ export interface ListSubscribersParams {
 export interface ListSubscribers {
   subscribers: {
     id: number;
-    first_name: string;
+    first_name: string | null;
     email_address: string;
     state: SubscriberState;
     created_at: string;
-    fields: Record<string, string>;
+    fields: Record<string, string | null>;
   }[];
   pagination: Pagination;
 }
@@ -78,11 +78,11 @@ export interface CreateSubscriberParams {
 export interface CreateSubscriber {
   subscriber: {
     id: number;
-    first_name: string;
+    first_name: string | null;
     email_address: string;
     state: SubscriberState;
     created_at: string;
-    fields: Record<string, string>;
+    fields: Record<string, string | null>;
   };
 }
 
@@ -183,11 +183,11 @@ export interface FilterSubscribers {
 export interface GetSubscriber {
   subscriber: {
     id: number;
-    first_name: string;
+    first_name: string | null;
     email_address: string;
     state: SubscriberState;
     created_at: string;
-    fields: Record<string, string>;
+    fields: Record<string, string | null>;
   };
 }
 
@@ -200,11 +200,11 @@ export interface UpdateSubscriberParams {
 export interface UpdateSubscriber {
   subscriber: {
     id: number;
-    first_name: string;
+    first_name: string | null;
     email_address: string;
     state: SubscriberState;
     created_at: string;
-    fields: Record<string, string>;
+    fields: Record<string, string | null>;
   };
 }
 
