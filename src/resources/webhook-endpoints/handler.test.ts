@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
 import {
   Kit,
+  type CreateWebhookEndpoint,
+  type CreateWebhookEndpointParams,
   type GetWebhookEndpoint,
   type ListWebhookEndpoints,
   type ListWebhookEndpointsParams,
@@ -282,5 +284,115 @@ describe("webhook endpoint get requests through Kit", () => {
       "Authentication failed"
     );
     expect(fetchMock.requests()).toHaveLength(1);
+  });
+});
+
+describe("webhook endpoint create requests through Kit", () => {
+  let kit: Kit;
+  beforeEach(() => {
+    fetchMock.resetMocks();
+    kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
+  });
+
+  it("creates an endpoint with only URL and events and exposes the signing secret", async () => {
+    const params = {
+      url: endpoint.url,
+      events: ["subscriber.created", "custom_field.created"],
+    } satisfies CreateWebhookEndpointParams;
+    const response = {
+      webhook_endpoint: {
+        ...endpoint,
+        events: params.events,
+        secret: "whsec_test_fixture",
+      },
+    } satisfies CreateWebhookEndpoint;
+    fetchMock.mockResponseOnce(JSON.stringify(response), { status: 201 });
+    const result = await kit.webhookEndpoints.create(params);
+    expectTypeOf(result).toEqualTypeOf<CreateWebhookEndpoint>();
+    expectTypeOf(result.webhook_endpoint.secret).toEqualTypeOf<string>();
+    expectTypeOf<typeof endpoint>().not.toExtend<
+      CreateWebhookEndpoint["webhook_endpoint"]
+    >();
+    expectTypeOf<{ url: string }>().not.toExtend<CreateWebhookEndpointParams>();
+    expectTypeOf<{
+      events: string[];
+    }>().not.toExtend<CreateWebhookEndpointParams>();
+    expect(result).toEqual(response);
+    expect(fetchMock.requests()).toHaveLength(1);
+    const req = fetchMock.requests()[0]!;
+    expect(req.method).toBe("POST");
+    expect(req.url).toBe("https://api.kit.com/v4/webhook_endpoints");
+    expect(req.headers.get("X-Kit-Api-Key")).toBe("test-key");
+    expect(await req.json()).toEqual(params);
+  });
+
+  it("preserves optional names, empty descriptions, and event strings", async () => {
+    const params = {
+      url: endpoint.url,
+      events: ["subscriber.created", "future.event"],
+      name: "Integration & alerts",
+      description: "",
+    } satisfies CreateWebhookEndpointParams;
+    const response = {
+      webhook_endpoint: {
+        ...endpoint,
+        ...params,
+        created_by_app: { id: 42 },
+        source: "app",
+        secret: "whsec_test_fixture",
+      },
+    } satisfies CreateWebhookEndpoint;
+    fetchMock.mockResponseOnce(JSON.stringify(response), { status: 201 });
+    expect(await kit.webhookEndpoints.create(params)).toEqual(response);
+    expect(await fetchMock.requests()[0]!.json()).toEqual(params);
+  });
+
+  it("omits undefined metadata without supplying defaults", async () => {
+    const params = {
+      url: endpoint.url,
+      events: ["subscriber.created"],
+      name: undefined,
+      description: undefined,
+    } satisfies CreateWebhookEndpointParams;
+    fetchMock.mockResponseOnce(
+      JSON.stringify({
+        webhook_endpoint: { ...endpoint, secret: "whsec_test_fixture" },
+      }),
+      { status: 201 }
+    );
+    await kit.webhookEndpoints.create(params);
+    expect(await fetchMock.requests()[0]!.json()).toEqual({
+      url: endpoint.url,
+      events: ["subscriber.created"],
+    });
+  });
+
+  it("surfaces API validation errors", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({ errors: ["url must be publicly reachable"] }),
+      { status: 422 }
+    );
+    const params = {
+      url: "http://localhost/hooks",
+      events: ["subscriber.created"],
+    } satisfies CreateWebhookEndpointParams;
+    await expect(kit.webhookEndpoints.create(params)).rejects.toThrow(
+      "url must be publicly reachable"
+    );
+    expect(await fetchMock.requests()[0]!.json()).toEqual(params);
+    expect(fetchMock.requests()).toHaveLength(1);
+  });
+
+  it("surfaces authentication errors", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({ errors: ["The access token is invalid"] }),
+      { status: 401 }
+    );
+    await expect(
+      kit.webhookEndpoints.create({
+        url: endpoint.url,
+        events: ["subscriber.created"],
+      })
+    ).rejects.toThrow("Authentication failed");
   });
 });

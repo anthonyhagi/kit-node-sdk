@@ -2,6 +2,21 @@ import type { Pagination } from "~/common/types";
 
 export type WebhookEndpointStatus = "active" | "disabled";
 
+export interface CreateWebhookEndpointParams {
+  /** Publicly reachable HTTP(S) URL for webhook deliveries. */
+  url: string;
+  events: string[];
+  name?: string | undefined;
+  description?: string | undefined;
+}
+
+export interface CreateWebhookEndpoint {
+  webhook_endpoint: WebhookEndpoint & {
+    /** Save this signing secret; subsequent list/get responses omit it. */
+    secret: string;
+  };
+}
+
 export interface ListWebhookEndpointsParams {
   /** Cursor from the previous page's end_cursor. */
   after?: string | undefined;

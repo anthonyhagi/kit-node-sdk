@@ -405,6 +405,8 @@ export type {
 } from "./resources/tags/types";
 
 export type {
+  CreateWebhookEndpoint,
+  CreateWebhookEndpointParams,
   GetWebhookEndpoint,
   ListWebhookEndpoints,
   ListWebhookEndpointsParams,
