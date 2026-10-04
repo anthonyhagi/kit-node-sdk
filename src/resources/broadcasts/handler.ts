@@ -9,6 +9,7 @@ import type {
   GetSingleBroadcastStats,
   ListBroadcasts,
   ListBroadcastsParams,
+  ListSlimBroadcasts,
   UpdateBroadcast,
   UpdateBroadcastParams,
 } from "./types";
@@ -30,7 +31,18 @@ export class BroadcastsHandler {
    *
    * @returns the paginated list of broadcasts.
    */
-  public async list(params?: ListBroadcastsParams): Promise<ListBroadcasts> {
+  public async list(
+    params: ListBroadcastsParams & { slim: true }
+  ): Promise<ListSlimBroadcasts>;
+  public async list(
+    params?: ListBroadcastsParams & { slim?: false | undefined }
+  ): Promise<ListBroadcasts>;
+  public async list(
+    params?: ListBroadcastsParams
+  ): Promise<ListBroadcasts | ListSlimBroadcasts>;
+  public async list(
+    params?: ListBroadcastsParams
+  ): Promise<ListBroadcasts | ListSlimBroadcasts> {
     const {
       after,
       before,
@@ -39,6 +51,7 @@ export class BroadcastsHandler {
       sent_after,
       sent_before,
       status,
+      slim,
     } = params || {};
 
     const query = new URLSearchParams({
@@ -51,9 +64,15 @@ export class BroadcastsHandler {
       ...(sent_after && { sent_after }),
       ...(sent_before && { sent_before }),
       ...(status && { status }),
+      ...(slim !== undefined && { slim: String(slim) }),
     });
 
-    return await this.api.get<ListBroadcasts>("/broadcasts", { query });
+    return await this.api.get<ListBroadcasts | ListSlimBroadcasts>(
+      "/broadcasts",
+      {
+        query,
+      }
+    );
   }
 
   /**

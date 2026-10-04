@@ -4,7 +4,9 @@ import {
   type BroadcastSubscriberFilterGroup,
   type CreateBroadcastParams,
   type GetBroadcastStatsParams,
+  type ListBroadcasts,
   type ListBroadcastsParams,
+  type ListSlimBroadcasts,
 } from "~/index";
 
 const pagination = {
@@ -93,6 +95,99 @@ describe("broadcast list filters through Kit", () => {
       ).toEqual({ [bound]: "2026-01-01" });
     }
   );
+});
+
+describe("slim broadcast lists through Kit", () => {
+  let kit: Kit;
+  const broadcast = {
+    id: 1,
+    publication_id: 2,
+    created_at: "2026-01-01T00:00:00Z",
+    subject: "Hello",
+    preview_text: null,
+    description: null,
+    public: false,
+    published_at: null,
+    send_at: null,
+    thumbnail_alt: null,
+    thumbnail_url: null,
+  } satisfies ListSlimBroadcasts["broadcasts"][number];
+
+  beforeEach(() => {
+    fetchMock.resetMocks();
+    kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
+  });
+
+  it("returns slim types and combines slim with filters and pagination", async () => {
+    const response = { broadcasts: [broadcast], pagination };
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const result = await kit.broadcasts.list({
+      slim: true,
+      after: "next+/=",
+      per_page: 25,
+      status: "completed",
+      sent_after: "2026-01-01",
+    });
+    expectTypeOf(result).toEqualTypeOf<ListSlimBroadcasts>();
+    type OmittedFields = Extract<
+      keyof ListSlimBroadcasts["broadcasts"][number],
+      | "content"
+      | "public_url"
+      | "email_address"
+      | "email_template"
+      | "subscriber_filter"
+    >;
+    expectTypeOf<OmittedFields>().toEqualTypeOf<never>();
+    expect(result).toEqual(response);
+    expect(
+      Object.fromEntries(new URL(fetchMock.requests()[0]!.url).searchParams)
+    ).toEqual({
+      slim: "true",
+      after: "next+/=",
+      per_page: "25",
+      status: "completed",
+      sent_after: "2026-01-01",
+    });
+  });
+
+  it("sends explicit false and preserves the full response type", async () => {
+    const response = {
+      broadcasts: [
+        {
+          ...broadcast,
+          content: "<p>Hello</p>",
+          public_url: null,
+          email_address: "hello@example.com",
+          email_template: { id: 3, name: "Default" },
+          subscriber_filter: [{ all: [{ type: "tag", ids: [7] }] }],
+        },
+      ],
+      pagination,
+    } satisfies ListBroadcasts;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const result = await kit.broadcasts.list({ slim: false });
+    expectTypeOf(result).toEqualTypeOf<ListBroadcasts>();
+    expect(result).toEqual(response);
+    expect(
+      Object.fromEntries(new URL(fetchMock.requests()[0]!.url).searchParams)
+    ).toEqual({ slim: "false" });
+  });
+
+  it("preserves the full response type for default calls", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify({ broadcasts: [], pagination }));
+    const result = await kit.broadcasts.list();
+    expectTypeOf(result).toEqualTypeOf<ListBroadcasts>();
+  });
+
+  it("returns a union for runtime boolean options", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({ broadcasts: [broadcast], pagination })
+    );
+    const params: ListBroadcastsParams = { slim: Boolean(1) };
+    const result = await kit.broadcasts.list(params);
+    expectTypeOf(result).toEqualTypeOf<ListBroadcasts | ListSlimBroadcasts>();
+    expect(result.broadcasts).toEqual([broadcast]);
+  });
 });
 
 describe("broadcast stats requests through Kit", () => {

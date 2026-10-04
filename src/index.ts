@@ -207,6 +207,7 @@ export type {
   GetSingleBroadcastStats,
   ListBroadcasts,
   ListBroadcastsParams,
+  ListSlimBroadcasts,
   TypedSubscriberFilterItem,
   UpdateBroadcast,
   UpdateBroadcastParams,
