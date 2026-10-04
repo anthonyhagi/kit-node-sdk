@@ -191,12 +191,27 @@ export interface CreateBroadcast {
   };
 }
 
+export interface GetBroadcastStatsParams extends ListBroadcastsParams {
+  /** Filter broadcasts sent after this date (YYYY-MM-DD). */
+  sent_after?: string | undefined;
+
+  /** Filter broadcasts sent before this date (YYYY-MM-DD). */
+  sent_before?: string | undefined;
+
+  /** Filter broadcasts by lifecycle status. */
+  status?:
+    "draft" | "scheduled" | "sending" | "completed" | "aborted" | undefined;
+}
+
 export interface GetBroadcastStats {
   broadcasts: {
     id: number;
     stats: BroadcastStats;
   }[];
-  pagination: Pagination;
+  pagination: Pagination & {
+    /** Only included when include_total_count is true. */
+    total_count?: number | undefined;
+  };
 }
 
 export interface GetLinkClicks {

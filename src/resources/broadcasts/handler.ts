@@ -4,6 +4,7 @@ import type {
   CreateBroadcastParams,
   GetBroadcast,
   GetBroadcastStats,
+  GetBroadcastStatsParams,
   GetLinkClicks,
   GetSingleBroadcastStats,
   ListBroadcasts,
@@ -69,17 +70,45 @@ export class BroadcastsHandler {
   }
 
   /**
-   * Returns the stats for all Broadcasts on the account.
+   * Returns a paginated list of broadcast stats on the account.
    *
    * @remarks This endpoint requires either a Pro level plan or
    * developer authorization.
    *
+   * @param params - Optional pagination, sent-date, and status filters.
+   *
    * @see {@link https://developers.kit.com/api-reference/broadcasts/get-stats-for-a-list-of-broadcasts}
    *
-   * @returns an array of stats for all Broadcasts.
+   * @returns a page of broadcast stats and pagination details.
    */
-  public async getAllStats(): Promise<GetBroadcastStats> {
-    return await this.api.get<GetBroadcastStats>("/broadcasts/stats");
+  public async getAllStats(
+    params?: GetBroadcastStatsParams
+  ): Promise<GetBroadcastStats> {
+    const {
+      after,
+      before,
+      include_total_count,
+      per_page,
+      sent_after,
+      sent_before,
+      status,
+    } = params || {};
+
+    const query = new URLSearchParams({
+      ...(after && { after }),
+      ...(before && { before }),
+      ...(include_total_count !== undefined && {
+        include_total_count: String(include_total_count),
+      }),
+      ...(per_page !== undefined && { per_page: String(per_page) }),
+      ...(sent_after && { sent_after }),
+      ...(sent_before && { sent_before }),
+      ...(status && { status }),
+    });
+
+    return await this.api.get<GetBroadcastStats>("/broadcasts/stats", {
+      query,
+    });
   }
 
   /**
