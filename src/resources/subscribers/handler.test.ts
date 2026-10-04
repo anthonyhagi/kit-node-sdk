@@ -135,6 +135,61 @@ describe("subscriber requests through Kit", () => {
     expect(await request("GET", "/subscribers/42").text()).toBe("");
   });
 
+  it.each([
+    {
+      name: "a populated primary location and cancellation timestamp",
+      details: {
+        canceled_at: "2026-05-01T00:00:00Z",
+        location: {
+          city: "Williamstown",
+          state: "Massachusetts",
+          country: "US",
+          latitude: 9.99,
+          longitude: 9.99,
+          timezone: "US/EST",
+        },
+      },
+    },
+    {
+      name: "undetermined location fields and no cancellation",
+      details: {
+        canceled_at: null,
+        location: {
+          city: null,
+          state: null,
+          country: null,
+          latitude: null,
+          longitude: null,
+          timezone: null,
+        },
+      },
+    },
+    {
+      name: "zero coordinates with other location fields omitted",
+      details: { location: { latitude: 0, longitude: 0 } },
+    },
+    { name: "optional details omitted", details: {} },
+  ] satisfies {
+    name: string;
+    details: Partial<GetSubscriber["subscriber"]>;
+  }[])("gets a subscriber with $name", async ({ details }) => {
+    const response = {
+      subscriber: { ...subscriber, ...details },
+    } satisfies GetSubscriber;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+
+    const result = await kit.subscribers.get(42);
+    expectTypeOf(result).toEqualTypeOf<GetSubscriber | null>();
+    expectTypeOf(result?.subscriber.canceled_at).toEqualTypeOf<
+      string | null | undefined
+    >();
+    expectTypeOf(result?.subscriber.location?.latitude).toEqualTypeOf<
+      number | null | undefined
+    >();
+    expect(result).toEqual(response);
+    expect(await request("GET", "/subscribers/42").text()).toBe("");
+  });
+
   it("lists subscribers with null names and unset custom fields", async () => {
     const response = {
       subscribers: [namelessSubscriber],

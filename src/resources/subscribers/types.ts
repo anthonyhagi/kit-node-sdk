@@ -375,6 +375,19 @@ export interface GetSubscriber {
     state: SubscriberState;
     created_at: string;
     fields: Record<string, string | null>;
+    /** Cancellation timestamp, when present. */
+    canceled_at?: string | null | undefined;
+    /** Primary location. Individual fields are null when not yet determined. */
+    location?:
+      | {
+          city?: string | null | undefined;
+          state?: string | null | undefined;
+          country?: string | null | undefined;
+          latitude?: number | null | undefined;
+          longitude?: number | null | undefined;
+          timezone?: string | null | undefined;
+        }
+      | undefined;
   };
 }
 
