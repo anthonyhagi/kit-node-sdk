@@ -14,6 +14,7 @@ import { SequencesHandler } from "./resources/sequences/handler";
 import { SnippetsHandler } from "./resources/snippets/handler";
 import { SubscribersHandler } from "./resources/subscribers/handler";
 import { TagsHandler } from "./resources/tags/handler";
+import { WebhookEndpointsHandler } from "./resources/webhook-endpoints/handler";
 import { WebhooksHandler } from "./resources/webhooks/handler";
 import type { ClientOptions } from "./types";
 
@@ -123,6 +124,12 @@ export class Kit extends ApiClient {
   public readonly tags: TagsHandler;
 
   /**
+   * Webhook endpoints subscribing to multiple event types with signed deliveries.
+   * @see {@link https://developers.kit.com/api-reference/webhooks/list-webhook-endpoints}
+   */
+  public readonly webhookEndpoints: WebhookEndpointsHandler;
+
+  /**
    * HTTP callbacks for external applications to receive real-time
    * notifications from Kit.com for events like new subscribers.
    *
@@ -181,6 +188,7 @@ export class Kit extends ApiClient {
     this.snippets = new SnippetsHandler(this);
     this.subscribers = new SubscribersHandler(this);
     this.tags = new TagsHandler(this);
+    this.webhookEndpoints = new WebhookEndpointsHandler(this);
     this.webhooks = new WebhooksHandler(this);
   }
 
@@ -393,6 +401,13 @@ export type {
   UpdateTag,
   UpdateTagParams,
 } from "./resources/tags/types";
+
+export type {
+  ListWebhookEndpoints,
+  ListWebhookEndpointsParams,
+  WebhookEndpoint,
+  WebhookEndpointStatus,
+} from "./resources/webhook-endpoints/types";
 
 export type {
   CreateWebhook,
