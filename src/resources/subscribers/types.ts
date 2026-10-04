@@ -164,7 +164,7 @@ export interface FilterSubscriberBody {
 export interface FilterSubscribers {
   subscribers: {
     id: string;
-    first_name: string;
+    first_name: string | null;
     email_address: string;
     created_at: string;
     tag_names?: string[] | undefined;

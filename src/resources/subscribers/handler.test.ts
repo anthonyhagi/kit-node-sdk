@@ -224,8 +224,16 @@ describe("subscriber requests through Kit", () => {
           tag_names: ["Newsletter"],
           tag_ids: ["7"],
         },
+        {
+          id: "43",
+          first_name: null,
+          email_address: "anonymous@example.com",
+          created_at: "2026-01-02T00:00:00Z",
+          tag_names: [],
+          tag_ids: [],
+        },
       ],
-      pagination: { ...pagination, total_count: 1 },
+      pagination: { ...pagination, total_count: 2 },
     } satisfies FilterSubscribers;
     fetchMock.mockResponseOnce(JSON.stringify(response));
 
