@@ -3,6 +3,7 @@ import {
   Kit,
   type CreateSubscriber,
   type FilterSubscriberBody,
+  type FilterSubscriberBodyAllTags,
   type FilterSubscriberParams,
   type FilterSubscribers,
   type GetSubscriber,
@@ -284,6 +285,34 @@ describe("subscriber requests through Kit", () => {
     expect(await kit.subscribers.filter(body)).toEqual(response);
     expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
   });
+
+  const tagCondition: FilterSubscriberBodyAllTags = {
+    type: "tags",
+    any: [{ type: "ids", matching: [123, 456] }],
+  };
+
+  it.each([
+    { name: "tags alone", body: { all: [tagCondition] } },
+    {
+      name: "tags combined with engagement and sign-up dates",
+      body: {
+        all: [
+          tagCondition,
+          { type: "opens", count_greater_than: 5 },
+          { type: "subscribed", after: "2026-01-01" },
+        ],
+      },
+    },
+  ] satisfies { name: string; body: FilterSubscriberBody }[])(
+    "filters by $name",
+    async ({ body }) => {
+      const response = { subscribers: [], pagination };
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+
+      expect(await kit.subscribers.filter(body)).toEqual(response);
+      expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
+    }
+  );
 
   it.each(["after", "before"] as const)(
     "paginates filter results with %s",

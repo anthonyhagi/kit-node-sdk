@@ -157,8 +157,22 @@ export interface FilterSubscriberBodyAllBase {
   any?: (FilterSubscriberBodyAnyBroadcast | FilterSubscriberBodyAnyUrls)[];
 }
 
+export interface FilterSubscriberBodyAllTags {
+  type: "tags";
+  /** Tag conditions combined with OR logic. */
+  any: {
+    type: "ids";
+    /** Tag IDs to match. */
+    matching: number[];
+  }[];
+}
+
 export interface FilterSubscriberBody {
-  all: (FilterSubscriberBodyAllSubscribed | FilterSubscriberBodyAllBase)[];
+  all: (
+    | FilterSubscriberBodyAllSubscribed
+    | FilterSubscriberBodyAllBase
+    | FilterSubscriberBodyAllTags
+  )[];
 }
 
 export interface FilterSubscribers {
