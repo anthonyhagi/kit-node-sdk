@@ -56,6 +56,33 @@ describe("sequence requests through Kit", () => {
     kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
   });
 
+  it("deletes a sequence with a bodyless request and handles 204 responses", async () => {
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
+    const result = await kit.sequences.delete(7);
+    expectTypeOf(result).toEqualTypeOf<{} | null>();
+    expect(result).toEqual({});
+    expect(await request("DELETE", "/sequences/7").text()).toBe("");
+  });
+
+  it("returns null when deleting a missing sequence", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
+      status: 404,
+    });
+    expect(await kit.sequences.delete(404)).toBeNull();
+    expect(await request("DELETE", "/sequences/404").text()).toBe("");
+  });
+
+  it("surfaces authentication errors when deleting a sequence", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({ errors: ["The access token is invalid"] }),
+      { status: 401 }
+    );
+    await expect(kit.sequences.delete(7)).rejects.toThrow(
+      "Authentication failed"
+    );
+    expect(await request("DELETE", "/sequences/7").text()).toBe("");
+  });
+
   it("lists sequences without optional pagination", async () => {
     const response = {
       sequences: [sequence],
