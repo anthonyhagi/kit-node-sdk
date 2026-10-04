@@ -37,6 +37,7 @@ const kit = new Kit({
   authType: "apikey", // Optional: "apikey" (default) or "oauth"
   maxRetries: 3, // Optional: Retry attempts; 0 disables retries (default: 3)
   retryDelay: 1000, // Optional: Base delay; 0 disables backoff (default: 1000ms)
+  timeoutMs: 10000, // Optional: Timeout per attempt; defaults to 0 (disabled)
 });
 ```
 
@@ -47,6 +48,11 @@ as the server requests, even when `retryDelay` is `0`.
 non-negative number; fractional milliseconds are accepted. Invalid values throw
 a `RangeError` when constructing the client. Omitted or `undefined` options use
 the defaults, and both options accept `0`.
+
+`timeoutMs` limits each attempt, including response body reading. Omit it or set
+it to `0` to disable the timeout. It must be an integer from `0` to `2147483647`
+milliseconds; invalid values throw a `RangeError` at construction. Retry delays
+are excluded, so the entire call can take longer than one attempt's timeout.
 
 ## Environment Variables
 

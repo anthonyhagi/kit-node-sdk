@@ -135,12 +135,14 @@ export class Kit extends ApiClient {
       baseUrl: opts.baseUrl || "https://api.kit.com/v4",
       maxRetries: opts.maxRetries ?? 3,
       retryDelay: opts.retryDelay ?? 1000,
+      timeoutMs: opts.timeoutMs ?? 0,
     } satisfies Required<ClientOptions>;
 
     super({
       baseUrl: options.baseUrl,
       maxRetries: options.maxRetries,
       retryDelay: options.retryDelay,
+      timeoutMs: options.timeoutMs,
     });
 
     this.options = options;

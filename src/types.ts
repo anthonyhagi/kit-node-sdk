@@ -1,5 +1,13 @@
 export interface ClientOptions {
   /**
+   * Per-attempt timeout in milliseconds, including response body reading.
+   * Defaults to 0 (disabled). Must be an integer from 0 to 2147483647.
+   * Fetch timeouts follow maxRetries; successful response body timeouts
+   * throw without repeating the operation. Retry delays are excluded.
+   */
+  timeoutMs?: number | undefined;
+
+  /**
    * Defaults to `process.env['KIT_API_KEY']`
    */
   apiKey?: string | undefined;

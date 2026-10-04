@@ -14,17 +14,20 @@ type ApiClientOptions = {
   baseUrl: string;
   maxRetries?: number;
   retryDelay?: number;
+  timeoutMs?: number | undefined;
 };
 
 export class ApiClient {
   baseUrl: string;
   maxRetries: number;
   retryDelay: number;
+  timeoutMs: number;
 
   constructor({
     baseUrl,
     maxRetries = 3,
     retryDelay = 1000,
+    timeoutMs = 0,
   }: ApiClientOptions) {
     if (!Number.isSafeInteger(maxRetries) || maxRetries < 0) {
       throw new RangeError("maxRetries must be a non-negative safe integer");
@@ -32,10 +35,20 @@ export class ApiClient {
     if (!Number.isFinite(retryDelay) || retryDelay < 0) {
       throw new RangeError("retryDelay must be a finite non-negative number");
     }
+    if (
+      !Number.isInteger(timeoutMs) ||
+      timeoutMs < 0 ||
+      timeoutMs > 2 ** 31 - 1
+    ) {
+      throw new RangeError(
+        "timeoutMs must be an integer between 0 and 2147483647"
+      );
+    }
 
     this.baseUrl = baseUrl;
     this.maxRetries = maxRetries;
     this.retryDelay = retryDelay;
+    this.timeoutMs = timeoutMs;
   }
 
   /**
@@ -140,43 +153,68 @@ export class ApiClient {
     // retry the request until we have exhausted
     // all attempts.
     for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
-      let resp: Response;
+      const controller = this.timeoutMs > 0 ? new AbortController() : undefined;
+      const timer = controller
+        ? setTimeout(
+            () =>
+              controller.abort(
+                new DOMException(
+                  `Request timed out after ${this.timeoutMs}ms`,
+                  "TimeoutError"
+                )
+              ),
+            this.timeoutMs
+          )
+        : undefined;
 
       try {
-        resp = await fetch(url, fetchOptions);
-      } catch (error: unknown) {
-        // Only fetch failures are eligible for network retries.
-        if (error instanceof Error && attempt < this.maxRetries) {
-          await delay(this.calculateDelay(attempt));
-          continue;
+        let resp: Response;
+
+        try {
+          resp = await fetch(
+            url,
+            controller
+              ? { ...fetchOptions, signal: controller.signal }
+              : fetchOptions
+          );
+        } catch (error: unknown) {
+          clearTimeout(timer);
+          // Only fetch failures are eligible for network retries.
+          if (error instanceof Error && attempt < this.maxRetries) {
+            await delay(this.calculateDelay(attempt));
+            continue;
+          }
+          throw error;
         }
-        throw error;
-      }
 
-      if (!resp.ok) {
-        if (this.shouldRetry(resp.status) && attempt < this.maxRetries) {
-          await this.waitForRetry(attempt, resp);
-          continue;
+        if (!resp.ok) {
+          if (this.shouldRetry(resp.status) && attempt < this.maxRetries) {
+            clearTimeout(timer);
+            await this.waitForRetry(attempt, resp);
+            continue;
+          }
+
+          return (await this.handleError(resp)) as TResponseType;
         }
 
-        return (await this.handleError(resp)) as TResponseType;
+        if (resp.status === 204) {
+          const emptyObj = {};
+          return emptyObj as TResponseType;
+        }
+
+        // A successful operation must not be repeated if reading or parsing
+        // its response fails. Keep body handling outside the fetch catch.
+        const body = await resp.text();
+
+        if (body.length === 0) {
+          const emptyObj = {};
+          return emptyObj as TResponseType;
+        }
+
+        return JSON.parse(body) as TResponseType;
+      } finally {
+        clearTimeout(timer);
       }
-
-      if (resp.status === 204) {
-        const emptyObj = {};
-        return emptyObj as TResponseType;
-      }
-
-      // A successful operation must not be repeated if reading or parsing
-      // its response fails. Keep body handling outside the fetch catch.
-      const body = await resp.text();
-
-      if (body.length === 0) {
-        const emptyObj = {};
-        return emptyObj as TResponseType;
-      }
-
-      return JSON.parse(body) as TResponseType;
     }
 
     throw new Error("Request failed after all retry attempts");
