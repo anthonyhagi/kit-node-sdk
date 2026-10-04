@@ -3,6 +3,8 @@ import { toDateString } from "~/utils/date";
 import type {
   AddSubscriberByEmailParams,
   AddSubscriberToSequence,
+  CreateSequence,
+  CreateSequenceParams,
   GetSequence,
   GetSequenceParams,
   ListSequences,
@@ -42,6 +44,19 @@ export class SequencesHandler {
     });
 
     return await this.api.get<ListSequences>("/sequences", { query });
+  }
+
+  /**
+   * Create an empty sequence. Only the name is required; Kit supplies defaults.
+   *
+   * @param params - The name and optional sending settings and exclusions.
+   * @returns The created sequence details.
+   * @see {@link https://developers.kit.com/api-reference/sequences/create-a-sequence}
+   */
+  public async create(params: CreateSequenceParams): Promise<CreateSequence> {
+    return await this.api.post<CreateSequence>("/sequences", {
+      body: JSON.stringify(params),
+    });
   }
 
   /**

@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
 import {
   Kit,
   type AddSubscriberToSequence,
+  type CreateSequence,
+  type CreateSequenceParams,
   type GetSequence,
   type ListSequences,
   type ListSequenceSubscribers,
@@ -78,6 +80,85 @@ describe("sequence requests through Kit", () => {
     email_count: 2,
     subscriber_count: 10,
   } satisfies GetSequence["sequence"];
+
+  it("creates a sequence with only a name and returns the server's defaults", async () => {
+    const params = { name: "Welcome" } satisfies CreateSequenceParams;
+    const response = { sequence: details } satisfies CreateSequence;
+    fetchMock.mockResponseOnce(JSON.stringify(response), { status: 201 });
+    const result = await kit.sequences.create(params);
+    expectTypeOf(result).toEqualTypeOf<CreateSequence>();
+    expect(result).toEqual(response);
+    const req = request("POST", "/sequences");
+    expect(req.headers.get("Content-Type")).toBe("application/json");
+    expect(await req.json()).toEqual({ name: "Welcome" });
+  });
+
+  it("creates a fully configured sequence with false flags and a midnight schedule", async () => {
+    const params = {
+      name: "Full Series",
+      email_address: "hello@example.com",
+      email_template_id: 6,
+      send_days: ["monday", "wednesday", "friday"],
+      send_hour: 0,
+      time_zone: "Australia/Adelaide",
+      active: false,
+      repeat: false,
+      hold: false,
+      exclude_subscriber_sources: [
+        { type: "tag", ids: [3] },
+        { type: "sequence", ids: [30] },
+        { type: "form", ids: [4] },
+        { type: "segment", ids: [5] },
+      ],
+    } satisfies CreateSequenceParams;
+    const response = {
+      sequence: { ...details, ...params },
+    } satisfies CreateSequence;
+    fetchMock.mockResponseOnce(JSON.stringify(response), { status: 201 });
+    expect(await kit.sequences.create(params)).toEqual(response);
+    expect(await request("POST", "/sequences").json()).toEqual(params);
+    expectTypeOf<{
+      name: string;
+      send_days: ["holiday"];
+    }>().not.toExtend<CreateSequenceParams>();
+    expectTypeOf<{
+      name: string;
+      exclude_subscriber_sources: [{ type: "unknown"; ids: number[] }];
+    }>().not.toExtend<CreateSequenceParams>();
+    expectTypeOf<{}>().not.toExtend<CreateSequenceParams>();
+  });
+
+  it("preserves empty exclusions and omits undefined optional settings", async () => {
+    const params = {
+      name: "Welcome",
+      exclude_subscriber_sources: [],
+      email_address: undefined,
+    } satisfies CreateSequenceParams;
+    fetchMock.mockResponseOnce(JSON.stringify({ sequence: details }), {
+      status: 201,
+    });
+    await kit.sequences.create(params);
+    expect(await request("POST", "/sequences").json()).toEqual({
+      name: "Welcome",
+      exclude_subscriber_sources: [],
+    });
+  });
+
+  it("surfaces Kit validation errors when creating a sequence", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({
+        errors: ["send_hour must be an integer between 0 and 23"],
+      }),
+      { status: 422 }
+    );
+    await expect(
+      kit.sequences.create({ name: "Welcome", send_hour: 24 })
+    ).rejects.toThrow("send_hour must be an integer between 0 and 23");
+    expect(await request("POST", "/sequences").json()).toEqual({
+      name: "Welcome",
+      send_hour: 24,
+    });
+  });
 
   it("fetches full sequence details without requesting stats", async () => {
     const response = { sequence: details } satisfies GetSequence;
