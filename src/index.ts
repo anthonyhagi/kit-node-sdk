@@ -334,6 +334,7 @@ export type {
   CreateSubscriber,
   CreateSubscriberParams,
   FilterSubscriberBody,
+  FilterSubscriberBodyAllTags,
   FilterSubscriberParams,
   FilterSubscribers,
   GetSubscriber,
