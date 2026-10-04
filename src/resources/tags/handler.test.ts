@@ -1,5 +1,11 @@
 import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
-import { Kit, type TagSubscriber, type TagSubscriberByEmail } from "~/index";
+import {
+  Kit,
+  type BulkTagParams,
+  type BulkTagSynchronous,
+  type TagSubscriber,
+  type TagSubscriberByEmail,
+} from "~/index";
 
 const tag = { id: 7, name: "Newsletter", created_at: "2026-01-01T00:00:00Z" };
 const subscriber = {
@@ -245,6 +251,49 @@ describe("tag requests through Kit", () => {
       type: "synchronous",
       ...response,
     });
+    expect(await request("POST", "/bulk/tags/subscribers").json()).toEqual(
+      body
+    );
+  });
+
+  it("preserves nullable bulk tagging IDs and mixed results", async () => {
+    const body = {
+      taggings: [
+        { tag_id: null, subscriber_id: 42 },
+        { tag_id: 7, subscriber_id: null },
+        { tag_id: null, subscriber_id: null },
+        { tag_id: 7, subscriber_id: 42 },
+      ],
+      callback_url: null,
+    } satisfies BulkTagParams;
+    const response = {
+      subscribers: [subscriber],
+      failures: [
+        {
+          tagging: { tag_id: null, subscriber_id: 42 },
+          errors: ["Tag does not exist"],
+        },
+        {
+          tagging: { tag_id: 7, subscriber_id: null },
+          errors: ["Subscriber does not exist"],
+        },
+        {
+          tagging: { tag_id: null, subscriber_id: null },
+          errors: ["Tag does not exist", "Subscriber does not exist"],
+        },
+      ],
+    } satisfies Omit<BulkTagSynchronous, "type">;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.tags.bulkTag(body)).toEqual({
+      type: "synchronous",
+      ...response,
+    });
+    expectTypeOf<BulkTagParams["taggings"][number]["tag_id"]>().toEqualTypeOf<
+      number | null
+    >();
+    expectTypeOf<
+      BulkTagParams["taggings"][number]["subscriber_id"]
+    >().toEqualTypeOf<number | null>();
     expect(await request("POST", "/bulk/tags/subscribers").json()).toEqual(
       body
     );
