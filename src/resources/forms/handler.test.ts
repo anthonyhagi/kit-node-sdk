@@ -163,6 +163,17 @@ describe("form requests through Kit", () => {
     }
   );
 
+  it("accepts a null state when a subscriber is newly added by ID", async () => {
+    const response = {
+      subscriber: { ...subscriber, state: null },
+    } satisfies AddSubscriberToForm;
+    fetchMock.mockResponseOnce(JSON.stringify(response), { status: 201 });
+    const result = await kit.forms.addSubscriber(7, 42);
+    expectTypeOf(result!.subscriber.state).toEqualTypeOf<string | null>();
+    expect(result).toEqual(response);
+    expect(await request("POST", "/forms/7/subscribers/42").json()).toEqual({});
+  });
+
   it("lists form subscribers without optional filters", async () => {
     const response = { subscribers: [subscriber], pagination };
     fetchMock.mockResponseOnce(JSON.stringify(response));

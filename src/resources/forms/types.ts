@@ -266,7 +266,7 @@ export interface AddSubscriberToForm {
     id: number;
     first_name: string | null;
     email_address: string;
-    state: string;
+    state: string | null;
     created_at: string;
     added_at: string;
     fields: Record<string, string>;
