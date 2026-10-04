@@ -241,7 +241,25 @@ export interface FilterSubscriberBodyAllLocation {
   radius: number;
 }
 
+export type FilterSubscriberInclude =
+  | {
+      type:
+        "attribution" | "tags" | "location" | "canceled_at" | "custom_fields";
+    }
+  | {
+      type: "stats";
+      /** Date window (YYYY-MM-DD). Defaults to the last 90 days. */
+      range?:
+        | {
+            start?: string | undefined;
+            end?: string | undefined;
+          }
+        | undefined;
+    };
+
 export interface FilterSubscriberBody {
+  /** Additional fields to embed on each returned subscriber. */
+  include?: FilterSubscriberInclude[] | undefined;
   /**
    * Count all engagement events (raw) or distinct emails (unique_email).
    * Applies to opens, clicks, sent, and delivered conditions.
@@ -288,6 +306,56 @@ export interface FilterSubscribers {
     created_at: string;
     tag_names?: string[] | undefined;
     tag_ids?: string[] | undefined;
+    /** Included when attribution is requested; null when unavailable. */
+    attribution?:
+      | {
+          referrer?: string | null | undefined;
+          utm_source?: string | null | undefined;
+          utm_medium?: string | null | undefined;
+          utm_campaign?: string | null | undefined;
+          utm_term?: string | null | undefined;
+          utm_content?: string | null | undefined;
+          source_type?: string | null | undefined;
+          source_name?: string | null | undefined;
+          source_mechanism?: string | null | undefined;
+          source_mechanism_id?: number | null | undefined;
+        }
+      | null
+      | undefined;
+    /** Included when tags are requested. */
+    tags?: { id?: number | undefined; name?: string | undefined }[] | undefined;
+    /** Included when location is requested; null when unavailable. */
+    location?:
+      | {
+          city?: string | null | undefined;
+          state?: string | null | undefined;
+          country?: string | null | undefined;
+          latitude?: number | null | undefined;
+          longitude?: number | null | undefined;
+          timezone?: string | null | undefined;
+        }
+      | null
+      | undefined;
+    /** Most recent state transition timestamp, included when canceled_at is requested. */
+    canceled_at?: string | null | undefined;
+    /** Engagement over the requested range, included when stats are requested. */
+    stats?:
+      | {
+          sent?: number | undefined;
+          opened?: number | undefined;
+          clicked?: number | undefined;
+          bounced?: number | undefined;
+          open_rate?: number | undefined;
+          click_rate?: number | undefined;
+          last_sent?: string | null | undefined;
+          last_opened?: string | null | undefined;
+          last_clicked?: string | null | undefined;
+          sends_since_last_open?: number | undefined;
+          sends_since_last_click?: number | undefined;
+        }
+      | undefined;
+    /** All custom field values, included when custom_fields is requested. */
+    fields?: Record<string, string | null> | undefined;
   }[];
 
   pagination: Pagination & {

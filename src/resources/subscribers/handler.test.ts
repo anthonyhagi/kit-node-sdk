@@ -10,6 +10,7 @@ import {
   type FilterSubscriberBodyAllTags,
   type FilterSubscriberBodyAnyForms,
   type FilterSubscriberBodyAnyKitSource,
+  type FilterSubscriberInclude,
   type FilterSubscriberParams,
   type FilterSubscribers,
   type GetSubscriber,
@@ -370,6 +371,133 @@ describe("subscriber requests through Kit", () => {
       expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
     }
   );
+
+  it.each([
+    { type: "attribution" },
+    { type: "tags" },
+    { type: "location" },
+    { type: "canceled_at" },
+    { type: "custom_fields" },
+    { type: "stats" },
+    { type: "stats", range: {} },
+    { type: "stats", range: { start: "2026-05-01" } },
+    { type: "stats", range: { end: "2026-06-30" } },
+    { type: "stats", range: { start: "2026-05-01", end: "2026-06-30" } },
+  ] satisfies FilterSubscriberInclude[])(
+    "sends filter include %j",
+    async (include) => {
+      const body = {
+        ...filterBody,
+        include: [include],
+      } satisfies FilterSubscriberBody;
+      const response = { subscribers: [], pagination };
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+
+      expect(await kit.subscribers.filter(body)).toEqual(response);
+      expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
+    }
+  );
+
+  it("returns typed embedded subscriber fields with nullable and absent values", async () => {
+    const body = {
+      ...filterBody,
+      include: [
+        { type: "attribution" },
+        { type: "tags" },
+        { type: "location" },
+        { type: "canceled_at" },
+        { type: "stats" },
+        { type: "custom_fields" },
+      ],
+    } satisfies FilterSubscriberBody;
+    const base = {
+      id: "42",
+      first_name: "Ada",
+      email_address: "ada@example.com",
+      created_at: "2026-01-01T00:00:00Z",
+    };
+    const response = {
+      subscribers: [
+        {
+          ...base,
+          attribution: {
+            referrer: "https://example.com",
+            utm_source: "newsletter",
+            utm_medium: null,
+            utm_campaign: "launch",
+            utm_term: null,
+            utm_content: null,
+            source_type: "api_subscription",
+            source_name: "Welcome",
+            source_mechanism: "import",
+            source_mechanism_id: 9,
+          },
+          tags: [{ id: 123, name: "Newsletter" }],
+          location: {
+            city: "Adelaide",
+            state: null,
+            country: "Australia",
+            latitude: -34.9285,
+            longitude: 138.6007,
+            timezone: "Australia/Adelaide",
+          },
+          canceled_at: "2026-05-01T00:00:00Z",
+          stats: {
+            sent: 10,
+            opened: 5,
+            clicked: 2,
+            bounced: 0,
+            open_rate: 0.5,
+            click_rate: 0.2,
+            last_sent: "2026-05-01T00:00:00Z",
+            last_opened: "2026-05-01T00:01:00Z",
+            last_clicked: "2026-05-01T00:02:00Z",
+            sends_since_last_open: 0,
+            sends_since_last_click: 0,
+          },
+          fields: { interest: "TypeScript", company: null },
+        },
+        {
+          ...base,
+          id: "43",
+          attribution: null,
+          location: null,
+          tags: [],
+          canceled_at: null,
+          fields: {},
+          stats: {
+            sent: 0,
+            opened: 0,
+            clicked: 0,
+            bounced: 0,
+            open_rate: 0,
+            click_rate: 0,
+            last_sent: null,
+            last_opened: null,
+            last_clicked: null,
+            sends_since_last_open: 0,
+            sends_since_last_click: 0,
+          },
+        },
+        { ...base, id: "44" },
+        {
+          ...base,
+          id: "45",
+          attribution: {},
+          location: {},
+          stats: {},
+          tags: [{}],
+        },
+      ],
+      pagination,
+    } satisfies FilterSubscribers;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+
+    const result = await kit.subscribers.filter(body);
+    expectTypeOf(result).toEqualTypeOf<FilterSubscribers>();
+    expect(result).toEqual(response);
+    expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
+  });
 
   const locationCondition = {
     type: "location",
