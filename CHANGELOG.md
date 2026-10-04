@@ -1,5 +1,44 @@
 # @anthonyhagi/kit-node-sdk
 
+## 0.5.0
+
+### Minor Changes
+
+- 91be42b: Add `kit.snippets.create(params)` with discriminated inline/block request types and an exported creation response type supporting nullable document HTML.
+- 9bc435e: Add `kit.webhookEndpoints.create(params)` with exported request and response types, including the signing secret returned at creation.
+- 8b34654: Add custom-field events and `custom_field_id` to legacy webhook creation types, including the numeric field ID for value-update subscriptions.
+- 2f42e53: Add `subscribers.deleteLocation()` to remove a pinned subscriber location. Return an empty object on successful deletion or null when the subscriber is not found.
+- 30341d4: Add `kit.webhookEndpoints.delete(id)` to delete a webhook endpoint. Empty 204 responses return an empty object; missing or inaccessible endpoints return null.
+- a7714a5: Add `kit.posts.get(id)` and the exported `GetPost` response type with required HTML content and publishing metadata. Missing posts return null.
+- f683d8a: Add `kit.snippets.get(id)` and the exported `GetSnippet` response type, with required content and document fields. Missing snippets return null.
+- 7824e74: Add `kit.webhookEndpoints.get(id)` and the exported `GetWebhookEndpoint` response type. Missing or inaccessible endpoints return null, and metadata excludes signing secrets.
+- 2aa55a6: Add `kit.posts.list()` with cursor pagination, optional HTML content and total counts, and exported response types for publishing metadata and nullable draft fields.
+- af50ed8: Add `kit.snippets.list()` with pagination, snippet type and archive filters, optional content/document inclusion, and exported request and response types.
+- b725d02: Add `kit.webhookEndpoints.list()` with cursor pagination, total counts, active/disabled filtering, and exported endpoint metadata types.
+- 0c3345d: Add `subscribers.pinLocation()` and export `PinSubscriberLocationParams` and `PinSubscriberLocation` for pinning an explicit subscriber location.
+- 0b89680: Add `kit.webhookEndpoints.revokePreviousSecret(id)` to close a signing-secret rotation overlap window early, with exported response types. Missing endpoints return null.
+- 7af3812: Add `kit.webhookEndpoints.rotateSecret(id, params)` with optional force handling and exported types for the new signing secret and previous-secret expiry. Missing endpoints return null.
+- 2313ad2: Add original signup attribution filters for form/landing-page IDs and Kit source fields. Export `FilterSubscriberBodyAllAttribution`, `FilterSubscriberBodyAnyForms`, and `FilterSubscriberBodyAnyKitSource` for typed subscriber filtering.
+- 95e48cf: Add the optional `counting_mode` subscriber filter setting, supporting raw engagement-event counts and distinct-email counts.
+- 8465724: Add custom-field conditions to subscriber filters with exact, substring, presence, and numeric comparisons. Export `FilterSubscriberBodyAllCustomField` for reusable conditions.
+- 517d086: Support subscriber filter includes for attribution, tags, location, canceled_at, stats, and custom fields. Export `FilterSubscriberInclude`, support optional stats date ranges, and type the optional embedded response fields, including nullable values.
+- 2ad8d1f: Add optional `sort_field` and `sort_order` settings to subscriber filter requests.
+- 11bed60: Add inclusive engagement count thresholds (`count_greater_than_or_equal` and `count_less_than_or_equal`) to subscriber filters. Correct the existing greater-than and less-than descriptions to identify their exclusive bounds.
+- 36bcb18: Add location conditions to subscriber filtering and export `FilterSubscriberBodyAllLocation`, enabling typed geographic filtering and distance sorting.
+- a15c1fd: Add subscriber lifecycle state conditions to subscriber filtering and export `FilterSubscriberBodyAllState`, enabling typed filtering by one or more states alone or alongside other conditions.
+- 22b33a7: Add typed tag-ID conditions to subscriber filtering and export `FilterSubscriberBodyAllTags` for reusable tag filters.
+- c9acf14: Add `kit.snippets.update(id, params)` with exported request and response types for partial inline/block content, name, and archive updates. Missing snippets return null.
+- 50c1e66: Add `subscribers.updateLocation()` for replacing an existing pinned location via PATCH. Export `UpdateSubscriberLocationParams` and `UpdateSubscriberLocation`, keeping all six location fields required.
+- b22ef22: Add `kit.webhookEndpoints.update(id, params)` with partial metadata, status, and event subscription updates, exported types, and shared API-client PATCH support. Missing endpoints return null.
+
+### Patch Changes
+
+- 31e3c4c: Correct the filtered subscriber response type to allow null first names. Consumers should check for null before using string methods.
+- acfaa51: Allow null values for `event.tag_id` and `event.form_id` in legacy webhook list responses, matching the Kit API schema.
+- 05bcea1: Read HTTP error response bodies once without cloning them, preserving existing JSON and raw text error details while avoiding an unread buffered stream.
+- f5a319f: Use timer-safe waits for network and HTTP retries, cap calculated backoff at the maximum safe integer, and preserve disabled backoff at high retry counts.
+- 19f4f64: Allow URL-pattern subscriber filters without URL IDs, matching the Kit API's documented request format.
+
 ## 0.4.0
 
 ### Minor Changes
