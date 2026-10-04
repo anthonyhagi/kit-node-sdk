@@ -168,6 +168,13 @@ export interface FilterSubscriberBodyAllTags {
 }
 
 export interface FilterSubscriberBody {
+  /**
+   * Count all engagement events (raw) or distinct emails (unique_email).
+   * Applies to opens, clicks, sent, and delivered conditions.
+   *
+   * @default "raw"
+   */
+  counting_mode?: "raw" | "unique_email" | undefined;
   all: (
     | FilterSubscriberBodyAllSubscribed
     | FilterSubscriberBodyAllBase
