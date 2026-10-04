@@ -26,6 +26,24 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
 
+## Including form subscriber counts
+
+Pass `include: "subscriber_count"` to `kit.forms.list()` to request the number
+of active subscribers who subscribed via each form:
+
+```ts
+const result = await kit.forms.list({ include: "subscriber_count" });
+for (const form of result.forms) {
+  console.log(form.name, form.subscriber_count);
+}
+```
+
+The exported `ListFormsParams` type accepts this include option, and `ListForms`
+exposes `subscriber_count` as an optional number. A form can have a count of zero;
+responses without the include option can omit it. This per-form count is separate
+from `include_total_count`, which requests the number of forms for pagination.
+See the [Kit API reference](https://developers.kit.com/api-reference/forms/list-forms).
+
 ## Custom-field events for legacy webhooks
 
 `kit.webhooks.create()` supports `custom_field.field_created`,
