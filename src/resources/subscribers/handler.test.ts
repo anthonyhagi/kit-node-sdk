@@ -3,6 +3,7 @@ import {
   Kit,
   type CreateSubscriber,
   type FilterSubscriberBody,
+  type FilterSubscriberBodyAllCustomField,
   type FilterSubscriberBodyAllTags,
   type FilterSubscriberParams,
   type FilterSubscribers,
@@ -339,6 +340,57 @@ describe("subscriber requests through Kit", () => {
       expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
     }
   );
+
+  const customFieldCondition = {
+    type: "custom_field",
+    subscriber_custom_field_id: 42,
+    value: "premium",
+    comparison: "is",
+  } satisfies FilterSubscriberBodyAllCustomField;
+
+  it.each([
+    { name: "custom fields alone", body: { all: [customFieldCondition] } },
+    {
+      name: "custom fields combined with engagement and tags",
+      body: {
+        all: [
+          customFieldCondition,
+          { type: "opens", count_greater_than: 5 },
+          { type: "tags", any: [{ type: "ids", matching: [123] }] },
+        ],
+      },
+    },
+  ] satisfies { name: string; body: FilterSubscriberBody }[])(
+    "filters by $name",
+    async ({ body }) => {
+      const response = { subscribers: [], pagination };
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+
+      expect(await kit.subscribers.filter(body)).toEqual(response);
+      expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
+    }
+  );
+
+  it.each([
+    { comparison: "contains", value: "premium" },
+    { comparison: "greater_than", value: "10" },
+    { comparison: "greater_than_or_equal", value: "10" },
+    { comparison: "less_than", value: "10" },
+    { comparison: "less_than_or_equal", value: "10" },
+    { comparison: "has_value" },
+  ] as const)("filters custom fields using $comparison", async (comparison) => {
+    const condition = {
+      type: "custom_field",
+      subscriber_custom_field_id: 42,
+      ...comparison,
+    } satisfies FilterSubscriberBodyAllCustomField;
+    const body = { all: [condition] } satisfies FilterSubscriberBody;
+    const response = { subscribers: [], pagination };
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+
+    expect(await kit.subscribers.filter(body)).toEqual(response);
+    expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
+  });
 
   const tagCondition: FilterSubscriberBodyAllTags = {
     type: "tags",
