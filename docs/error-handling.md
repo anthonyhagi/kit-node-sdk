@@ -38,6 +38,24 @@ whole seconds or an HTTP date. Missing, invalid, or expired values fall back to
 backoff. This minimum wait applies even when `retryDelay` is `0`; `maxRetries: 0`
 still disables retries entirely.
 
+## Request Timeouts
+
+Set `timeoutMs` on the client to abort an attempt that takes too long:
+
+```typescript
+const kitWithTimeout = new Kit({
+  apiKey: "your-api-key",
+  timeoutMs: 10000,
+  maxRetries: 1,
+});
+```
+
+The timeout defaults to disabled (`0`). Each attempt gets its own timer covering
+the fetch and response body reading; backoff waits are excluded. Fetch timeouts
+follow the configured retry limits and eventually throw a `TimeoutError`.
+Timeouts reading a successful response body throw without repeating the
+operation. Timers are cleared when attempts finish or enter retry backoff.
+
 ## Error Handling Example
 
 ```typescript
