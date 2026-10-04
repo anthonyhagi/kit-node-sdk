@@ -59,6 +59,7 @@ export type WebhookEvent =
       initiator_value?: null | undefined;
       product_id?: null | undefined;
       tag_id?: null | undefined;
+      custom_field_id?: null | undefined;
     }
   | {
       name: "subscriber.subscriber_unsubscribe";
@@ -67,6 +68,7 @@ export type WebhookEvent =
       initiator_value?: null | undefined;
       product_id?: null | undefined;
       tag_id?: null | undefined;
+      custom_field_id?: null | undefined;
     }
   | {
       name: "subscriber.subscriber_bounce";
@@ -75,6 +77,7 @@ export type WebhookEvent =
       initiator_value?: null | undefined;
       product_id?: null | undefined;
       tag_id?: null | undefined;
+      custom_field_id?: null | undefined;
     }
   | {
       name: "subscriber.subscriber_complain";
@@ -83,6 +86,7 @@ export type WebhookEvent =
       initiator_value?: null | undefined;
       product_id?: null | undefined;
       tag_id?: null | undefined;
+      custom_field_id?: null | undefined;
     }
   | {
       name: "subscriber.form_subscribe";
@@ -91,6 +95,7 @@ export type WebhookEvent =
       initiator_value?: null | undefined;
       product_id?: null | undefined;
       tag_id?: null | undefined;
+      custom_field_id?: null | undefined;
     }
   | {
       name: "subscriber.course_subscribe";
@@ -99,6 +104,7 @@ export type WebhookEvent =
       initiator_value?: null | undefined;
       product_id?: null | undefined;
       tag_id?: null | undefined;
+      custom_field_id?: null | undefined;
     }
   | {
       name: "subscriber.course_complete";
@@ -107,6 +113,7 @@ export type WebhookEvent =
       initiator_value?: null | undefined;
       product_id?: null | undefined;
       tag_id?: null | undefined;
+      custom_field_id?: null | undefined;
     }
   | {
       name: "subscriber.link_click";
@@ -115,6 +122,7 @@ export type WebhookEvent =
       initiator_value: string;
       product_id?: null | undefined;
       tag_id?: null | undefined;
+      custom_field_id?: null | undefined;
     }
   | {
       name: "subscriber.product_purchase";
@@ -123,6 +131,7 @@ export type WebhookEvent =
       initiator_value?: null | undefined;
       product_id: number;
       tag_id?: null | undefined;
+      custom_field_id?: null | undefined;
     }
   | {
       name: "subscriber.tag_add";
@@ -131,6 +140,7 @@ export type WebhookEvent =
       initiator_value?: null | undefined;
       product_id?: null | undefined;
       tag_id: number;
+      custom_field_id?: null | undefined;
     }
   | {
       name: "subscriber.tag_remove";
@@ -139,6 +149,7 @@ export type WebhookEvent =
       initiator_value?: null | undefined;
       product_id?: null | undefined;
       tag_id: number;
+      custom_field_id?: null | undefined;
     }
   | {
       name: "purchase.purchase_create";
@@ -147,6 +158,26 @@ export type WebhookEvent =
       initiator_value?: null | undefined;
       product_id?: null | undefined;
       tag_id?: null | undefined;
+      custom_field_id?: null | undefined;
+    }
+  | {
+      name: "custom_field.field_created" | "custom_field.field_deleted";
+      form_id?: null | undefined;
+      sequence_id?: null | undefined;
+      initiator_value?: null | undefined;
+      product_id?: null | undefined;
+      tag_id?: null | undefined;
+      custom_field_id?: null | undefined;
+    }
+  | {
+      name: "custom_field.field_value_updated";
+      form_id?: null | undefined;
+      sequence_id?: null | undefined;
+      initiator_value?: null | undefined;
+      product_id?: null | undefined;
+      tag_id?: null | undefined;
+      /** ID of the custom field whose value changes trigger this webhook. */
+      custom_field_id: number;
     }
   | {
       name: string & {};
@@ -155,6 +186,7 @@ export type WebhookEvent =
       initiator_value?: string | null | undefined;
       product_id?: number | null | undefined;
       tag_id?: number | null | undefined;
+      custom_field_id?: number | null | undefined;
     };
 
 export interface CreateWebhookParams {

@@ -26,6 +26,29 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
 
+## Custom-field events for legacy webhooks
+
+`kit.webhooks.create()` supports `custom_field.field_created`,
+`custom_field.field_deleted`, and `custom_field.field_value_updated`. Value-update
+subscriptions require the numeric `custom_field_id` of the field to watch:
+
+```ts
+await kit.webhooks.create({
+  target_url: "https://example.com/hooks/kit",
+  event: {
+    name: "custom_field.field_value_updated",
+    custom_field_id: 11,
+  },
+});
+```
+
+Field-created and field-deleted subscriptions need only their event name.
+The exported `WebhookEvent` type includes these events and retains support for
+future event names. Kit validates event configuration when creating the webhook.
+For new integrations, use `kit.webhookEndpoints`; these event names belong to
+the legacy webhook API.
+See the [Kit API reference](https://developers.kit.com/api-reference/webhooks-legacy/create-a-webhook).
+
 ## Revoking the previous webhook endpoint secret
 
 After switching your receiver to a rotated signing secret, call
