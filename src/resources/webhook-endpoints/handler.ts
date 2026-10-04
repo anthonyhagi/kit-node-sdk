@@ -5,6 +5,7 @@ import type {
   GetWebhookEndpoint,
   ListWebhookEndpoints,
   ListWebhookEndpointsParams,
+  RevokePreviousWebhookEndpointSecret,
   RotateWebhookEndpointSecret,
   RotateWebhookEndpointSecretParams,
   UpdateWebhookEndpoint,
@@ -13,6 +14,21 @@ import type {
 
 export class WebhookEndpointsHandler {
   constructor(private api: Kit) {}
+
+  /**
+   * Revoke the previous signing secret and close the rotation overlap window.
+   *
+   * @param id - The webhook endpoint whose previous secret should be revoked.
+   * @returns Endpoint metadata, or null when it was not found.
+   * @see {@link https://developers.kit.com/api-reference/webhooks/revoke-the-previous-webhook-endpoint-secret}
+   */
+  public async revokePreviousSecret(
+    id: number
+  ): Promise<RevokePreviousWebhookEndpointSecret | null> {
+    return await this.api.post<RevokePreviousWebhookEndpointSecret | null>(
+      `/webhook_endpoints/${id}/revoke_previous_secret`
+    );
+  }
 
   /**
    * Rotate the signing secret and return the new secret and overlap expiry.

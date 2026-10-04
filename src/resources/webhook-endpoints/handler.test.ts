@@ -6,6 +6,7 @@ import {
   type GetWebhookEndpoint,
   type ListWebhookEndpoints,
   type ListWebhookEndpointsParams,
+  type RevokePreviousWebhookEndpointSecret,
   type RotateWebhookEndpointSecret,
   type RotateWebhookEndpointSecretParams,
   type UpdateWebhookEndpoint,
@@ -661,6 +662,71 @@ describe("webhook endpoint secret rotation requests through Kit", () => {
     );
     await expect(kit.webhookEndpoints.rotateSecret(2)).rejects.toThrow(
       "Authentication failed"
+    );
+    expect(fetchMock.requests()).toHaveLength(1);
+  });
+});
+
+describe("webhook endpoint previous-secret revocation requests through Kit", () => {
+  let kit: Kit;
+  const response = {
+    webhook_endpoint: endpoint,
+  } satisfies RevokePreviousWebhookEndpointSecret;
+
+  beforeEach(() => {
+    fetchMock.resetMocks();
+    kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
+  });
+
+  it("revokes the previous secret with a bodyless POST and returns endpoint metadata", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const result = await kit.webhookEndpoints.revokePreviousSecret(2);
+    expectTypeOf(
+      result
+    ).toEqualTypeOf<RevokePreviousWebhookEndpointSecret | null>();
+    expectTypeOf(
+      result!.webhook_endpoint.previous_secret_expires_at
+    ).toEqualTypeOf<null>();
+    expect(result).toEqual(response);
+    expect(result!.webhook_endpoint).not.toHaveProperty("secret");
+    expect(fetchMock.requests()).toHaveLength(1);
+    const req = fetchMock.requests()[0]!;
+    expect(req.method).toBe("POST");
+    expect(req.url).toBe(
+      "https://api.kit.com/v4/webhook_endpoints/2/revoke_previous_secret"
+    );
+    expect(req.headers.get("X-Kit-Api-Key")).toBe("test-key");
+    expect(await req.text()).toBe("");
+  });
+
+  it("returns null for missing endpoints", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
+      status: 404,
+    });
+    expect(await kit.webhookEndpoints.revokePreviousSecret(404)).toBeNull();
+    expect(fetchMock.requests()[0]!.url).toBe(
+      "https://api.kit.com/v4/webhook_endpoints/404/revoke_previous_secret"
+    );
+  });
+
+  it("surfaces authentication errors", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({ errors: ["The access token is invalid"] }),
+      { status: 401 }
+    );
+    await expect(kit.webhookEndpoints.revokePreviousSecret(2)).rejects.toThrow(
+      "Authentication failed"
+    );
+    expect(fetchMock.requests()).toHaveLength(1);
+  });
+
+  it("propagates API errors without retrying when retries are disabled", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({ errors: ["Service unavailable"] }),
+      { status: 503 }
+    );
+    await expect(kit.webhookEndpoints.revokePreviousSecret(2)).rejects.toThrow(
+      "Service unavailable"
     );
     expect(fetchMock.requests()).toHaveLength(1);
   });

@@ -415,6 +415,7 @@ export type {
   GetWebhookEndpoint,
   ListWebhookEndpoints,
   ListWebhookEndpointsParams,
+  RevokePreviousWebhookEndpointSecret,
   RotateWebhookEndpointSecret,
   RotateWebhookEndpointSecretParams,
   UpdateWebhookEndpoint,
