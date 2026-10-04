@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { Kit } from "~/index";
+import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
+import { Kit, type AddSubscriberToForm } from "~/index";
 
 const form = {
   id: 7,
@@ -143,9 +143,14 @@ describe("form requests through Kit", () => {
   );
 
   it("adds a subscriber by ID with an empty JSON body when options are omitted", async () => {
-    const response = { subscriber };
+    const response = { subscriber } satisfies AddSubscriberToForm;
     fetchMock.mockResponseOnce(JSON.stringify(response));
-    expect(await kit.forms.addSubscriber(7, 42)).toEqual(response);
+    const result = await kit.forms.addSubscriber(7, 42);
+    expectTypeOf(result).toEqualTypeOf<AddSubscriberToForm | null>();
+    expectTypeOf<
+      NonNullable<typeof result>["subscriber"]["first_name"]
+    >().toEqualTypeOf<string>();
+    expect(result).toEqual(response);
     expect(await request("POST", "/forms/7/subscribers/42").json()).toEqual({});
   });
 
