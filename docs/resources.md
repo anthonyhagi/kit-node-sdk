@@ -15,7 +15,7 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 | **`kit.forms`**          | Web forms for collecting subscriber information                    | `list()`, `addSubscriber()`, `addSubscriberByEmail()`, `listSubscribers()`                                                  |
 | **`kit.purchases`**      | Transaction records for products/services                          | `list()`, `create()`, `get()`                                                                                               |
 | **`kit.segments`**       | Dynamic subscriber groups based on criteria                        | `list()`                                                                                                                    |
-| **`kit.sequenceEmails`** | Individual emails inside automated sequences                       | `list()`, `get()`                                                                                                           |
+| **`kit.sequenceEmails`** | Individual emails inside automated sequences                       | `list()`, `get()`, `create()`                                                                                               |
 | **`kit.sequences`**      | Automated email series                                             | `list()`, `get()`, `create()`, `update()`, `delete()`, `addSubscriberById()`, `addSubscriberByEmail()`, `listSubscribers()` |
 | **`kit.subscribers`**    | Individual email recipients                                        | `list()`, `create()`, `get()`, `update()`, `bulkCreate()`, `getTags()`                                                      |
 | **`kit.tags`**           | Labels for categorizing subscribers                                | `list()`, `create()`, `update()`, `bulkCreate()`, `tagSubscriber()`, `listSubscribers()`                                    |
@@ -23,10 +23,39 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
 
+## Creating a sequence email
+
+Use `kit.sequenceEmails.create(sequenceId, params)` to add an email. The subject,
+`delay_value`, and `delay_unit` (`"days"` or `"hours"`) are required:
+
+```ts
+const result = await kit.sequenceEmails.create(123, {
+  subject: "Welcome to the series",
+  delay_value: 1,
+  delay_unit: "days",
+  content: "<p>Thanks for joining!</p>",
+});
+console.log(result?.email.id);
+```
+
+Emails are drafts by default and append to the sequence when `position` is
+omitted. Optional fields include `preview_text`, `content`, `email_template_id`,
+`published`, `send_days`, and `position`. Day-based emails follow the sequence's
+schedule unless `send_days` overrides it. Hour-based emails ignore the schedule
+and return `send_days: null`. Only the first email can have a zero-day delay;
+subsequent emails require a positive delay. Publishing an immediate email or
+inserting a published email earlier in the sequence can trigger deliveries to
+existing subscribers.
+
+The exported types are `CreateSequenceEmailParams` and `CreateSequenceEmail`.
+The response includes `content`, which can be `null` for drafts; `preview_text`
+can also be `null`. Missing sequences return `null`, and validation errors throw.
+See the [Kit API reference](https://developers.kit.com/api-reference/sequence-emails/create-a-sequence-email).
+
 ## Fetching a sequence email
 
 `kit.sequenceEmails.get(sequenceId, emailId, params)` always returns the email's
-HTML content. Use `include: "stats"` to request per-email performance metrics:
+content field, which can be `null` for drafts. Use `include: "stats"` to request per-email performance metrics:
 
 ```ts
 const result = await kit.sequenceEmails.get(123, 456, { include: "stats" });
@@ -70,7 +99,8 @@ if (page) {
 
 Pagination supports `after`, `before`, `per_page`, and `include_total_count`.
 Missing sequences return `null`. HTML content is omitted by default; request
-`include_content: true` to include it. Per-email stats use zero when no delivery
+`include_content: true` to include it. Draft content and preview text can be
+`null`; hour-based emails return `send_days: null`. Per-email stats use zero when no delivery
 data is available. Exported types are `ListSequenceEmails`,
 `ListSequenceEmailsParams`, `SequenceEmailListItem`, and `SequenceEmailStats`.
 See the [Kit API reference](https://developers.kit.com/api-reference/sequence-emails/list-sequence-emails).

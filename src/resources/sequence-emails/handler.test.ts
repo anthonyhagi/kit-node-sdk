@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
 import {
   Kit,
+  type CreateSequenceEmail,
+  type CreateSequenceEmailParams,
   type GetSequenceEmail,
   type ListSequenceEmails,
   type SequenceEmailStats,
@@ -41,7 +43,7 @@ describe("sequence email get requests through Kit", () => {
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.sequenceEmails.get(108, 6);
     expectTypeOf(result).toEqualTypeOf<GetSequenceEmail | null>();
-    expectTypeOf(result!.email.content).toEqualTypeOf<string>();
+    expectTypeOf(result!.email.content).toEqualTypeOf<string | null>();
     expectTypeOf(result!.email.stats).toEqualTypeOf<
       SequenceEmailStats | undefined
     >();
@@ -79,6 +81,22 @@ describe("sequence email get requests through Kit", () => {
       expect(await req.text()).toBe("");
     }
   );
+
+  it("retrieves nullable draft content and hour-based timing", async () => {
+    const response = {
+      email: {
+        ...email,
+        published: false,
+        preview_text: null,
+        content: null,
+        delay_unit: "hours",
+        delay_value: 2,
+        send_days: null,
+      },
+    } satisfies GetSequenceEmail;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.sequenceEmails.get(108, 6)).toEqual(response);
+  });
 
   it("handles empty options and empty HTML content", async () => {
     const response = {
@@ -118,7 +136,7 @@ describe("sequence email list requests through Kit", () => {
     const result = await kit.sequenceEmails.list(108);
     expectTypeOf(result).toEqualTypeOf<ListSequenceEmails | null>();
     expectTypeOf(result!.emails[0]!.content).toEqualTypeOf<
-      string | undefined
+      string | null | undefined
     >();
     expectTypeOf(result!.emails[0]!.email_template_id).toEqualTypeOf<
       number | null
@@ -240,5 +258,128 @@ describe("sequence email list requests through Kit", () => {
       status: 404,
     });
     expect(await kit.sequenceEmails.list(404)).toBeNull();
+  });
+});
+
+describe("sequence email create requests through Kit", () => {
+  let kit: Kit;
+  beforeEach(() => {
+    fetchMock.resetMocks();
+    kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
+  });
+
+  it("creates a draft using only the required subject and delay", async () => {
+    const params = {
+      subject: "Welcome",
+      delay_value: 1,
+      delay_unit: "days",
+    } satisfies CreateSequenceEmailParams;
+    const response = {
+      email: {
+        ...email,
+        subject: "Welcome",
+        delay_value: 1,
+        published: false,
+        preview_text: null,
+        content: null,
+      },
+    } satisfies CreateSequenceEmail;
+    fetchMock.mockResponseOnce(JSON.stringify(response), { status: 201 });
+    const result = await kit.sequenceEmails.create(108, params);
+    expectTypeOf(result).toEqualTypeOf<CreateSequenceEmail | null>();
+    expectTypeOf(result!.email.content).toEqualTypeOf<string | null>();
+    expectTypeOf(result!.email.preview_text).toEqualTypeOf<string | null>();
+    expectTypeOf(result!.email.send_days).toEqualTypeOf<string[] | null>();
+    expectTypeOf<{
+      subject: string;
+    }>().not.toExtend<CreateSequenceEmailParams>();
+    expectTypeOf<{
+      subject: string;
+      delay_value: number;
+      delay_unit: "weeks";
+    }>().not.toExtend<CreateSequenceEmailParams>();
+    expect(result).toEqual(response);
+    const req = fetchMock.requests()[0]!;
+    expect(req.method).toBe("POST");
+    expect(req.url).toBe("https://api.kit.com/v4/sequences/108/emails");
+    expect(await req.json()).toEqual(params);
+  });
+
+  it("preserves explicit publishing, position, timing, content, and schedule settings", async () => {
+    const params = {
+      subject: email.subject,
+      preview_text: "Preview",
+      content: "<p>Welcome!</p>",
+      email_template_id: 2,
+      published: false,
+      position: 0,
+      delay_value: 0,
+      delay_unit: "days",
+      send_days: ["monday", "wednesday"],
+    } satisfies CreateSequenceEmailParams;
+    const response = {
+      email: { ...email, ...params },
+    } satisfies CreateSequenceEmail;
+    fetchMock.mockResponseOnce(JSON.stringify(response), { status: 201 });
+    expect(await kit.sequenceEmails.create(108, params)).toEqual(response);
+    expect(await fetchMock.requests()[0]!.json()).toEqual(params);
+  });
+
+  it("supports nullable options and hour-based emails with no sending days", async () => {
+    const params = {
+      subject: "Follow up",
+      delay_value: 2,
+      delay_unit: "hours",
+      preview_text: null,
+      content: null,
+      email_template_id: null,
+      send_days: null,
+      position: null,
+      published: undefined,
+    } satisfies CreateSequenceEmailParams;
+    const response = {
+      email: { ...email, ...params, position: 1, published: false },
+    } satisfies CreateSequenceEmail;
+    fetchMock.mockResponseOnce(JSON.stringify(response), { status: 201 });
+    expect(await kit.sequenceEmails.create(108, params)).toEqual(response);
+    const body = await fetchMock.requests()[0]!.json();
+    expect(body).toEqual({
+      subject: "Follow up",
+      delay_value: 2,
+      delay_unit: "hours",
+      preview_text: null,
+      content: null,
+      email_template_id: null,
+      send_days: null,
+      position: null,
+    });
+    expect(body).not.toHaveProperty("published");
+  });
+
+  it("returns null when the sequence does not exist", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
+      status: 404,
+    });
+    expect(
+      await kit.sequenceEmails.create(404, {
+        subject: "Welcome",
+        delay_value: 1,
+        delay_unit: "days",
+      })
+    ).toBeNull();
+  });
+
+  it("surfaces API validation errors", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({ errors: ["subject can't be blank"] }),
+      { status: 422 }
+    );
+    await expect(
+      kit.sequenceEmails.create(108, {
+        subject: "",
+        delay_value: 1,
+        delay_unit: "days",
+      })
+    ).rejects.toThrow("subject can't be blank");
   });
 });
