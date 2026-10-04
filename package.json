@@ -52,6 +52,7 @@
     "build": "tsdown",
     "clean": "rm -rf dist",
     "typecheck": "tsc",
+    "typecheck:readme": "npm run build && node scripts/check-readme.mjs",
     "lint": "eslint .",
     "lint:package": "publint",
     "format": "prettier -w .",
