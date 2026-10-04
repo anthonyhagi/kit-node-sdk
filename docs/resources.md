@@ -22,6 +22,29 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
 
+## Broadcast creation filters
+
+Use an array of filter groups when creating a targeted broadcast. Kit supports
+one filter group type per request: `all` (AND), `any` (OR), or `none` (NOT).
+For example, this creates a draft for subscribers with either of two tags:
+
+```typescript
+const broadcast = await kit.broadcasts.create({
+  subject: "Newsletter",
+  content: "<p>Our latest news</p>",
+  description: "Monthly update",
+  preview_text: "Catch up with us",
+  public: false,
+  published_at: "2026-01-01T12:00:00Z",
+  send_at: null,
+  subscriber_filter: [{ any: [{ type: "tag", ids: [7, 8] }] }],
+});
+```
+
+Use `type: "segment"` to target segment IDs. Existing single-object filters are
+also accepted and wrapped in an array before sending. A `null` filter is passed
+through unchanged. See the [Kit API reference](https://developers.kit.com/api-reference/broadcasts/create-a-broadcast).
+
 ## Broadcast stats pagination
 
 `kit.broadcasts.getAllStats()` returns one page of stats (500 broadcasts by

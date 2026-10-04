@@ -64,7 +64,14 @@ export class BroadcastsHandler {
    * @returns the created broadcast.
    */
   public async create(params: CreateBroadcastParams): Promise<CreateBroadcast> {
-    const body = JSON.stringify(params);
+    const { subscriber_filter } = params;
+    const body = JSON.stringify({
+      ...params,
+      subscriber_filter:
+        subscriber_filter != null && !Array.isArray(subscriber_filter)
+          ? [subscriber_filter]
+          : subscriber_filter,
+    });
 
     return await this.api.post<CreateBroadcast>("/broadcasts", { body });
   }
