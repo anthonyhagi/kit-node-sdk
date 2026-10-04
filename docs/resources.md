@@ -15,12 +15,48 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 | **`kit.forms`**          | Web forms for collecting subscriber information                    | `list()`, `addSubscriber()`, `addSubscriberByEmail()`, `listSubscribers()`                                                  |
 | **`kit.purchases`**      | Transaction records for products/services                          | `list()`, `create()`, `get()`                                                                                               |
 | **`kit.segments`**       | Dynamic subscriber groups based on criteria                        | `list()`                                                                                                                    |
+| **`kit.sequenceEmails`** | Individual emails inside automated sequences                       | `list()`                                                                                                                    |
 | **`kit.sequences`**      | Automated email series                                             | `list()`, `get()`, `create()`, `update()`, `delete()`, `addSubscriberById()`, `addSubscriberByEmail()`, `listSubscribers()` |
 | **`kit.subscribers`**    | Individual email recipients                                        | `list()`, `create()`, `get()`, `update()`, `bulkCreate()`, `getTags()`                                                      |
 | **`kit.tags`**           | Labels for categorizing subscribers                                | `list()`, `create()`, `update()`, `bulkCreate()`, `tagSubscriber()`, `listSubscribers()`                                    |
 | **`kit.webhooks`**       | HTTP callbacks for real-time notifications                         | `list()`, `create()`                                                                                                        |
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
+
+## Listing sequence emails
+
+Use `kit.sequenceEmails.list(sequenceId, params)` to fetch a page of emails
+ordered by position. Each item includes its subject, publication state,
+template, delay, and sending days. Content and stats are optional:
+
+```ts
+const page = await kit.sequenceEmails.list(123, {
+  include_content: true,
+  include: "stats",
+  per_page: 25,
+});
+if (page) {
+  for (const email of page.emails) {
+    console.log(email.subject, email.content, email.stats?.open_rate);
+  }
+  if (page.pagination.has_next_page && page.pagination.end_cursor) {
+    const next = await kit.sequenceEmails.list(123, {
+      after: page.pagination.end_cursor,
+      per_page: 25,
+      include_content: true,
+      include: "stats",
+    });
+    console.log(next?.emails);
+  }
+}
+```
+
+Pagination supports `after`, `before`, `per_page`, and `include_total_count`.
+Missing sequences return `null`. HTML content is omitted by default; request
+`include_content: true` to include it. Per-email stats use zero when no delivery
+data is available. Exported types are `ListSequenceEmails`,
+`ListSequenceEmailsParams`, `SequenceEmailListItem`, and `SequenceEmailStats`.
+See the [Kit API reference](https://developers.kit.com/api-reference/sequence-emails/list-sequence-emails).
 
 ## Deleting a sequence
 

@@ -8,6 +8,7 @@ import { EmailTemplatesHandler } from "./resources/email-templates/handler";
 import { FormsHandler } from "./resources/forms/handler";
 import { PurchasesHandler } from "./resources/purchases/handler";
 import { SegmentsHandler } from "./resources/segments/handler";
+import { SequenceEmailsHandler } from "./resources/sequence-emails/handler";
 import { SequencesHandler } from "./resources/sequences/handler";
 import { SubscribersHandler } from "./resources/subscribers/handler";
 import { TagsHandler } from "./resources/tags/handler";
@@ -69,6 +70,12 @@ export class Kit extends ApiClient {
    * @see {@link https://developers.kit.com/v4#kit-api-segments}
    */
   public readonly segments: SegmentsHandler;
+
+  /**
+   * Individual emails within an automated sequence.
+   * @see {@link https://developers.kit.com/api-reference/sequence-emails/list-sequence-emails}
+   */
+  public readonly sequenceEmails: SequenceEmailsHandler;
 
   /**
    * Automated email series sent at predefined intervals, often
@@ -154,6 +161,7 @@ export class Kit extends ApiClient {
     this.forms = new FormsHandler(this);
     this.purchases = new PurchasesHandler(this);
     this.segments = new SegmentsHandler(this);
+    this.sequenceEmails = new SequenceEmailsHandler(this);
     this.sequences = new SequencesHandler(this);
     this.subscribers = new SubscribersHandler(this);
     this.tags = new TagsHandler(this);
@@ -267,6 +275,13 @@ export type {
   ListSegments,
   ListSegmentsParams,
 } from "./resources/segments/types";
+
+export type {
+  ListSequenceEmails,
+  ListSequenceEmailsParams,
+  SequenceEmailListItem,
+  SequenceEmailStats,
+} from "./resources/sequence-emails/types";
 
 export type {
   AddSubscriberByEmailParams,
