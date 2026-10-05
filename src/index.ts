@@ -375,6 +375,7 @@ export type {
   SequenceListItem,
   SequenceSendDay,
   SequenceStats,
+  SequenceSubscriber,
   UpdateSequence,
   UpdateSequenceParams,
 } from "./resources/sequences/types";
