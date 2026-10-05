@@ -4,9 +4,11 @@ import {
   Kit,
   refreshOAuthToken,
   verifyWebhookSignature,
+  type GetSequenceWithStats,
   type GetSubscriber,
   type ListPostsWithContent,
   type ListSequenceEmailsWithContent,
+  type ListSequencesWithStats,
   type ListSnippetsWithContent,
   type ListSubscribers,
   type OAuthPKCE,
@@ -60,6 +62,27 @@ export function sequenceEmailContent(
   page: ListSequenceEmailsWithContent | null
 ): (string | null)[] {
   return page?.emails.map((email) => email.content) ?? [];
+}
+
+export const sequencesWithStats = kit.sequences.list(
+  { include: "stats" },
+  options
+);
+export const sequenceWithStats = kit.sequences.get(
+  123,
+  { include: "stats" },
+  options
+);
+export type SequencesStatsResult = Assert<
+  Equal<typeof sequencesWithStats, Promise<ListSequencesWithStats>>
+>;
+export type SequenceStatsResult = Assert<
+  Equal<typeof sequenceWithStats, Promise<GetSequenceWithStats | null>>
+>;
+export function sequenceOpenRates(
+  page: ListSequencesWithStats
+): (number | null | undefined)[] {
+  return page.sequences.map((sequence) => sequence.stats.open_rate);
 }
 
 export const pkce = generateOAuthPKCE();

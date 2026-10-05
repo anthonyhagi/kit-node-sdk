@@ -9,7 +9,7 @@ import {
   type ListSequencesParams,
   type ListSequenceSubscribers,
   type ListSequenceSubscribersParams,
-  type SequenceListItem,
+  type ListSequencesWithStats,
   type SequenceStats,
   type UpdateSequence,
   type UpdateSequenceParams,
@@ -518,10 +518,10 @@ describe("sequence requests through Kit", () => {
         include: "stats",
       });
       expect(result).toEqual(response);
-      expectTypeOf(result.sequences[0]!).toEqualTypeOf<SequenceListItem>();
-      expectTypeOf(result.sequences[0]!.stats).toEqualTypeOf<
-        SequenceStats | undefined
+      expectTypeOf(result.sequences[0]!).toEqualTypeOf<
+        ListSequencesWithStats["sequences"][number]
       >();
+      expectTypeOf(result.sequences[0]!.stats).toEqualTypeOf<SequenceStats>();
       expectTypeOf(result.sequences[0]!.email_address).toEqualTypeOf<
         string | null | undefined
       >();
