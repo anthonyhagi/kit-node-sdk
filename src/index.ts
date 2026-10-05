@@ -16,7 +16,7 @@ import { SubscribersHandler } from "./resources/subscribers/handler";
 import { TagsHandler } from "./resources/tags/handler";
 import { WebhookEndpointsHandler } from "./resources/webhook-endpoints/handler";
 import { WebhooksHandler } from "./resources/webhooks/handler";
-import type { ClientOptions } from "./types";
+import type { ClientOptions, RequestOptions } from "./types";
 
 export class Kit extends ApiClient {
   protected options: Required<ClientOptions>;
@@ -233,7 +233,7 @@ export type {
   RevokeOAuthTokenOptions,
   RevokeOAuthTokenParams,
 } from "./oauth";
-export type { ClientOptions };
+export type { ClientOptions, RequestOptions };
 
 export type {
   GetCreatorProfile,

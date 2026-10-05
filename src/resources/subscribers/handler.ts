@@ -1,4 +1,4 @@
-import type { Kit } from "~/index";
+import type { Kit, RequestOptions } from "~/index";
 import { toDateOnlyString } from "~/utils/date";
 import type {
   BulkCreateSubscribers,
@@ -68,13 +68,17 @@ export class SubscribersHandler {
    * Get a paginated list of all Subscribers.
    *
    * @param params - Optional filters.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/subscribers/list-subscribers}
    *
    * @returns the paginated list of subcribers based on any provided
    * filters.
    */
-  public async list(params?: ListSubscribersParams): Promise<ListSubscribers> {
+  public async list(
+    params?: ListSubscribersParams,
+    options?: RequestOptions
+  ): Promise<ListSubscribers> {
     const {
       after,
       before,
@@ -117,7 +121,10 @@ export class SubscribersHandler {
 
     const url = "/subscribers";
 
-    return await this.api.get<ListSubscribers>(url, { query });
+    return await this.api.get<ListSubscribers>(url, {
+      query,
+      signal: options?.signal,
+    });
   }
 
   /**
