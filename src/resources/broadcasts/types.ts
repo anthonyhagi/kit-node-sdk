@@ -165,9 +165,11 @@ export interface CreateBroadcastParams {
   email_address?: string | null | undefined;
 
   /**
-   * The HTML content of the email.
+   * The HTML content of the email. Omit when selecting a Starting point
+   * template to use that template's own design. When supplying custom HTML
+   * with a Starting point template, set allow_starting_point to true.
    */
-  content: string;
+  content?: string | undefined;
   description: string;
 
   /**
