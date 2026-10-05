@@ -1,9 +1,11 @@
 import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
 import {
   Kit,
+  type BulkCreatedCustomField,
   type BulkUpdateSubscriberValues,
   type BulkUpdateSubscriberValuesParams,
   type BulkUpdateSubscriberValuesSynchronous,
+  type CustomField,
   type ListCustomFields,
   type ListCustomFieldsParams,
 } from "~/index";
@@ -142,7 +144,9 @@ describe("custom-field requests through Kit", () => {
   it("lists custom fields without optional pagination", async () => {
     const response = { custom_fields: [field], pagination };
     fetchMock.mockResponseOnce(JSON.stringify(response));
-    expect(await kit.customFields.list()).toEqual(response);
+    const result = await kit.customFields.list();
+    expect(result).toEqual(response);
+    expectTypeOf(result.custom_fields[0]!).toEqualTypeOf<CustomField>();
     expect(await request("GET", "/custom_fields").text()).toBe("");
   });
 
@@ -178,7 +182,9 @@ describe("custom-field requests through Kit", () => {
         },
       };
       fetchMock.mockResponseOnce(JSON.stringify(response), { status });
-      expect(await kit.customFields.create(body)).toEqual(response);
+      const result = await kit.customFields.create(body);
+      expect(result).toEqual(response);
+      expectTypeOf(result.custom_field).toEqualTypeOf<CustomField>();
       const req = request("POST", "/custom_fields");
       expect(req.headers.get("Content-Type")).toBe("application/json");
       expect(await req.json()).toEqual(body);
@@ -191,7 +197,9 @@ describe("custom-field requests through Kit", () => {
       custom_field: { ...field, ...body, key: "family_name" },
     };
     fetchMock.mockResponseOnce(JSON.stringify(response));
-    expect(await kit.customFields.update(7, body)).toEqual(response);
+    const result = await kit.customFields.update(7, body);
+    expect(result).toEqual(response);
+    expectTypeOf(result!.custom_field).toEqualTypeOf<CustomField>();
     expect(await request("PUT", "/custom_fields/7").json()).toEqual(body);
   });
 
@@ -229,10 +237,18 @@ describe("custom-field requests through Kit", () => {
       ],
     };
     fetchMock.mockResponseOnce(JSON.stringify(response));
-    expect(await kit.customFields.bulkCreate(body)).toEqual({
+    const result = await kit.customFields.bulkCreate(body);
+    expect(result).toEqual({
       type: "synchronous",
       ...response,
     });
+    if (result.type !== "synchronous") {
+      throw new Error("Expected synchronous bulk creation");
+    }
+    expectTypeOf(
+      result.custom_fields[0]!
+    ).toEqualTypeOf<BulkCreatedCustomField>();
+    expectTypeOf(result.custom_fields[0]!.created_at).toEqualTypeOf<string>();
     const req = request("POST", "/bulk/custom_fields");
     expect(req.headers.get("Authorization")).toBe("Bearer oauth-token");
     expect(await req.json()).toEqual(body);
