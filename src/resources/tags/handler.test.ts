@@ -10,6 +10,8 @@ import {
   type BulkTagSynchronous,
   type ListTags,
   type ListTagsParams,
+  type ListTagSubscribers,
+  type ListTagSubscribersParams,
   type TagSubscriber,
   type TagSubscriberByEmail,
 } from "~/index";
@@ -222,6 +224,68 @@ describe("tag requests through Kit", () => {
     expect(await kit.tags.listSubscribers(7)).toEqual(response);
     expect(await request("GET", "/tags/7/subscribers").text()).toBe("");
   });
+
+  it.each([
+    { name: "true", params: { slim: true }, query: { slim: "true" } },
+    { name: "false", params: { slim: false }, query: { slim: "false" } },
+    { name: "omitted", params: {}, query: {} },
+    { name: "explicit undefined", params: { slim: undefined }, query: {} },
+  ] satisfies {
+    name: string;
+    params: ListTagSubscribersParams;
+    query: Record<string, string>;
+  }[])(
+    "lists tagged subscribers with slim $name",
+    async ({ params, query }) => {
+      const response = {
+        subscribers: [],
+        pagination,
+      } satisfies ListTagSubscribers;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+
+      const result = await kit.tags.listSubscribers(7, params);
+      expectTypeOf(result).toEqualTypeOf<ListTagSubscribers | null>();
+      expect(result).toEqual(response);
+      expect(await request("GET", "/tags/7/subscribers", query).text()).toBe(
+        ""
+      );
+    }
+  );
+
+  it.each(["after", "before"] as const)(
+    "combines slim with the %s cursor and tagged subscriber filters",
+    async (cursor) => {
+      const params = {
+        slim: true,
+        [cursor]: "next+/=",
+        per_page: 25,
+        include_total_count: false,
+        status: "inactive",
+        created_after: new Date("2026-01-01T00:00:00Z"),
+        created_before: "2026-02-01",
+        tagged_after: "2026-03-01",
+        tagged_before: new Date("2026-04-01T00:00:00Z"),
+      } satisfies ListTagSubscribersParams;
+      const response = {
+        subscribers: [],
+        pagination,
+      } satisfies ListTagSubscribers;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+
+      expect(await kit.tags.listSubscribers(7, params)).toEqual(response);
+      request("GET", "/tags/7/subscribers", {
+        slim: "true",
+        [cursor]: "next+/=",
+        per_page: "25",
+        include_total_count: "false",
+        status: "inactive",
+        created_after: "2026-01-01T00:00:00.000Z",
+        created_before: "2026-02-01",
+        tagged_after: "2026-03-01",
+        tagged_before: "2026-04-01T00:00:00.000Z",
+      });
+    }
+  );
 
   it.each(["after", "before"] as const)(
     "paginates tagged subscribers with %s and normalizes date filters",
