@@ -53,7 +53,7 @@ export interface ClientOptions {
    * - 2nd retry: ~retryDelay * 2 ms
    * - 3rd retry: ~retryDelay * 4 ms
    *
-   * Jitter (±25%) is added to prevent thundering herd issues.
+   * Jitter (±12.5%) is added to prevent thundering herd issues.
    *
    * A valid Retry-After response header sets a minimum wait, even
    * when this option is 0. Missing or invalid headers use backoff.
