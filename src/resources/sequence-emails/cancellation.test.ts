@@ -53,6 +53,7 @@ const scenarios: Scenario[] = [
   },
   {
     name: "delete",
+    result: undefined,
     run: (kit, options) => kit.sequenceEmails.delete(123, 456, options),
     method: "DELETE",
     path: "/sequences/123/emails/456",
@@ -113,7 +114,7 @@ describe.each(scenarios)("sequence-email $name cancellation", (scenario) => {
       const response = scenario.response ?? {};
       fetchMock.mockResponseOnce(JSON.stringify(response));
       await expect(scenario.run(kit, options)).resolves.toEqual(
-        scenario.result ?? response
+        "result" in scenario ? scenario.result : response
       );
       expect(fetchMock).toHaveBeenCalledTimes(1);
       const [url, init] = fetchMock.mock.calls[0]!;

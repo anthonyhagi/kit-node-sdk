@@ -154,13 +154,13 @@ export class SequencesHandler {
    *
    * @param id - The unique ID of the sequence.
    * @param options - Optional request controls, including cancellation.
-   * @returns An empty object on success.
+   * @returns Resolves without a value on success.
    * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    *
    * @see {@link https://developers.kit.com/api-reference/sequences/delete-a-sequence}
    */
-  public async delete(id: number, options?: RequestOptions): Promise<{}> {
-    return await this.api.delete<{}>(`/sequences/${id}`, {
+  public async delete(id: number, options?: RequestOptions): Promise<void> {
+    await this.api.delete<void>(`/sequences/${id}`, {
       signal: options?.signal,
       maxRetries: options?.maxRetries,
     });

@@ -21,7 +21,9 @@ The SDK automatically retries requests for:
 
 All unsuccessful HTTP responses throw `ApiError`, including 404. A missing
 resource never produces a successful `null` or `undefined` result.
-Empty successful response bodies return `{}`. Errors reading or parsing a
+Resource methods with no meaningful response data return `Promise<void>` and
+resolve to `undefined`; see the [migration guide](migration-void.md). Bulk
+operations retain their asynchronous acknowledgments. Errors reading or parsing a
 successful response body throw without repeating the request.
 
 HTTP failures throw the exported `ApiError`, an `Error` subclass with a numeric

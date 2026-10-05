@@ -694,7 +694,7 @@ describe("subscriber requests through Kit", () => {
   it("unsubscribes with a bodyless POST and handles a 204 response", async () => {
     fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
 
-    expect(await kit.subscribers.unsubscribe(42)).toEqual({});
+    expect(await kit.subscribers.unsubscribe(42)).toBeUndefined();
     expect(await request("POST", "/subscribers/42/unsubscribe").text()).toBe(
       ""
     );
@@ -842,8 +842,8 @@ describe("subscriber requests through Kit", () => {
     fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
 
     const result = await kit.subscribers.deleteLocation(42);
-    expectTypeOf(result).toEqualTypeOf<{}>();
-    expect(result).toEqual({});
+    expectTypeOf(result).toEqualTypeOf<void>();
+    expect(result).toBeUndefined();
     expect(await request("DELETE", "/subscribers/42/location").text()).toBe("");
     expect(fetchMock.requests()).toHaveLength(1);
   });

@@ -24,7 +24,7 @@ export class SequenceEmailsHandler {
    * @param sequenceId - The sequence containing the email.
    * @param emailId - The email to delete.
    * @param options - Optional request controls, including cancellation.
-   * @returns An empty object on success.
+   * @returns Resolves without a value on success.
    * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    *
    * @see {@link https://developers.kit.com/api-reference/sequence-emails/delete-a-sequence-email}
@@ -33,11 +33,11 @@ export class SequenceEmailsHandler {
     sequenceId: number,
     emailId: number,
     options?: RequestOptions
-  ): Promise<{}> {
-    return await this.api.delete<{}>(
-      `/sequences/${sequenceId}/emails/${emailId}`,
-      { signal: options?.signal, maxRetries: options?.maxRetries }
-    );
+  ): Promise<void> {
+    await this.api.delete<void>(`/sequences/${sequenceId}/emails/${emailId}`, {
+      signal: options?.signal,
+      maxRetries: options?.maxRetries,
+    });
   }
 
   /**

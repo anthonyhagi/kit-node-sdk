@@ -568,8 +568,8 @@ describe("webhook endpoint delete requests through Kit", () => {
   it("deletes an endpoint with no body or query and handles an empty 204 response", async () => {
     fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
     const result = await kit.webhookEndpoints.delete(2);
-    expectTypeOf(result).toEqualTypeOf<{}>();
-    expect(result).toEqual({});
+    expectTypeOf(result).toEqualTypeOf<void>();
+    expect(result).toBeUndefined();
     expect(fetchMock.requests()).toHaveLength(1);
     const req = fetchMock.requests()[0]!;
     expect(req.method).toBe("DELETE");

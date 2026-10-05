@@ -327,7 +327,7 @@ describe("webhook requests through Kit", () => {
 
   it("deletes by ID with a bodyless DELETE and handles a 204 response", async () => {
     fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
-    expect(await kit.webhooks.delete(1)).toEqual({});
+    expect(await kit.webhooks.delete(1)).toBeUndefined();
     expect(await request("DELETE", "/webhooks/1").text()).toBe("");
   });
 

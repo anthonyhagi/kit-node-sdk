@@ -70,13 +70,13 @@ export class WebhookEndpointsHandler {
    *
    * @param id - The webhook endpoint to delete.
    * @param options - Optional request controls, including cancellation.
-   * @returns An empty object on success.
+   * @returns Resolves without a value on success.
    * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    *
    * @see {@link https://developers.kit.com/api-reference/webhooks/delete-a-webhook-endpoint}
    */
-  public async delete(id: number, options?: RequestOptions): Promise<{}> {
-    return await this.api.delete<{}>(`/webhook_endpoints/${id}`, {
+  public async delete(id: number, options?: RequestOptions): Promise<void> {
+    await this.api.delete<void>(`/webhook_endpoints/${id}`, {
       signal: options?.signal,
       maxRetries: options?.maxRetries,
     });

@@ -87,6 +87,7 @@ const scenarios: Scenario[] = [
   },
   {
     name: "unsubscribe",
+    result: undefined,
     run: (kit, options) => kit.subscribers.unsubscribe(123, options),
     method: "POST",
     path: "/subscribers/123/unsubscribe",
@@ -108,6 +109,7 @@ const scenarios: Scenario[] = [
   },
   {
     name: "deleteLocation",
+    result: undefined,
     run: (kit, options) => kit.subscribers.deleteLocation(123, options),
     method: "DELETE",
     path: "/subscribers/123/location",
@@ -162,7 +164,7 @@ describe.each(scenarios)("subscriber $name cancellation", (scenario) => {
       const response = scenario.response ?? {};
       fetchMock.mockResponseOnce(JSON.stringify(response));
       await expect(scenario.run(kit, options)).resolves.toEqual(
-        scenario.result ?? response
+        "result" in scenario ? scenario.result : response
       );
       expect(fetchMock).toHaveBeenCalledTimes(1);
       const [url, init] = fetchMock.mock.calls[0]!;

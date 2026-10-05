@@ -610,7 +610,7 @@ describe("tag requests through Kit", () => {
       fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
       expect(
         await kit.tags.removeSubscriberByEmail(7, { email_address })
-      ).toEqual({});
+      ).toBeUndefined();
       const req = request("DELETE", "/tags/7/subscribers", { email_address });
       expect(await req.text()).toBe("");
     }
@@ -618,7 +618,7 @@ describe("tag requests through Kit", () => {
 
   it("removes a tag by subscriber ID with a bodyless DELETE", async () => {
     fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
-    expect(await kit.tags.removeSubscriber(7, 42)).toEqual({});
+    expect(await kit.tags.removeSubscriber(7, 42)).toBeUndefined();
     expect(await request("DELETE", "/tags/7/subscribers/42").text()).toBe("");
   });
 

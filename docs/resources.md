@@ -522,7 +522,7 @@ deliveries of its subscribed events.
 await kit.webhookEndpoints.delete(2);
 ```
 
-Kit returns an empty `204` response, which the SDK exposes as `{}`. Missing or
+Kit returns an empty `204` response, which the SDK exposes as `undefined`. Missing or
 inaccessible endpoints throw `ApiError` with status 404; authentication and
 permission errors also throw. OAuth-created endpoints can only be deleted by the app that created them;
 an API-key request returns a permission error. To stop deliveries temporarily,
@@ -816,7 +816,7 @@ from a sequence. Subscribers already queued for it skip to the next email.
 await kit.sequenceEmails.delete(123, 456);
 ```
 
-Kit returns an empty `204` response, which the SDK exposes as `{}`. Missing
+Kit returns an empty `204` response, which the SDK exposes as `undefined`. Missing
 sequences or emails throw `ApiError` with status 404; authentication errors also throw. To pause delivery,
 use `kit.sequenceEmails.update(sequenceId, emailId, { published: false })`.
 See the [Kit API reference](https://developers.kit.com/api-reference/sequence-emails/delete-a-sequence-email).
@@ -975,7 +975,7 @@ delivery, use `kit.sequences.update(id, { active: false })`.
 await kit.sequences.delete(123);
 ```
 
-The method sends a bodyless DELETE and returns `{}` for Kit's successful
+The method sends a bodyless DELETE and resolves to `undefined` for Kit's successful
 `204 No Content` response. Missing sequences throw `ApiError` with status 404. See the
 [Kit API reference](https://developers.kit.com/api-reference/sequences/delete-a-sequence).
 

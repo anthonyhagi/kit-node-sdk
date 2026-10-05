@@ -197,7 +197,7 @@ describe("custom-field requests through Kit", () => {
 
   it("deletes by ID with a bodyless DELETE and handles a 204 response", async () => {
     fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
-    expect(await kit.customFields.delete(7)).toEqual({});
+    expect(await kit.customFields.delete(7)).toBeUndefined();
     expect(await request("DELETE", "/custom_fields/7").text()).toBe("");
   });
 

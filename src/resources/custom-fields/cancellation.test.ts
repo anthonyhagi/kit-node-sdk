@@ -81,6 +81,7 @@ const scenarios: Scenario[] = [
   },
   {
     name: "delete",
+    result: undefined,
     run: (kit, options) => kit.customFields.delete(123, options),
     method: "DELETE",
     path: "/custom_fields/123",
@@ -163,7 +164,7 @@ describe.each(scenarios)("custom-field $name cancellation", (scenario) => {
       const response = scenario.response ?? {};
       fetchMock.mockResponseOnce(JSON.stringify(response));
       await expect(scenario.run(kit, options)).resolves.toEqual(
-        scenario.result ?? response
+        "result" in scenario ? scenario.result : response
       );
       expect(fetchMock).toHaveBeenCalledTimes(1);
       const [url, init] = fetchMock.mock.calls[0]!;
