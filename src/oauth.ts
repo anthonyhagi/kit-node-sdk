@@ -21,14 +21,20 @@ export interface RefreshOAuthTokenParams {
 
 export type RefreshOAuthTokenOptions = RevokeOAuthTokenOptions;
 
-export interface ExchangeOAuthCodeParams {
+export type ExchangeOAuthCodeParams = {
   client_id: string;
-  client_secret: string;
   /** Authorization code received at the OAuth callback. */
   code: string;
   /** Redirect URI used for authorization, matching an app-configured URI. */
   redirect_uri: string;
-}
+} & (
+  | { client_secret: string; code_verifier?: never }
+  | {
+      client_secret?: never;
+      /** Original PKCE verifier: 43–128 characters from A–Z, a–z, 0–9, -._~. */
+      code_verifier: string;
+    }
+);
 
 export type ExchangeOAuthCodeOptions = RevokeOAuthTokenOptions;
 
@@ -69,21 +75,24 @@ export async function refreshOAuthToken(
 }
 
 /**
- * Exchange an authorization code for access and refresh tokens using client credentials.
+ * Exchange an authorization code using a client secret or PKCE verifier.
  * Makes one request without automatic retries. Network and parsing failures
  * propagate; HTTP failures throw ApiError.
  *
  * @see {@link https://developers.kit.com/api-reference/oauth-refresh-token-flow}
+ * @see {@link https://developers.kit.com/api-reference/oauth-proof-key-for-code-exchange-flow}
  */
 export async function exchangeOAuthCode(
   params: ExchangeOAuthCodeParams,
   options?: ExchangeOAuthCodeOptions
 ): Promise<OAuthTokenResponse> {
-  const { client_id, client_secret, code, redirect_uri } = params;
+  const { client_id, client_secret, code_verifier, code, redirect_uri } =
+    params;
   return await requestOAuthTokens(
     {
       client_id,
-      client_secret,
+      ...(client_secret !== undefined && { client_secret }),
+      ...(code_verifier !== undefined && { code_verifier }),
       grant_type: "authorization_code",
       code,
       redirect_uri,
