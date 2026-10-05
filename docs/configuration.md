@@ -46,13 +46,33 @@ const kit = new Kit({ apiKey: tokens.access_token, authType: "oauth" });
 ```
 
 Use the redirect URI from the authorization request, matching one configured in
-your app. The helper implements the client-secret flow and returns
+your app. The helper accepts a client secret or PKCE verifier and returns
 `OAuthTokenResponse`. It makes one request without automatic retries. HTTP failures
 throw `ApiError` with `status` and `details`; network and JSON parsing failures
 propagate. Its optional second argument accepts `{ baseUrl }` to override
 `https://api.kit.com/v4`.
 
 See [Kit's authorization-code flow](https://developers.kit.com/api-reference/oauth-refresh-token-flow).
+
+### Exchanging a PKCE Authorization Code
+
+For PKCE, supply the original verifier saved before the authorization redirect:
+
+```typescript
+const tokens = await exchangeOAuthCode({
+  client_id: clientId,
+  code: authorizationCode,
+  redirect_uri: "https://example.com/oauth/callback",
+  code_verifier: savedCodeVerifier,
+});
+```
+
+`ExchangeOAuthCodeParams` requires either `client_secret` or `code_verifier`.
+The verifier must be the same 43–128 character random string used to derive the
+S256 challenge sent during authorization. The helper sends it unchanged and
+returns `OAuthTokenResponse` using the same single-request behavior.
+
+See [Kit's PKCE flow](https://developers.kit.com/api-reference/oauth-proof-key-for-code-exchange-flow).
 
 ### Refreshing OAuth Tokens
 

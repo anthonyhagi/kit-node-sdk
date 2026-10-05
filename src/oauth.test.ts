@@ -259,6 +259,63 @@ describe("OAuth authorization code exchange", () => {
     });
   });
 
+  it("exchanges a PKCE code with the original verifier and no client secret", async () => {
+    const pkce = {
+      client_id: params.client_id,
+      code: params.code,
+      redirect_uri: params.redirect_uri,
+      code_verifier: "abcdefghijklmnopqrstuvwxyz0123456789-._~ABC",
+    } satisfies ExchangeOAuthCodeParams;
+    fetchMock.mockResponseOnce(JSON.stringify(tokens));
+
+    const result = await exchangeOAuthCode(pkce);
+    expectTypeOf(result).toEqualTypeOf<OAuthTokenResponse>();
+    expect(result).toEqual(tokens);
+    const requests = fetchMock.requests();
+    expect(requests).toHaveLength(1);
+    const request = requests[0]!;
+    expect(request.url).toBe("https://api.kit.com/v4/oauth/token");
+    expect(request.method).toBe("POST");
+    expect(request.headers.get("Content-Type")).toBe("application/json");
+    expect(request.headers.has("Authorization")).toBe(false);
+    expect(request.headers.has("X-Kit-Api-Key")).toBe(false);
+    const body = await request.json();
+    expect(body).toEqual({ ...pkce, grant_type: "authorization_code" });
+    expect(body).not.toHaveProperty("client_secret");
+  });
+
+  it("surfaces PKCE verifier errors without retrying the exchange", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify({ error: "invalid_grant" }), {
+      status: 400,
+    });
+    await expect(
+      exchangeOAuthCode({
+        client_id: params.client_id,
+        code: params.code,
+        redirect_uri: params.redirect_uri,
+        code_verifier: "abcdefghijklmnopqrstuvwxyz0123456789-._~ABC",
+      })
+    ).rejects.toMatchObject({
+      status: 400,
+      details: { error: "invalid_grant" },
+    });
+    expect(fetchMock.requests()).toHaveLength(1);
+  });
+
+  it("requires exactly one credential form", () => {
+    type Callback = { client_id: string; code: string; redirect_uri: string };
+    expectTypeOf<Callback>().not.toExtend<ExchangeOAuthCodeParams>();
+    expectTypeOf<
+      Callback & { client_secret: string }
+    >().toExtend<ExchangeOAuthCodeParams>();
+    expectTypeOf<
+      Callback & { code_verifier: string }
+    >().toExtend<ExchangeOAuthCodeParams>();
+    expectTypeOf<
+      Callback & { client_secret: string; code_verifier: string }
+    >().not.toExtend<ExchangeOAuthCodeParams>();
+  });
+
   it.each(["https://example.com/v4", "https://example.com/v4/"])(
     "supports an overridden base URL %s",
     async (baseUrl) => {
