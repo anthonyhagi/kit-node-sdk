@@ -429,6 +429,7 @@ export type {
   PinSubscriberLocation,
   PinSubscriberLocationParams,
   Subscriber,
+  SubscriberLocation,
   UpdateSubscriber,
   UpdateSubscriberLocation,
   UpdateSubscriberLocationParams,
