@@ -465,4 +465,17 @@ export type {
   WebhookEvent,
 } from "./resources/webhooks/types";
 
+export type {
+  WebhookBroadcast,
+  WebhookCustomField,
+  WebhookDelivery,
+  WebhookDeliveryEvent,
+  WebhookEndpointEventType,
+  WebhookEventDataMap,
+  WebhookForm,
+  WebhookPost,
+  WebhookSequence,
+  WebhookSubscriber,
+} from "./webhook-delivery";
+
 export type { VerifyWebhookSignatureOptions } from "./webhook-signature";
