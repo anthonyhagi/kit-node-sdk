@@ -6,6 +6,8 @@ import {
   type AddSubscriberToFormByEmailParams,
   type BulkAddSubscribersParams,
   type BulkAddSubscribersSynchronous,
+  type FormReferrerUtmParameters,
+  type FormSubscriber,
   type ListForms,
   type ListFormsParams,
   type ListFormSubscribers,
@@ -203,6 +205,13 @@ describe("form requests through Kit", () => {
         email_address: subscriber.email_address,
       });
       expect(result).toEqual(response);
+      expectTypeOf(result!.subscriber.state).toEqualTypeOf<string>();
+      expectTypeOf(result!.subscriber.fields).toEqualTypeOf<
+        Record<string, string>
+      >();
+      expectTypeOf(result!.subscriber.referrer_utm_parameters).toEqualTypeOf<
+        FormReferrerUtmParameters | undefined
+      >();
       expectTypeOf(result!.subscriber.first_name).toEqualTypeOf<
         string | null
       >();
@@ -236,6 +245,7 @@ describe("form requests through Kit", () => {
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.forms.listSubscribers(7);
     expectTypeOf(result).toEqualTypeOf<ListFormSubscribers | null>();
+    expectTypeOf(result!.subscribers[0]!).toEqualTypeOf<FormSubscriber>();
     expectTypeOf<
       NonNullable<typeof result>["subscribers"][number]["fields"]
     >().toEqualTypeOf<Record<string, string | null>>();
@@ -568,6 +578,12 @@ describe("form requests through Kit", () => {
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.forms.addSubscriber(7, 42);
     expectTypeOf(result).toEqualTypeOf<AddSubscriberToForm | null>();
+    expectTypeOf(result!.subscriber.fields).toEqualTypeOf<
+      Record<string, string>
+    >();
+    expectTypeOf(result!.subscriber.referrer_utm_parameters).toEqualTypeOf<
+      FormReferrerUtmParameters | undefined
+    >();
     expectTypeOf<
       NonNullable<typeof result>["subscriber"]["first_name"]
     >().toEqualTypeOf<string | null>();
