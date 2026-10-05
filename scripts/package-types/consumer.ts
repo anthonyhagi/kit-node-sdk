@@ -4,6 +4,7 @@ import {
   Kit,
   refreshOAuthToken,
   verifyWebhookSignature,
+  type GetSequence,
   type GetSequenceEmailWithStats,
   type GetSequenceWithStats,
   type GetSubscriber,
@@ -16,6 +17,7 @@ import {
   type OAuthPKCE,
   type OAuthTokenResponse,
   type RequestOptions,
+  type Sequence,
   type WebhookDelivery,
 } from "@anthonyhagi/kit-node-sdk";
 
@@ -24,6 +26,8 @@ type Equal<A, B> =
     ? true
     : false;
 type Assert<T extends true> = T;
+
+export type SequenceResponse = Assert<Equal<GetSequence["sequence"], Sequence>>;
 
 const kit = new Kit({ apiKey: "typecheck-only", maxRetries: 0 });
 const options = {

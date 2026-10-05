@@ -37,14 +37,14 @@ export interface CreateSequenceParams {
 }
 
 export interface CreateSequence {
-  sequence: Omit<GetSequence["sequence"], "stats">;
+  sequence: Omit<Sequence, "stats">;
 }
 
 /** Only supplied fields change; omitted fields retain their current values. */
 export type UpdateSequenceParams = Partial<CreateSequenceParams>;
 
 export interface UpdateSequence {
-  sequence: CreateSequence["sequence"];
+  sequence: Omit<Sequence, "stats">;
 }
 
 export interface GetSequenceParams {
@@ -70,26 +70,29 @@ export interface SequenceStats {
   complaint_rate?: number | null | undefined;
 }
 
+/** Full sequence details; counts and requested deliverability statistics may be omitted. */
+export interface Sequence {
+  id: number;
+  name: string;
+  hold: boolean;
+  repeat: boolean;
+  created_at: string;
+  updated_at: string;
+  email_address: string | null;
+  email_template_id: number | null;
+  send_days: string[];
+  send_hour: number;
+  time_zone: string;
+  active: boolean;
+  exclude_subscriber_sources: { type: string; ids: number[] }[];
+  email_count?: number | undefined;
+  subscriber_count?: number | undefined;
+  /** Returned only when requested with include: "stats". */
+  stats?: SequenceStats | undefined;
+}
+
 export interface GetSequence {
-  sequence: {
-    id: number;
-    name: string;
-    hold: boolean;
-    repeat: boolean;
-    created_at: string;
-    updated_at: string;
-    email_address: string | null;
-    email_template_id: number | null;
-    send_days: string[];
-    send_hour: number;
-    time_zone: string;
-    active: boolean;
-    exclude_subscriber_sources: { type: string; ids: number[] }[];
-    email_count?: number | undefined;
-    subscriber_count?: number | undefined;
-    /** Returned only when requested with include: "stats". */
-    stats?: SequenceStats | undefined;
-  };
+  sequence: Sequence;
 }
 
 export interface ListSequencesParams
@@ -97,15 +100,10 @@ export interface ListSequencesParams
 
 /** List responses require core metadata; additional sequence details are optional. */
 export type SequenceListItem = Pick<
-  GetSequence["sequence"],
+  Sequence,
   "id" | "name" | "hold" | "repeat" | "created_at"
 > &
-  Partial<
-    Omit<
-      GetSequence["sequence"],
-      "id" | "name" | "hold" | "repeat" | "created_at"
-    >
-  >;
+  Partial<Omit<Sequence, "id" | "name" | "hold" | "repeat" | "created_at">>;
 
 export interface ListSequences {
   sequences: SequenceListItem[];
@@ -163,7 +161,7 @@ export interface AddSubscriberToSequence {
 
 /** Sequence reads explicitly requested with include: "stats". */
 export interface GetSequenceWithStats extends Omit<GetSequence, "sequence"> {
-  sequence: Omit<GetSequence["sequence"], "stats"> & { stats: SequenceStats };
+  sequence: Omit<Sequence, "stats"> & { stats: SequenceStats };
 }
 
 /** Sequence lists explicitly requested with include: "stats". */

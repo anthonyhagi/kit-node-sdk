@@ -10,6 +10,7 @@ import {
   type ListSequenceSubscribers,
   type ListSequenceSubscribersParams,
   type ListSequencesWithStats,
+  type Sequence,
   type SequenceStats,
   type SequenceSubscriber,
   type UpdateSequence,
@@ -257,6 +258,7 @@ describe("sequence requests through Kit", () => {
     fetchMock.mockResponseOnce(JSON.stringify(response), { status: 201 });
     const result = await kit.sequences.create(params);
     expectTypeOf(result).toEqualTypeOf<CreateSequence>();
+    expectTypeOf(result.sequence).toEqualTypeOf<Omit<Sequence, "stats">>();
     expect(result).toEqual(response);
     const req = request("POST", "/sequences");
     expect(req.headers.get("Content-Type")).toBe("application/json");
@@ -341,6 +343,7 @@ describe("sequence requests through Kit", () => {
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.sequences.update(7, params);
     expectTypeOf(result).toEqualTypeOf<UpdateSequence | null>();
+    expectTypeOf(result!.sequence).toEqualTypeOf<Omit<Sequence, "stats">>();
     expect(result).toEqual(response);
     const req = request("PUT", "/sequences/7");
     expect(req.headers.get("Content-Type")).toBe("application/json");
@@ -413,6 +416,7 @@ describe("sequence requests through Kit", () => {
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.sequences.get(7);
     expectTypeOf(result).toEqualTypeOf<GetSequence | null>();
+    expectTypeOf(result!.sequence).toEqualTypeOf<Sequence>();
     expectTypeOf(result!.sequence.email_address).toEqualTypeOf<string | null>();
     expectTypeOf(result!.sequence.email_template_id).toEqualTypeOf<
       number | null
