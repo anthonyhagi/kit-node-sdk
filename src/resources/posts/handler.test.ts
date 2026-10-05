@@ -1,5 +1,11 @@
 import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
-import { Kit, type GetPost, type ListPosts, type PostListItem } from "~/index";
+import {
+  Kit,
+  type GetPost,
+  type ListPosts,
+  type ListPostsParams,
+  type PostListItem,
+} from "~/index";
 
 const draft = {
   id: 5,
@@ -42,6 +48,84 @@ describe("post list requests through Kit", () => {
     fetchMock.resetMocks();
     kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
   });
+
+  it("accepts nullable pagination while keeping inclusion flags boolean", () => {
+    expectTypeOf<ListPostsParams["after"]>().toEqualTypeOf<
+      string | null | undefined
+    >();
+    expectTypeOf<ListPostsParams["before"]>().toEqualTypeOf<
+      string | null | undefined
+    >();
+    expectTypeOf<ListPostsParams["per_page"]>().toEqualTypeOf<
+      number | null | undefined
+    >();
+    expectTypeOf<ListPostsParams["include_content"]>().toEqualTypeOf<
+      boolean | undefined
+    >();
+    expectTypeOf<ListPostsParams["include_total_count"]>().toEqualTypeOf<
+      boolean | undefined
+    >();
+  });
+
+  it.each([
+    { params: { after: null, before: null, per_page: null }, expected: {} },
+    {
+      params: {
+        after: null,
+        before: "previous",
+        per_page: 25,
+        include_content: false,
+        include_total_count: false,
+      },
+      expected: {
+        before: "previous",
+        per_page: "25",
+        include_content: "false",
+        include_total_count: "false",
+      },
+    },
+    {
+      params: {
+        after: "next",
+        before: null,
+        per_page: 25,
+        include_content: true,
+        include_total_count: true,
+      },
+      expected: {
+        after: "next",
+        per_page: "25",
+        include_content: "true",
+        include_total_count: "true",
+      },
+    },
+    {
+      params: {
+        after: "next",
+        before: "previous",
+        per_page: null,
+        include_content: false,
+        include_total_count: false,
+      },
+      expected: {
+        after: "next",
+        before: "previous",
+        include_content: "false",
+        include_total_count: "false",
+      },
+    },
+    { params: { per_page: 0 }, expected: { per_page: "0" } },
+  ])(
+    "omits null values while preserving defined options $params",
+    async ({ params, expected }) => {
+      const response = { posts: [draft], pagination } satisfies ListPosts;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+
+      await expect(kit.posts.list(params)).resolves.toEqual(response);
+
+      request(expected);
+    }
+  );
 
   it("lists draft metadata without injecting content, product, or query defaults", async () => {
     const response = { posts: [draft], pagination } satisfies ListPosts;

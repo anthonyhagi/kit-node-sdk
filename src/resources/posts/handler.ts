@@ -44,7 +44,7 @@ export class PostsHandler {
       ...(include_total_count !== undefined && {
         include_total_count: String(include_total_count),
       }),
-      ...(per_page !== undefined && { per_page: String(per_page) }),
+      ...(per_page != null && { per_page: String(per_page) }),
     });
     return await this.api.get<ListPosts>("/posts", {
       query,

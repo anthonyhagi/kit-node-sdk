@@ -1186,3 +1186,11 @@ Null values are omitted from the query; defined values and explicit
 `include_total_count: false` are preserved. The exported `ListPurchasesParams`
 type matches these inputs. See the
 [Kit API reference](https://developers.kit.com/api-reference/purchases/list-purchases).
+
+## Nullable post-list pagination
+
+`kit.posts.list()` accepts `null` for `after`, `before`, and `per_page`.
+Null values are omitted from the query; defined pagination values and explicit
+`include_content: false` and `include_total_count: false` are preserved.
+The exported `ListPostsParams` type matches these inputs. See the
+[Kit API reference](https://developers.kit.com/api-reference/posts/list-posts).
