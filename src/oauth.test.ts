@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
 import {
   ApiError,
+  refreshOAuthToken,
   revokeOAuthToken,
+  type OAuthTokenResponse,
+  type RefreshOAuthTokenParams,
   type RevokeOAuthTokenParams,
 } from "~/index";
 
@@ -100,5 +103,116 @@ describe("OAuth token revocation", () => {
     expectTypeOf<
       typeof credentials & { token_type_hint: "other" }
     >().not.toExtend<RevokeOAuthTokenParams>();
+  });
+});
+
+describe("OAuth token refresh", () => {
+  const params = {
+    client_id: "client+id",
+    refresh_token: "single-use+token&value= /",
+  } satisfies RefreshOAuthTokenParams;
+  const tokens = {
+    access_token: "new-access-token",
+    token_type: "Bearer",
+    expires_in: 7200,
+    refresh_token: "replacement-refresh-token",
+    scope: "public",
+    created_at: 1710271006,
+  } satisfies OAuthTokenResponse;
+
+  beforeEach(() => {
+    fetchMock.resetMocks();
+  });
+
+  it("posts the refresh grant as JSON and returns replacement tokens", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify(tokens));
+    const result = await refreshOAuthToken(params);
+    expectTypeOf(result).toEqualTypeOf<OAuthTokenResponse>();
+    expectTypeOf(result.expires_in).toEqualTypeOf<number>();
+    expectTypeOf(result.created_at).toEqualTypeOf<number>();
+    expectTypeOf(result.refresh_token).toEqualTypeOf<string>();
+    expect(result).toEqual(tokens);
+    const requests = fetchMock.requests();
+    expect(requests).toHaveLength(1);
+    const request = requests[0]!;
+    expect(request.url).toBe("https://api.kit.com/v4/oauth/token");
+    expect(request.method).toBe("POST");
+    expect(request.headers.get("Content-Type")).toBe("application/json");
+    expect(request.headers.get("Accept")).toBe("application/json");
+    expect(request.headers.has("Authorization")).toBe(false);
+    expect(request.headers.has("X-Kit-Api-Key")).toBe(false);
+    expect(await request.json()).toEqual({
+      ...params,
+      grant_type: "refresh_token",
+    });
+  });
+
+  it.each(["https://example.com/v4", "https://example.com/v4/"])(
+    "supports an overridden base URL %s",
+    async (baseUrl) => {
+      fetchMock.mockResponseOnce(JSON.stringify(tokens));
+      expect(await refreshOAuthToken(params, { baseUrl })).toEqual(tokens);
+      expect(fetchMock.requests()[0]!.url).toBe(
+        "https://example.com/v4/oauth/token"
+      );
+    }
+  );
+
+  it.each([
+    {
+      status: 400,
+      body: '{"error":"invalid_grant"}',
+      details: { error: "invalid_grant" },
+    },
+    { status: 401, body: "Invalid client", details: "Invalid client" },
+    { status: 404, body: "", details: "" },
+    {
+      status: 429,
+      body: '{"error":"rate_limited"}',
+      details: { error: "rate_limited" },
+    },
+    { status: 500, body: "Server error", details: "Server error" },
+  ])(
+    "throws ApiError without retrying status $status",
+    async ({ status, body, details }) => {
+      fetchMock.mockResponseOnce(body, { status });
+      const error = await refreshOAuthToken(params).catch(
+        (error: unknown) => error
+      );
+      expect(error).toBeInstanceOf(ApiError);
+      expect(error).toMatchObject({
+        status,
+        details,
+        message: `OAuth token refresh failed. Status: ${status}`,
+      });
+      expect(fetchMock.requests()).toHaveLength(1);
+    }
+  );
+
+  it("propagates network failures without reusing the refresh token", async () => {
+    const error = new TypeError("Network failure");
+    fetchMock.mockRejectOnce(error);
+    await expect(refreshOAuthToken(params)).rejects.toBe(error);
+    expect(fetchMock.requests()).toHaveLength(1);
+  });
+
+  it.each(["", "invalid JSON"])(
+    "rejects malformed success body %j without retrying",
+    async (body) => {
+      fetchMock.mockResponseOnce(body);
+      await expect(refreshOAuthToken(params)).rejects.toBeInstanceOf(
+        SyntaxError
+      );
+      expect(fetchMock.requests()).toHaveLength(1);
+    }
+  );
+
+  it("requires both the client ID and refresh token", () => {
+    expectTypeOf<{
+      client_id: string;
+    }>().not.toExtend<RefreshOAuthTokenParams>();
+    expectTypeOf<{
+      refresh_token: string;
+    }>().not.toExtend<RefreshOAuthTokenParams>();
   });
 });
