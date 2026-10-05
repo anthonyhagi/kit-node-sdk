@@ -59,6 +59,41 @@ describe("tag requests through Kit", () => {
   });
 
   it.each([
+    { after: null, before: null, per_page: null },
+    { after: undefined, before: undefined, per_page: undefined },
+  ] satisfies ListTagsParams[])(
+    "omits nullable and undefined tag pagination: %j",
+    async (params) => {
+      const response = { tags: [tag], pagination } satisfies ListTags;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      const result = await kit.tags.list(params);
+      expectTypeOf(result).toEqualTypeOf<ListTags>();
+      expect(result).toEqual(response);
+      expect(await request("GET", "/tags").text()).toBe("");
+    }
+  );
+
+  it("preserves subscriber counts and false total counts with null tag pagination", async () => {
+    const params = {
+      after: null,
+      before: null,
+      per_page: null,
+      include: "subscriber_count",
+      include_total_count: false,
+    } satisfies ListTagsParams;
+    const response = {
+      tags: [{ ...tag, subscriber_count: 0 }],
+      pagination,
+    } satisfies ListTags;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.tags.list(params)).toEqual(response);
+    request("GET", "/tags", {
+      include: "subscriber_count",
+      include_total_count: "false",
+    });
+  });
+
+  it.each([
     { failures: [] },
     { failures: [{ tag: { id: 92 }, errors: ["Tag does not exist"] }] },
   ] satisfies Omit<BulkDeleteTagsSynchronous, "type">[])(
