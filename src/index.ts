@@ -440,6 +440,7 @@ export type {
   BulkTagSynchronous,
   CreateTag,
   CreateTagParams,
+  ListSlimTagSubscribers,
   ListTags,
   ListTagsParams,
   ListTagSubscribers,

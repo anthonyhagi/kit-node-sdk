@@ -15,6 +15,7 @@ import type {
   BulkTagWithoutType,
   CreateTag,
   CreateTagParams,
+  ListSlimTagSubscribers,
   ListTags,
   ListTagsParams,
   ListTagSubscribers,
@@ -405,9 +406,24 @@ export class TagsHandler {
    */
   public async listSubscribers(
     tagId: number,
+    params: ListTagSubscribersParams & { slim: true },
+    options?: RequestOptions
+  ): Promise<ListSlimTagSubscribers | null>;
+  public async listSubscribers(
+    tagId: number,
+    params?: ListTagSubscribersParams & { slim?: false | undefined },
+    options?: RequestOptions
+  ): Promise<ListTagSubscribers | null>;
+  public async listSubscribers(
+    tagId: number,
     params?: ListTagSubscribersParams,
     options?: RequestOptions
-  ): Promise<ListTagSubscribers | null> {
+  ): Promise<ListTagSubscribers | ListSlimTagSubscribers | null>;
+  public async listSubscribers(
+    tagId: number,
+    params?: ListTagSubscribersParams,
+    options?: RequestOptions
+  ): Promise<ListTagSubscribers | ListSlimTagSubscribers | null> {
     const {
       after,
       before,
@@ -440,7 +456,9 @@ export class TagsHandler {
 
     const url = `/tags/${tagId}/subscribers`;
 
-    return await this.api.get<ListTagSubscribers | null>(url, {
+    return await this.api.get<
+      ListTagSubscribers | ListSlimTagSubscribers | null
+    >(url, {
       query,
       signal: options?.signal,
     });
