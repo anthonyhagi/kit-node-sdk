@@ -61,6 +61,8 @@ export class SequenceEmailsHandler {
 
   /**
    * Create a sequence email with a subject and delay; emails are drafts by default.
+   * Automatic retries default to 0 because replaying an uncertain creation can
+   * add another email. Request options can explicitly override this limit.
    *
    * @param sequenceId - The sequence containing the new email.
    * @param params - Content, timing, and optional publishing settings.
@@ -78,7 +80,7 @@ export class SequenceEmailsHandler {
       {
         body: JSON.stringify(params),
         signal: options?.signal,
-        maxRetries: options?.maxRetries,
+        maxRetries: options?.maxRetries ?? 0,
       }
     );
   }

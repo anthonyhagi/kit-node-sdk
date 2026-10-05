@@ -322,6 +322,81 @@ describe("sequence email create requests through Kit", () => {
     kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
   });
 
+  it.each(["network", 500, 503, 429] as const)(
+    "does not retry sequence email creation after %s by default",
+    async (failure) => {
+      kit = new Kit({ apiKey: "test-key", maxRetries: 3, retryDelay: 0 });
+      if (failure === "network") {
+        fetchMock.mockRejectOnce(new Error("Connection lost"));
+      } else {
+        fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Failed"] }), {
+          status: failure,
+        });
+      }
+      fetchMock.mockResponseOnce(
+        JSON.stringify({ email: { ...email, content: null } })
+      );
+      await expect(
+        kit.sequenceEmails.create(108, {
+          subject: "Welcome",
+          delay_value: 1,
+          delay_unit: "days",
+        })
+      ).rejects.toThrow();
+      expect(fetchMock.requests()).toHaveLength(1);
+    }
+  );
+
+  it("allows explicit retries without changing the client retry policy", async () => {
+    kit = new Kit({ apiKey: "test-key", maxRetries: 0, retryDelay: 0 });
+    const response = {
+      email: { ...email, content: null },
+    } satisfies CreateSequenceEmail;
+    fetchMock.mockRejectOnce(new Error("Connection lost"));
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(
+      await kit.sequenceEmails.create(
+        108,
+        {
+          subject: "Welcome",
+          delay_value: 1,
+          delay_unit: "days",
+        },
+        { maxRetries: 1 }
+      )
+    ).toEqual(response);
+    expect(fetchMock.requests()).toHaveLength(2);
+    expect(kit.maxRetries).toBe(0);
+  });
+
+  it("keeps creation retries disabled for an undefined override", async () => {
+    kit = new Kit({ apiKey: "test-key", maxRetries: 3, retryDelay: 0 });
+    fetchMock.mockRejectOnce(new Error("Connection lost"));
+    await expect(
+      kit.sequenceEmails.create(
+        108,
+        {
+          subject: "Welcome",
+          delay_value: 1,
+          delay_unit: "days",
+        },
+        { maxRetries: undefined }
+      )
+    ).rejects.toThrow("Connection lost");
+    expect(fetchMock.requests()).toHaveLength(1);
+  });
+
+  it("retains client retries for sequence email reads", async () => {
+    kit = new Kit({ apiKey: "test-key", maxRetries: 1, retryDelay: 0 });
+    const response = {
+      email: { ...email, content: null },
+    } satisfies GetSequenceEmail;
+    fetchMock.mockRejectOnce(new Error("Connection lost"));
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.sequenceEmails.get(108, 6)).toEqual(response);
+    expect(fetchMock.requests()).toHaveLength(2);
+  });
+
   it("creates a draft using only the required subject and delay", async () => {
     const params = {
       subject: "Welcome",
