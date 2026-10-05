@@ -52,10 +52,8 @@ describe("sequence email list response inference", () => {
         { include_content: true, after: null, per_page: 25 },
         { signal: controller.signal }
       );
-      expectTypeOf(
-        result
-      ).toEqualTypeOf<ListSequenceEmailsWithContent | null>();
-      expectTypeOf(result).toExtend<ListSequenceEmails | null>();
+      expectTypeOf(result).toEqualTypeOf<ListSequenceEmailsWithContent>();
+      expectTypeOf(result).toExtend<ListSequenceEmails>();
       expectTypeOf<
         NonNullable<typeof result>["emails"][number]["content"]
       >().toEqualTypeOf<string | null>();
@@ -90,7 +88,7 @@ describe("sequence email list response inference", () => {
       fetchMock.mockResponseOnce(JSON.stringify(response));
       const kit = new Kit({ apiKey: "test", maxRetries: 0 });
       const result = await kit.sequenceEmails.list(108, params);
-      expectTypeOf(result).toEqualTypeOf<ListSequenceEmails | null>();
+      expectTypeOf(result).toEqualTypeOf<ListSequenceEmails>();
       expectTypeOf<
         NonNullable<typeof result>["emails"][number]["content"]
       >().toEqualTypeOf<string | null | undefined>();
@@ -107,24 +105,29 @@ describe("sequence email list response inference", () => {
       const kit = new Kit({ apiKey: "test", maxRetries: 0 });
       const result = await kit.sequenceEmails.list(108, params);
       expectTypeOf(result).toEqualTypeOf<
-        ListSequenceEmails | ListSequenceEmailsWithContent | null
+        ListSequenceEmails | ListSequenceEmailsWithContent
       >();
-      expectTypeOf(result).toExtend<ListSequenceEmails | null>();
+      expectTypeOf(result).toExtend<ListSequenceEmails>();
       expectTypeOf<
         NonNullable<typeof result>["emails"][number]["content"]
       >().toEqualTypeOf<string | null | undefined>();
       expect(result!.emails).toEqual([]);
     }
   );
-  it("preserves null for missing sequences when content is requested", async () => {
+  it("throws for missing sequences when content is requested", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
       status: 404,
     });
     const kit = new Kit({ apiKey: "test", maxRetries: 0 });
-    const result = await kit.sequenceEmails.list(404, {
+    const result = kit.sequenceEmails.list(404, {
       include_content: true,
     });
-    expectTypeOf(result).toEqualTypeOf<ListSequenceEmailsWithContent | null>();
-    expect(result).toBeNull();
+    expectTypeOf(result).toEqualTypeOf<
+      Promise<ListSequenceEmailsWithContent>
+    >();
+    await expect(result).rejects.toMatchObject({
+      name: "ApiError",
+      status: 404,
+    });
   });
 });

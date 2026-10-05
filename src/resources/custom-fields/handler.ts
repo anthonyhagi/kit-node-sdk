@@ -173,16 +173,13 @@ export class CustomFieldsHandler {
    *
    * @see {@link https://developers.kit.com/api-reference/custom-fields/delete-custom-field}
    *
-   * @returns an empty object when deleted successfully; `null` if
-   * the custom field was not found.
+   * @returns an empty object when deleted successfully.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    */
-  public async delete(
-    id: number,
-    options?: RequestOptions
-  ): Promise<{} | null> {
+  public async delete(id: number, options?: RequestOptions): Promise<{}> {
     const url = `/custom_fields/${id}`;
 
-    return await this.api.delete<{} | null>(url, {
+    return await this.api.delete<{}>(url, {
       signal: options?.signal,
       maxRetries: options?.maxRetries,
     });
@@ -208,18 +205,18 @@ export class CustomFieldsHandler {
    *
    * @see {@link https://developers.kit.com/api-reference/custom-fields/update-a-custom-field}
    *
-   * @returns the updated custom field; `null` if the custom
-   * field was not found.
+   * @returns the updated custom field.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    */
   public async update(
     id: number,
     params: UpdateCustomFieldParams,
     options?: RequestOptions
-  ): Promise<UpdateCustomField | null> {
+  ): Promise<UpdateCustomField> {
     const body = JSON.stringify(params || {});
     const url = `/custom_fields/${id}`;
 
-    return await this.api.put<UpdateCustomField | null>(url, {
+    return await this.api.put<UpdateCustomField>(url, {
       body,
       signal: options?.signal,
       maxRetries: options?.maxRetries,

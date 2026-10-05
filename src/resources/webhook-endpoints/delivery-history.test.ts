@@ -77,7 +77,7 @@ describe("webhook delivery history", () => {
   it("lists typed records without adding defaults or a body", async () => {
     fetchMock.mockResponseOnce(JSON.stringify(page));
     const result = await kit.webhookEndpoints.listDeliveries(42);
-    expectTypeOf(result).toEqualTypeOf<ListWebhookDeliveries | null>();
+    expectTypeOf(result).toEqualTypeOf<ListWebhookDeliveries>();
     expectTypeOf(result!.deliveries[0]!.completed_at).toEqualTypeOf<
       string | null
     >();
@@ -177,7 +177,7 @@ describe("webhook delivery history", () => {
       const result = await kit.webhookEndpoints.getDelivery(42, 123456, {
         include_payload,
       });
-      expectTypeOf(result).toEqualTypeOf<GetWebhookDelivery | null>();
+      expectTypeOf(result).toEqualTypeOf<GetWebhookDelivery>();
       expectTypeOf(result!.delivery.payload).toEqualTypeOf<
         WebhookDeliveryEvent[] | undefined
       >();
@@ -210,7 +210,7 @@ describe("webhook delivery history", () => {
   });
 
   it.each(["list", "get"] as const)(
-    "returns null for %s history when missing, expired, or inaccessible",
+    "throws ApiError for %s history when missing, expired, or inaccessible",
     async (method) => {
       fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
         status: 404,
@@ -219,7 +219,12 @@ describe("webhook delivery history", () => {
         method === "list"
           ? kit.webhookEndpoints.listDeliveries(42)
           : kit.webhookEndpoints.getDelivery(42, 123456);
-      await expect(result).resolves.toBeNull();
+      await expect(result).rejects.toMatchObject({
+        name: "ApiError",
+        status: 404,
+      });
+      await expect(result).rejects.toBeInstanceOf(ApiError);
+      expect(fetchMock.requests()).toHaveLength(1);
     }
   );
 

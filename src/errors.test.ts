@@ -27,6 +27,7 @@ describe("public API errors", () => {
       label: "",
     },
     { status: 403, prefix: "Unknown error", label: "Details: " },
+    { status: 404, prefix: "Resource not found", label: "" },
     { status: 409, prefix: "Unknown error", label: "Details: " },
     { status: 422, prefix: "Bad data in request", label: "" },
     { status: 429, prefix: "Rate limit exceeded", label: "" },
@@ -144,11 +145,14 @@ describe("public API errors", () => {
     expect(fetchMock.requests()).toHaveLength(1);
   });
 
-  it("continues returning null for 404 responses", async () => {
+  it("throws ApiError for 404 responses", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not found"] }), {
       status: 404,
     });
-    expect(await kit.accounts.getCurrentAccount()).toBeNull();
+    await expect(kit.accounts.getCurrentAccount()).rejects.toMatchObject({
+      name: "ApiError",
+      status: 404,
+    });
   });
 
   it("preserves network errors without wrapping them as ApiError", async () => {

@@ -19,7 +19,8 @@ The SDK automatically retries requests for:
 
 - **4xx client errors** (400, 401, 403, 404, 422) - These indicate client-side issues
 
-A 404 response returns `null`. Other non-retryable client errors throw.
+All unsuccessful HTTP responses throw `ApiError`, including 404. A missing
+resource never produces a successful `null` or `undefined` result.
 Empty successful response bodies return `{}`. Errors reading or parsing a
 successful response body throw without repeating the request.
 
@@ -29,7 +30,10 @@ non-JSON bodies. Its message retains the existing human-readable error text.
 Treat `details` as `unknown` and validate its shape before accessing fields.
 Retryable failures expose the final response after exhausting retry attempts.
 Network errors, timeouts, and successful response parsing failures retain their
-original error types. A 404 continues to return `null`.
+original error types. A 404 throws immediately without retrying.
+
+See [Migrating 404 handling](migration-404.md) when upgrading from the previous
+null-returning behavior.
 
 Successful responses are not retried to check data freshness. See
 [Data consistency](data-consistency.md) for reading lists and counts after writes.

@@ -272,7 +272,7 @@ describe("webhook endpoint get requests through Kit", () => {
     } satisfies GetWebhookEndpoint;
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.webhookEndpoints.get(2);
-    expectTypeOf(result).toEqualTypeOf<GetWebhookEndpoint | null>();
+    expectTypeOf(result).toEqualTypeOf<GetWebhookEndpoint>();
     expectTypeOf(result!.webhook_endpoint).toEqualTypeOf<WebhookEndpoint>();
     expectTypeOf<"secret">().not.toExtend<
       keyof GetWebhookEndpoint["webhook_endpoint"]
@@ -303,11 +303,14 @@ describe("webhook endpoint get requests through Kit", () => {
     expect(await kit.webhookEndpoints.get(2)).toEqual(response);
   });
 
-  it("returns null for missing or inaccessible endpoints", async () => {
+  it("throws ApiError for missing or inaccessible endpoints", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
       status: 404,
     });
-    expect(await kit.webhookEndpoints.get(404)).toBeNull();
+    await expect(kit.webhookEndpoints.get(404)).rejects.toMatchObject({
+      name: "ApiError",
+      status: 404,
+    });
     expect(fetchMock.requests()[0]!.url).toBe(
       "https://api.kit.com/v4/webhook_endpoints/404"
     );
@@ -453,7 +456,7 @@ describe("webhook endpoint update requests through Kit", () => {
     } satisfies UpdateWebhookEndpoint;
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.webhookEndpoints.update(2, params);
-    expectTypeOf(result).toEqualTypeOf<UpdateWebhookEndpoint | null>();
+    expectTypeOf(result).toEqualTypeOf<UpdateWebhookEndpoint>();
     expectTypeOf(result!.webhook_endpoint).toEqualTypeOf<WebhookEndpoint>();
     expectTypeOf<{
       status: "invalid";
@@ -517,13 +520,13 @@ describe("webhook endpoint update requests through Kit", () => {
     expect(await fetchMock.requests()[0]!.json()).toEqual({});
   });
 
-  it("returns null for missing endpoints", async () => {
+  it("throws ApiError for missing endpoints", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
       status: 404,
     });
-    expect(
-      await kit.webhookEndpoints.update(404, { status: "disabled" })
-    ).toBeNull();
+    await expect(
+      kit.webhookEndpoints.update(404, { status: "disabled" })
+    ).rejects.toMatchObject({ name: "ApiError", status: 404 });
     expect(fetchMock.requests()[0]!.url).toBe(
       "https://api.kit.com/v4/webhook_endpoints/404"
     );
@@ -565,7 +568,7 @@ describe("webhook endpoint delete requests through Kit", () => {
   it("deletes an endpoint with no body or query and handles an empty 204 response", async () => {
     fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
     const result = await kit.webhookEndpoints.delete(2);
-    expectTypeOf(result).toEqualTypeOf<{} | null>();
+    expectTypeOf(result).toEqualTypeOf<{}>();
     expect(result).toEqual({});
     expect(fetchMock.requests()).toHaveLength(1);
     const req = fetchMock.requests()[0]!;
@@ -575,11 +578,14 @@ describe("webhook endpoint delete requests through Kit", () => {
     expect(await req.text()).toBe("");
   });
 
-  it("returns null for a missing or inaccessible endpoint", async () => {
+  it("throws ApiError for a missing or inaccessible endpoint", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
       status: 404,
     });
-    expect(await kit.webhookEndpoints.delete(404)).toBeNull();
+    await expect(kit.webhookEndpoints.delete(404)).rejects.toMatchObject({
+      name: "ApiError",
+      status: 404,
+    });
     expect(fetchMock.requests()[0]!.url).toBe(
       "https://api.kit.com/v4/webhook_endpoints/404"
     );
@@ -687,7 +693,7 @@ describe("webhook endpoint secret rotation requests through Kit", () => {
   it("rotates without forcing and returns the new secret and required expiry", async () => {
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.webhookEndpoints.rotateSecret(2);
-    expectTypeOf(result).toEqualTypeOf<RotateWebhookEndpointSecret | null>();
+    expectTypeOf(result).toEqualTypeOf<RotateWebhookEndpointSecret>();
     expectTypeOf(result!.webhook_endpoint.secret).toEqualTypeOf<string>();
     expectTypeOf(
       result!.webhook_endpoint.previous_secret_expires_at
@@ -721,11 +727,14 @@ describe("webhook endpoint secret rotation requests through Kit", () => {
     }
   );
 
-  it("returns null for missing endpoints", async () => {
+  it("throws ApiError for missing endpoints", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
       status: 404,
     });
-    expect(await kit.webhookEndpoints.rotateSecret(404)).toBeNull();
+    await expect(kit.webhookEndpoints.rotateSecret(404)).rejects.toMatchObject({
+      name: "ApiError",
+      status: 404,
+    });
     expect(fetchMock.requests()[0]!.url).toBe(
       "https://api.kit.com/v4/webhook_endpoints/404/rotate_secret"
     );
@@ -773,9 +782,7 @@ describe("webhook endpoint previous-secret revocation requests through Kit", () 
   it("revokes the previous secret with a bodyless POST and returns endpoint metadata", async () => {
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.webhookEndpoints.revokePreviousSecret(2);
-    expectTypeOf(
-      result
-    ).toEqualTypeOf<RevokePreviousWebhookEndpointSecret | null>();
+    expectTypeOf(result).toEqualTypeOf<RevokePreviousWebhookEndpointSecret>();
     expectTypeOf(
       result!.webhook_endpoint.previous_secret_expires_at
     ).toEqualTypeOf<null>();
@@ -791,11 +798,13 @@ describe("webhook endpoint previous-secret revocation requests through Kit", () 
     expect(await req.text()).toBe("");
   });
 
-  it("returns null for missing endpoints", async () => {
+  it("throws ApiError for missing endpoints", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
       status: 404,
     });
-    expect(await kit.webhookEndpoints.revokePreviousSecret(404)).toBeNull();
+    await expect(
+      kit.webhookEndpoints.revokePreviousSecret(404)
+    ).rejects.toMatchObject({ name: "ApiError", status: 404 });
     expect(fetchMock.requests()[0]!.url).toBe(
       "https://api.kit.com/v4/webhook_endpoints/404/revoke_previous_secret"
     );

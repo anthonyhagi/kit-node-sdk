@@ -153,28 +153,25 @@ export class BroadcastsHandler {
    *
    * @see {@link https://developers.kit.com/api-reference/broadcasts/get-link-clicks-for-a-broadcast}
    *
-   * @returns the broadcast link clicks with pagination. Otherwise, `null`
-   * if the broadcast cannot be found.
+   * @returns the broadcast link clicks with pagination.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    */
   public async getLinkClicksById(
     id: number,
     params?: GetLinkClicksParams,
     options?: RequestOptions
-  ): Promise<GetLinkClicks | null> {
+  ): Promise<GetLinkClicks> {
     this.validateId(id);
 
     const query = new URLSearchParams(
       paginationQuery(params, { includeZeroPageSize: true })
     );
 
-    return await this.api.get<GetLinkClicks | null>(
-      `/broadcasts/${id}/clicks`,
-      {
-        query,
-        signal: options?.signal,
-        maxRetries: options?.maxRetries,
-      }
-    );
+    return await this.api.get<GetLinkClicks>(`/broadcasts/${id}/clicks`, {
+      query,
+      signal: options?.signal,
+      maxRetries: options?.maxRetries,
+    });
   }
 
   /**
@@ -185,16 +182,17 @@ export class BroadcastsHandler {
    *
    * @see {@link https://developers.kit.com/api-reference/broadcasts/get-stats-for-a-broadcast}
    *
-   * @returns the Broadcast if it exists; `null` otherwise.
+   * @returns the Broadcast if it exists.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    */
   public async getStats(
     id: number,
     options?: RequestOptions
-  ): Promise<GetSingleBroadcastStats | null> {
+  ): Promise<GetSingleBroadcastStats> {
     this.validateId(id);
     const url = `/broadcasts/${id}/stats`;
 
-    return await this.api.get<GetSingleBroadcastStats | null>(url, {
+    return await this.api.get<GetSingleBroadcastStats>(url, {
       signal: options?.signal,
       maxRetries: options?.maxRetries,
     });
@@ -208,16 +206,13 @@ export class BroadcastsHandler {
    *
    * @see {@link https://developers.kit.com/api-reference/broadcasts/delete-a-broadcast}
    *
-   * @returns an empty object when deleted successfully; `null` if
-   * the Broadcast was not found.
+   * @returns an empty object when deleted successfully.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    */
-  public async delete(
-    id: number,
-    options?: RequestOptions
-  ): Promise<{} | null> {
+  public async delete(id: number, options?: RequestOptions): Promise<{}> {
     this.validateId(id);
 
-    return await this.api.delete<{} | null>(`/broadcasts/${id}`, {
+    return await this.api.delete<{}>(`/broadcasts/${id}`, {
       signal: options?.signal,
       maxRetries: options?.maxRetries,
     });
@@ -229,16 +224,18 @@ export class BroadcastsHandler {
    * @param id the unique ID of the broadcast.
    * @param options - Optional request controls, including cancellation.
    *
-   * @returns the broadcast if it was found; `null` otherwise.
+   * @returns the broadcast.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
+   *
    * @see {@link https://developers.kit.com/api-reference/broadcasts/get-a-broadcast}
    */
   public async get(
     id: number,
     options?: RequestOptions
-  ): Promise<GetBroadcast | null> {
+  ): Promise<GetBroadcast> {
     this.validateId(id);
 
-    return await this.api.get<GetBroadcast | null>(`/broadcasts/${id}`, {
+    return await this.api.get<GetBroadcast>(`/broadcasts/${id}`, {
       signal: options?.signal,
       maxRetries: options?.maxRetries,
     });
@@ -261,20 +258,21 @@ export class BroadcastsHandler {
    * @param params - The broadcast details to update.
    * @param options - Optional request controls, including cancellation.
    *
-   * @returns the updated broadcast with attached details. If the
-   * broadcast was not found, `null` is returned.
+   * @returns the updated broadcast with attached details.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
+   *
    * @see {@link https://developers.kit.com/api-reference/broadcasts/update-a-broadcast}
    */
   public async update(
     id: number,
     params: UpdateBroadcastParams,
     options?: RequestOptions
-  ): Promise<UpdateBroadcast | null> {
+  ): Promise<UpdateBroadcast> {
     this.validateId(id);
 
     const body = JSON.stringify(params);
 
-    return await this.api.put<UpdateBroadcast | null>(`/broadcasts/${id}`, {
+    return await this.api.put<UpdateBroadcast>(`/broadcasts/${id}`, {
       body,
       signal: options?.signal,
       maxRetries: options?.maxRetries,

@@ -255,17 +255,17 @@ describe("form subscriber cancellation return types", () => {
     } satisfies ListFormSubscribers;
     fetchMock.mockResponse(JSON.stringify(response));
     const slim = await kit.forms.listSubscribers(123, { slim: true }, options);
-    expectTypeOf(slim).toEqualTypeOf<ListSlimFormSubscribers | null>();
+    expectTypeOf(slim).toEqualTypeOf<ListSlimFormSubscribers>();
     const full = await kit.forms.listSubscribers(123, { slim: false }, options);
-    expectTypeOf(full).toEqualTypeOf<ListFormSubscribers | null>();
+    expectTypeOf(full).toEqualTypeOf<ListFormSubscribers>();
     const omitted = await kit.forms.listSubscribers(123, undefined, options);
-    expectTypeOf(omitted).toEqualTypeOf<ListFormSubscribers | null>();
+    expectTypeOf(omitted).toEqualTypeOf<ListFormSubscribers>();
     const explicitUndefined = await kit.forms.listSubscribers(
       123,
       { slim: undefined },
       options
     );
-    expectTypeOf(explicitUndefined).toEqualTypeOf<ListFormSubscribers | null>();
+    expectTypeOf(explicitUndefined).toEqualTypeOf<ListFormSubscribers>();
     const dynamicParams: ListFormSubscribersParams = {
       slim: Math.random() > 0.5,
     };
@@ -275,7 +275,7 @@ describe("form subscriber cancellation return types", () => {
       options
     );
     expectTypeOf(dynamic).toEqualTypeOf<
-      ListFormSubscribers | ListSlimFormSubscribers | null
+      ListFormSubscribers | ListSlimFormSubscribers
     >();
     expect([slim, full, omitted, explicitUndefined, dynamic]).toEqual(
       Array.from({ length: 5 }, () => response)

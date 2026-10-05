@@ -111,22 +111,22 @@ export class FormsHandler {
     id: number,
     params: ListFormSubscribersParams & { slim: true },
     options?: RequestOptions
-  ): Promise<ListSlimFormSubscribers | null>;
+  ): Promise<ListSlimFormSubscribers>;
   public async listSubscribers(
     id: number,
     params?: ListFormSubscribersParams & { slim?: false | undefined },
     options?: RequestOptions
-  ): Promise<ListFormSubscribers | null>;
+  ): Promise<ListFormSubscribers>;
   public async listSubscribers(
     id: number,
     params?: ListFormSubscribersParams,
     options?: RequestOptions
-  ): Promise<ListFormSubscribers | ListSlimFormSubscribers | null>;
+  ): Promise<ListFormSubscribers | ListSlimFormSubscribers>;
   public async listSubscribers(
     id: number,
     params?: ListFormSubscribersParams,
     options?: RequestOptions
-  ): Promise<ListFormSubscribers | ListSlimFormSubscribers | null> {
+  ): Promise<ListFormSubscribers | ListSlimFormSubscribers> {
     const {
       added_after,
       added_before,
@@ -149,9 +149,10 @@ export class FormsHandler {
       ...(status && { status }),
     });
 
-    return await this.api.get<
-      ListFormSubscribers | ListSlimFormSubscribers | null
-    >(url, { query, signal: options?.signal, maxRetries: options?.maxRetries });
+    return await this.api.get<ListFormSubscribers | ListSlimFormSubscribers>(
+      url,
+      { query, signal: options?.signal, maxRetries: options?.maxRetries }
+    );
   }
 
   /**
@@ -173,7 +174,7 @@ export class FormsHandler {
     id: number,
     params: AddSubscriberToFormByEmailParams,
     options?: RequestOptions
-  ): Promise<AddSubscriberToFormByEmail | null> {
+  ): Promise<AddSubscriberToFormByEmail> {
     const { email_address, referrer } = params || {};
 
     const body = JSON.stringify({
@@ -183,7 +184,7 @@ export class FormsHandler {
 
     const url = `/forms/${id}/subscribers`;
 
-    return await this.api.post<AddSubscriberToFormByEmail | null>(url, {
+    return await this.api.post<AddSubscriberToFormByEmail>(url, {
       body,
       signal: options?.signal,
       maxRetries: options?.maxRetries,
@@ -208,12 +209,12 @@ export class FormsHandler {
     subscriberId: number,
     params?: AddSubscriberToFormParams,
     options?: RequestOptions
-  ): Promise<AddSubscriberToForm | null> {
+  ): Promise<AddSubscriberToForm> {
     const body = JSON.stringify(params || {});
 
     const url = `/forms/${formId}/subscribers/${subscriberId}`;
 
-    return await this.api.post<AddSubscriberToForm | null>(url, {
+    return await this.api.post<AddSubscriberToForm>(url, {
       body,
       signal: options?.signal,
       maxRetries: options?.maxRetries,

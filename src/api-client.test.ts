@@ -537,15 +537,16 @@ describe("api-client", () => {
     expect(fetchMock.requests()[0]?.method).toBe("DELETE");
   });
 
-  it("returns `null` for a 404 response", async () => {
+  it("throws ApiError for a 404 response", async () => {
     fetchMock.mockResponseOnce({ status: 404 });
 
     const api = new ApiClient({ baseUrl: "http://localhost" });
 
-    const resp = await api.get("/some/route");
-
+    await expect(api.get("/some/route")).rejects.toMatchObject({
+      name: "ApiError",
+      status: 404,
+    });
     expect(fetchMock.requests().length).toBe(1);
-    expect(resp).toBe(null);
   });
 
   describe("successful response bodies", () => {

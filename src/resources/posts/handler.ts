@@ -15,14 +15,13 @@ export class PostsHandler {
    *
    * @param id - The post to retrieve.
    * @param options - Optional request controls, including cancellation.
-   * @returns The post details, or null when the post was not found.
+   * @returns The post details.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
+   *
    * @see {@link https://developers.kit.com/api-reference/posts/get-a-post}
    */
-  public async get(
-    id: number,
-    options?: RequestOptions
-  ): Promise<GetPost | null> {
-    return await this.api.get<GetPost | null>(`/posts/${id}`, {
+  public async get(id: number, options?: RequestOptions): Promise<GetPost> {
+    return await this.api.get<GetPost>(`/posts/${id}`, {
       signal: options?.signal,
       maxRetries: options?.maxRetries,
     });

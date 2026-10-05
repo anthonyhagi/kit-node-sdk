@@ -62,14 +62,14 @@ describe("sequence stats response inference", () => {
         options
       );
       expectTypeOf(page).toEqualTypeOf<ListSequencesWithStats>();
-      expectTypeOf(result).toEqualTypeOf<GetSequenceWithStats | null>();
+      expectTypeOf(result).toEqualTypeOf<GetSequenceWithStats>();
       expectTypeOf(page.sequences[0]!.stats).toEqualTypeOf<SequenceStats>();
       expectTypeOf(result!.sequence.stats).toEqualTypeOf<SequenceStats>();
       expectTypeOf(page.sequences[0]!.stats.open_rate).toEqualTypeOf<
         number | null | undefined
       >();
       expectTypeOf(page).toExtend<ListSequences>();
-      expectTypeOf(result).toExtend<GetSequence | null>();
+      expectTypeOf(result).toExtend<GetSequence>();
       expect(page).toEqual(list);
       expect(result).toEqual(single);
       const requests = fetchMock.requests();
@@ -98,7 +98,7 @@ describe("sequence stats response inference", () => {
       const page = await kit.sequences.list(params);
       const result = await kit.sequences.get(123, params);
       expectTypeOf(page).toEqualTypeOf<ListSequences>();
-      expectTypeOf(result).toEqualTypeOf<GetSequence | null>();
+      expectTypeOf(result).toEqualTypeOf<GetSequence>();
       expectTypeOf(page.sequences[0]!.stats).toEqualTypeOf<
         SequenceStats | undefined
       >();
@@ -123,9 +123,7 @@ describe("sequence stats response inference", () => {
       expectTypeOf(page).toEqualTypeOf<
         ListSequences | ListSequencesWithStats
       >();
-      expectTypeOf(result).toEqualTypeOf<
-        GetSequence | GetSequenceWithStats | null
-      >();
+      expectTypeOf(result).toEqualTypeOf<GetSequence | GetSequenceWithStats>();
       expectTypeOf<(typeof page)["sequences"][number]["stats"]>().toEqualTypeOf<
         SequenceStats | undefined
       >();
@@ -136,15 +134,18 @@ describe("sequence stats response inference", () => {
     }
   );
 
-  it("preserves null for a missing sequence when stats are requested", async () => {
+  it("throws ApiError for a missing sequence when stats are requested", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
       status: 404,
     });
-    const result = await new Kit({
+    const result = new Kit({
       apiKey: "test",
       maxRetries: 0,
     }).sequences.get(404, { include: "stats" });
-    expectTypeOf(result).toEqualTypeOf<GetSequenceWithStats | null>();
-    expect(result).toBeNull();
+    expectTypeOf(result).toEqualTypeOf<Promise<GetSequenceWithStats>>();
+    await expect(result).rejects.toMatchObject({
+      name: "ApiError",
+      status: 404,
+    });
   });
 });

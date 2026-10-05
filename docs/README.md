@@ -16,3 +16,5 @@ for the upstream API specification and [Contributing](../CONTRIBUTING.md) for
 contribution guidelines and dependency-update policy.
 
 For local setup, scripts, and tests, see [DEVELOPMENT.md](../DEVELOPMENT.md).
+
+- [Migrating 404 handling](migration-404.md) — replace null checks with ApiError handling.

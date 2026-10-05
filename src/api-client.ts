@@ -259,7 +259,7 @@ export class ApiClient {
             continue;
           }
 
-          return (await this.handleError(resp)) as TResponseType;
+          return await this.handleError(resp);
         }
 
         if (resp.status === 204) {
@@ -293,7 +293,7 @@ export class ApiClient {
     throw new Error("Request failed after all retry attempts");
   }
 
-  private async handleError(resp: Response): Promise<null | never> {
+  private async handleError(resp: Response): Promise<never> {
     let detailsString: string;
     let details: unknown;
 
@@ -330,7 +330,11 @@ export class ApiClient {
         );
 
       case 404:
-        return null;
+        throw new ApiError(
+          `Resource not found. Status: ${resp.status} - ${detailsString}`,
+          resp.status,
+          details
+        );
 
       case 429:
         throw new ApiError(

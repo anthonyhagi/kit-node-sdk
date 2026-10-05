@@ -94,15 +94,15 @@ export class AccountsHandler {
    *
    * @see {@link https://developers.kit.com/api-reference/accounts/get-creator-profile}
    *
-   * @returns the details stored on the current profile or `null` if
-   * the creator profile does not exist.
+   * @returns the details stored on the current profile.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    */
   public async getCreatorProfile(
     options?: RequestOptions
-  ): Promise<GetCreatorProfile | null> {
+  ): Promise<GetCreatorProfile> {
     const url = "/account/creator_profile";
 
-    return await this.api.get<GetCreatorProfile | null>(url, {
+    return await this.api.get<GetCreatorProfile>(url, {
       signal: options?.signal,
       maxRetries: options?.maxRetries,
     });
