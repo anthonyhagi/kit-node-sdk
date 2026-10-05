@@ -202,16 +202,19 @@ describe("custom-field requests through Kit", () => {
   });
 
   it.each(["update", "delete"] as const)(
-    "returns null from %s when the custom field is missing",
+    "throws ApiError from %s when the custom field is missing",
     async (method) => {
       fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not found"] }), {
         status: 404,
       });
       const result =
         method === "update"
-          ? await kit.customFields.update(7, { label: "Family name" })
-          : await kit.customFields.delete(7);
-      expect(result).toBeNull();
+          ? kit.customFields.update(7, { label: "Family name" })
+          : kit.customFields.delete(7);
+      await expect(result).rejects.toMatchObject({
+        name: "ApiError",
+        status: 404,
+      });
       request(method === "update" ? "PUT" : "DELETE", "/custom_fields/7");
     }
   );

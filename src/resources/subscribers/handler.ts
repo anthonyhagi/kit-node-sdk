@@ -200,15 +200,16 @@ export class SubscribersHandler {
    *
    * @see {@link https://developers.kit.com/api-reference/subscribers/get-a-subscriber}
    *
-   * @returns The Subscriber if found; `null` otherwise.
+   * @returns The Subscriber.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    */
   public async get(
     id: number,
     options?: RequestOptions
-  ): Promise<GetSubscriber | null> {
+  ): Promise<GetSubscriber> {
     const url = `/subscribers/${id}`;
 
-    return await this.api.get<GetSubscriber | null>(url, {
+    return await this.api.get<GetSubscriber>(url, {
       signal: options?.signal,
       maxRetries: options?.maxRetries,
     });
@@ -229,12 +230,12 @@ export class SubscribersHandler {
     id: number,
     params: UpdateSubscriberParams,
     options?: RequestOptions
-  ): Promise<UpdateSubscriber | null> {
+  ): Promise<UpdateSubscriber> {
     const body = JSON.stringify(params || {});
 
     const url = `/subscribers/${id}`;
 
-    return await this.api.put<UpdateSubscriber | null>(url, {
+    return await this.api.put<UpdateSubscriber>(url, {
       body,
       signal: options?.signal,
       maxRetries: options?.maxRetries,
@@ -249,16 +250,13 @@ export class SubscribersHandler {
    *
    * @see {@link https://developers.kit.com/api-reference/subscribers/unsubscribe-subscriber}
    *
-   * @returns An empty object if the request was successful; `null`
-   * if the Subscriber was not found.
+   * @returns An empty object if the request was successful.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    */
-  public async unsubscribe(
-    id: number,
-    options?: RequestOptions
-  ): Promise<{} | null> {
+  public async unsubscribe(id: number, options?: RequestOptions): Promise<{}> {
     const url = `/subscribers/${id}/unsubscribe`;
 
-    return await this.api.post<{} | null>(url, {
+    return await this.api.post<{}>(url, {
       signal: options?.signal,
       maxRetries: options?.maxRetries,
     });
@@ -272,14 +270,15 @@ export class SubscribersHandler {
    * @param params - The location to pin.
    * @param options - Optional request controls, including cancellation.
    * @see {@link https://developers.kit.com/api-reference/subscribers/pin-a-subscribers-location}
-   * @returns The pinned location, or null when the Subscriber is not found.
+   * @returns The pinned location.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    */
   public async pinLocation(
     id: number,
     params: PinSubscriberLocationParams,
     options?: RequestOptions
-  ): Promise<PinSubscriberLocation | null> {
-    return await this.api.post<PinSubscriberLocation | null>(
+  ): Promise<PinSubscriberLocation> {
+    return await this.api.post<PinSubscriberLocation>(
       `/subscribers/${id}/location`,
       {
         body: JSON.stringify(params),
@@ -297,14 +296,15 @@ export class SubscribersHandler {
    * @param params - The complete replacement location.
    * @param options - Optional request controls, including cancellation.
    * @see {@link https://developers.kit.com/api-reference/subscribers/update-a-subscribers-pinned-location}
-   * @returns The updated location, or null when the Subscriber is not found.
+   * @returns The updated location.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    */
   public async updateLocation(
     id: number,
     params: UpdateSubscriberLocationParams,
     options?: RequestOptions
-  ): Promise<UpdateSubscriberLocation | null> {
-    return await this.api.patch<UpdateSubscriberLocation | null>(
+  ): Promise<UpdateSubscriberLocation> {
+    return await this.api.patch<UpdateSubscriberLocation>(
       `/subscribers/${id}/location`,
       {
         body: JSON.stringify(params),
@@ -321,13 +321,14 @@ export class SubscribersHandler {
    * @param id - The unique ID of the Subscriber.
    * @param options - Optional request controls, including cancellation.
    * @see {@link https://developers.kit.com/api-reference/subscribers/delete-a-subscribers-location}
-   * @returns An empty object on success, or null when the Subscriber is not found.
+   * @returns An empty object on success.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    */
   public async deleteLocation(
     id: number,
     options?: RequestOptions
-  ): Promise<{} | null> {
-    return await this.api.delete<{} | null>(`/subscribers/${id}/location`, {
+  ): Promise<{}> {
+    return await this.api.delete<{}>(`/subscribers/${id}/location`, {
       signal: options?.signal,
       maxRetries: options?.maxRetries,
     });
@@ -342,14 +343,14 @@ export class SubscribersHandler {
    *
    * @see {@link https://developers.kit.com/api-reference/subscribers/list-stats-for-a-subscriber}
    *
-   * @returns The Subscriber's email stats if the Subscriber exists;
-   * Otherwise `null` if the Subscriber does not exist.
+   * @returns The Subscriber's email stats.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    */
   public async getStats(
     id: number,
     params?: GetSubscriberStatsParams,
     options?: RequestOptions
-  ): Promise<GetSubscriberStats | null> {
+  ): Promise<GetSubscriberStats> {
     const { email_sent_after, email_sent_before } = params || {};
 
     const query = new URLSearchParams({
@@ -359,7 +360,7 @@ export class SubscribersHandler {
 
     const url = `/subscribers/${id}/stats`;
 
-    return await this.api.get<GetSubscriberStats | null>(url, {
+    return await this.api.get<GetSubscriberStats>(url, {
       query,
       signal: options?.signal,
       maxRetries: options?.maxRetries,
@@ -375,19 +376,19 @@ export class SubscribersHandler {
    *
    * @see {@link https://developers.kit.com/api-reference/subscribers/list-tags-for-a-subscriber}
    *
-   * @returns The Subscribers' Tags if the Subscriber exists;
-   * Otheriwse `null` if the Subscriber does not exist.
+   * @returns The Subscribers' Tags.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    */
   public async getTags(
     id: number,
     params?: GetSubscriberTagsParams,
     options?: RequestOptions
-  ): Promise<GetSubscriberTags | null> {
+  ): Promise<GetSubscriberTags> {
     const query = new URLSearchParams(paginationQuery(params));
 
     const url = `/subscribers/${id}/tags`;
 
-    return await this.api.get<GetSubscriberTags | null>(url, {
+    return await this.api.get<GetSubscriberTags>(url, {
       query,
       signal: options?.signal,
       maxRetries: options?.maxRetries,

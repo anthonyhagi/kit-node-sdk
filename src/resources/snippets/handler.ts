@@ -20,15 +20,17 @@ export class SnippetsHandler {
    * @param id - The snippet to update.
    * @param params - Changes matching the existing inline or block snippet type.
    * @param options - Optional request controls, including cancellation.
-   * @returns The updated snippet, or null when the snippet was not found.
+   * @returns The updated snippet.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
+   *
    * @see {@link https://developers.kit.com/api-reference/snippets/update-a-snippet}
    */
   public async update(
     id: number,
     params: UpdateSnippetParams,
     options?: RequestOptions
-  ): Promise<UpdateSnippet | null> {
-    return await this.api.put<UpdateSnippet | null>(`/snippets/${id}`, {
+  ): Promise<UpdateSnippet> {
+    return await this.api.put<UpdateSnippet>(`/snippets/${id}`, {
       body: JSON.stringify(params),
       signal: options?.signal,
       maxRetries: options?.maxRetries,
@@ -59,14 +61,13 @@ export class SnippetsHandler {
    *
    * @param id - The snippet to retrieve.
    * @param options - Optional request controls, including cancellation.
-   * @returns The snippet details, or null when the snippet was not found.
+   * @returns The snippet details.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
+   *
    * @see {@link https://developers.kit.com/api-reference/snippets/get-a-snippet}
    */
-  public async get(
-    id: number,
-    options?: RequestOptions
-  ): Promise<GetSnippet | null> {
-    return await this.api.get<GetSnippet | null>(`/snippets/${id}`, {
+  public async get(id: number, options?: RequestOptions): Promise<GetSnippet> {
+    return await this.api.get<GetSnippet>(`/snippets/${id}`, {
       signal: options?.signal,
       maxRetries: options?.maxRetries,
     });

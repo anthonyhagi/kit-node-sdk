@@ -284,7 +284,7 @@ describe("snippet get requests through Kit", () => {
       } satisfies GetSnippet;
       fetchMock.mockResponseOnce(JSON.stringify(response));
       const result = await kit.snippets.get(5);
-      expectTypeOf(result).toEqualTypeOf<GetSnippet | null>();
+      expectTypeOf(result).toEqualTypeOf<GetSnippet>();
       expectTypeOf(result!.snippet.content).toEqualTypeOf<string>();
       expectTypeOf(result!.snippet.document).toEqualTypeOf<SnippetDocument>();
       expectTypeOf<typeof snippet>().not.toExtend<GetSnippet["snippet"]>();
@@ -317,11 +317,14 @@ describe("snippet get requests through Kit", () => {
     expect(await kit.snippets.get(5)).toEqual(response);
   });
 
-  it("returns null for a missing snippet", async () => {
+  it("throws ApiError for a missing snippet", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
       status: 404,
     });
-    expect(await kit.snippets.get(404)).toBeNull();
+    await expect(kit.snippets.get(404)).rejects.toMatchObject({
+      name: "ApiError",
+      status: 404,
+    });
     expect(fetchMock.requests()[0]!.url).toBe(
       "https://api.kit.com/v4/snippets/404"
     );
@@ -365,7 +368,7 @@ describe("snippet update requests through Kit", () => {
     } satisfies UpdateSnippet;
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.snippets.update(5, params);
-    expectTypeOf(result).toEqualTypeOf<UpdateSnippet | null>();
+    expectTypeOf(result).toEqualTypeOf<UpdateSnippet>();
     expectTypeOf(result!.snippet.content).toEqualTypeOf<string>();
     expectTypeOf(result!.snippet.document).toEqualTypeOf<SnippetDocument>();
     expect(result).toEqual(response);
@@ -470,11 +473,13 @@ describe("snippet update requests through Kit", () => {
     }>().not.toExtend<UpdateSnippetParams>();
   });
 
-  it("returns null for missing snippets", async () => {
+  it("throws ApiError for missing snippets", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
       status: 404,
     });
-    expect(await kit.snippets.update(404, { name: "Renamed" })).toBeNull();
+    await expect(
+      kit.snippets.update(404, { name: "Renamed" })
+    ).rejects.toMatchObject({ name: "ApiError", status: 404 });
     expect(fetchMock.requests()[0]!.url).toBe(
       "https://api.kit.com/v4/snippets/404"
     );

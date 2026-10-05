@@ -142,7 +142,7 @@ describe("subscriber requests through Kit", () => {
       } satisfies GetSubscriberTags;
       fetchMock.mockResponseOnce(JSON.stringify(response));
       const result = await kit.subscribers.getTags(42, params);
-      expectTypeOf(result).toEqualTypeOf<GetSubscriberTags | null>();
+      expectTypeOf(result).toEqualTypeOf<GetSubscriberTags>();
       expect(result).toEqual(response);
       expect(await request("GET", "/subscribers/42/tags").text()).toBe("");
     }
@@ -616,7 +616,7 @@ describe("subscriber requests through Kit", () => {
     fetchMock.mockResponseOnce(JSON.stringify(response));
 
     const result = await kit.subscribers.get(42);
-    expectTypeOf(result).toEqualTypeOf<GetSubscriber | null>();
+    expectTypeOf(result).toEqualTypeOf<GetSubscriber>();
     expectTypeOf(result?.subscriber.canceled_at).toEqualTypeOf<
       string | null | undefined
     >();
@@ -645,7 +645,7 @@ describe("subscriber requests through Kit", () => {
     fetchMock.mockResponseOnce(JSON.stringify(response));
 
     const result = await kit.subscribers.get(42);
-    expectTypeOf(result).toEqualTypeOf<GetSubscriber | null>();
+    expectTypeOf(result).toEqualTypeOf<GetSubscriber>();
     expect(result).toEqual(response);
     request("GET", "/subscribers/42");
   });
@@ -671,7 +671,7 @@ describe("subscriber requests through Kit", () => {
     fetchMock.mockResponseOnce(JSON.stringify(response));
 
     const result = await kit.subscribers.update(42, body);
-    expectTypeOf(result).toEqualTypeOf<UpdateSubscriber | null>();
+    expectTypeOf(result).toEqualTypeOf<UpdateSubscriber>();
     expect(result).toEqual(response);
     expect(await request("PUT", "/subscribers/42").json()).toEqual(body);
   });
@@ -723,7 +723,7 @@ describe("subscriber requests through Kit", () => {
       fetchMock.mockResponseOnce(JSON.stringify(response));
 
       const result = await kit.subscribers.pinLocation(42, body);
-      expectTypeOf(result).toEqualTypeOf<PinSubscriberLocation | null>();
+      expectTypeOf(result).toEqualTypeOf<PinSubscriberLocation>();
       expect(result).toEqual(response);
       expect(await request("POST", "/subscribers/42/location").json()).toEqual(
         body
@@ -731,12 +731,14 @@ describe("subscriber requests through Kit", () => {
     }
   );
 
-  it("returns null when pinning a missing subscriber's location", async () => {
+  it("throws ApiError when pinning a missing subscriber's location", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
       status: 404,
     });
 
-    expect(await kit.subscribers.pinLocation(42, pinnedLocation)).toBeNull();
+    await expect(
+      kit.subscribers.pinLocation(42, pinnedLocation)
+    ).rejects.toMatchObject({ name: "ApiError", status: 404 });
     expect(await request("POST", "/subscribers/42/location").json()).toEqual(
       pinnedLocation
     );
@@ -778,7 +780,7 @@ describe("subscriber requests through Kit", () => {
       fetchMock.mockResponseOnce(JSON.stringify(response));
 
       const result = await kit.subscribers.updateLocation(42, body);
-      expectTypeOf(result).toEqualTypeOf<UpdateSubscriberLocation | null>();
+      expectTypeOf(result).toEqualTypeOf<UpdateSubscriberLocation>();
       expect(result).toEqual(response);
       expect(await request("PATCH", "/subscribers/42/location").json()).toEqual(
         body
@@ -796,12 +798,14 @@ describe("subscriber requests through Kit", () => {
     expectTypeOf<Omit<Location, "timezone">>().not.toExtend<Location>();
   });
 
-  it("returns null when updating a missing subscriber's location", async () => {
+  it("throws ApiError when updating a missing subscriber's location", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
       status: 404,
     });
 
-    expect(await kit.subscribers.updateLocation(42, pinnedLocation)).toBeNull();
+    await expect(
+      kit.subscribers.updateLocation(42, pinnedLocation)
+    ).rejects.toMatchObject({ name: "ApiError", status: 404 });
     expect(await request("PATCH", "/subscribers/42/location").json()).toEqual(
       pinnedLocation
     );
@@ -838,18 +842,21 @@ describe("subscriber requests through Kit", () => {
     fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
 
     const result = await kit.subscribers.deleteLocation(42);
-    expectTypeOf(result).toEqualTypeOf<{} | null>();
+    expectTypeOf(result).toEqualTypeOf<{}>();
     expect(result).toEqual({});
     expect(await request("DELETE", "/subscribers/42/location").text()).toBe("");
     expect(fetchMock.requests()).toHaveLength(1);
   });
 
-  it("returns null when deleting a missing subscriber's location", async () => {
+  it("throws ApiError when deleting a missing subscriber's location", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
       status: 404,
     });
 
-    expect(await kit.subscribers.deleteLocation(42)).toBeNull();
+    await expect(kit.subscribers.deleteLocation(42)).rejects.toMatchObject({
+      name: "ApiError",
+      status: 404,
+    });
     expect(await request("DELETE", "/subscribers/42/location").text()).toBe("");
     expect(fetchMock.requests()).toHaveLength(1);
   });
@@ -1498,7 +1505,7 @@ describe("subscriber requests through Kit", () => {
     fetchMock.mockResponseOnce(JSON.stringify(response));
 
     const result = await kit.subscribers.getStats(42, params);
-    expectTypeOf(result).toEqualTypeOf<GetSubscriberStats | null>();
+    expectTypeOf(result).toEqualTypeOf<GetSubscriberStats>();
     expect(result).toEqual(response);
     request("GET", "/subscribers/42/stats", {
       email_sent_after: "2026-01-01",
@@ -1642,7 +1649,7 @@ describe("subscriber requests through Kit", () => {
   });
 
   it.each(["get", "update", "unsubscribe", "getStats", "getTags"] as const)(
-    "returns null from %s when the subscriber is missing",
+    "throws ApiError from %s when the subscriber is missing",
     async (method) => {
       fetchMock.mockResponseOnce(
         JSON.stringify({ errors: ["Subscriber not found"] }),
@@ -1650,11 +1657,14 @@ describe("subscriber requests through Kit", () => {
       );
       const result =
         method === "update"
-          ? await kit.subscribers.update(42, {
+          ? kit.subscribers.update(42, {
               email_address: subscriber.email_address,
             })
-          : await kit.subscribers[method](42);
-      expect(result).toBeNull();
+          : kit.subscribers[method](42);
+      await expect(result).rejects.toMatchObject({
+        name: "ApiError",
+        status: 404,
+      });
       expect(fetchMock.requests()).toHaveLength(1);
     }
   );

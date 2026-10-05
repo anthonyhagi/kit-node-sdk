@@ -240,11 +240,14 @@ describe("account requests through Kit", () => {
     expect(await request("GET", "/account/creator_profile").text()).toBe("");
   });
 
-  it("returns null when the creator profile does not exist", async () => {
+  it("throws ApiError when the creator profile does not exist", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not found"] }), {
       status: 404,
     });
-    expect(await kit.accounts.getCreatorProfile()).toBeNull();
+    await expect(kit.accounts.getCreatorProfile()).rejects.toMatchObject({
+      name: "ApiError",
+      status: 404,
+    });
     request("GET", "/account/creator_profile");
   });
 

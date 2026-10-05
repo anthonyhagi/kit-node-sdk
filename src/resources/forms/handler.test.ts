@@ -235,7 +235,7 @@ describe("form requests through Kit", () => {
     } satisfies ListFormSubscribers;
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.forms.listSubscribers(7);
-    expectTypeOf(result).toEqualTypeOf<ListFormSubscribers | null>();
+    expectTypeOf(result).toEqualTypeOf<ListFormSubscribers>();
     expectTypeOf<
       NonNullable<typeof result>["subscribers"][number]["fields"]
     >().toEqualTypeOf<Record<string, string | null>>();
@@ -271,7 +271,7 @@ describe("form requests through Kit", () => {
       } satisfies ListFormSubscribers;
       fetchMock.mockResponseOnce(JSON.stringify(response));
       const result = await kit.forms.listSubscribers(7, params);
-      expectTypeOf(result).toEqualTypeOf<ListFormSubscribers | null>();
+      expectTypeOf(result).toEqualTypeOf<ListFormSubscribers>();
       expect(result).toEqual(response);
       expect(await request("GET", "/forms/7/subscribers").text()).toBe("");
     }
@@ -303,7 +303,7 @@ describe("form requests through Kit", () => {
       include_total_count: false,
     } satisfies ListFormSubscribersParams & { slim: true };
     const result = await kit.forms.listSubscribers(7, params);
-    expectTypeOf(result).toEqualTypeOf<ListSlimFormSubscribers | null>();
+    expectTypeOf(result).toEqualTypeOf<ListSlimFormSubscribers>();
     expect(result).toEqual(response);
     request("GET", "/forms/7/subscribers", {
       slim: "true",
@@ -331,7 +331,7 @@ describe("form requests through Kit", () => {
       include_total_count: false,
     } satisfies ListFormSubscribersParams & { slim: false };
     const result = await kit.forms.listSubscribers(7, params);
-    expectTypeOf(result).toEqualTypeOf<ListFormSubscribers | null>();
+    expectTypeOf(result).toEqualTypeOf<ListFormSubscribers>();
     expect(result).toEqual(response);
     request("GET", "/forms/7/subscribers", {
       slim: "false",
@@ -363,7 +363,7 @@ describe("form requests through Kit", () => {
       added_after: "2026-01-01",
       created_before: "2026-02-01",
     });
-    expectTypeOf(result).toEqualTypeOf<ListSlimFormSubscribers | null>();
+    expectTypeOf(result).toEqualTypeOf<ListSlimFormSubscribers>();
     expectTypeOf(result!.subscribers[0]!.fields).toEqualTypeOf<
       Record<string, string | null> | undefined
     >();
@@ -398,7 +398,7 @@ describe("form requests through Kit", () => {
     } satisfies ListFormSubscribers;
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.forms.listSubscribers(7, { slim: false });
-    expectTypeOf(result).toEqualTypeOf<ListFormSubscribers | null>();
+    expectTypeOf(result).toEqualTypeOf<ListFormSubscribers>();
     expectTypeOf(result!.subscribers[0]!.fields).toEqualTypeOf<
       Record<string, string | null>
     >();
@@ -411,7 +411,7 @@ describe("form requests through Kit", () => {
       JSON.stringify({ subscribers: [subscriber], pagination })
     );
     const result = await kit.forms.listSubscribers(7, { slim: undefined });
-    expectTypeOf(result).toEqualTypeOf<ListFormSubscribers | null>();
+    expectTypeOf(result).toEqualTypeOf<ListFormSubscribers>();
     request("GET", "/forms/7/subscribers");
   });
 
@@ -423,18 +423,20 @@ describe("form requests through Kit", () => {
       fetchMock.mockResponseOnce(JSON.stringify(response));
       const result = await kit.forms.listSubscribers(7, params);
       expectTypeOf(result).toEqualTypeOf<
-        ListFormSubscribers | ListSlimFormSubscribers | null
+        ListFormSubscribers | ListSlimFormSubscribers
       >();
       expect(result).toEqual(response);
       request("GET", "/forms/7/subscribers", { slim: String(slim) });
     }
   );
 
-  it("returns null for a missing form when slim is true", async () => {
+  it("throws ApiError for a missing form when slim is true", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
       status: 404,
     });
-    expect(await kit.forms.listSubscribers(404, { slim: true })).toBeNull();
+    await expect(
+      kit.forms.listSubscribers(404, { slim: true })
+    ).rejects.toMatchObject({ name: "ApiError", status: 404 });
     request("GET", "/forms/404/subscribers", { slim: "true" });
   });
 
@@ -567,7 +569,7 @@ describe("form requests through Kit", () => {
     const response = { subscriber } satisfies AddSubscriberToForm;
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.forms.addSubscriber(7, 42);
-    expectTypeOf(result).toEqualTypeOf<AddSubscriberToForm | null>();
+    expectTypeOf(result).toEqualTypeOf<AddSubscriberToForm>();
     expectTypeOf<
       NonNullable<typeof result>["subscriber"]["first_name"]
     >().toEqualTypeOf<string | null>();
@@ -702,7 +704,7 @@ describe("form requests through Kit", () => {
     "addSubscriber",
     "addSubscriberByEmail",
   ] as const)(
-    "returns null from %s when the form or subscriber is missing",
+    "throws ApiError from %s when the form or subscriber is missing",
     async (method) => {
       fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not found"] }), {
         status: 404,
@@ -710,18 +712,21 @@ describe("form requests through Kit", () => {
       let result;
       switch (method) {
         case "listSubscribers":
-          result = await kit.forms.listSubscribers(7);
+          result = kit.forms.listSubscribers(7);
           break;
         case "addSubscriber":
-          result = await kit.forms.addSubscriber(7, 42);
+          result = kit.forms.addSubscriber(7, 42);
           break;
         case "addSubscriberByEmail":
-          result = await kit.forms.addSubscriberByEmail(7, {
+          result = kit.forms.addSubscriberByEmail(7, {
             email_address: subscriber.email_address,
           });
           break;
       }
-      expect(result).toBeNull();
+      await expect(result).rejects.toMatchObject({
+        name: "ApiError",
+        status: 404,
+      });
       expect(fetchMock.requests()).toHaveLength(1);
     }
   );

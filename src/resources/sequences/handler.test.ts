@@ -124,7 +124,7 @@ describe("sequence requests through Kit", () => {
       } satisfies ListSequenceSubscribers;
       fetchMock.mockResponseOnce(JSON.stringify(response));
       const result = await kit.sequences.listSubscribers(7, params);
-      expectTypeOf(result).toEqualTypeOf<ListSequenceSubscribers | null>();
+      expectTypeOf(result).toEqualTypeOf<ListSequenceSubscribers>();
       expect(result).toEqual(response);
       expect(await request("GET", "/sequences/7/subscribers").text()).toBe("");
     }
@@ -186,7 +186,7 @@ describe("sequence requests through Kit", () => {
       fetchMock.mockResponseOnce(JSON.stringify(response));
 
       const result = await kit.sequences.listSubscribers(7);
-      expectTypeOf(result).toEqualTypeOf<ListSequenceSubscribers | null>();
+      expectTypeOf(result).toEqualTypeOf<ListSequenceSubscribers>();
       expectTypeOf<
         ListSequenceSubscribers["subscribers"][number]["fields"]
       >().toEqualTypeOf<Record<string, string | null>>();
@@ -199,16 +199,19 @@ describe("sequence requests through Kit", () => {
   it("deletes a sequence with a bodyless request and handles 204 responses", async () => {
     fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
     const result = await kit.sequences.delete(7);
-    expectTypeOf(result).toEqualTypeOf<{} | null>();
+    expectTypeOf(result).toEqualTypeOf<{}>();
     expect(result).toEqual({});
     expect(await request("DELETE", "/sequences/7").text()).toBe("");
   });
 
-  it("returns null when deleting a missing sequence", async () => {
+  it("throws ApiError when deleting a missing sequence", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
       status: 404,
     });
-    expect(await kit.sequences.delete(404)).toBeNull();
+    await expect(kit.sequences.delete(404)).rejects.toMatchObject({
+      name: "ApiError",
+      status: 404,
+    });
     expect(await request("DELETE", "/sequences/404").text()).toBe("");
   });
 
@@ -339,7 +342,7 @@ describe("sequence requests through Kit", () => {
     } satisfies UpdateSequence;
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.sequences.update(7, params);
-    expectTypeOf(result).toEqualTypeOf<UpdateSequence | null>();
+    expectTypeOf(result).toEqualTypeOf<UpdateSequence>();
     expect(result).toEqual(response);
     const req = request("PUT", "/sequences/7");
     expect(req.headers.get("Content-Type")).toBe("application/json");
@@ -386,11 +389,13 @@ describe("sequence requests through Kit", () => {
     expect(await request("PUT", "/sequences/7").json()).toEqual(params);
   });
 
-  it("returns null when updating a missing sequence", async () => {
+  it("throws ApiError when updating a missing sequence", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
       status: 404,
     });
-    expect(await kit.sequences.update(404, { name: "Missing" })).toBeNull();
+    await expect(
+      kit.sequences.update(404, { name: "Missing" })
+    ).rejects.toMatchObject({ name: "ApiError", status: 404 });
     expect(await request("PUT", "/sequences/404").json()).toEqual({
       name: "Missing",
     });
@@ -411,7 +416,7 @@ describe("sequence requests through Kit", () => {
     const response = { sequence: details } satisfies GetSequence;
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.sequences.get(7);
-    expectTypeOf(result).toEqualTypeOf<GetSequence | null>();
+    expectTypeOf(result).toEqualTypeOf<GetSequence>();
     expectTypeOf(result!.sequence.email_address).toEqualTypeOf<string | null>();
     expectTypeOf(result!.sequence.email_template_id).toEqualTypeOf<
       number | null
@@ -470,11 +475,13 @@ describe("sequence requests through Kit", () => {
     request("GET", "/sequences/7");
   });
 
-  it("returns null for a missing sequence", async () => {
+  it("throws ApiError for a missing sequence", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
       status: 404,
     });
-    expect(await kit.sequences.get(404, { include: "stats" })).toBeNull();
+    await expect(
+      kit.sequences.get(404, { include: "stats" })
+    ).rejects.toMatchObject({ name: "ApiError", status: 404 });
     request("GET", "/sequences/404", { include: "stats" });
   });
 
@@ -605,7 +612,7 @@ describe("sequence requests through Kit", () => {
     } satisfies ListSequenceSubscribers;
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.sequences.listSubscribers(7);
-    expectTypeOf(result).toEqualTypeOf<ListSequenceSubscribers | null>();
+    expectTypeOf(result).toEqualTypeOf<ListSequenceSubscribers>();
     expectTypeOf<
       NonNullable<typeof result>["subscribers"][number]["fields"]
     >().toEqualTypeOf<Record<string, string | null>>();
@@ -731,7 +738,7 @@ describe("sequence requests through Kit", () => {
       fetchMock.mockResponseOnce(JSON.stringify(response), { status });
 
       const result = await kit.sequences.addSubscriberById(7, 42);
-      expectTypeOf(result).toEqualTypeOf<AddSubscriberToSequence | null>();
+      expectTypeOf(result).toEqualTypeOf<AddSubscriberToSequence>();
       expectTypeOf<
         AddSubscriberToSequence["subscriber"]["first_name"]
       >().toEqualTypeOf<string | null>();
@@ -753,7 +760,7 @@ describe("sequence requests through Kit", () => {
       fetchMock.mockResponseOnce(JSON.stringify(response), { status });
 
       const result = await kit.sequences.addSubscriberByEmail(7, body);
-      expectTypeOf(result).toEqualTypeOf<AddSubscriberToSequence | null>();
+      expectTypeOf(result).toEqualTypeOf<AddSubscriberToSequence>();
       expect(result).toEqual(response);
       expect(result?.subscriber.first_name).toBeNull();
       const req = request("POST", "/sequences/7/subscribers");
@@ -767,7 +774,7 @@ describe("sequence requests through Kit", () => {
     "addSubscriberById",
     "addSubscriberByEmail",
   ] as const)(
-    "returns null from %s when the sequence or subscriber is missing",
+    "throws ApiError from %s when the sequence or subscriber is missing",
     async (method) => {
       fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not found"] }), {
         status: 404,
@@ -775,18 +782,21 @@ describe("sequence requests through Kit", () => {
       let result;
       switch (method) {
         case "listSubscribers":
-          result = await kit.sequences.listSubscribers(7);
+          result = kit.sequences.listSubscribers(7);
           break;
         case "addSubscriberById":
-          result = await kit.sequences.addSubscriberById(7, 42);
+          result = kit.sequences.addSubscriberById(7, 42);
           break;
         case "addSubscriberByEmail":
-          result = await kit.sequences.addSubscriberByEmail(7, {
+          result = kit.sequences.addSubscriberByEmail(7, {
             email_address: subscriber.email_address,
           });
           break;
       }
-      expect(result).toBeNull();
+      await expect(result).rejects.toMatchObject({
+        name: "ApiError",
+        status: 404,
+      });
       expect(fetchMock.requests()).toHaveLength(1);
     }
   );

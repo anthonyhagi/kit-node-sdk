@@ -65,16 +65,16 @@ describe("sequence email stats inference", () => {
       );
       expectTypeOf(
         result
-      ).toEqualTypeOf<ListSequenceEmailsWithContentAndStats | null>();
-      expectTypeOf(single).toEqualTypeOf<GetSequenceEmailWithStats | null>();
+      ).toEqualTypeOf<ListSequenceEmailsWithContentAndStats>();
+      expectTypeOf(single).toEqualTypeOf<GetSequenceEmailWithStats>();
       expectTypeOf(
         result!.emails[0]!.stats
       ).toEqualTypeOf<SequenceEmailStats>();
       expectTypeOf(result!.emails[0]!.content).toEqualTypeOf<string | null>();
       expectTypeOf(single!.email.stats).toEqualTypeOf<SequenceEmailStats>();
       expectTypeOf(single!.email.content).toEqualTypeOf<string | null>();
-      expectTypeOf(result).toExtend<ListSequenceEmailsWithContent | null>();
-      expectTypeOf(single).toExtend<GetSequenceEmail | null>();
+      expectTypeOf(result).toExtend<ListSequenceEmailsWithContent>();
+      expectTypeOf(single).toExtend<GetSequenceEmail>();
       expect(result).toEqual(page);
       expect(single!.email.stats.open_rate).toBe(0);
       expect(
@@ -105,7 +105,7 @@ describe("sequence email stats inference", () => {
         apiKey: "test",
         maxRetries: 0,
       }).sequenceEmails.list(123, { include: "stats", include_content });
-      expectTypeOf(result).toEqualTypeOf<ListSequenceEmailsWithStats | null>();
+      expectTypeOf(result).toEqualTypeOf<ListSequenceEmailsWithStats>();
       expectTypeOf(result!.emails[0]!.content).toEqualTypeOf<
         string | null | undefined
       >();
@@ -132,10 +132,10 @@ describe("sequence email stats inference", () => {
       const result = await kit.sequenceEmails.list(123, params);
       const single = await kit.sequenceEmails.get(123, 456, getParams);
       expectTypeOf(result).toEqualTypeOf<
-        ListSequenceEmails | ListSequenceEmailsWithContent | null
+        ListSequenceEmails | ListSequenceEmailsWithContent
       >();
       expectTypeOf(single).toEqualTypeOf<
-        GetSequenceEmail | GetSequenceEmailWithStats | null
+        GetSequenceEmail | GetSequenceEmailWithStats
       >();
       expectTypeOf<
         NonNullable<typeof result>["emails"][number]["stats"]
@@ -152,7 +152,7 @@ describe("sequence email stats inference", () => {
       apiKey: "test",
       maxRetries: 0,
     }).sequenceEmails.list(123, params);
-    expectTypeOf(result).toEqualTypeOf<ListSequenceEmailsWithContent | null>();
+    expectTypeOf(result).toEqualTypeOf<ListSequenceEmailsWithContent>();
     expectTypeOf<
       NonNullable<typeof result>["emails"][number]["stats"]
     >().toEqualTypeOf<SequenceEmailStats | undefined>();
@@ -170,7 +170,7 @@ describe("sequence email stats inference", () => {
       apiKey: "test",
       maxRetries: 0,
     }).sequenceEmails.list(123, params);
-    expectTypeOf(result).toEqualTypeOf<ListSequenceEmailsWithStats | null>();
+    expectTypeOf(result).toEqualTypeOf<ListSequenceEmailsWithStats>();
     expectTypeOf<
       NonNullable<typeof result>["emails"][number]["content"]
     >().toEqualTypeOf<string | null | undefined>();
@@ -179,14 +179,14 @@ describe("sequence email stats inference", () => {
     fetchMock.mockResponseOnce("", { status: 404 });
     fetchMock.mockResponseOnce("", { status: 404 });
     const kit = new Kit({ apiKey: "test", maxRetries: 0 });
-    expect(
-      await kit.sequenceEmails.get(123, 456, { include: "stats" })
-    ).toBeNull();
-    expect(
-      await kit.sequenceEmails.list(123, {
+    await expect(
+      kit.sequenceEmails.get(123, 456, { include: "stats" })
+    ).rejects.toMatchObject({ name: "ApiError", status: 404 });
+    await expect(
+      kit.sequenceEmails.list(123, {
         include: "stats",
         include_content: true,
       })
-    ).toBeNull();
+    ).rejects.toMatchObject({ name: "ApiError", status: 404 });
   });
 });

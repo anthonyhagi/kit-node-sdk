@@ -298,7 +298,7 @@ describe("post get requests through Kit", () => {
     } satisfies GetPost;
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.posts.get(6);
-    expectTypeOf(result).toEqualTypeOf<GetPost | null>();
+    expectTypeOf(result).toEqualTypeOf<GetPost>();
     expectTypeOf(result!.post.content).toEqualTypeOf<string>();
     expectTypeOf(result!.post.product_id).toEqualTypeOf<
       number | null | undefined
@@ -340,11 +340,14 @@ describe("post get requests through Kit", () => {
     expect(await kit.posts.get(5)).toEqual(response);
   });
 
-  it("returns null for missing posts", async () => {
+  it("throws ApiError for missing posts", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
       status: 404,
     });
-    expect(await kit.posts.get(404)).toBeNull();
+    await expect(kit.posts.get(404)).rejects.toMatchObject({
+      name: "ApiError",
+      status: 404,
+    });
     expect(fetchMock.requests()[0]!.url).toBe(
       "https://api.kit.com/v4/posts/404"
     );
