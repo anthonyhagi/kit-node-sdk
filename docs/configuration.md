@@ -27,6 +27,32 @@ const kit = new Kit({
 });
 ```
 
+### Disconnecting an OAuth App
+
+Use the exported `revokeOAuthToken()` helper when a creator disconnects your app:
+
+```typescript
+import { revokeOAuthToken } from "@anthonyhagi/kit-node-sdk";
+
+await revokeOAuthToken({
+  token: accessToken,
+  client_id: clientId,
+  client_secret: clientSecret,
+  token_type_hint: "access_token", // Optional; refresh_token is also supported
+});
+```
+
+Both access tokens and refresh tokens are accepted. Kit revokes associated tokens
+and disables the matching plugin authorization. An unknown, expired, or already
+revoked token also receives a successful response. The helper resolves to `void`
+and can be used without constructing a `Kit` client.
+
+The helper makes one request. HTTP failures throw `ApiError` with `status` and
+`details`; network failures propagate. Its optional second argument accepts
+`{ baseUrl }` to override the default `https://api.kit.com/v4` endpoint.
+
+See [Kit's token revocation documentation](https://developers.kit.com/api-reference/oauth-token-revocation).
+
 ### Configuration Options
 
 The Kit constructor accepts the following options:

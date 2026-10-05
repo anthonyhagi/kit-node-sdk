@@ -214,6 +214,8 @@ export class Kit extends ApiClient {
 }
 
 export { ApiError } from "./errors";
+export { revokeOAuthToken } from "./oauth";
+export type { RevokeOAuthTokenOptions, RevokeOAuthTokenParams } from "./oauth";
 export type { ClientOptions };
 
 export type {
