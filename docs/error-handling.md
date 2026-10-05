@@ -207,6 +207,17 @@ await kit.snippets.create(
 await kit.snippets.update(snippetId, { archived: true }, { signal });
 ```
 
+All account methods accept request options as their final argument. Methods with
+no other parameters take options directly; skip optional growth-stat filters with
+`undefined`:
+
+```typescript
+await kit.accounts.getCurrentAccount({ signal });
+await kit.accounts.getEmailStats({ signal });
+await kit.accounts.updateColors({ colors: ["#123456"] }, { signal });
+await kit.accounts.getGrowthStats(undefined, { signal });
+```
+
 Cancellation stops pending fetches, response body reads, and retry waits. An
 already-aborted signal prevents the initial request. Caller cancellations are
 never retried. `timeoutMs` still applies independently to each attempt, and timed-out
