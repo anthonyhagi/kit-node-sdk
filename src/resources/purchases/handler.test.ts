@@ -8,11 +8,10 @@ import {
 
 // First purchase in Kit's documented list response:
 // https://developers.kit.com/api-reference/purchases/list-purchases
-const purchase = {
+const purchaseWithoutSource = {
   id: 3,
   transaction_id: "512-41-4101",
   status: "paid",
-  source: "Gumroad",
   email_address: "pru.magoo@convertkit.dev",
   subscriber_id: 13,
   currency: "USD",
@@ -32,6 +31,7 @@ const purchase = {
     },
   ],
 };
+const purchase = { ...purchaseWithoutSource, source: "Gumroad" };
 const response = {
   purchases: [purchase],
   pagination: {
@@ -64,7 +64,7 @@ describe("purchase list response through Kit", () => {
     expectTypeOf(product.lid).toEqualTypeOf<string>();
     expectTypeOf(listedPurchase.id).toEqualTypeOf<number>();
     expectTypeOf(listedPurchase.subscriber_id).toEqualTypeOf<number>();
-    expectTypeOf(listedPurchase.source).toEqualTypeOf<string>();
+    expectTypeOf(listedPurchase.source).toEqualTypeOf<string | undefined>();
     expectTypeOf(product.unit_price).toEqualTypeOf<number>();
     expect(result).toEqual(response);
     expect(listedPurchase.transaction_id).toBe("512-41-4101");
@@ -86,7 +86,7 @@ describe("purchase list response through Kit", () => {
     const result = await kit.purchases.get(14);
     expect(result).toEqual(response);
     expectTypeOf(result!.purchase.subscriber_id).toEqualTypeOf<number>();
-    expectTypeOf(result!.purchase.source).toEqualTypeOf<string>();
+    expectTypeOf(result!.purchase.source).toEqualTypeOf<string | undefined>();
     expect(result!.purchase.subscriber_id).toBe(24);
     expect(result!.purchase.source).toBe("Gumroad");
   });
@@ -116,8 +116,69 @@ describe("purchase list response through Kit", () => {
     });
     expect(result).toEqual(response);
     expectTypeOf(result.purchase.subscriber_id).toEqualTypeOf<number>();
-    expectTypeOf(result.purchase.source).toEqualTypeOf<string>();
+    expectTypeOf(result.purchase.source).toEqualTypeOf<string | undefined>();
     expect(result.purchase.subscriber_id).toBe(42);
     expect(result.purchase.source).toBe("Fancy App 434");
+  });
+
+  it("accepts listed purchases without a source", async () => {
+    const withoutSource = {
+      ...response,
+      purchases: [purchaseWithoutSource],
+    } satisfies ListPurchases;
+    fetchMock.mockResponseOnce(JSON.stringify(withoutSource));
+    const kit = new Kit({
+      apiKey: "oauth-token",
+      authType: "oauth",
+      maxRetries: 0,
+    });
+
+    const result = await kit.purchases.list();
+    expect(result).toEqual(withoutSource);
+    expect(result.purchases[0]).not.toHaveProperty("source");
+    expectTypeOf(result.purchases[0]!.source).toEqualTypeOf<
+      string | undefined
+    >();
+  });
+
+  it("accepts a single purchase without a source", async () => {
+    const withoutSource = {
+      purchase: purchaseWithoutSource,
+    } satisfies GetPurchase;
+    fetchMock.mockResponseOnce(JSON.stringify(withoutSource));
+    const kit = new Kit({
+      apiKey: "oauth-token",
+      authType: "oauth",
+      maxRetries: 0,
+    });
+
+    const result = await kit.purchases.get(purchaseWithoutSource.id);
+    expect(result).toEqual(withoutSource);
+    expect(result!.purchase).not.toHaveProperty("source");
+    expectTypeOf(result!.purchase.source).toEqualTypeOf<string | undefined>();
+  });
+
+  it("accepts a created purchase without a source", async () => {
+    const withoutSource = {
+      purchase: purchaseWithoutSource,
+    } satisfies CreatePurchase;
+    fetchMock.mockResponseOnce(JSON.stringify(withoutSource), { status: 201 });
+    const kit = new Kit({
+      apiKey: "oauth-token",
+      authType: "oauth",
+      maxRetries: 0,
+    });
+
+    const result = await kit.purchases.create({
+      purchase: {
+        email_address: purchaseWithoutSource.email_address,
+        transaction_id: purchaseWithoutSource.transaction_id,
+        currency: purchaseWithoutSource.currency,
+        products: purchaseWithoutSource.products,
+      },
+    });
+    expect(result).toEqual(withoutSource);
+    expect(result.purchase).not.toHaveProperty("source");
+    expectTypeOf(result.purchase.source).toEqualTypeOf<string | undefined>();
   });
 });

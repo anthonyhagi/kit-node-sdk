@@ -40,7 +40,8 @@ export interface ListPurchases {
     transaction_id: string;
     status: string;
     subscriber_id: number;
-    source: string;
+    /** Purchase origin; not guaranteed to be included by Kit. */
+    source?: string | undefined;
     email_address: string;
     currency: string;
     transaction_time: string;
@@ -133,7 +134,8 @@ export interface CreatePurchase {
     transaction_id: string;
     status: string;
     subscriber_id: number;
-    source: string;
+    /** Purchase origin; not guaranteed to be included by Kit. */
+    source?: string | undefined;
     email_address: string;
     currency: string;
     transaction_time: string;
@@ -158,7 +160,8 @@ export interface GetPurchase {
     transaction_id: string;
     status: string;
     subscriber_id: number;
-    source: string;
+    /** Purchase origin; not guaranteed to be included by Kit. */
+    source?: string | undefined;
     email_address: string;
     currency: string;
     transaction_time: string;
