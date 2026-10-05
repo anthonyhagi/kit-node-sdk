@@ -30,15 +30,7 @@ export type BulkAddSubscribersCallback = Omit<
 
 export interface BulkAddSubscribersSynchronous {
   type: "synchronous";
-  subscribers: {
-    id: number;
-    first_name: string;
-    email_address: string;
-    created_at: string;
-    added_at: string;
-    referrer_utm_parameters?: FormReferrerUtmParameters | undefined;
-    referrer?: string | undefined;
-  }[];
+  subscribers: BulkAddedFormSubscriber[];
   failures: {
     errors: string[];
     subscription: {
@@ -150,6 +142,19 @@ export interface FormSubscriber {
   fields: Record<string, string | null>;
   referrer_utm_parameters?: FormReferrerUtmParameters | undefined;
   referrer?: string | undefined;
+}
+
+/** Bulk additions return subscription metadata with a non-null first name. */
+interface BulkAddedFormSubscriber extends Pick<
+  FormSubscriber,
+  | "id"
+  | "email_address"
+  | "created_at"
+  | "added_at"
+  | "referrer_utm_parameters"
+  | "referrer"
+> {
+  first_name: string;
 }
 
 /** Add responses retain their string-only custom field values. */
