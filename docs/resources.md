@@ -508,6 +508,14 @@ again while the window is open throws a `409` conflict. Passing `{ force: true }
 rotates anyway and immediately expires the older secret. The SDK sends force
 only when supplied and leaves conflict handling to the caller.
 
+Rotation disables automatic retries by default, including forced rotation.
+An uncertain response may mean Kit already rotated the secret. Inspect endpoint
+metadata before deciding how to recover; list/get cannot recover the new
+plaintext secret. Avoid automatically forcing another rotation to bypass `409`,
+because that immediately expires the older secret. An explicit `maxRetries` in
+the third argument opts into retries when replaying is appropriate; see
+[per-request retry limits](configuration.md#per-request-retry-limits).
+
 Exported types are `RotateWebhookEndpointSecretParams` and
 `RotateWebhookEndpointSecret`. The response requires both the new secret and a
 string expiry timestamp. Missing endpoints return `null`; API errors throw.

@@ -626,6 +626,64 @@ describe("webhook endpoint secret rotation requests through Kit", () => {
     kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
   });
 
+  it.each([undefined, { force: false }, { force: true }] satisfies (
+    RotateWebhookEndpointSecretParams | undefined
+  )[])("does not retry rotation with params %j", async (params) => {
+    for (const failure of ["network", 500, 503, 429] as const) {
+      fetchMock.resetMocks();
+      kit = new Kit({ apiKey: "test-key", maxRetries: 3, retryDelay: 0 });
+      if (failure === "network") {
+        fetchMock.mockRejectOnce(new Error("Connection lost"));
+      } else {
+        fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Failed"] }), {
+          status: failure,
+        });
+      }
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      await expect(
+        kit.webhookEndpoints.rotateSecret(2, params)
+      ).rejects.toThrow();
+      expect(fetchMock.requests()).toHaveLength(1);
+      expect(await fetchMock.requests()[0]!.json()).toEqual(params ?? {});
+    }
+  });
+
+  it.each([false, true])(
+    "allows an explicit retry override with force %s",
+    async (force) => {
+      kit = new Kit({ apiKey: "test-key", maxRetries: 0, retryDelay: 0 });
+      fetchMock.mockRejectOnce(new Error("Connection lost"));
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      expect(
+        await kit.webhookEndpoints.rotateSecret(2, { force }, { maxRetries: 1 })
+      ).toEqual(response);
+      expect(fetchMock.requests()).toHaveLength(2);
+      for (const req of fetchMock.requests()) {
+        expect(await req.json()).toEqual({ force });
+      }
+      expect(kit.maxRetries).toBe(0);
+    }
+  );
+
+  it("keeps rotation retries disabled for an undefined override", async () => {
+    kit = new Kit({ apiKey: "test-key", maxRetries: 3, retryDelay: 0 });
+    fetchMock.mockRejectOnce(new Error("Connection lost"));
+    await expect(
+      kit.webhookEndpoints.rotateSecret(2, undefined, { maxRetries: undefined })
+    ).rejects.toThrow("Connection lost");
+    expect(fetchMock.requests()).toHaveLength(1);
+  });
+
+  it("retains client retries for endpoint reads", async () => {
+    kit = new Kit({ apiKey: "test-key", maxRetries: 1, retryDelay: 0 });
+    fetchMock.mockRejectOnce(new Error("Connection lost"));
+    fetchMock.mockResponseOnce(JSON.stringify({ webhook_endpoint: endpoint }));
+    expect(await kit.webhookEndpoints.get(2)).toEqual({
+      webhook_endpoint: endpoint,
+    });
+    expect(fetchMock.requests()).toHaveLength(2);
+  });
+
   it("rotates without forcing and returns the new secret and required expiry", async () => {
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.webhookEndpoints.rotateSecret(2);
