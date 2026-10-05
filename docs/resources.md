@@ -943,6 +943,10 @@ List items use the exported `SequenceListItem` type. Core metadata (`id`, `name`
 `hold`, `repeat`, `created_at`) remains required; additional settings, schedule,
 exclusions, counts, and stats are optional. Stats reuse `SequenceStats`, including
 nullable delivery metrics. Keep `include: "stats"` on subsequent page requests.
+The pagination options `after`, `before`, and `per_page` accept `null` or
+`undefined`; both are omitted from the query string. Other options such as
+`include: "stats"` and `include_total_count: false` are still sent.
+
 Existing calls without stats continue to work. See the
 [Kit API reference](https://developers.kit.com/api-reference/sequences/list-sequences).
 
