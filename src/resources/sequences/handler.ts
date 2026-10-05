@@ -7,10 +7,12 @@ import type {
   CreateSequenceParams,
   GetSequence,
   GetSequenceParams,
+  GetSequenceWithStats,
   ListSequences,
   ListSequencesParams,
   ListSequenceSubscribers,
   ListSequenceSubscribersParams,
+  ListSequencesWithStats,
   UpdateSequence,
   UpdateSequenceParams,
 } from "./types";
@@ -33,9 +35,21 @@ export class SequencesHandler {
    * @returns The paginated list of Sequences.
    */
   public async list(
+    params: ListSequencesParams & { include: "stats" },
+    options?: RequestOptions
+  ): Promise<ListSequencesWithStats>;
+  public async list(
+    params?: ListSequencesParams & { include?: undefined },
+    options?: RequestOptions
+  ): Promise<ListSequences>;
+  public async list(
     params?: ListSequencesParams,
     options?: RequestOptions
-  ): Promise<ListSequences> {
+  ): Promise<ListSequences | ListSequencesWithStats>;
+  public async list(
+    params?: ListSequencesParams,
+    options?: RequestOptions
+  ): Promise<ListSequences | ListSequencesWithStats> {
     const { after, before, include, include_total_count, per_page } =
       params || {};
 
@@ -86,9 +100,24 @@ export class SequencesHandler {
    */
   public async get(
     id: number,
+    params: GetSequenceParams & { include: "stats" },
+    options?: RequestOptions
+  ): Promise<GetSequenceWithStats | null>;
+  public async get(
+    id: number,
+    params?: GetSequenceParams & { include?: undefined },
+    options?: RequestOptions
+  ): Promise<GetSequence | null>;
+  public async get(
+    id: number,
     params?: GetSequenceParams,
     options?: RequestOptions
-  ): Promise<GetSequence | null> {
+  ): Promise<GetSequence | GetSequenceWithStats | null>;
+  public async get(
+    id: number,
+    params?: GetSequenceParams,
+    options?: RequestOptions
+  ): Promise<GetSequence | GetSequenceWithStats | null> {
     const query = new URLSearchParams({
       ...(params?.include && { include: params.include }),
     });

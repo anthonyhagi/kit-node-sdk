@@ -183,3 +183,16 @@ export interface AddSubscriberToSequence {
     fields: Record<string, string>;
   };
 }
+
+/** Sequence reads explicitly requested with include: "stats". */
+export interface GetSequenceWithStats extends Omit<GetSequence, "sequence"> {
+  sequence: Omit<GetSequence["sequence"], "stats"> & { stats: SequenceStats };
+}
+
+/** Sequence lists explicitly requested with include: "stats". */
+export interface ListSequencesWithStats extends Omit<
+  ListSequences,
+  "sequences"
+> {
+  sequences: (Omit<SequenceListItem, "stats"> & { stats: SequenceStats })[];
+}

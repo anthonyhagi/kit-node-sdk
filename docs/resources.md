@@ -1048,7 +1048,7 @@ for a page of sequences:
 ```ts
 const first = await kit.sequences.list({ include: "stats", per_page: 25 });
 for (const sequence of first.sequences) {
-  console.log(sequence.name, sequence.stats?.open_rate);
+  console.log(sequence.name, sequence.stats.open_rate);
 }
 if (first.pagination.has_next_page && first.pagination.end_cursor) {
   const next = await kit.sequences.list({
@@ -1063,7 +1063,10 @@ if (first.pagination.has_next_page && first.pagination.end_cursor) {
 List items use the exported `SequenceListItem` type. Core metadata (`id`, `name`,
 `hold`, `repeat`, `created_at`) remains required; additional settings, schedule,
 exclusions, counts, and stats are optional. Stats reuse `SequenceStats`, including
-nullable delivery metrics. Keep `include: "stats"` on subsequent page requests.
+nullable delivery metrics. A literal `include: "stats"` infers
+`ListSequencesWithStats`, with a required stats object. Omitted or dynamic
+inclusion flags retain optional stats. Keep `include: "stats"` on subsequent
+page requests.
 The pagination options `after`, `before`, and `per_page` accept `null` or
 `undefined`; both are omitted from the query string. Other options such as
 `include: "stats"` and `include_total_count: false` are still sent.
@@ -1081,7 +1084,7 @@ to include deliverability statistics:
 const result = await kit.sequences.get(123, { include: "stats" });
 if (result) {
   console.log(result.sequence.name, result.sequence.time_zone);
-  console.log(result.sequence.stats?.open_rate);
+  console.log(result.sequence.stats.open_rate);
 }
 ```
 
@@ -1089,7 +1092,10 @@ Missing sequences return `null`. The sending address and template can be null;
 email/subscriber counts and stats may be absent. Delivery metrics can be null
 when there is no delivery data. `stats.unsubscribers` counts current cancelled
 sequence subscriptions, while `stats.email_unsubscribes` counts email events.
-The exported types are `GetSequence`, `GetSequenceParams`, and `SequenceStats`.
+A literal `include: "stats"` infers `GetSequenceWithStats | null`, with a
+required stats object when the sequence exists. Omitted or dynamic inclusion
+flags retain optional stats. The exported types are `GetSequence`,
+`GetSequenceWithStats`, `GetSequenceParams`, and `SequenceStats`.
 See the [Kit API reference](https://developers.kit.com/api-reference/sequences/get-a-sequence).
 
 ## Reusable subscriber filter conditions
