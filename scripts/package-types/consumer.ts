@@ -5,6 +5,7 @@ import {
   refreshOAuthToken,
   verifyWebhookSignature,
   type GetSequence,
+  type GetSequenceEmail,
   type GetSequenceEmailWithStats,
   type GetSequenceWithStats,
   type GetSubscriber,
@@ -18,6 +19,7 @@ import {
   type OAuthTokenResponse,
   type RequestOptions,
   type Sequence,
+  type SequenceEmail,
   type WebhookDelivery,
 } from "@anthonyhagi/kit-node-sdk";
 
@@ -28,6 +30,12 @@ type Equal<A, B> =
 type Assert<T extends true> = T;
 
 export type SequenceResponse = Assert<Equal<GetSequence["sequence"], Sequence>>;
+export type SequenceEmailResponse = Assert<
+  Equal<GetSequenceEmail["email"], SequenceEmail>
+>;
+export type SequenceEmailContentList = Assert<
+  Equal<ListSequenceEmailsWithContent["emails"][number], SequenceEmail>
+>;
 
 const kit = new Kit({ apiKey: "typecheck-only", maxRetries: 0 });
 const options = {

@@ -19,11 +19,13 @@ export interface CreateSequenceEmailParams {
   position?: number | null | undefined;
 }
 
+/** Write responses omit stats and may return a null position. */
+type WrittenSequenceEmail = Omit<SequenceEmail, "stats" | "position"> & {
+  position: number | null;
+};
+
 export interface CreateSequenceEmail {
-  email: Omit<GetSequenceEmail["email"], "stats" | "position"> & {
-    /** Kit may return a null position when creating an email. */
-    position: number | null;
-  };
+  email: WrittenSequenceEmail;
 }
 
 /** Only supplied fields change; omitted fields retain their existing values. */
@@ -41,9 +43,7 @@ export interface UpdateSequenceEmailParams {
 }
 
 export interface UpdateSequenceEmail {
-  email: Omit<CreateSequenceEmail["email"], "position"> & {
-    position: number | null;
-  };
+  email: WrittenSequenceEmail;
 }
 
 export interface ListSequenceEmailsParams
@@ -96,16 +96,19 @@ export interface ListSequenceEmailsWithContent extends Omit<
   ListSequenceEmails,
   "emails"
 > {
-  emails: GetSequenceEmail["email"][];
+  emails: SequenceEmail[];
 }
 
 export type GetSequenceEmailParams = Pick<ListSequenceEmailsParams, "include">;
 
+/** Full sequence email record returned by reads and lists requesting content. */
+export type SequenceEmail = Omit<SequenceEmailListItem, "content"> & {
+  /** Full reads always include this field; draft content may be null. */
+  content: string | null;
+};
+
 export interface GetSequenceEmail {
-  email: Omit<SequenceEmailListItem, "content"> & {
-    /** Single-email reads always include this field; draft content may be null. */
-    content: string | null;
-  };
+  email: SequenceEmail;
 }
 
 /** Email reads explicitly requested with include: "stats". */
@@ -113,7 +116,7 @@ export interface GetSequenceEmailWithStats extends Omit<
   GetSequenceEmail,
   "email"
 > {
-  email: Omit<GetSequenceEmail["email"], "stats"> & {
+  email: Omit<SequenceEmail, "stats"> & {
     stats: SequenceEmailStats;
   };
 }
