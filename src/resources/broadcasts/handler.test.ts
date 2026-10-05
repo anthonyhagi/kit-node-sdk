@@ -204,6 +204,62 @@ describe("broadcast stats requests through Kit", () => {
     kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
   });
 
+  it.each([
+    {
+      after: null,
+      before: null,
+      per_page: null,
+      sent_after: null,
+      sent_before: null,
+    },
+    {
+      after: undefined,
+      before: undefined,
+      per_page: undefined,
+      sent_after: undefined,
+      sent_before: undefined,
+    },
+  ] satisfies GetBroadcastStatsParams[])(
+    "omits nullable and undefined stats filters: %j",
+    async (params) => {
+      const response = {
+        broadcasts: [],
+        pagination,
+      } satisfies GetBroadcastStats;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      expect(await kit.broadcasts.getAllStats(params)).toEqual(response);
+      expect(fetchMock.requests()).toHaveLength(1);
+      const req = fetchMock.requests()[0]!;
+      expect(req.method).toBe("GET");
+      expect(req.url).toBe("https://api.kit.com/v4/broadcasts/stats");
+    }
+  );
+
+  it.each(["draft", "scheduled", "sending", "completed", "aborted"] as const)(
+    "preserves %s status and false counts alongside nullable filters",
+    async (status) => {
+      const params = {
+        after: null,
+        before: null,
+        per_page: null,
+        sent_after: null,
+        sent_before: null,
+        status,
+        include_total_count: false,
+      } satisfies GetBroadcastStatsParams;
+      fetchMock.mockResponseOnce(
+        JSON.stringify({ broadcasts: [], pagination })
+      );
+      await kit.broadcasts.getAllStats(params);
+      expect(
+        Object.fromEntries(new URL(fetchMock.requests()[0]!.url).searchParams)
+      ).toEqual({
+        status,
+        include_total_count: "false",
+      });
+    }
+  );
+
   it("preserves calls without options and returns pagination", async () => {
     const response = { broadcasts: [], pagination };
     fetchMock.mockResponseOnce(JSON.stringify(response));
