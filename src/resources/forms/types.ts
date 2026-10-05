@@ -201,7 +201,7 @@ export interface ListFormSubscribers {
     state: string;
     created_at: string;
     added_at: string;
-    fields: Record<string, string>;
+    fields: Record<string, string | null>;
     referrer_utm_parameters?:
       | {
           source: string;
