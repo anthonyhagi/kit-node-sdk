@@ -77,6 +77,8 @@ export class ApiClient {
   public async get<TResponseType = unknown>(
     path: string,
     options?: {
+      /** Cancel this request, including response reads and retry waits. */
+      signal?: AbortSignal | undefined;
       headers?: Record<string, string>;
       query?: URLSearchParams | undefined;
     }
@@ -87,6 +89,8 @@ export class ApiClient {
   public async post<TResponseType = unknown>(
     path: string,
     options?: {
+      /** Cancel this request, including response reads and retry waits. */
+      signal?: AbortSignal | undefined;
       headers?: Record<string, string>;
       query?: URLSearchParams | undefined;
       body?: RequestInit["body"];
@@ -98,6 +102,8 @@ export class ApiClient {
   public async put<TResponseType = unknown>(
     path: string,
     options?: {
+      /** Cancel this request, including response reads and retry waits. */
+      signal?: AbortSignal | undefined;
       headers?: Record<string, string>;
       query?: URLSearchParams | undefined;
       body?: RequestInit["body"];
@@ -109,6 +115,8 @@ export class ApiClient {
   public async patch<TResponseType = unknown>(
     path: string,
     options?: {
+      /** Cancel this request, including response reads and retry waits. */
+      signal?: AbortSignal | undefined;
       headers?: Record<string, string>;
       query?: URLSearchParams | undefined;
       body?: RequestInit["body"];
@@ -120,6 +128,8 @@ export class ApiClient {
   public async delete<TResponseType = unknown>(
     path: string,
     options?: {
+      /** Cancel this request, including response reads and retry waits. */
+      signal?: AbortSignal | undefined;
       headers?: Record<string, string>;
       query?: URLSearchParams | undefined;
       body?: RequestInit["body"];
@@ -132,6 +142,8 @@ export class ApiClient {
     method: HttpMethod,
     path: string,
     options?: {
+      /** Cancel this request, including response reads and retry waits. */
+      signal?: AbortSignal | undefined;
       headers?: Record<string, string>;
       query?: URLSearchParams | undefined;
       body?: RequestInit["body"];
@@ -165,7 +177,14 @@ export class ApiClient {
     // retry the request until we have exhausted
     // all attempts.
     for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
+      options?.signal?.throwIfAborted();
       const controller = this.timeoutMs > 0 ? new AbortController() : undefined;
+      const abortAttempt = () => controller?.abort(options?.signal?.reason);
+      if (controller) {
+        options?.signal?.addEventListener("abort", abortAttempt, {
+          once: true,
+        });
+      }
       const timer = controller
         ? setTimeout(
             () =>
@@ -187,18 +206,21 @@ export class ApiClient {
             url,
             controller
               ? { ...fetchOptions, signal: controller.signal }
-              : fetchOptions
+              : { ...fetchOptions, signal: options?.signal }
           );
         } catch (error: unknown) {
           clearTimeout(timer);
+          // Caller cancellation never retries, regardless of the fetch error.
+          options?.signal?.throwIfAborted();
           // Only fetch failures are eligible for network retries.
           if (error instanceof Error && attempt < this.maxRetries) {
-            await this.waitForRetry(attempt);
+            await this.waitForRetry(attempt, undefined, options?.signal);
             continue;
           }
           throw error;
         }
 
+        options?.signal?.throwIfAborted();
         if (!resp.ok) {
           if (this.shouldRetry(resp.status) && attempt < this.maxRetries) {
             clearTimeout(timer);
@@ -207,7 +229,7 @@ export class ApiClient {
             } catch {
               // A failed stream cleanup must not prevent the HTTP retry.
             }
-            await this.waitForRetry(attempt, resp);
+            await this.waitForRetry(attempt, resp, options?.signal);
             continue;
           }
 
@@ -222,6 +244,7 @@ export class ApiClient {
         // A successful operation must not be repeated if reading or parsing
         // its response fails. Keep body handling outside the fetch catch.
         const body = await resp.text();
+        options?.signal?.throwIfAborted();
 
         if (body.length === 0) {
           const emptyObj = {};
@@ -229,8 +252,15 @@ export class ApiClient {
         }
 
         return JSON.parse(body) as TResponseType;
+      } catch (error: unknown) {
+        // Fetch body streams may report AbortError instead of a custom reason.
+        options?.signal?.throwIfAborted();
+        throw error;
       } finally {
         clearTimeout(timer);
+        if (controller) {
+          options?.signal?.removeEventListener("abort", abortAttempt);
+        }
       }
     }
 
@@ -316,7 +346,11 @@ export class ApiClient {
     return statusCode >= 500 || statusCode === 429;
   }
 
-  private async waitForRetry(attempt: number, resp?: Response): Promise<void> {
+  private async waitForRetry(
+    attempt: number,
+    resp?: Response,
+    signal?: AbortSignal
+  ): Promise<void> {
     let remaining = Math.max(
       this.calculateDelay(attempt),
       this.retryAfterDelay(resp?.headers.get("Retry-After") ?? null)
@@ -326,10 +360,10 @@ export class ApiClient {
     // Split long backoff and server delays to preserve the intended wait.
     const maxTimerDelay = 2 ** 31 - 1;
     while (remaining > maxTimerDelay) {
-      await delay(maxTimerDelay);
+      await delay(maxTimerDelay, signal);
       remaining -= maxTimerDelay;
     }
-    await delay(remaining);
+    await delay(remaining, signal);
   }
 
   private retryAfterDelay(header: string | null): number {
