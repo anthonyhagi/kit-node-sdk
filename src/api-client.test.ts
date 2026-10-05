@@ -1,5 +1,83 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiClient } from "./api-client";
+import { Kit } from "./index";
+
+describe("request header overrides", () => {
+  beforeEach(() => {
+    fetchMock.resetMocks();
+    fetchMock.mockResponseOnce("{}");
+  });
+
+  it.each([
+    ["Content-Type", "Accept", "User-Agent", "X-Kit-Api-Key"],
+    ["content-type", "accept", "user-agent", "x-kit-api-key"],
+    ["CONTENT-TYPE", "ACCEPT", "USER-AGENT", "X-KIT-API-KEY"],
+    ["CoNtEnT-TyPe", "AcCePt", "UsEr-AgEnT", "X-KiT-ApI-KeY"],
+  ])(
+    "replaces default and API key headers with casing %s",
+    async (contentType, accept, userAgent, apiKey) => {
+      const headers = {
+        [contentType]: "text/plain",
+        [accept]: "text/plain",
+        [userAgent]: "custom-client",
+        [apiKey]: "replacement-key",
+        "X-Custom": "custom-value",
+      };
+      const kit = new Kit({ apiKey: "original-key", maxRetries: 0 });
+
+      await kit.post("/test", { headers, body: "hello" });
+
+      const request = fetchMock.requests()[0]!;
+      expect(request.headers.get("content-type")).toBe("text/plain");
+      expect(request.headers.get("accept")).toBe("text/plain");
+      expect(request.headers.get("user-agent")).toBe("custom-client");
+      expect(request.headers.get("x-kit-api-key")).toBe("replacement-key");
+      expect(request.headers.get("x-custom")).toBe("custom-value");
+      expect(await request.text()).toBe("hello");
+    }
+  );
+
+  it.each(["Authorization", "authorization", "AUTHORIZATION"])(
+    "replaces the OAuth header with casing %s",
+    async (name) => {
+      const kit = new Kit({
+        apiKey: "original-token",
+        authType: "oauth",
+        maxRetries: 0,
+      });
+
+      await kit.get("/test", {
+        headers: { [name]: "Bearer replacement-token" },
+      });
+
+      expect(fetchMock.requests()[0]!.headers.get("authorization")).toBe(
+        "Bearer replacement-token"
+      );
+    }
+  );
+
+  it("applies auth headers after defaults regardless of casing", async () => {
+    class AuthClient extends ApiClient {
+      protected override defaultHeaders() {
+        return { ...super.defaultHeaders(), authorization: "default-token" };
+      }
+
+      protected override authHeaders() {
+        return { Authorization: "Bearer auth-token" };
+      }
+    }
+    const api = new AuthClient({ baseUrl: "http://localhost" });
+
+    await api.get("/test");
+
+    expect(fetchMock.requests()[0]!.headers.get("authorization")).toBe(
+      "Bearer auth-token"
+    );
+    expect(fetchMock.requests()[0]!.headers.get("content-type")).toBe(
+      "application/json"
+    );
+  });
+});
 
 describe("safe retry backoff", () => {
   beforeEach(() => {
