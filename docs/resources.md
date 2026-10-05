@@ -1192,6 +1192,21 @@ with both normal and slim responses; status and explicit false flags are still s
 Keep the same filters on subsequent pages. All filters are optional; calls
 without arguments continue to work. See the [Kit API reference](https://developers.kit.com/api-reference/broadcasts/list-broadcasts).
 
+## Broadcast creation retries
+
+`kit.broadcasts.create(params)` makes one attempt by default, for both drafts
+(`send_at: null`) and scheduled broadcasts (`send_at` set to a timestamp).
+This overrides the client's retry limit: replaying an uncertain creation can
+create another broadcast and potentially schedule duplicate deliveries.
+
+Inspect existing broadcasts before repeating a creation whose outcome is
+uncertain. An explicit second argument, such as `{ maxRetries: 1 }`, opts into
+retries when you have established that replaying the request is appropriate.
+Broadcast reads and updates retain the client retry policy.
+
+See [per-request retry limits](configuration.md#per-request-retry-limits) and
+[Kit's creation endpoint](https://developers.kit.com/api-reference/broadcasts/create-a-broadcast).
+
 ## Slim broadcast lists
 
 Use `slim: true` when you only need broadcast metadata. Kit omits `content`,
