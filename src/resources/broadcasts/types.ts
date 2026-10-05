@@ -248,6 +248,10 @@ export interface GetBroadcastStatsParams extends Omit<
 export interface GetBroadcastStats {
   broadcasts: {
     id: number;
+    /** Broadcast subject when included by Kit. */
+    subject?: string | undefined;
+    /** Scheduled send timestamp; null for unscheduled broadcasts, when included. */
+    send_at?: string | null | undefined;
     stats: BroadcastStats;
   }[];
   pagination: Pagination & {

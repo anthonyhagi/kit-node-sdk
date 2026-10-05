@@ -4,6 +4,7 @@ import {
   type BroadcastSubscriberFilterGroup,
   type CreateBroadcast,
   type CreateBroadcastParams,
+  type GetBroadcastStats,
   type GetBroadcastStatsParams,
   type GetLinkClicks,
   type GetLinkClicksParams,
@@ -252,6 +253,52 @@ describe("broadcast stats requests through Kit", () => {
       });
     }
   );
+
+  it("exposes optional subject and nullable send time without requiring metadata", async () => {
+    const stats = {
+      recipients: 0,
+      open_rate: 0,
+      emails_opened: 0,
+      click_rate: 0,
+      unsubscribe_rate: 0,
+      unsubscribes: 0,
+      total_clicks: 0,
+      show_total_clicks: false,
+      status: "draft",
+      progress: 0,
+      open_tracking_disabled: false,
+      click_tracking_disabled: false,
+    };
+    const response = {
+      broadcasts: [
+        { id: 1, subject: "Draft", send_at: null, stats },
+        { id: 2, subject: "Scheduled", send_at: "2026-10-10T12:00:00Z", stats },
+        { id: 3, stats },
+      ],
+      pagination,
+    } satisfies GetBroadcastStats;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+
+    const result = await kit.broadcasts.getAllStats();
+    expectTypeOf(result.broadcasts[0]!.subject).toEqualTypeOf<
+      string | undefined
+    >();
+    expectTypeOf(result.broadcasts[0]!.send_at).toEqualTypeOf<
+      string | null | undefined
+    >();
+    expect(result).toEqual(response);
+    expect(result.broadcasts.map((item) => item.subject)).toEqual([
+      "Draft",
+      "Scheduled",
+      undefined,
+    ]);
+    expect(result.broadcasts.map((item) => item.send_at)).toEqual([
+      null,
+      "2026-10-10T12:00:00Z",
+      undefined,
+    ]);
+    expect(result.broadcasts[2]).not.toHaveProperty("send_at");
+  });
 
   it("sends an explicit false total-count option", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ broadcasts: [], pagination }));
