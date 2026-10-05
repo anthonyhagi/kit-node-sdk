@@ -292,6 +292,7 @@ describe("sequence email create requests through Kit", () => {
     expectTypeOf(result!.email.content).toEqualTypeOf<string | null>();
     expectTypeOf(result!.email.preview_text).toEqualTypeOf<string | null>();
     expectTypeOf(result!.email.send_days).toEqualTypeOf<string[] | null>();
+    expectTypeOf(result!.email.position).toEqualTypeOf<number | null>();
     expectTypeOf<{
       subject: string;
     }>().not.toExtend<CreateSequenceEmailParams>();
@@ -301,6 +302,35 @@ describe("sequence email create requests through Kit", () => {
       delay_unit: "weeks";
     }>().not.toExtend<CreateSequenceEmailParams>();
     expect(result).toEqual(response);
+    const req = fetchMock.requests()[0]!;
+    expect(req.method).toBe("POST");
+    expect(req.url).toBe("https://api.kit.com/v4/sequences/108/emails");
+    expect(await req.json()).toEqual(params);
+  });
+
+  it("preserves a null position in the created email response", async () => {
+    // The creation response schema explicitly permits a nullable position:
+    // https://developers.kit.com/api-reference/sequence-emails/create-a-sequence-email
+    const params = {
+      subject: "Welcome",
+      delay_value: 1,
+      delay_unit: "days",
+    } satisfies CreateSequenceEmailParams;
+    const response = {
+      email: { ...email, position: null, content: null },
+    } satisfies CreateSequenceEmail;
+    fetchMock.mockResponseOnce(JSON.stringify(response), { status: 201 });
+
+    const result = await kit.sequenceEmails.create(108, params);
+    expect(result).toEqual(response);
+    expect(result!.email.position).toBeNull();
+    expectTypeOf(result!.email.position).toEqualTypeOf<number | null>();
+    expectTypeOf<
+      GetSequenceEmail["email"]["position"]
+    >().toEqualTypeOf<number>();
+    expectTypeOf<
+      ListSequenceEmails["emails"][number]["position"]
+    >().toEqualTypeOf<number>();
     const req = fetchMock.requests()[0]!;
     expect(req.method).toBe("POST");
     expect(req.url).toBe("https://api.kit.com/v4/sequences/108/emails");
