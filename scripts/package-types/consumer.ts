@@ -6,6 +6,7 @@ import {
   verifyWebhookSignature,
   type Broadcast,
   type BroadcastListItem,
+  type EmailTemplate,
   type GetBroadcast,
   type GetPost,
   type GetSequence,
@@ -15,7 +16,9 @@ import {
   type GetSnippet,
   type GetSubscriber,
   type ListBroadcasts,
+  type ListEmailTemplates,
   type ListPostsWithContent,
+  type ListSegments,
   type ListSequenceEmailsWithContent,
   type ListSequenceEmailsWithContentAndStats,
   type ListSequencesWithStats,
@@ -25,6 +28,7 @@ import {
   type OAuthTokenResponse,
   type Post,
   type RequestOptions,
+  type Segment,
   type Sequence,
   type SequenceEmail,
   type Snippet,
@@ -64,6 +68,13 @@ export type BroadcastUpdateResponse = Assert<
 >;
 export type BroadcastListResponse = Assert<
   Equal<ListBroadcasts["broadcasts"][number], BroadcastListItem>
+>;
+
+export type EmailTemplateListResponse = Assert<
+  Equal<ListEmailTemplates["email_templates"][number], EmailTemplate>
+>;
+export type SegmentListResponse = Assert<
+  Equal<ListSegments["segments"][number], Segment>
 >;
 
 const kit = new Kit({ apiKey: "typecheck-only", maxRetries: 0 });

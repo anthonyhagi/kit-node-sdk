@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
-import { Kit, type ListSegments, type ListSegmentsParams } from "~/index";
+import {
+  Kit,
+  type ListSegments,
+  type ListSegmentsParams,
+  type Segment,
+} from "~/index";
 
 const segment = {
   id: 75,
@@ -105,6 +110,12 @@ describe("segment requests through Kit", () => {
     const response = { segments: [segment], pagination };
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.segments.list();
+    expectTypeOf(result.segments[0]!).toEqualTypeOf<Segment>();
+    expectTypeOf<Segment>().toEqualTypeOf<{
+      id: number;
+      name: string;
+      created_at: string;
+    }>();
     expect(result).toEqual(response);
     expectTypeOf(result.pagination.total_count).toEqualTypeOf<
       number | undefined

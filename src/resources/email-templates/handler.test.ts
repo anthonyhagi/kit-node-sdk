@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
-import { Kit, type ListEmailTemplatesParams } from "~/index";
+import {
+  Kit,
+  type EmailTemplate,
+  type ListEmailTemplatesParams,
+} from "~/index";
 
 const templates = [
   { id: 36, name: "Custom HTML ✨", is_default: false, category: "HTML" },
@@ -101,7 +105,15 @@ describe("email-template requests through Kit", () => {
   it("lists templates with API-key authentication and no body or query", async () => {
     const response = { email_templates: templates, pagination };
     fetchMock.mockResponseOnce(JSON.stringify(response));
-    expect(await kit.emailTemplates.list()).toEqual(response);
+    const result = await kit.emailTemplates.list();
+    expectTypeOf(result.email_templates[0]!).toEqualTypeOf<EmailTemplate>();
+    expectTypeOf<EmailTemplate>().toEqualTypeOf<{
+      id: number;
+      name: string;
+      is_default: boolean;
+      category: string;
+    }>();
+    expect(result).toEqual(response);
     const req = request();
     expect(req.headers.get("X-Kit-Api-Key")).toBe("test-key");
     expect(await req.text()).toBe("");
