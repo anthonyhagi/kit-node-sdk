@@ -146,6 +146,47 @@ describe("snippet list requests through Kit", () => {
     });
   });
 
+  it.each([
+    {
+      after: null,
+      before: null,
+      archived: null,
+      per_page: null,
+      snippet_type: null,
+    },
+    {
+      after: undefined,
+      before: undefined,
+      archived: undefined,
+      per_page: undefined,
+      snippet_type: undefined,
+    },
+  ] satisfies ListSnippetsParams[])(
+    "omits nullable and undefined list parameters: %j",
+    async (params) => {
+      fetchMock.mockResponseOnce(JSON.stringify({ snippets: [], pagination }));
+      await kit.snippets.list({
+        ...params,
+        include_content: false,
+        include_total_count: false,
+      });
+      request({ include_content: "false", include_total_count: "false" });
+    }
+  );
+
+  it("preserves explicit false alongside nullable filters", async () => {
+    const params = {
+      after: null,
+      before: null,
+      archived: false,
+      snippet_type: null,
+      per_page: null,
+    } satisfies ListSnippetsParams;
+    fetchMock.mockResponseOnce(JSON.stringify({ snippets: [], pagination }));
+    await kit.snippets.list(params);
+    request({ archived: "false" });
+  });
+
   it("follows a returned cursor while preserving list options", async () => {
     fetchMock.mockResponseOnce(
       JSON.stringify({ snippets: [snippet], pagination })

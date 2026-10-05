@@ -642,6 +642,10 @@ are excluded by default; `archived: true` returns only archived snippets.
 Pagination supports `after`, `before`, `per_page` (default 500, maximum 1000),
 and `include_total_count`. API errors throw.
 
+The `after`, `before`, `archived`, `per_page`, and `snippet_type` parameters
+also accept `null`. Null and undefined values are omitted from the query so Kit
+uses its defaults. An explicit `archived: false` is sent as `false`.
+
 Exported types are `ListSnippets`, `ListSnippetsParams`, `SnippetListItem`,
 `SnippetDocument`, and `SnippetType`. Document `value` and `value_plain` use
 `unknown` because Kit's schema leaves their nullable structure unspecified.
