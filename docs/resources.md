@@ -26,6 +26,24 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
 
+## Including tag subscriber counts
+
+Pass `include: "subscriber_count"` to `kit.tags.list()` to request the number
+of active subscribers with each tag:
+
+```ts
+const result = await kit.tags.list({ include: "subscriber_count" });
+for (const tag of result.tags) {
+  console.log(tag.name, tag.subscriber_count);
+}
+```
+
+The exported `ListTagsParams` type accepts this include option, and `ListTags`
+exposes `subscriber_count` as an optional number. A tag can have a count of zero;
+responses without the include option can omit it. This per-tag count is separate
+from `include_total_count`, which requests the number of tags for pagination.
+See the [Kit API reference](https://developers.kit.com/api-reference/tags/list-tags).
+
 ## Including form subscriber counts
 
 Pass `include: "subscriber_count"` to `kit.forms.list()` to request the number
