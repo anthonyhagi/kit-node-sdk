@@ -188,7 +188,10 @@ webhook endpoint delivery. Pass the exact raw body, the `X-Kit-Signature` header
 and the secret saved when creating or rotating the endpoint:
 
 ```ts
-import { verifyWebhookSignature } from "@anthonyhagi/kit-node-sdk";
+import {
+  verifyWebhookSignature,
+  type WebhookDelivery,
+} from "@anthonyhagi/kit-node-sdk";
 
 async function receiveKitWebhook(request: Request, signingSecret: string) {
   const rawBody = new Uint8Array(await request.arrayBuffer());
@@ -201,10 +204,15 @@ async function receiveKitWebhook(request: Request, signingSecret: string) {
     return new Response("Invalid signature", { status: 401 });
   }
 
-  const delivery = JSON.parse(new TextDecoder().decode(rawBody));
+  const delivery: WebhookDelivery = JSON.parse(
+    new TextDecoder().decode(rawBody)
+  );
   for (const event of delivery.events) {
     // Deduplicate by event.id before applying your application logic.
-    console.log(event.id, event.type);
+    if (event.type === "subscriber.tag_added") {
+      // The event type narrows data to subscriber and tag.
+      console.log(event.id, event.data.subscriber.id, event.data.tag.id);
+    }
   }
   return new Response(null, { status: 204 });
 }
@@ -224,6 +232,28 @@ does not deduplicate events: a retry or re-emission can deliver the same event
 again, so deduplicate using each event's `id`, rather than `delivery_id`.
 See [Kit's signature protocol](https://developers.kit.com/webhooks/verifying-signatures)
 and [delivery format](https://developers.kit.com/webhooks/delivery-format).
+
+## Webhook delivery types
+
+`WebhookDelivery` represents the signed delivery envelope, and
+`WebhookDeliveryEvent` is a discriminated union of the 23 currently available
+webhook endpoint events. Checking `event.type` narrows `event.data` to the
+subscriber and related resource, or the resource summary for resource events.
+`WebhookEventDataMap` maps event names to payloads; `WebhookEndpointEventType`
+is its event-name union. These are separate from the legacy `WebhookEvent` type.
+
+For an endpoint handling a specific event, use
+`WebhookDelivery<"subscriber.tag_added">` or
+`WebhookDeliveryEvent<"subscriber.tag_added">`. The exported resource payload
+types are `WebhookSubscriber`, `WebhookForm`, `WebhookSequence`,
+`WebhookCustomField`, `WebhookBroadcast`, and `WebhookPost`. Broadcast and post
+payloads contain summaries, so fetch the full API record for content.
+
+These are TypeScript types, not runtime validators. Verify the signature before
+parsing, and validate incoming JSON if your application requires schema checks.
+The event union covers shipped events; planned and future event payloads are
+not modeled. Endpoint subscription parameters continue to accept strings.
+See [Kit's event payloads](https://developers.kit.com/webhooks/event-types).
 
 ## Revoking the previous webhook endpoint secret
 
