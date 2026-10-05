@@ -154,6 +154,14 @@ await kit.sequenceEmails.update(
 );
 ```
 
+All purchase methods accept request options as their final argument:
+
+```typescript
+await kit.purchases.list(undefined, { signal });
+await kit.purchases.get(purchaseId, { signal });
+await kit.purchases.create({ purchase }, { signal });
+```
+
 Cancellation stops pending fetches, response body reads, and retry waits. An
 already-aborted signal prevents the initial request. Caller cancellations are
 never retried. `timeoutMs` still applies independently to each attempt, and timed-out

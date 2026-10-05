@@ -1,4 +1,4 @@
-import type { Kit } from "~/index";
+import type { Kit, RequestOptions } from "~/index";
 import type {
   CreatePurchase,
   CreatePurchaseParams,
@@ -18,12 +18,16 @@ export class PurchasesHandler {
    * Get a paginated list of all Purchases.
    *
    * @param params - Optional parameters to filter by.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/purchases/list-purchases}
    *
    * @returns The paginated list of Purchases.
    */
-  public async list(params?: ListPurchasesParams): Promise<ListPurchases> {
+  public async list(
+    params?: ListPurchasesParams,
+    options?: RequestOptions
+  ): Promise<ListPurchases> {
     const { after, before, include_total_count, per_page } = params || {};
 
     const query = new URLSearchParams({
@@ -35,34 +39,50 @@ export class PurchasesHandler {
       ...(per_page && { per_page: String(per_page) }),
     });
 
-    return await this.api.get<ListPurchases>("/purchases", { query });
+    return await this.api.get<ListPurchases>("/purchases", {
+      query,
+      signal: options?.signal,
+    });
   }
 
   /**
    * Create a new Purchase for a Subscriber.
    *
    * @param params - The required details to record a Purchase.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/purchases/create-a-purchase}
    *
    * @returns The created Purchase for a Subscriber.
    */
-  public async create(params: CreatePurchaseParams): Promise<CreatePurchase> {
+  public async create(
+    params: CreatePurchaseParams,
+    options?: RequestOptions
+  ): Promise<CreatePurchase> {
     const body = JSON.stringify(params || {});
 
-    return await this.api.post<CreatePurchase>("/purchases", { body });
+    return await this.api.post<CreatePurchase>("/purchases", {
+      body,
+      signal: options?.signal,
+    });
   }
 
   /**
    * Get a unique Purchase.
    *
    * @param id - The unique ID of the Purchase.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/purchases/get-a-purchase}
    *
    * @returns The unique Purchase.
    */
-  public async get(id: number): Promise<GetPurchase | null> {
-    return await this.api.get<GetPurchase | null>(`/purchases/${id}`);
+  public async get(
+    id: number,
+    options?: RequestOptions
+  ): Promise<GetPurchase | null> {
+    return await this.api.get<GetPurchase | null>(`/purchases/${id}`, {
+      signal: options?.signal,
+    });
   }
 }
