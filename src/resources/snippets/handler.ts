@@ -5,6 +5,7 @@ import type {
   GetSnippet,
   ListSnippets,
   ListSnippetsParams,
+  ListSnippetsWithContent,
   UpdateSnippet,
   UpdateSnippetParams,
 } from "./types";
@@ -76,9 +77,21 @@ export class SnippetsHandler {
    * @see {@link https://developers.kit.com/api-reference/snippets/list-snippets}
    */
   public async list(
+    params: ListSnippetsParams & { include_content: true },
+    options?: RequestOptions
+  ): Promise<ListSnippetsWithContent>;
+  public async list(
+    params?: ListSnippetsParams & { include_content?: false | undefined },
+    options?: RequestOptions
+  ): Promise<ListSnippets>;
+  public async list(
     params?: ListSnippetsParams,
     options?: RequestOptions
-  ): Promise<ListSnippets> {
+  ): Promise<ListSnippets | ListSnippetsWithContent>;
+  public async list(
+    params?: ListSnippetsParams,
+    options?: RequestOptions
+  ): Promise<ListSnippets | ListSnippetsWithContent> {
     const {
       after,
       before,

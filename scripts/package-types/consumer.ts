@@ -5,6 +5,7 @@ import {
   refreshOAuthToken,
   verifyWebhookSignature,
   type GetSubscriber,
+  type ListSnippetsWithContent,
   type ListSubscribers,
   type OAuthPKCE,
   type OAuthTokenResponse,
@@ -27,6 +28,16 @@ export const subscribers = kit.subscribers.list(
   { slim: true, after: null, per_page: 25 },
   options
 );
+export const snippets = kit.snippets.list({ include_content: true }, options);
+export type SnippetsResult = Assert<
+  Equal<typeof snippets, Promise<ListSnippetsWithContent>>
+>;
+export function snippetContent(page: ListSnippetsWithContent): string[] {
+  return page.snippets.map(
+    (snippet) => snippet.content + snippet.document.value_html
+  );
+}
+
 export const pkce = generateOAuthPKCE();
 export const tokens = refreshOAuthToken(
   { client_id: "typecheck-only", refresh_token: "typecheck-only" },
