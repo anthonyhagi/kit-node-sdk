@@ -7,6 +7,7 @@ import {
   type BulkAddSubscribersSynchronous,
   type ListForms,
   type ListFormsParams,
+  type ListFormSubscribers,
 } from "~/index";
 
 const form = {
@@ -174,6 +175,26 @@ describe("form requests through Kit", () => {
     expectTypeOf(result!.subscriber.state).toEqualTypeOf<string | null>();
     expect(result).toEqual(response);
     expect(await request("POST", "/forms/7/subscribers/42").json()).toEqual({});
+  });
+
+  it("preserves nullable and string custom-field values in form subscriber lists", async () => {
+    const response = {
+      subscribers: [
+        {
+          ...subscriber,
+          fields: { category: null, interest: "TypeScript", empty: "" },
+        },
+      ],
+      pagination,
+    } satisfies ListFormSubscribers;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const result = await kit.forms.listSubscribers(7);
+    expectTypeOf(result).toEqualTypeOf<ListFormSubscribers | null>();
+    expectTypeOf<
+      NonNullable<typeof result>["subscribers"][number]["fields"]
+    >().toEqualTypeOf<Record<string, string | null>>();
+    expect(result).toEqual(response);
+    expect(await request("GET", "/forms/7/subscribers").text()).toBe("");
   });
 
   it("lists form subscribers without optional filters", async () => {
