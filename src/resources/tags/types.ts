@@ -119,6 +119,9 @@ export type BulkTagWithoutType =
   | Omit<BulkTagAsynchronous, "type">;
 
 export interface ListTagsParams {
+  /** Include the number of active subscribers with each tag. */
+  include?: "subscriber_count" | undefined;
+
   /**
    * Pass in the string from the previous request to move
    * the cursor. This can be found in the following field:
@@ -153,7 +156,10 @@ export interface ListTagsParams {
 }
 
 export interface ListTags {
-  tags: Tag[];
+  tags: (Tag & {
+    /** Returned when include is subscriber_count; counts active subscribers. */
+    subscriber_count?: number | undefined;
+  })[];
   pagination: Pagination;
 }
 
