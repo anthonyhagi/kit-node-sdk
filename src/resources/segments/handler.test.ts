@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
-import { Kit, type ListSegments } from "~/index";
+import { Kit, type ListSegments, type ListSegmentsParams } from "~/index";
 
 const segment = {
   id: 75,
@@ -33,6 +33,73 @@ describe("segment requests through Kit", () => {
     fetchMock.resetMocks();
     kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
   });
+
+  it("accepts documented nullable pagination parameters", () => {
+    expectTypeOf<ListSegmentsParams["after"]>().toEqualTypeOf<
+      string | null | undefined
+    >();
+    expectTypeOf<ListSegmentsParams["before"]>().toEqualTypeOf<
+      string | null | undefined
+    >();
+    expectTypeOf<ListSegmentsParams["per_page"]>().toEqualTypeOf<
+      number | null | undefined
+    >();
+    expectTypeOf<ListSegmentsParams["include_total_count"]>().toEqualTypeOf<
+      boolean | undefined
+    >();
+  });
+
+  it.each([
+    { params: { after: null, before: null, per_page: null }, expected: {} },
+    {
+      params: {
+        after: null,
+        before: "previous",
+        per_page: 25,
+        include_total_count: false,
+      },
+      expected: {
+        before: "previous",
+        per_page: "25",
+        include_total_count: "false",
+      },
+    },
+    {
+      params: {
+        after: "next",
+        before: null,
+        per_page: 25,
+        include_total_count: true,
+      },
+      expected: { after: "next", per_page: "25", include_total_count: "true" },
+    },
+    {
+      params: {
+        after: "next",
+        before: "previous",
+        per_page: null,
+        include_total_count: false,
+      },
+      expected: {
+        after: "next",
+        before: "previous",
+        include_total_count: "false",
+      },
+    },
+  ])(
+    "omits null values while preserving defined options $params",
+    async ({ params, expected }) => {
+      const response = {
+        segments: [segment],
+        pagination,
+      } satisfies ListSegments;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+
+      await expect(kit.segments.list(params)).resolves.toEqual(response);
+
+      request(expected);
+    }
+  );
 
   it("lists segments with API-key authentication and no body or query", async () => {
     const response = { segments: [segment], pagination };
