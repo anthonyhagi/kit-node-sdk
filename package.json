@@ -63,7 +63,8 @@
     "changeset": "changeset",
     "prerelease:ci": "npm run build",
     "release:ci": "changeset publish",
-    "test:package-runtime": "node scripts/check-package-runtime.mjs"
+    "test:package-runtime": "node scripts/check-package-runtime.mjs",
+    "test:package-types": "node scripts/check-package-types.mjs"
   },
   "devDependencies": {
     "@arethetypeswrong/core": "^0.18.2",
