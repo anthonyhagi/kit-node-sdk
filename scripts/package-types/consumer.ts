@@ -155,3 +155,19 @@ export function invalidInputs() {
   // @ts-expect-error Cancellation requires an AbortSignal.
   kit.subscribers.list({}, { signal: "invalid" });
 }
+
+export const noDataResults = [
+  kit.broadcasts.delete(1),
+  kit.customFields.delete(1),
+  kit.sequenceEmails.delete(1, 2),
+  kit.sequences.delete(1),
+  kit.subscribers.unsubscribe(1),
+  kit.subscribers.deleteLocation(1),
+  kit.tags.removeSubscriber(1, 2),
+  kit.tags.removeSubscriberByEmail(1, { email_address: "ada@example.com" }),
+  kit.webhookEndpoints.delete(1),
+  kit.webhooks.delete(1),
+] as const;
+export type NoDataResults = Assert<
+  Equal<(typeof noDataResults)[number], Promise<void>>
+>;

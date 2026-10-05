@@ -73,6 +73,12 @@ try {
       return true;
     });
 
+    globalThis.fetch = () =>
+      Promise.resolve(new Response(null, { status: 204 }));
+    assert.equal(await kit.broadcasts.delete(1), undefined);
+    globalThis.fetch = () => Promise.resolve(Response.json({}));
+    assert.equal(await kit.subscribers.unsubscribe(1), undefined);
+
     const pkce = generateOAuthPKCE();
     assert.match(pkce.code_verifier, /^[\w-]{43}$/);
     assert.equal(pkce.code_challenge_method, "S256");

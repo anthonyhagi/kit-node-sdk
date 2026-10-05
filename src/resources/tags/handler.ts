@@ -358,12 +358,12 @@ export class TagsHandler {
    *
    * @see {@link https://developers.kit.com/api-reference/tags/remove-tag-from-subscriber-by-email-address}
    *
-   * @returns An empty object `{}` on success.
+   * @returns Resolves without a value on success.
    * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    *
    * @example Removing a subscriber by email
    * ```typescript
-   * const result = await kit.tags.removeSubscriberByEmail(123, {
+   * await kit.tags.removeSubscriberByEmail(123, {
    *   email_address: 'subscriber@email.com'
    * });
    * ```
@@ -372,11 +372,11 @@ export class TagsHandler {
     tagId: number,
     params: RemoveSubscriberByEmailParams,
     options?: RequestOptions
-  ): Promise<{}> {
+  ): Promise<void> {
     const query = new URLSearchParams({ email_address: params.email_address });
     const url = `/tags/${tagId}/subscribers`;
 
-    return await this.api.delete<{}>(url, {
+    await this.api.delete<void>(url, {
       query,
       signal: options?.signal,
       maxRetries: options?.maxRetries,
@@ -505,7 +505,7 @@ export class TagsHandler {
    *
    * @see {@link https://developers.kit.com/api-reference/tags/remove-tag-from-subscriber}
    *
-   * @returns An empty object `{}` on success.
+   * @returns Resolves without a value on success.
    * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    *
    * @example Removing a subscriber by ID
@@ -518,10 +518,10 @@ export class TagsHandler {
     tagId: number,
     subscriberId: number,
     options?: RequestOptions
-  ): Promise<{}> {
+  ): Promise<void> {
     const url = `/tags/${tagId}/subscribers/${subscriberId}`;
 
-    return await this.api.delete<{}>(url, {
+    await this.api.delete<void>(url, {
       signal: options?.signal,
       maxRetries: options?.maxRetries,
     });

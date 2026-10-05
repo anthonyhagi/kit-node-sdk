@@ -199,8 +199,8 @@ describe("sequence requests through Kit", () => {
   it("deletes a sequence with a bodyless request and handles 204 responses", async () => {
     fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
     const result = await kit.sequences.delete(7);
-    expectTypeOf(result).toEqualTypeOf<{}>();
-    expect(result).toEqual({});
+    expectTypeOf(result).toEqualTypeOf<void>();
+    expect(result).toBeUndefined();
     expect(await request("DELETE", "/sequences/7").text()).toBe("");
   });
 

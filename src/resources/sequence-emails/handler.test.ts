@@ -690,8 +690,8 @@ describe("sequence email delete requests through Kit", () => {
   it("deletes an email with a bodyless request and handles an empty 204 response", async () => {
     fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
     const result = await kit.sequenceEmails.delete(108, 6);
-    expectTypeOf(result).toEqualTypeOf<{}>();
-    expect(result).toEqual({});
+    expectTypeOf(result).toEqualTypeOf<void>();
+    expect(result).toBeUndefined();
     expect(fetchMock.requests()).toHaveLength(1);
     const req = fetchMock.requests()[0]!;
     expect(req.method).toBe("DELETE");

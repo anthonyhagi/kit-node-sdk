@@ -250,13 +250,16 @@ export class SubscribersHandler {
    *
    * @see {@link https://developers.kit.com/api-reference/subscribers/unsubscribe-subscriber}
    *
-   * @returns An empty object if the request was successful.
+   * @returns Resolves without a value on success.
    * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    */
-  public async unsubscribe(id: number, options?: RequestOptions): Promise<{}> {
+  public async unsubscribe(
+    id: number,
+    options?: RequestOptions
+  ): Promise<void> {
     const url = `/subscribers/${id}/unsubscribe`;
 
-    return await this.api.post<{}>(url, {
+    await this.api.post<void>(url, {
       signal: options?.signal,
       maxRetries: options?.maxRetries,
     });
@@ -321,14 +324,14 @@ export class SubscribersHandler {
    * @param id - The unique ID of the Subscriber.
    * @param options - Optional request controls, including cancellation.
    * @see {@link https://developers.kit.com/api-reference/subscribers/delete-a-subscribers-location}
-   * @returns An empty object on success.
+   * @returns Resolves without a value on success.
    * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    */
   public async deleteLocation(
     id: number,
     options?: RequestOptions
-  ): Promise<{}> {
-    return await this.api.delete<{}>(`/subscribers/${id}/location`, {
+  ): Promise<void> {
+    await this.api.delete<void>(`/subscribers/${id}/location`, {
       signal: options?.signal,
       maxRetries: options?.maxRetries,
     });
