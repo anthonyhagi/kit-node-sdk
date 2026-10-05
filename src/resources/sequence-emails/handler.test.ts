@@ -5,6 +5,7 @@ import {
   type CreateSequenceEmailParams,
   type GetSequenceEmail,
   type ListSequenceEmails,
+  type ListSequenceEmailsParams,
   type SequenceEmailStats,
   type UpdateSequenceEmail,
   type UpdateSequenceEmailParams,
@@ -151,6 +152,57 @@ describe("sequence email list requests through Kit", () => {
     expect(req.url).toBe("https://api.kit.com/v4/sequences/108/emails");
     expect(req.method).toBe("GET");
     expect(await req.text()).toBe("");
+  });
+
+  it.each([
+    { after: null, before: null, per_page: null, include_content: null },
+    {
+      after: undefined,
+      before: undefined,
+      per_page: undefined,
+      include_content: undefined,
+    },
+  ] satisfies ListSequenceEmailsParams[])(
+    "omits nullable and undefined list parameters: %j",
+    async (params) => {
+      const response = {
+        emails: [email],
+        pagination,
+      } satisfies ListSequenceEmails;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      expect(
+        await kit.sequenceEmails.list(108, {
+          ...params,
+          include: "stats",
+          include_total_count: false,
+        })
+      ).toEqual(response);
+      expect(fetchMock.requests()).toHaveLength(1);
+      const req = fetchMock.requests()[0]!;
+      const url = new URL(req.url);
+      expect(req.method).toBe("GET");
+      expect(url.pathname).toBe("/v4/sequences/108/emails");
+      expect(Object.fromEntries(url.searchParams)).toEqual({
+        include: "stats",
+        include_total_count: "false",
+      });
+    }
+  );
+
+  it("preserves explicit false content flags alongside nullable pagination", async () => {
+    const params = {
+      after: null,
+      before: null,
+      per_page: null,
+      include_content: false,
+    } satisfies ListSequenceEmailsParams;
+    fetchMock.mockResponseOnce(JSON.stringify({ emails: [], pagination }));
+    await kit.sequenceEmails.list(108, params);
+    expect(
+      Object.fromEntries(new URL(fetchMock.requests()[0]!.url).searchParams)
+    ).toEqual({
+      include_content: "false",
+    });
   });
 
   it.each(["after", "before"] as const)(

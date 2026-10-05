@@ -126,13 +126,13 @@ export class SequenceEmailsHandler {
       ...(after && { after }),
       ...(before && { before }),
       ...(include && { include }),
-      ...(include_content !== undefined && {
+      ...(include_content != null && {
         include_content: String(include_content),
       }),
       ...(include_total_count !== undefined && {
         include_total_count: String(include_total_count),
       }),
-      ...(per_page !== undefined && { per_page: String(per_page) }),
+      ...(per_page != null && { per_page: String(per_page) }),
     });
     return await this.api.get<ListSequenceEmails | null>(
       `/sequences/${sequenceId}/emails`,
