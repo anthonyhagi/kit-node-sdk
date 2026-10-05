@@ -1235,6 +1235,54 @@ so request it on the first page and reuse it. Existing calls without arguments
 continue to work. See the [Kit API reference](https://developers.kit.com/api-reference/broadcasts/get-stats-for-a-list-of-broadcasts)
 for the endpoint contract.
 
+## Recording purchases and additional line items
+
+`kit.purchases.create()` records a purchase against a subscriber's email address.
+Kit creates an active subscriber if that address does not exist. A request with
+an existing `transaction_id` updates that purchase, and its `products` are
+**appended** to the existing line items. They do not replace previously synced
+products. Resending the same products duplicates line items.
+
+When adding a product to an order you have already synced, send only the new
+line item, using the same transaction identifier and the updated order totals:
+
+```ts
+// Order order-1042 was already synced with its original products.
+// This request adds only the newly purchased workbook.
+const result = await kit.purchases.create({
+  purchase: {
+    email_address: "ada@example.com",
+    transaction_id: "order-1042",
+    status: "paid",
+    subtotal: 45,
+    tax: 0,
+    shipping: 0,
+    discount: 0,
+    total: 45,
+    currency: "USD",
+    transaction_time: "2026-10-05T09:00:00Z",
+    products: [
+      {
+        name: "Workbook",
+        pid: "workbook",
+        lid: "order-1042-line-2",
+        quantity: 1,
+        unit_price: 15,
+        sku: "WORKBOOK-001",
+      },
+    ],
+  },
+});
+console.log(result.purchase.id);
+```
+
+Track which line items have been synced for each transaction. Reusing the
+transaction identifier or line-item identifier does not make replaying the
+products safe. If a request's outcome is uncertain, inspect the existing purchase
+before resending its products.
+
+See the [Kit API reference](https://developers.kit.com/api-reference/purchases/create-a-purchase).
+
 ## Nullable purchase-list pagination
 
 `kit.purchases.list()` accepts `null` for `after`, `before`, and `per_page`.
