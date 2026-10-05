@@ -176,6 +176,25 @@ even when the bulk request was accepted. These bulk completion callbacks are
 separate from signed webhook endpoint deliveries.
 See [Kit's bulk processing guide](https://developers.kit.com/api-reference/bulk-and-async-processing).
 
+## Listing custom fields
+
+Use `kit.customFields.list()` to fetch custom field definitions. The pagination
+options `after`, `before`, and `per_page` accept `null` or `undefined`; both are
+omitted from the query string. An explicit `include_total_count: false` is still
+sent:
+
+```ts
+const result = await kit.customFields.list({
+  after: null,
+  before: null,
+  per_page: null,
+  include_total_count: false,
+});
+console.log(result.custom_fields);
+```
+
+See the [Kit API reference](https://developers.kit.com/api-reference/custom-fields/list-custom-fields).
+
 ## Updating subscriber custom-field values in bulk
 
 Use `kit.customFields.bulkUpdateSubscriberValues()` with an OAuth client. The

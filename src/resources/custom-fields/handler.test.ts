@@ -4,6 +4,8 @@ import {
   type BulkUpdateSubscriberValues,
   type BulkUpdateSubscriberValuesParams,
   type BulkUpdateSubscriberValuesSynchronous,
+  type ListCustomFields,
+  type ListCustomFieldsParams,
 } from "~/index";
 
 const field = {
@@ -38,6 +40,40 @@ describe("custom-field requests through Kit", () => {
   beforeEach(() => {
     fetchMock.resetMocks();
     kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
+  });
+
+  it.each([
+    { after: null, before: null, per_page: null },
+    { after: undefined, before: undefined, per_page: undefined },
+  ] satisfies ListCustomFieldsParams[])(
+    "omits nullable and undefined custom field pagination: %j",
+    async (params) => {
+      const response = {
+        custom_fields: [field],
+        pagination,
+      } satisfies ListCustomFields;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      const result = await kit.customFields.list(params);
+      expectTypeOf(result).toEqualTypeOf<ListCustomFields>();
+      expect(result).toEqual(response);
+      expect(await request("GET", "/custom_fields").text()).toBe("");
+    }
+  );
+
+  it("preserves false total counts alongside null custom field pagination", async () => {
+    const params = {
+      after: null,
+      before: null,
+      per_page: null,
+      include_total_count: false,
+    } satisfies ListCustomFieldsParams;
+    const response = {
+      custom_fields: [field],
+      pagination,
+    } satisfies ListCustomFields;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.customFields.list(params)).toEqual(response);
+    request("GET", "/custom_fields", { include_total_count: "false" });
   });
 
   it("lists custom fields without optional pagination", async () => {
