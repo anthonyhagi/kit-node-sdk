@@ -292,6 +292,25 @@ still sent when supplied alongside null filters.
 
 See the [Kit API reference](https://developers.kit.com/api-reference/forms/list-forms).
 
+## Listing legacy webhooks
+
+Use `kit.webhooks.list()` to fetch legacy webhook registrations. The pagination
+options `after`, `before`, and `per_page` accept `null` or `undefined`; both are
+omitted from the query string. An explicit `include_total_count: false` is still
+sent:
+
+```ts
+const result = await kit.webhooks.list({
+  after: null,
+  before: null,
+  per_page: null,
+  include_total_count: false,
+});
+console.log(result.webhooks);
+```
+
+See the [Kit API reference](https://developers.kit.com/api-reference/webhooks/list-webhooks).
+
 ## Custom-field events for legacy webhooks
 
 `kit.webhooks.create()` supports `custom_field.field_created`,
