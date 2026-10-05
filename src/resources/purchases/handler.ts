@@ -46,14 +46,19 @@ export class PurchasesHandler {
   }
 
   /**
-   * Create a new Purchase for a Subscriber.
+   * Record a purchase or update one with the same transaction_id.
+   *
+   * Products are appended to an existing purchase, not replaced. Resending
+   * the same products duplicates its line items; send only products that
+   * have not already been synced for this transaction_id.
+   * If the email address has no subscriber, Kit creates an active subscriber.
    *
    * @param params - The required details to record a Purchase.
    * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/purchases/create-a-purchase}
    *
-   * @returns The created Purchase for a Subscriber.
+   * @returns The recorded Purchase for a Subscriber.
    */
   public async create(
     params: CreatePurchaseParams,

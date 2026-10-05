@@ -74,7 +74,8 @@ export interface CreatePurchaseParams {
     first_name?: string | null | undefined;
 
     /**
-     * A unique ID for the purchase.
+     * External transaction identifier. Reusing it updates the existing purchase
+     * and appends the supplied products; it does not replace existing line items.
      */
     transaction_id: string;
     status?: "paid" | (string & {}) | null | undefined;
@@ -85,12 +86,16 @@ export interface CreatePurchaseParams {
     total?: number | null | undefined;
 
     /**
-     * The 3 letter country code of the currency.
+     * The 3-letter currency code.
      *
      * @example USD
      */
     currency: string;
     transaction_time?: Date | string | null | undefined;
+    /**
+     * Line items to add. For an existing transaction_id, include only products
+     * that have not already been synced; resending them creates duplicates.
+     */
     products: {
       /**
        * The product name displayed to the Subscriber.
