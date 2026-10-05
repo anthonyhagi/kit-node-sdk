@@ -187,10 +187,16 @@ export interface FilterSubscriberBodyAnyUrls {
   ids?: number[] | undefined;
 
   /** Array of URL patterns. Subscriber must have clicked ANY of these. */
-  urls: string[];
+  urls?: string[] | undefined;
 
-  /** URL matching strategy */
-  matching: "exact" | "contains" | "starts_with" | "ends_with" | (string & {});
+  /** URL pattern matching strategy. Defaults to exact when omitted. */
+  matching?:
+    | "exact"
+    | "contains"
+    | "starts_with"
+    | "ends_with"
+    | (string & {})
+    | undefined;
 }
 
 export interface FilterSubscriberBodyAllSubscribed {

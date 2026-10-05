@@ -860,6 +860,29 @@ describe("subscriber requests through Kit", () => {
     expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
   });
 
+  it.each([
+    { type: "urls", ids: [7, 8] },
+    { type: "urls", urls: ["https://kit.com/news"] },
+    { type: "urls", ids: [7], urls: ["https://kit.com/news"] },
+  ] satisfies FilterSubscriberBodyAnyUrls[])(
+    "preserves URL filter fields without adding a matching mode (%j)",
+    async (condition) => {
+      const body = {
+        all: [{ type: "clicks", count_greater_than: 0, any: [condition] }],
+      } satisfies FilterSubscriberBody;
+      const response = { subscribers: [], pagination };
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+
+      expect(await kit.subscribers.filter(body)).toEqual(response);
+      const serialized = await request("POST", "/subscribers/filter").json();
+      expect(serialized).toEqual(body);
+      expect(serialized).not.toHaveProperty("all.0.any.0.matching");
+      if (!("urls" in condition)) {
+        expect(serialized).not.toHaveProperty("all.0.any.0.urls");
+      }
+    }
+  );
+
   it("filters clicks by URL patterns without requiring URL IDs", async () => {
     const body = {
       all: [
