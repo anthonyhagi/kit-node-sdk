@@ -57,8 +57,14 @@ operations.
 
 ## Working with Subscribers
 
+`kit.subscribers.create()` matches subscribers by email address. It creates a new
+subscriber or updates an existing subscriber's first name. Its `state` option
+applies only to new subscribers; it cannot change an existing subscriber's state.
+For example, passing `state: "active"` does not reactivate a cancelled subscriber.
+See the [Kit API reference](https://developers.kit.com/api-reference/subscribers/create-a-subscriber).
+
 ```typescript
-// Create a new subscriber
+// Create a subscriber or update the first name for this email
 const newSubscriber = await kit.subscribers.create({
   email_address: "john@example.com",
   first_name: "John",

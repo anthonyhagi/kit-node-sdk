@@ -145,14 +145,17 @@ export class SubscribersHandler {
   }
 
   /**
-   * Create a new Subscriber.
+   * Create a subscriber or update the first name of one with the same email.
    *
-   * @param params - The parameters to create a new Subscriber.
+   * The state parameter applies only when creating a subscriber. This endpoint
+   * cannot change an existing subscriber's state.
+   *
+   * @param params - The subscriber email and details to create or update.
    * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/subscribers/create-a-subscriber}
    *
-   * @returns The newly created Subscribers' details.
+   * @returns The created or existing subscriber details.
    */
   public async create(
     params: CreateSubscriberParams,
