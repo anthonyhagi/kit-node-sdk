@@ -7,6 +7,9 @@
 - Node.js 24 (see `.nvmrc`; current development tools require Node.js >= 24.11)
 - npm or equivalent package manager
 
+The published SDK requires Node.js >= 22.0.0. Development tools use Node.js 24;
+packed-package checks cover Node 22.0.0, latest Node 22, and Node 24 in CI.
+
 ## Setup
 
 1. Clone the repository:
@@ -35,6 +38,7 @@
 - `npm run lint` - Lint code with ESLint
 - `npm run format` - Format code with Prettier
 - `npm run test` - Run the test suite with Vitest
+- `npm run test:package-runtime` - After building, pack and install the SDK in a temporary consumer and check ESM/CommonJS imports, requests, cancellation, and PKCE on the current Node runtime
 - `npm run changeset` - Create a changeset for version management
 
 ## Testing

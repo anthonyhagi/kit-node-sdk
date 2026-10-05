@@ -10,5 +10,6 @@ export default defineConfig({
     profile: "node16",
   },
   platform: "node",
+  target: "node22.0.0",
   entry: ["./src/index.ts"],
 });

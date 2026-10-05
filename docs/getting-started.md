@@ -12,7 +12,7 @@ npm install @anthonyhagi/kit-node-sdk
 
 ## Requirements
 
-- Node.js >= 18.0.0
+- Node.js >= 22.0.0
 - TypeScript >= 5.0 (for TypeScript projects)
 
 ## Basic usage (TypeScript/ESM)

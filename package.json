@@ -50,7 +50,7 @@
     "access": "public"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
   "scripts": {
     "build": "tsdown",
@@ -62,7 +62,8 @@
     "test": "vitest run",
     "changeset": "changeset",
     "prerelease:ci": "npm run build",
-    "release:ci": "changeset publish"
+    "release:ci": "changeset publish",
+    "test:package-runtime": "node scripts/check-package-runtime.mjs"
   },
   "devDependencies": {
     "@arethetypeswrong/core": "^0.18.2",
