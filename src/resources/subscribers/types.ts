@@ -45,7 +45,9 @@ export type BulkCreateSubscribersWithoutType =
 export interface ListSubscribersParams {
   after?: string | undefined;
   before?: string | undefined;
+  /** Created after this date (YYYY-MM-DD). Date objects use their UTC calendar date. */
   created_after?: Date | string | undefined;
+  /** Created before this date (YYYY-MM-DD). Date objects use their UTC calendar date. */
   created_before?: Date | string | undefined;
   email_address?: string | undefined;
   /**
@@ -76,7 +78,9 @@ export interface ListSubscribersParams {
     | undefined;
   sort_order?: "asc" | "desc" | undefined;
   status?: SubscriberState | "all" | undefined;
+  /** Updated after this date (YYYY-MM-DD). Date objects use their UTC calendar date. */
   updated_after?: Date | string | undefined;
+  /** Updated before this date (YYYY-MM-DD). Date objects use their UTC calendar date. */
   updated_before?: Date | string | undefined;
 }
 
