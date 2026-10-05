@@ -34,12 +34,15 @@ export interface ListPosts {
 
 /** Post lists requested with include_content: true include HTML on each item. */
 export interface ListPostsWithContent extends Omit<ListPosts, "posts"> {
-  posts: GetPost["post"][];
+  posts: Post[];
 }
 
+/** Full post record returned by reads and lists requesting content. */
+export type Post = Omit<PostListItem, "content"> & {
+  /** Full reads always include HTML content. */
+  content: string;
+};
+
 export interface GetPost {
-  post: Omit<PostListItem, "content"> & {
-    /** Single-post reads always include HTML content. */
-    content: string;
-  };
+  post: Post;
 }

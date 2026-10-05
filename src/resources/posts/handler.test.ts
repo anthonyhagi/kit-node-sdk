@@ -4,6 +4,7 @@ import {
   type GetPost,
   type ListPosts,
   type ListPostsParams,
+  type Post,
   type PostListItem,
 } from "~/index";
 
@@ -299,6 +300,7 @@ describe("post get requests through Kit", () => {
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.posts.get(6);
     expectTypeOf(result).toEqualTypeOf<GetPost | null>();
+    expectTypeOf(result!.post).toEqualTypeOf<Post>();
     expectTypeOf(result!.post.content).toEqualTypeOf<string>();
     expectTypeOf(result!.post.product_id).toEqualTypeOf<
       number | null | undefined
