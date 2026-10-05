@@ -1,4 +1,4 @@
-import type { Kit } from "~/index";
+import type { Kit, RequestOptions } from "~/index";
 import type { ListEmailTemplates, ListEmailTemplatesParams } from "./types";
 
 export class EmailTemplatesHandler {
@@ -12,13 +12,15 @@ export class EmailTemplatesHandler {
    * Get a paginated list of all Email Templates.
    *
    * @param params - Optional parameters to filter by.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/email-templates/list-email-templates}
    *
    * @returns The paginated list of Email Templates.
    */
   public async list(
-    params?: ListEmailTemplatesParams
+    params?: ListEmailTemplatesParams,
+    options?: RequestOptions
   ): Promise<ListEmailTemplates> {
     const { after, before, include_total_count, per_page } = params || {};
 
@@ -33,6 +35,9 @@ export class EmailTemplatesHandler {
 
     const url = "/email_templates";
 
-    return await this.api.get<ListEmailTemplates>(url, { query });
+    return await this.api.get<ListEmailTemplates>(url, {
+      query,
+      signal: options?.signal,
+    });
   }
 }

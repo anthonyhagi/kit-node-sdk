@@ -79,7 +79,8 @@ controller.abort();
 await pendingRequest; // Rejects with the signal's abort reason.
 ```
 
-For subscriber list requests, pass request controls as the second argument:
+Every resource method accepts the exported `RequestOptions` type as its final
+argument. For subscriber list requests, pass request controls as the second argument:
 
 ```typescript
 const subscribers = await kit.subscribers.list(
@@ -216,6 +217,15 @@ await kit.accounts.getCurrentAccount({ signal });
 await kit.accounts.getEmailStats({ signal });
 await kit.accounts.updateColors({ colors: ["#123456"] }, { signal });
 await kit.accounts.getGrowthStats(undefined, { signal });
+```
+
+Posts, segments, and email templates use the same request options:
+
+```typescript
+await kit.posts.get(postId, { signal });
+await kit.posts.list(undefined, { signal });
+await kit.segments.list(undefined, { signal });
+await kit.emailTemplates.list(undefined, { signal });
 ```
 
 Cancellation stops pending fetches, response body reads, and retry waits. An
