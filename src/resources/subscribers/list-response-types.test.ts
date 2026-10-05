@@ -5,6 +5,7 @@ import {
   type ListSlimSubscribers,
   type ListSubscribers,
   type ListSubscribersParams,
+  type Subscriber,
 } from "~/index";
 
 const subscriber = {
@@ -38,6 +39,7 @@ describe("subscriber list response inference", () => {
       const kit = new Kit({ apiKey: "test", maxRetries: 0 });
       const result = await kit.subscribers.list(params);
       expectTypeOf(result).toEqualTypeOf<ListFullSubscribers>();
+      expectTypeOf(result.subscribers[0]!).toExtend<Subscriber>();
       expectTypeOf(result.subscribers[0]!.fields).toEqualTypeOf<
         Record<string, string | null>
       >();
@@ -58,6 +60,12 @@ describe("subscriber list response inference", () => {
       include_total_count: false,
     });
     expectTypeOf(result).toEqualTypeOf<ListSlimSubscribers>();
+    expectTypeOf<
+      Pick<
+        (typeof result.subscribers)[number],
+        keyof Omit<Subscriber, "fields">
+      >
+    >().toEqualTypeOf<Omit<Subscriber, "fields">>();
     expectTypeOf(result.subscribers[0]!.fields).toEqualTypeOf<
       Record<string, string | null> | undefined
     >();

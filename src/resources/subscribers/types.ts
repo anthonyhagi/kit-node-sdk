@@ -5,7 +5,7 @@ import type {
   SubscriberState,
 } from "~/common/types";
 
-/** Core subscriber record returned by create, get, and update operations. */
+/** Core subscriber record shared by subscriber response types. */
 export interface Subscriber {
   id: number;
   first_name: string | null;
@@ -33,13 +33,7 @@ export type BulkCreateSubscribersCallback = Omit<
 
 export interface BulkCreateSubscribersSynchronous {
   type: "synchronous";
-  subscribers: {
-    id: number;
-    first_name: string | null;
-    email_address: string;
-    state: SubscriberState;
-    created_at: string;
-  }[];
+  subscribers: Omit<Subscriber, "fields">[];
   failures: {
     subscriber: {
       first_name: string | null;
@@ -101,14 +95,9 @@ export interface ListSubscribersParams extends PaginationParams {
 }
 
 export interface ListSubscribers {
-  subscribers: {
-    id: number;
-    first_name: string | null;
-    email_address: string;
-    state: SubscriberState;
-    created_at: string;
+  subscribers: (Omit<Subscriber, "fields"> & {
     /** Omitted when slim is true. */
-    fields?: Record<string, string | null> | undefined;
+    fields?: Subscriber["fields"] | undefined;
     /** Included when attribution is requested. */
     attribution?:
       | {
@@ -143,15 +132,14 @@ export interface ListSubscribers {
       | undefined;
     /** Included when canceled_at is requested with status: "cancelled". */
     canceled_at?: string | null | undefined;
-  }[];
+  })[];
   pagination: Pagination;
 }
 
 /** Full list responses include custom field values. */
 export interface ListFullSubscribers {
-  subscribers: (Omit<ListSubscribers["subscribers"][number], "fields"> & {
-    fields: Record<string, string | null>;
-  })[];
+  subscribers: (Omit<ListSubscribers["subscribers"][number], "fields"> &
+    Pick<Subscriber, "fields">)[];
   pagination: Pagination;
 }
 
