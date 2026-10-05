@@ -13,6 +13,7 @@ import {
   type ListTagsParams,
   type ListTagSubscribers,
   type ListTagSubscribersParams,
+  type TaggedSubscriber,
   type TagSubscriber,
   type TagSubscriberByEmail,
 } from "~/index";
@@ -408,6 +409,7 @@ describe("tag requests through Kit", () => {
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.tags.listSubscribers(7);
     expectTypeOf(result).toEqualTypeOf<ListTagSubscribers | null>();
+    expectTypeOf(result!.subscribers[0]!).toEqualTypeOf<TaggedSubscriber>();
     expect(result).toEqual(response);
     expect(await request("GET", "/tags/7/subscribers").text()).toBe("");
   });
@@ -569,6 +571,7 @@ describe("tag requests through Kit", () => {
 
       const result = await kit.tags.tagSubscriber(7, 42);
       expectTypeOf(result).toEqualTypeOf<TagSubscriber | null>();
+      expectTypeOf(result!.subscriber).toEqualTypeOf<TaggedSubscriber>();
       expectTypeOf(result!.subscriber.first_name).toEqualTypeOf<
         string | null
       >();
@@ -589,6 +592,7 @@ describe("tag requests through Kit", () => {
 
       const result = await kit.tags.tagSubscriberByEmail(7, body);
       expectTypeOf(result).toEqualTypeOf<TagSubscriberByEmail | null>();
+      expectTypeOf(result!.subscriber).toEqualTypeOf<TaggedSubscriber>();
       expectTypeOf(result!.subscriber.first_name).toEqualTypeOf<
         string | null
       >();
