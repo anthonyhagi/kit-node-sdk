@@ -41,6 +41,7 @@ export class SubscribersHandler {
    * the result of the request.
    *
    * @param params - The required and optional parameters.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/subscribers/bulk-create-subscribers}
    *
@@ -48,13 +49,15 @@ export class SubscribersHandler {
    * an empty object when it is run asynchronously.
    */
   public async bulkCreate(
-    params: BulkCreateSubscribersParams
+    params: BulkCreateSubscribersParams,
+    options?: RequestOptions
   ): Promise<BulkCreateSubscribers> {
     const body = JSON.stringify(params || {});
     const url = "/bulk/subscribers";
 
     const resp = await this.api.post<BulkCreateSubscribersWithoutType>(url, {
       body,
+      signal: options?.signal,
     });
 
     if ("subscribers" in resp) {
@@ -131,19 +134,24 @@ export class SubscribersHandler {
    * Create a new Subscriber.
    *
    * @param params - The parameters to create a new Subscriber.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/subscribers/create-a-subscriber}
    *
    * @returns The newly created Subscribers' details.
    */
   public async create(
-    params: CreateSubscriberParams
+    params: CreateSubscriberParams,
+    options?: RequestOptions
   ): Promise<CreateSubscriber> {
     const body = JSON.stringify(params || {});
 
     const url = "/subscribers";
 
-    return await this.api.post<CreateSubscriber>(url, { body });
+    return await this.api.post<CreateSubscriber>(url, {
+      body,
+      signal: options?.signal,
+    });
   }
 
   /**
@@ -151,6 +159,7 @@ export class SubscribersHandler {
    *
    * @param body - The parameters to filter the subscribers.
    * @param params - The query parameters to filter the results.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/subscribers/filter-subscribers-by-engagement-sign-up-date-state-and-tags}
    *
@@ -158,7 +167,8 @@ export class SubscribersHandler {
    */
   public async filter(
     body: FilterSubscriberBody,
-    params?: FilterSubscriberParams
+    params?: FilterSubscriberParams,
+    options?: RequestOptions
   ): Promise<FilterSubscribers> {
     const { after, before, include_total_count, per_page } = params || {};
 
@@ -174,6 +184,7 @@ export class SubscribersHandler {
     return await this.api.post<FilterSubscribers>("/subscribers/filter", {
       body: JSON.stringify(body || {}),
       query,
+      signal: options?.signal,
     });
   }
 
@@ -181,15 +192,21 @@ export class SubscribersHandler {
    * Get a Subscriber by their unique ID.
    *
    * @param id - The Subscribers' unique ID to search by.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/subscribers/get-a-subscriber}
    *
    * @returns The Subscriber if found; `null` otherwise.
    */
-  public async get(id: number): Promise<GetSubscriber | null> {
+  public async get(
+    id: number,
+    options?: RequestOptions
+  ): Promise<GetSubscriber | null> {
     const url = `/subscribers/${id}`;
 
-    return await this.api.get<GetSubscriber | null>(url);
+    return await this.api.get<GetSubscriber | null>(url, {
+      signal: options?.signal,
+    });
   }
 
   /**
@@ -197,6 +214,7 @@ export class SubscribersHandler {
    *
    * @param id - The unique ID of the Subscriber.
    * @param params - The new parameters to update on the Subscriber.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/subscribers/update-a-subscriber}
    *
@@ -204,29 +222,37 @@ export class SubscribersHandler {
    */
   public async update(
     id: number,
-    params: UpdateSubscriberParams
+    params: UpdateSubscriberParams,
+    options?: RequestOptions
   ): Promise<UpdateSubscriber | null> {
     const body = JSON.stringify(params || {});
 
     const url = `/subscribers/${id}`;
 
-    return await this.api.put<UpdateSubscriber | null>(url, { body });
+    return await this.api.put<UpdateSubscriber | null>(url, {
+      body,
+      signal: options?.signal,
+    });
   }
 
   /**
    * Unsubscribe the specified Subscriber.
    *
    * @param id - The unique ID of the Subscriber.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/subscribers/unsubscribe-subscriber}
    *
    * @returns An empty object if the request was successful; `null`
    * if the Subscriber was not found.
    */
-  public async unsubscribe(id: number): Promise<{} | null> {
+  public async unsubscribe(
+    id: number,
+    options?: RequestOptions
+  ): Promise<{} | null> {
     const url = `/subscribers/${id}/unsubscribe`;
 
-    return await this.api.post<{} | null>(url);
+    return await this.api.post<{} | null>(url, { signal: options?.signal });
   }
 
   /**
@@ -235,16 +261,18 @@ export class SubscribersHandler {
    *
    * @param id - The unique ID of the Subscriber.
    * @param params - The location to pin.
+   * @param options - Optional request controls, including cancellation.
    * @see {@link https://developers.kit.com/api-reference/subscribers/pin-a-subscribers-location}
    * @returns The pinned location, or null when the Subscriber is not found.
    */
   public async pinLocation(
     id: number,
-    params: PinSubscriberLocationParams
+    params: PinSubscriberLocationParams,
+    options?: RequestOptions
   ): Promise<PinSubscriberLocation | null> {
     return await this.api.post<PinSubscriberLocation | null>(
       `/subscribers/${id}/location`,
-      { body: JSON.stringify(params) }
+      { body: JSON.stringify(params), signal: options?.signal }
     );
   }
 
@@ -254,16 +282,18 @@ export class SubscribersHandler {
    *
    * @param id - The unique ID of the Subscriber.
    * @param params - The complete replacement location.
+   * @param options - Optional request controls, including cancellation.
    * @see {@link https://developers.kit.com/api-reference/subscribers/update-a-subscribers-pinned-location}
    * @returns The updated location, or null when the Subscriber is not found.
    */
   public async updateLocation(
     id: number,
-    params: UpdateSubscriberLocationParams
+    params: UpdateSubscriberLocationParams,
+    options?: RequestOptions
   ): Promise<UpdateSubscriberLocation | null> {
     return await this.api.patch<UpdateSubscriberLocation | null>(
       `/subscribers/${id}/location`,
-      { body: JSON.stringify(params) }
+      { body: JSON.stringify(params), signal: options?.signal }
     );
   }
 
@@ -272,11 +302,17 @@ export class SubscribersHandler {
    * from future open events.
    *
    * @param id - The unique ID of the Subscriber.
+   * @param options - Optional request controls, including cancellation.
    * @see {@link https://developers.kit.com/api-reference/subscribers/delete-a-subscribers-location}
    * @returns An empty object on success, or null when the Subscriber is not found.
    */
-  public async deleteLocation(id: number): Promise<{} | null> {
-    return await this.api.delete<{} | null>(`/subscribers/${id}/location`);
+  public async deleteLocation(
+    id: number,
+    options?: RequestOptions
+  ): Promise<{} | null> {
+    return await this.api.delete<{} | null>(`/subscribers/${id}/location`, {
+      signal: options?.signal,
+    });
   }
 
   /**
@@ -284,6 +320,7 @@ export class SubscribersHandler {
    *
    * @param id - The unique ID of the Subscriber.
    * @param params - Optional parameters to filter by.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/subscribers/list-stats-for-a-subscriber}
    *
@@ -292,7 +329,8 @@ export class SubscribersHandler {
    */
   public async getStats(
     id: number,
-    params?: GetSubscriberStatsParams
+    params?: GetSubscriberStatsParams,
+    options?: RequestOptions
   ): Promise<GetSubscriberStats | null> {
     const { email_sent_after, email_sent_before } = params || {};
 
@@ -303,7 +341,10 @@ export class SubscribersHandler {
 
     const url = `/subscribers/${id}/stats`;
 
-    return await this.api.get<GetSubscriberStats | null>(url, { query });
+    return await this.api.get<GetSubscriberStats | null>(url, {
+      query,
+      signal: options?.signal,
+    });
   }
 
   /**
@@ -311,6 +352,7 @@ export class SubscribersHandler {
    *
    * @param id - The unique ID of the Subscriber.
    * @param params - Optional parameters to filter by.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/subscribers/list-tags-for-a-subscriber}
    *
@@ -319,7 +361,8 @@ export class SubscribersHandler {
    */
   public async getTags(
     id: number,
-    params?: GetSubscriberTagsParams
+    params?: GetSubscriberTagsParams,
+    options?: RequestOptions
   ): Promise<GetSubscriberTags | null> {
     const { after, before, include_total_count, per_page } = params || {};
 
@@ -334,6 +377,9 @@ export class SubscribersHandler {
 
     const url = `/subscribers/${id}/tags`;
 
-    return await this.api.get<GetSubscriberTags | null>(url, { query });
+    return await this.api.get<GetSubscriberTags | null>(url, {
+      query,
+      signal: options?.signal,
+    });
   }
 }
