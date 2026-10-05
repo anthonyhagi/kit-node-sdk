@@ -43,7 +43,8 @@ export class AccountsHandler {
   }
 
   /**
-   * Update and return the newly set colors.
+   * Replace the entire account palette with up to 10 hex colors and
+   * return the newly set colors. Include every color you want to keep.
    *
    * @param params - the required parameters to update the colors.
    *
@@ -56,7 +57,7 @@ export class AccountsHandler {
 
     if (colors.length === 0) {
       throw new Error(
-        "Cannot update colors to an empty list. Please enter up to 5 different hex colors"
+        "Cannot update colors to an empty list. Please enter up to 10 different hex colors"
       );
     } else if (colors.length > 10) {
       throw new Error(

@@ -40,14 +40,15 @@ export interface GetCurrentAccount {
 
 export interface ListColors {
   /**
-   * An array of up to 5 color hex codes.
+   * An array of up to 10 color hex codes.
    */
   colors: string[];
 }
 
 export interface UpdateColorsParams {
   /**
-   * An array of up to 5 color hex codes.
+   * An array of up to 10 color hex codes. Replaces the entire palette;
+   * include every color you want to keep.
    */
   colors: string[];
 }
