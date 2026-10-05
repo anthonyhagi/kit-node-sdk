@@ -1169,3 +1169,11 @@ Keep the same filters when paging. Requesting the total count can slow responses
 so request it on the first page and reuse it. Existing calls without arguments
 continue to work. See the [Kit API reference](https://developers.kit.com/api-reference/broadcasts/get-stats-for-a-list-of-broadcasts)
 for the endpoint contract.
+
+## Nullable purchase-list pagination
+
+`kit.purchases.list()` accepts `null` for `after`, `before`, and `per_page`.
+Null values are omitted from the query; defined values and explicit
+`include_total_count: false` are preserved. The exported `ListPurchasesParams`
+type matches these inputs. See the
+[Kit API reference](https://developers.kit.com/api-reference/purchases/list-purchases).

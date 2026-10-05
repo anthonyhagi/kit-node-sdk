@@ -7,7 +7,7 @@ export interface ListPurchasesParams {
    *
    * @example after: pagination.end_cursor
    */
-  after?: string | undefined;
+  after?: string | null | undefined;
 
   /**
    * Pass in the string from the previous request to move
@@ -15,7 +15,7 @@ export interface ListPurchasesParams {
    *
    * @example before: pagination.start_cursor
    */
-  before?: string | undefined;
+  before?: string | null | undefined;
 
   /**
    * To include the total count of records in the response,
@@ -31,7 +31,7 @@ export interface ListPurchasesParams {
    *
    * @example per_page: 500
    */
-  per_page?: number | undefined;
+  per_page?: number | null | undefined;
 }
 
 export interface ListPurchases {
