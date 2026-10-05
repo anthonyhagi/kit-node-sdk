@@ -129,3 +129,32 @@ jobs:
 
       - name: 📦 Check packed SDK runtime
         run: npm run test:package-runtime
+
+  types:
+    name: 📦 Types (TypeScript ${{ matrix.typescript }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - typescript: 5.0.4
+            node-types: 22.0.0
+          - typescript: "6"
+            node-types: "22"
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v7
+
+      - name: ⎔ Setup node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.21.0
+
+      - name: 📥 Download deps
+        uses: bahmutov/npm-install@v1
+
+      - name: 🏗️ Run build
+        run: npm run build
+
+      - name: 📦 Check packed SDK types
+        run: npm run test:package-types -- ${{ matrix.typescript }} ${{ matrix.node-types }}

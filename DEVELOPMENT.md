@@ -39,6 +39,7 @@ packed-package checks cover Node 22.0.0, latest Node 22, and Node 24 in CI.
 - `npm run format` - Format code with Prettier
 - `npm run test` - Run the test suite with Vitest
 - `npm run test:package-runtime` - After building, pack and install the SDK in a temporary consumer and check ESM/CommonJS imports, requests, cancellation, and PKCE on the current Node runtime
+- `npm run test:package-types` - After building, compile standalone ESM/CommonJS consumers against the packed SDK using TypeScript 6 and Node 22 type definitions
 - `npm run changeset` - Create a changeset for version management
 
 ## Testing
@@ -57,6 +58,28 @@ npm run test -- --watch
 # Run tests with coverage
 npm run test -- --coverage
 ```
+
+### Packed TypeScript Compatibility
+
+CI checks the published declarations with TypeScript 5.0.4 (the minimum supported
+compiler) and TypeScript 6. Each check packs and installs the SDK in a temporary
+project, then compiles dedicated `.mts` and `.cts` consumers with strict checking
+and `skipLibCheck: false`. The fixtures check public imports, inferred return
+types, and rejected inputs without running API requests.
+
+Run the same matrix locally after building:
+
+```bash
+npm run build
+npm run test:package-types -- 5.0.4 22.0.0
+npm run test:package-types -- 6 22
+```
+
+The arguments select TypeScript and `@types/node` versions. The minimum compiler
+uses Node 22.0.0 type definitions; the current compiler uses the latest Node 22
+types. This keeps the compiler check independent of newer syntax introduced in
+Node type definitions. These commands install their compiler dependencies from
+npm and remove the temporary project after checking.
 
 ### Test Structure
 
