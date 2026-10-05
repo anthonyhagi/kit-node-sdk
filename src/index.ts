@@ -215,12 +215,15 @@ export class Kit extends ApiClient {
 
 export { ApiError } from "./errors";
 export {
+  buildOAuthAuthorizationUrl,
   exchangeOAuthCode,
   generateOAuthPKCE,
   refreshOAuthToken,
   revokeOAuthToken,
 } from "./oauth";
 export type {
+  BuildOAuthAuthorizationUrlOptions,
+  BuildOAuthAuthorizationUrlParams,
   ExchangeOAuthCodeOptions,
   ExchangeOAuthCodeParams,
   OAuthPKCE,

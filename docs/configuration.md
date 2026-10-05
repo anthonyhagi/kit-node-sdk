@@ -27,6 +27,48 @@ const kit = new Kit({
 });
 ```
 
+### Building an Authorization URL
+
+Build the initial redirect URL with the client ID and an app-configured redirect URI:
+
+```typescript
+import { buildOAuthAuthorizationUrl } from "@anthonyhagi/kit-node-sdk";
+
+const authorizationUrl = buildOAuthAuthorizationUrl({
+  client_id: clientId,
+  redirect_uri: "https://example.com/oauth/callback",
+  state: savedState,
+});
+// Redirect the creator to authorizationUrl.
+```
+
+The helper encodes query values and sets `response_type=code`. Optional parameters
+include `state`, `scope`, and `tenant_name`. Save the state with the authorization
+session and validate it on the callback. The optional second argument accepts
+`{ baseUrl }` to override `https://api.kit.com/v4`.
+
+For PKCE, pass the generated challenge and method:
+
+```typescript
+import { generateOAuthPKCE } from "@anthonyhagi/kit-node-sdk";
+
+const pkce = generateOAuthPKCE();
+const authorizationUrl = buildOAuthAuthorizationUrl({
+  client_id: clientId,
+  redirect_uri: "https://example.com/oauth/callback",
+  state: savedState,
+  code_challenge: pkce.code_challenge,
+  code_challenge_method: pkce.code_challenge_method,
+});
+// Save pkce.code_verifier for exchangeOAuthCode() at the callback.
+```
+
+`BuildOAuthAuthorizationUrlParams` requires both PKCE challenge fields together.
+The verifier stays with your authorization session.
+
+See [Kit's OAuth flow](https://developers.kit.com/api-reference/oauth-refresh-token-flow)
+and [PKCE flow](https://developers.kit.com/api-reference/oauth-proof-key-for-code-exchange-flow).
+
 ### Exchanging an Authorization Code
 
 After validating the OAuth callback's state, exchange its authorization code for tokens:

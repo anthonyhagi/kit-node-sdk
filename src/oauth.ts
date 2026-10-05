@@ -9,6 +9,53 @@ export interface OAuthPKCE {
   code_challenge_method: "S256";
 }
 
+export type BuildOAuthAuthorizationUrlParams = {
+  client_id: string;
+  /** Must match a redirect URI configured for your Kit app. */
+  redirect_uri: string;
+  /** Save and validate this value when handling the OAuth callback. */
+  state?: string | undefined;
+  scope?: string | undefined;
+  tenant_name?: string | undefined;
+} & (
+  | { code_challenge: string; code_challenge_method: "S256" }
+  | { code_challenge?: never; code_challenge_method?: never }
+);
+
+export interface BuildOAuthAuthorizationUrlOptions {
+  /** Defaults to https://api.kit.com/v4. */
+  baseUrl?: string | undefined;
+}
+
+/**
+ * Build Kit's OAuth authorization URL for the initial redirect.
+ * PKCE requests include both the challenge and its S256 method.
+ *
+ * @see {@link https://developers.kit.com/api-reference/oauth-refresh-token-flow}
+ * @see {@link https://developers.kit.com/api-reference/oauth-proof-key-for-code-exchange-flow}
+ */
+export function buildOAuthAuthorizationUrl(
+  params: BuildOAuthAuthorizationUrlParams,
+  options?: BuildOAuthAuthorizationUrlOptions
+): string {
+  const baseUrl = options?.baseUrl ?? "https://api.kit.com/v4";
+  const url = new URL(`${baseUrl.replace(/\/$/, "")}/oauth/authorize`);
+  url.searchParams.set("client_id", params.client_id);
+  url.searchParams.set("response_type", "code");
+  url.searchParams.set("redirect_uri", params.redirect_uri);
+  for (const key of [
+    "state",
+    "scope",
+    "tenant_name",
+    "code_challenge",
+    "code_challenge_method",
+  ] as const) {
+    const value = params[key];
+    if (value !== undefined) url.searchParams.set(key, value);
+  }
+  return url.href;
+}
+
 /**
  * Generate a fresh 256-bit PKCE verifier and its SHA-256 base64url challenge.
  * Save the verifier before redirecting and reuse it in exchangeOAuthCode().
