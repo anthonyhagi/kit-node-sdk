@@ -720,7 +720,8 @@ if (result) {
 ```
 
 The exported `GetSnippet` response requires both `content` and `document`, while
-list items keep those fields optional. Missing snippets return `null`;
+list items keep those fields optional unless requested with
+`include_content: true`. Missing snippets return `null`;
 authentication errors throw. See the
 [Kit API reference](https://developers.kit.com/api-reference/snippets/get-a-snippet).
 
@@ -752,7 +753,10 @@ if (page.pagination.has_next_page && page.pagination.end_cursor) {
 ```
 
 Content and document fields are omitted by default; `include_content: true`
-requests both. `snippet_type` accepts `"inline"` or `"block"`. Archived snippets
+requests both and infers `ListSnippetsWithContent`, with `content` and `document`
+required. Omitted or false flags return the existing `ListSnippets` type with
+optional body fields; dynamic boolean flags retain optional fields.
+`snippet_type` accepts `"inline"` or `"block"`. Archived snippets
 are excluded by default; `archived: true` returns only archived snippets.
 Pagination supports `after`, `before`, `per_page` (default 500, maximum 1000),
 and `include_total_count`. API errors throw.

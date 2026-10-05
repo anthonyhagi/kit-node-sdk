@@ -92,6 +92,14 @@ export interface ListSnippets {
   pagination: Pagination;
 }
 
+/** Snippet lists requested with include_content: true include both body fields. */
+export interface ListSnippetsWithContent extends Omit<
+  ListSnippets,
+  "snippets"
+> {
+  snippets: GetSnippet["snippet"][];
+}
+
 export interface GetSnippet {
   snippet: Omit<SnippetListItem, "content" | "document"> & {
     /** Single-snippet reads always include content and document. */
