@@ -110,28 +110,48 @@ export interface ListBroadcastsParams {
   status?: BroadcastStatus | undefined;
 }
 
+/** Fields shared by full broadcast responses. */
+interface BroadcastResponse {
+  status: BroadcastStatus;
+  id: number;
+  publication_id: number;
+  created_at: string;
+  subject: string;
+  preview_text: string | null;
+  description: string | null;
+  content: string | null;
+  public: boolean;
+  published_at: string | null;
+  send_at: string | null;
+  thumbnail_alt: string | null;
+  thumbnail_url: string | null;
+  email_address: string | null;
+  email_template: BroadcastEmailTemplate;
+  subscriber_filter: BroadcastSubscriberFilterResponseGroup[];
+}
+
+interface ListedBroadcast extends BroadcastResponse {
+  public_url?: string | null | undefined;
+  clicks?: BroadcastLinkClick[] | undefined;
+  stats?: BroadcastStats | undefined;
+}
+
+interface CreatedBroadcast extends BroadcastResponse {
+  preview_text: string;
+  description: string;
+  content: string;
+  published_at: string;
+  email_address: string;
+  /** Public web URL; null when unavailable. */
+  public_url: string | null;
+}
+
+interface BroadcastWithPublicUrl extends BroadcastResponse {
+  public_url: string | null;
+}
+
 export interface ListBroadcasts {
-  broadcasts: {
-    status: BroadcastStatus;
-    id: number;
-    publication_id: number;
-    created_at: string;
-    subject: string;
-    preview_text: string | null;
-    description: string | null;
-    content: string | null;
-    public_url?: string | null | undefined;
-    public: boolean;
-    published_at: string | null;
-    send_at: string | null;
-    thumbnail_alt: string | null;
-    thumbnail_url: string | null;
-    email_address: string | null;
-    email_template: BroadcastEmailTemplate;
-    subscriber_filter: BroadcastSubscriberFilterResponseGroup[];
-    clicks?: BroadcastLinkClick[] | undefined;
-    stats?: BroadcastStats | undefined;
-  }[];
+  broadcasts: ListedBroadcast[];
   pagination: Pagination;
 }
 
@@ -209,26 +229,7 @@ export interface CreateBroadcastParams {
 }
 
 export interface CreateBroadcast {
-  broadcast: {
-    status: BroadcastStatus;
-    id: number;
-    publication_id: number;
-    created_at: string;
-    subject: string;
-    preview_text: string;
-    description: string;
-    content: string;
-    public: boolean;
-    published_at: string;
-    send_at: string | null;
-    thumbnail_alt: string | null;
-    thumbnail_url: string | null;
-    /** Public web URL; null when unavailable. */
-    public_url: string | null;
-    email_address: string;
-    email_template: BroadcastEmailTemplate;
-    subscriber_filter: BroadcastSubscriberFilterResponseGroup[];
-  };
+  broadcast: CreatedBroadcast;
 }
 
 export interface GetBroadcastStatsParams extends Omit<
@@ -291,25 +292,7 @@ export interface GetSingleBroadcastStats {
 }
 
 export interface GetBroadcast {
-  broadcast: {
-    status: BroadcastStatus;
-    id: number;
-    publication_id: number;
-    created_at: string;
-    subject: string;
-    preview_text: string | null;
-    description: string | null;
-    content: string | null;
-    public: boolean;
-    published_at: string | null;
-    send_at: string | null;
-    thumbnail_alt: string | null;
-    thumbnail_url: string | null;
-    public_url: string | null;
-    email_address: string | null;
-    email_template: BroadcastEmailTemplate;
-    subscriber_filter: BroadcastSubscriberFilterResponseGroup[];
-  };
+  broadcast: BroadcastWithPublicUrl;
 }
 
 export interface UpdateBroadcastParams {
@@ -390,23 +373,5 @@ export interface UpdateBroadcastParams {
 }
 
 export interface UpdateBroadcast {
-  broadcast: {
-    status: BroadcastStatus;
-    id: number;
-    publication_id: number;
-    created_at: string;
-    subject: string;
-    preview_text: string | null;
-    description: string | null;
-    content: string | null;
-    public: boolean;
-    published_at: string | null;
-    send_at: string | null;
-    thumbnail_alt: string | null;
-    thumbnail_url: string | null;
-    public_url: string | null;
-    email_address: string | null;
-    email_template: BroadcastEmailTemplate;
-    subscriber_filter: BroadcastSubscriberFilterResponseGroup[];
-  };
+  broadcast: BroadcastWithPublicUrl;
 }
