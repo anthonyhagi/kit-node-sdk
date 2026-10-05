@@ -929,6 +929,12 @@ const filter: FilterSubscriberBody = { all: [signup, engagement] };
 const result = await kit.subscribers.filter(filter);
 ```
 
+`FilterSubscriberBodyAnyUrls` also accepts an ID-only condition such as
+`{ type: "urls", ids: [7] }`, or patterns with no matching mode:
+`{ type: "urls", urls: ["https://kit.com/news"] }`. Both `urls` and `matching`
+are optional; Kit defaults omitted pattern matching to `exact`. The SDK sends
+the supplied condition without adding a matching mode or a patterns array.
+
 `FilterSubscriberBodyAllBase` covers opens, clicks, sends (`sent`), and
 `delivered` engagement conditions. Conditions in `all` are combined with AND;
 the nested `any` array combines broadcast or URL conditions with OR.
