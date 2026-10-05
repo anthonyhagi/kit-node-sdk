@@ -6,6 +6,7 @@ import {
   verifyWebhookSignature,
   type GetSubscriber,
   type ListPostsWithContent,
+  type ListSequenceEmailsWithContent,
   type ListSnippetsWithContent,
   type ListSubscribers,
   type OAuthPKCE,
@@ -45,6 +46,20 @@ export type PostsResult = Assert<
 >;
 export function postContent(page: ListPostsWithContent): string[] {
   return page.posts.map((post) => post.content);
+}
+
+export const sequenceEmails = kit.sequenceEmails.list(
+  108,
+  { include_content: true },
+  options
+);
+export type SequenceEmailsResult = Assert<
+  Equal<typeof sequenceEmails, Promise<ListSequenceEmailsWithContent | null>>
+>;
+export function sequenceEmailContent(
+  page: ListSequenceEmailsWithContent | null
+): (string | null)[] {
+  return page?.emails.map((email) => email.content) ?? [];
 }
 
 export const pkce = generateOAuthPKCE();
