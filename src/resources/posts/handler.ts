@@ -18,6 +18,7 @@ export class PostsHandler {
   ): Promise<GetPost | null> {
     return await this.api.get<GetPost | null>(`/posts/${id}`, {
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -49,6 +50,7 @@ export class PostsHandler {
     return await this.api.get<ListPosts>("/posts", {
       query,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 }

@@ -79,6 +79,7 @@ export class TagsHandler {
       {
         body: JSON.stringify(params),
         signal: options?.signal,
+        maxRetries: options?.maxRetries,
       }
     );
 
@@ -126,6 +127,7 @@ export class TagsHandler {
     const resp = await this.api.post<BulkCreateTagsWithoutType>(url, {
       body,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
 
     // Add on the response type such that the caller of this method
@@ -176,6 +178,7 @@ export class TagsHandler {
     const resp = await this.api.delete<BulkRemoveTagsWithoutType>(url, {
       body,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
 
     // Add on the response type such that the caller of this method
@@ -227,6 +230,7 @@ export class TagsHandler {
     const resp = await this.api.post<BulkTagWithoutType>(url, {
       body,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
 
     // Add on the response type such that the caller of this method
@@ -286,6 +290,7 @@ export class TagsHandler {
     return await this.api.get<ListTags>("/tags", {
       query,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -315,6 +320,7 @@ export class TagsHandler {
     return await this.api.post<CreateTag>("/tags", {
       body,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -341,6 +347,7 @@ export class TagsHandler {
     return await this.api.put<UpdateTag | null>(`/tags/${tagId}`, {
       body,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -378,6 +385,7 @@ export class TagsHandler {
     return await this.api.delete<{} | null>(url, {
       query,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -461,6 +469,7 @@ export class TagsHandler {
     >(url, {
       query,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -498,6 +507,7 @@ export class TagsHandler {
     return await this.api.post<TagSubscriberByEmail | null>(url, {
       body,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -532,7 +542,10 @@ export class TagsHandler {
   ): Promise<{} | null> {
     const url = `/tags/${tagId}/subscribers/${subscriberId}`;
 
-    return await this.api.delete<{} | null>(url, { signal: options?.signal });
+    return await this.api.delete<{} | null>(url, {
+      signal: options?.signal,
+      maxRetries: options?.maxRetries,
+    });
   }
 
   /**
@@ -563,6 +576,7 @@ export class TagsHandler {
 
     return await this.api.post<TagSubscriber | null>(url, {
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 }

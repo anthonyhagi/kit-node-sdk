@@ -52,6 +52,7 @@ export class SequencesHandler {
     return await this.api.get<ListSequences>("/sequences", {
       query,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -70,6 +71,7 @@ export class SequencesHandler {
     return await this.api.post<CreateSequence>("/sequences", {
       body: JSON.stringify(params),
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -93,6 +95,7 @@ export class SequencesHandler {
     return await this.api.get<GetSequence | null>(`/sequences/${id}`, {
       query,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -113,6 +116,7 @@ export class SequencesHandler {
     return await this.api.put<UpdateSequence | null>(`/sequences/${id}`, {
       body: JSON.stringify(params),
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -131,6 +135,7 @@ export class SequencesHandler {
   ): Promise<{} | null> {
     return await this.api.delete<{} | null>(`/sequences/${id}`, {
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -183,6 +188,7 @@ export class SequencesHandler {
     return await this.api.get<ListSequenceSubscribers | null>(url, {
       query,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -209,6 +215,7 @@ export class SequencesHandler {
     return await this.api.post<AddSubscriberToSequence | null>(url, {
       body,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -232,6 +239,7 @@ export class SequencesHandler {
 
     return await this.api.post<AddSubscriberToSequence | null>(url, {
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 }

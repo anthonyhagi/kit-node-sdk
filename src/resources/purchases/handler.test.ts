@@ -49,6 +49,42 @@ describe("purchase list response through Kit", () => {
     fetchMock.resetMocks();
   });
 
+  it.each(["network", 500, 503, 429] as const)(
+    "does not retry purchase creation after %s by default",
+    async (failure) => {
+      const kit = new Kit({ apiKey: "test-key", maxRetries: 3, retryDelay: 0 });
+      if (failure === "network") {
+        fetchMock.mockRejectOnce(new Error("Connection lost"));
+      } else {
+        fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Failed"] }), {
+          status: failure,
+        });
+      }
+      fetchMock.mockResponseOnce(JSON.stringify({ purchase }));
+      await expect(kit.purchases.create({ purchase })).rejects.toThrow();
+      expect(fetchMock.requests()).toHaveLength(1);
+    }
+  );
+
+  it("allows an explicit purchase retry override without changing client retries", async () => {
+    const kit = new Kit({ apiKey: "test-key", maxRetries: 0, retryDelay: 0 });
+    fetchMock.mockRejectOnce(new Error("Connection lost"));
+    fetchMock.mockResponseOnce(JSON.stringify({ purchase }));
+    expect(await kit.purchases.create({ purchase }, { maxRetries: 1 })).toEqual(
+      { purchase }
+    );
+    expect(fetchMock.requests()).toHaveLength(2);
+    expect(kit.maxRetries).toBe(0);
+  });
+
+  it("keeps the client retry policy for purchase reads", async () => {
+    const kit = new Kit({ apiKey: "test-key", maxRetries: 1, retryDelay: 0 });
+    fetchMock.mockRejectOnce(new Error("Connection lost"));
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.purchases.list()).toEqual(response);
+    expect(fetchMock.requests()).toHaveLength(2);
+  });
+
   it("accepts documented nullable pagination parameters", () => {
     expectTypeOf<ListPurchasesParams["after"]>().toEqualTypeOf<
       string | null | undefined

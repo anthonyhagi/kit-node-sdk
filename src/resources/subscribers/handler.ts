@@ -60,6 +60,7 @@ export class SubscribersHandler {
     const resp = await this.api.post<BulkCreateSubscribersWithoutType>(url, {
       body,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
 
     if ("subscribers" in resp) {
@@ -141,6 +142,7 @@ export class SubscribersHandler {
     return await this.api.get<ListSubscribers>(url, {
       query,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -168,6 +170,7 @@ export class SubscribersHandler {
     return await this.api.post<CreateSubscriber>(url, {
       body,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -202,6 +205,7 @@ export class SubscribersHandler {
       body: JSON.stringify(body || {}),
       query,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -223,6 +227,7 @@ export class SubscribersHandler {
 
     return await this.api.get<GetSubscriber | null>(url, {
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -249,6 +254,7 @@ export class SubscribersHandler {
     return await this.api.put<UpdateSubscriber | null>(url, {
       body,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -269,7 +275,10 @@ export class SubscribersHandler {
   ): Promise<{} | null> {
     const url = `/subscribers/${id}/unsubscribe`;
 
-    return await this.api.post<{} | null>(url, { signal: options?.signal });
+    return await this.api.post<{} | null>(url, {
+      signal: options?.signal,
+      maxRetries: options?.maxRetries,
+    });
   }
 
   /**
@@ -289,7 +298,11 @@ export class SubscribersHandler {
   ): Promise<PinSubscriberLocation | null> {
     return await this.api.post<PinSubscriberLocation | null>(
       `/subscribers/${id}/location`,
-      { body: JSON.stringify(params), signal: options?.signal }
+      {
+        body: JSON.stringify(params),
+        signal: options?.signal,
+        maxRetries: options?.maxRetries,
+      }
     );
   }
 
@@ -310,7 +323,11 @@ export class SubscribersHandler {
   ): Promise<UpdateSubscriberLocation | null> {
     return await this.api.patch<UpdateSubscriberLocation | null>(
       `/subscribers/${id}/location`,
-      { body: JSON.stringify(params), signal: options?.signal }
+      {
+        body: JSON.stringify(params),
+        signal: options?.signal,
+        maxRetries: options?.maxRetries,
+      }
     );
   }
 
@@ -329,6 +346,7 @@ export class SubscribersHandler {
   ): Promise<{} | null> {
     return await this.api.delete<{} | null>(`/subscribers/${id}/location`, {
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -361,6 +379,7 @@ export class SubscribersHandler {
     return await this.api.get<GetSubscriberStats | null>(url, {
       query,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -397,6 +416,7 @@ export class SubscribersHandler {
     return await this.api.get<GetSubscriberTags | null>(url, {
       query,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 }

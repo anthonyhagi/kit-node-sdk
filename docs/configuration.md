@@ -230,6 +230,28 @@ it to `0` to disable the timeout. It must be an integer from `0` to `2147483647`
 milliseconds; invalid values throw a `RangeError` at construction. Retry delays
 are excluded, so the entire call can take longer than one attempt's timeout.
 
+## Per-request retry limits
+
+Pass `maxRetries` in a resource method's request options to override the client
+limit for that call. It must be a non-negative safe integer; invalid values
+reject before a request is sent. This leaves the client default unchanged:
+
+```ts
+const page = await kit.subscribers.list(undefined, { maxRetries: 0 });
+console.log(page.subscribers);
+```
+
+Omitted or `undefined` request limits normally use the client limit.
+`kit.purchases.create()` defaults to **zero retries**, including network failures,
+timeouts, 5xx responses, and rate limits. Kit appends products when the transaction
+already exists, so replaying a request after an uncertain outcome can duplicate
+line items. Inspect the purchase before resending products. An explicit request
+limit can opt into retries, for example `kit.purchases.create(params, { maxRetries: 1 })`;
+do so only when you have established that replaying the request is appropriate.
+
+Other resource methods retain the client retry policy. See
+[Kit's purchase behavior](https://developers.kit.com/api-reference/purchases/create-a-purchase).
+
 ## Environment Variables
 
 You can set your API key as an environment variable:

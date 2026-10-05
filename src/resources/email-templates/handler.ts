@@ -38,6 +38,7 @@ export class EmailTemplatesHandler {
     return await this.api.get<ListEmailTemplates>(url, {
       query,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 }
