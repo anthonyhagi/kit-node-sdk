@@ -261,6 +261,14 @@ may schedule duplicate deliveries when `send_at` is supplied. Inspect existing
 broadcasts before repeating creation. An explicit `maxRetries` request option
 can opt into retries. See [Kit's broadcast creation behavior](https://developers.kit.com/api-reference/broadcasts/create-a-broadcast).
 
+`kit.webhookEndpoints.rotateSecret()` defaults to zero retries, including when
+`force: true` is supplied. After an uncertain successful rotation, replaying
+normally returns `409`; forced replay rotates again and immediately expires the
+older secret. The new plaintext secret is available only in the rotation
+response. Inspect endpoint metadata before deciding how to recover, and avoid
+forcing a second rotation just to bypass a conflict. An explicit `maxRetries`
+request option can opt into retries. See [Kit's rotation behavior](https://developers.kit.com/api-reference/webhooks/rotate-a-webhook-endpoint-secret).
+
 Other resource methods retain the client retry policy. See
 [Kit's purchase behavior](https://developers.kit.com/api-reference/purchases/create-a-purchase).
 

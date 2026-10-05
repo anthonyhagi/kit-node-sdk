@@ -216,7 +216,7 @@ describe.each(scenarios)("webhook endpoint $name cancellation", (scenario) => {
     const controller = new AbortController();
     const reason = new Error("Cancelled retry");
     const result = expect(
-      scenario.run(kit, { signal: controller.signal })
+      scenario.run(kit, { signal: controller.signal, maxRetries: 1 })
     ).rejects.toBe(reason);
     await vi.advanceTimersByTimeAsync(0);
     expect(vi.getTimerCount()).toBe(1);

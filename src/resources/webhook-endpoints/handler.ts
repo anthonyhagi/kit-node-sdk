@@ -35,6 +35,9 @@ export class WebhookEndpointsHandler {
 
   /**
    * Rotate the signing secret and return the new secret and overlap expiry.
+   * Automatic retries default to 0: repeating an uncertain rotation can return
+   * 409, or expire an older secret immediately when force is true. Request
+   * options can explicitly override the retry limit.
    *
    * @param id - The webhook endpoint whose secret should rotate.
    * @param params - Optional force flag for rotation during an open overlap window.
@@ -52,7 +55,7 @@ export class WebhookEndpointsHandler {
       {
         body: JSON.stringify(params || {}),
         signal: options?.signal,
-        maxRetries: options?.maxRetries,
+        maxRetries: options?.maxRetries ?? 0,
       }
     );
   }
