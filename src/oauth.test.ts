@@ -227,9 +227,9 @@ describe.each(["refresh", "revocation", "exchange"] as const)(
       refresh_token: "refresh-token",
     } satisfies RefreshOAuthTokenParams;
     const responseBody =
-      operation !== "revocation"
-        ? JSON.stringify({ access_token: "replacement" })
-        : "";
+      operation === "revocation"
+        ? ""
+        : JSON.stringify({ access_token: "replacement" });
 
     beforeEach(() => {
       fetchMock.resetMocks();
