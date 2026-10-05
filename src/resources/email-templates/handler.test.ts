@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { Kit } from "~/index";
+import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
+import { Kit, type ListEmailTemplatesParams } from "~/index";
 
 const templates = [
   { id: 36, name: "Custom HTML ✨", is_default: false, category: "HTML" },
@@ -33,6 +33,70 @@ describe("email-template requests through Kit", () => {
     fetchMock.resetMocks();
     kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
   });
+
+  it("accepts documented nullable pagination parameters", () => {
+    expectTypeOf<ListEmailTemplatesParams["after"]>().toEqualTypeOf<
+      string | null | undefined
+    >();
+    expectTypeOf<ListEmailTemplatesParams["before"]>().toEqualTypeOf<
+      string | null | undefined
+    >();
+    expectTypeOf<ListEmailTemplatesParams["per_page"]>().toEqualTypeOf<
+      number | null | undefined
+    >();
+    expectTypeOf<
+      ListEmailTemplatesParams["include_total_count"]
+    >().toEqualTypeOf<boolean | undefined>();
+  });
+
+  it.each([
+    { params: { after: null, before: null, per_page: null }, expected: {} },
+    {
+      params: {
+        after: null,
+        before: "previous",
+        per_page: 25,
+        include_total_count: false,
+      },
+      expected: {
+        before: "previous",
+        per_page: "25",
+        include_total_count: "false",
+      },
+    },
+    {
+      params: {
+        after: "next",
+        before: null,
+        per_page: 25,
+        include_total_count: true,
+      },
+      expected: { after: "next", per_page: "25", include_total_count: "true" },
+    },
+    {
+      params: {
+        after: "next",
+        before: "previous",
+        per_page: null,
+        include_total_count: false,
+      },
+      expected: {
+        after: "next",
+        before: "previous",
+        include_total_count: "false",
+      },
+    },
+  ])(
+    "omits null values while preserving defined options $params",
+    async ({ params, expected }) => {
+      const response = { email_templates: templates, pagination };
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+
+      await expect(kit.emailTemplates.list(params)).resolves.toEqual(response);
+
+      request(expected);
+    }
+  );
 
   it("lists templates with API-key authentication and no body or query", async () => {
     const response = { email_templates: templates, pagination };
