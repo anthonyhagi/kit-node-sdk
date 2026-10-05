@@ -27,6 +27,33 @@ const kit = new Kit({
 });
 ```
 
+### Refreshing OAuth Tokens
+
+Use `refreshOAuthToken()` to obtain a new access token and replacement refresh token:
+
+```typescript
+import { Kit, refreshOAuthToken } from "@anthonyhagi/kit-node-sdk";
+
+const tokens = await refreshOAuthToken({
+  client_id: clientId,
+  refresh_token: storedRefreshToken,
+});
+
+// Store tokens.refresh_token for the next refresh.
+const kit = new Kit({ apiKey: tokens.access_token, authType: "oauth" });
+```
+
+The `OAuthTokenResponse` includes `access_token`, `token_type`, `expires_in`
+(seconds), `refresh_token`, `scope`, and `created_at` (Unix seconds).
+
+Refresh tokens are single-use. Save the returned replacement token before the next
+refresh; reusing the submitted token returns `invalid_grant`. The helper makes one
+request without automatic retries. HTTP failures throw `ApiError` with `status`
+and `details`; network and JSON parsing failures propagate. An optional second
+argument accepts `{ baseUrl }` to override `https://api.kit.com/v4`.
+
+See [Kit's refresh-token flow](https://developers.kit.com/api-reference/oauth-refresh-token-flow).
+
 ### Disconnecting an OAuth App
 
 Use the exported `revokeOAuthToken()` helper when a creator disconnects your app:

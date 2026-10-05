@@ -13,6 +13,56 @@ export interface RevokeOAuthTokenOptions {
   baseUrl?: string | undefined;
 }
 
+export interface RefreshOAuthTokenParams {
+  client_id: string;
+  /** Single-use token. Store the replacement returned by this request. */
+  refresh_token: string;
+}
+
+export type RefreshOAuthTokenOptions = RevokeOAuthTokenOptions;
+
+export interface OAuthTokenResponse {
+  access_token: string;
+  token_type: string;
+  /** Access token lifetime in seconds. */
+  expires_in: number;
+  /** Replacement refresh token to store for the next refresh. */
+  refresh_token: string;
+  scope: string;
+  /** Token creation time as Unix seconds. */
+  created_at: number;
+}
+
+/**
+ * Obtain new access and refresh tokens using a single-use refresh token.
+ * Store the returned refresh_token; the submitted token is now revoked.
+ * Makes one request without automatic retries. Network and parsing failures
+ * propagate; HTTP failures throw ApiError.
+ *
+ * @see {@link https://developers.kit.com/api-reference/oauth-refresh-token-flow}
+ */
+export async function refreshOAuthToken(
+  params: RefreshOAuthTokenParams,
+  options?: RefreshOAuthTokenOptions
+): Promise<OAuthTokenResponse> {
+  const { client_id, refresh_token } = params;
+  const baseUrl = options?.baseUrl ?? "https://api.kit.com/v4";
+  const response = await fetch(`${baseUrl.replace(/\/$/, "")}/oauth/token`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      client_id,
+      grant_type: "refresh_token",
+      refresh_token,
+    }),
+  });
+  const responseBody = await readOAuthResponse(response, "refresh");
+  return JSON.parse(responseBody) as OAuthTokenResponse;
+}
+
 /**
  * Revoke a Kit-issued token when a creator disconnects your app.
  * A successful response also covers unknown, expired, or already revoked tokens.
@@ -39,6 +89,13 @@ export async function revokeOAuthToken(
     body: body.toString(),
   });
   // Revocation succeeds with an empty body; do not try to parse it as JSON.
+  await readOAuthResponse(response, "revocation");
+}
+
+async function readOAuthResponse(
+  response: Response,
+  operation: "refresh" | "revocation"
+): Promise<string> {
   const responseBody = await response.text();
   if (!response.ok) {
     let details: unknown;
@@ -48,9 +105,10 @@ export async function revokeOAuthToken(
       details = responseBody;
     }
     throw new ApiError(
-      `OAuth token revocation failed. Status: ${response.status}`,
+      `OAuth token ${operation} failed. Status: ${response.status}`,
       response.status,
       details
     );
   }
+  return responseBody;
 }
