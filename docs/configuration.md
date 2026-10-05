@@ -27,6 +27,33 @@ const kit = new Kit({
 });
 ```
 
+### Exchanging an Authorization Code
+
+After validating the OAuth callback's state, exchange its authorization code for tokens:
+
+```typescript
+import { exchangeOAuthCode, Kit } from "@anthonyhagi/kit-node-sdk";
+
+const tokens = await exchangeOAuthCode({
+  client_id: clientId,
+  client_secret: clientSecret,
+  code: authorizationCode,
+  redirect_uri: "https://example.com/oauth/callback",
+});
+
+// Store tokens.refresh_token for future refreshes.
+const kit = new Kit({ apiKey: tokens.access_token, authType: "oauth" });
+```
+
+Use the redirect URI from the authorization request, matching one configured in
+your app. The helper implements the client-secret flow and returns
+`OAuthTokenResponse`. It makes one request without automatic retries. HTTP failures
+throw `ApiError` with `status` and `details`; network and JSON parsing failures
+propagate. Its optional second argument accepts `{ baseUrl }` to override
+`https://api.kit.com/v4`.
+
+See [Kit's authorization-code flow](https://developers.kit.com/api-reference/oauth-refresh-token-flow).
+
 ### Refreshing OAuth Tokens
 
 Use `refreshOAuthToken()` to obtain a new access token and replacement refresh token:
