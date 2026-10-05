@@ -154,6 +154,7 @@ export interface CreateSubscriberParams {
   email_address: string;
   /** Applies to new subscribers only; cannot change an existing subscriber's state. */
   state?: SubscriberState | (string & {}) | null | undefined;
+  /** Use existing custom field keys; unknown keys are ignored and returned in warnings. */
   fields?: Record<string, string> | null | undefined;
 }
 
@@ -484,6 +485,7 @@ export interface GetSubscriber {
 export interface UpdateSubscriberParams {
   first_name?: string | null | undefined;
   email_address: string;
+  /** Use existing custom field keys; unknown keys are ignored and returned in warnings. */
   fields?: Record<string, string> | null | undefined;
 }
 

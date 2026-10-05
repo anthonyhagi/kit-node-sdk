@@ -70,14 +70,30 @@ const newSubscriber = await kit.subscribers.create({
   first_name: "John",
 });
 
+for (const key of newSubscriber.warnings ?? []) {
+  console.warn("Custom field key was ignored:", key);
+}
+
+// The company custom field must already exist; use its key, not its label.
 // Update subscriber information
-await kit.subscribers.update(newSubscriber.subscriber.id, {
-  email_address: newSubscriber.subscriber.email_address,
-  first_name: "Johnny",
-  fields: {
-    company: "Acme Corp",
-  },
-});
+const updatedSubscriber = await kit.subscribers.update(
+  newSubscriber.subscriber.id,
+  {
+    email_address: newSubscriber.subscriber.email_address,
+    first_name: "Johnny",
+    fields: {
+      company: "Acme Corp",
+    },
+  }
+);
+
+if (updatedSubscriber === null) {
+  console.log("Subscriber no longer exists");
+} else {
+  for (const key of updatedSubscriber.warnings ?? []) {
+    console.warn("Custom field key was ignored:", key);
+  }
+}
 
 // Get subscriber with their tags
 const subscriber = await kit.subscribers.get(newSubscriber.subscriber.id);
