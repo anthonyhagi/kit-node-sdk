@@ -5,6 +5,7 @@ import {
   refreshOAuthToken,
   verifyWebhookSignature,
   type GetSubscriber,
+  type ListPostsWithContent,
   type ListSnippetsWithContent,
   type ListSubscribers,
   type OAuthPKCE,
@@ -36,6 +37,14 @@ export function snippetContent(page: ListSnippetsWithContent): string[] {
   return page.snippets.map(
     (snippet) => snippet.content + snippet.document.value_html
   );
+}
+
+export const posts = kit.posts.list({ include_content: true }, options);
+export type PostsResult = Assert<
+  Equal<typeof posts, Promise<ListPostsWithContent>>
+>;
+export function postContent(page: ListPostsWithContent): string[] {
+  return page.posts.map((post) => post.content);
 }
 
 export const pkce = generateOAuthPKCE();

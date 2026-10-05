@@ -319,6 +319,7 @@ export type {
   GetPost,
   ListPosts,
   ListPostsParams,
+  ListPostsWithContent,
   PostListItem,
 } from "./resources/posts/types";
 

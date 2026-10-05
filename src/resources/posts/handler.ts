@@ -1,5 +1,10 @@
 import type { Kit, RequestOptions } from "~/index";
-import type { GetPost, ListPosts, ListPostsParams } from "./types";
+import type {
+  GetPost,
+  ListPosts,
+  ListPostsParams,
+  ListPostsWithContent,
+} from "./types";
 
 export class PostsHandler {
   constructor(private api: Kit) {}
@@ -31,9 +36,21 @@ export class PostsHandler {
    * @see {@link https://developers.kit.com/api-reference/posts/list-posts}
    */
   public async list(
+    params: ListPostsParams & { include_content: true },
+    options?: RequestOptions
+  ): Promise<ListPostsWithContent>;
+  public async list(
+    params?: ListPostsParams & { include_content?: false | undefined },
+    options?: RequestOptions
+  ): Promise<ListPosts>;
+  public async list(
     params?: ListPostsParams,
     options?: RequestOptions
-  ): Promise<ListPosts> {
+  ): Promise<ListPosts | ListPostsWithContent>;
+  public async list(
+    params?: ListPostsParams,
+    options?: RequestOptions
+  ): Promise<ListPosts | ListPostsWithContent> {
     const { after, before, include_content, include_total_count, per_page } =
       params || {};
     const query = new URLSearchParams({
