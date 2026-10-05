@@ -1622,10 +1622,17 @@ describe("subscriber requests through Kit", () => {
     const response = { subscribers: [subscriber], failures: [] };
     fetchMock.mockResponseOnce(JSON.stringify(response));
 
-    expect(await kit.subscribers.bulkCreate(body)).toEqual({
+    const result = await kit.subscribers.bulkCreate(body);
+    expect(result).toEqual({
       type: "synchronous",
       ...response,
     });
+    if (result.type !== "synchronous") {
+      throw new Error("Expected synchronous bulk creation");
+    }
+    expectTypeOf(result.subscribers[0]!).toEqualTypeOf<
+      Omit<Subscriber, "fields">
+    >();
     expect(await request("POST", "/bulk/subscribers").json()).toEqual(body);
   });
 
