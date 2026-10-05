@@ -831,6 +831,47 @@ sequence subscriptions, while `stats.email_unsubscribes` counts email events.
 The exported types are `GetSequence`, `GetSequenceParams`, and `SequenceStats`.
 See the [Kit API reference](https://developers.kit.com/api-reference/sequences/get-a-sequence).
 
+## Reusable subscriber filter conditions
+
+The package exports the types used by `kit.subscribers.filter()` so you can
+compose named conditions:
+
+```ts
+import type {
+  FilterSubscriberBody,
+  FilterSubscriberBodyAllBase,
+  FilterSubscriberBodyAllSubscribed,
+  FilterSubscriberBodyAnyBroadcast,
+  FilterSubscriberBodyAnyUrls,
+} from "@anthonyhagi/kit-node-sdk";
+
+const signup: FilterSubscriberBodyAllSubscribed = {
+  type: "subscribed",
+  after: "2026-01-01",
+};
+const broadcast: FilterSubscriberBodyAnyBroadcast = {
+  type: "broadcasts",
+  ids: [7],
+};
+const url: FilterSubscriberBodyAnyUrls = {
+  type: "urls",
+  urls: ["kit.com"],
+  matching: "contains",
+};
+const engagement: FilterSubscriberBodyAllBase = {
+  type: "clicks",
+  count_greater_than: 0,
+  any: [broadcast, url],
+};
+const filter: FilterSubscriberBody = { all: [signup, engagement] };
+const result = await kit.subscribers.filter(filter);
+```
+
+`FilterSubscriberBodyAllBase` covers opens, clicks, sends (`sent`), and
+`delivered` engagement conditions. Conditions in `all` are combined with AND;
+the nested `any` array combines broadcast or URL conditions with OR.
+See [Kit's filtering reference](https://developers.kit.com/api-reference/subscribers/filter-subscribers-by-engagement-sign-up-date-state-and-tags).
+
 ## Broadcast creation filters
 
 Use an array of filter groups when creating a targeted broadcast. Kit supports

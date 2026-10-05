@@ -6,12 +6,16 @@ import {
   type CreateSubscriber,
   type FilterSubscriberBody,
   type FilterSubscriberBodyAllAttribution,
+  type FilterSubscriberBodyAllBase,
   type FilterSubscriberBodyAllCustomField,
   type FilterSubscriberBodyAllLocation,
   type FilterSubscriberBodyAllState,
+  type FilterSubscriberBodyAllSubscribed,
   type FilterSubscriberBodyAllTags,
+  type FilterSubscriberBodyAnyBroadcast,
   type FilterSubscriberBodyAnyForms,
   type FilterSubscriberBodyAnyKitSource,
+  type FilterSubscriberBodyAnyUrls,
   type FilterSubscriberInclude,
   type FilterSubscriberParams,
   type FilterSubscribers,
@@ -773,22 +777,24 @@ describe("subscriber requests through Kit", () => {
     expect(fetchMock.requests()).toHaveLength(1);
   });
 
+  const signupCondition: FilterSubscriberBodyAllSubscribed = {
+    type: "subscribed",
+    after: "2026-01-01",
+    before: "2026-02-01",
+  };
+  const urlCondition: FilterSubscriberBodyAnyUrls = {
+    type: "urls",
+    ids: [7, 8],
+    urls: ["kit.com"],
+    matching: "contains",
+  };
+  const engagementCondition: FilterSubscriberBodyAllBase = {
+    type: "clicks",
+    count_greater_than: 0,
+    any: [urlCondition],
+  };
   const filterBody: FilterSubscriberBody = {
-    all: [
-      { type: "subscribed", after: "2026-01-01", before: "2026-02-01" },
-      {
-        type: "clicks",
-        count_greater_than: 0,
-        any: [
-          {
-            type: "urls",
-            ids: [7, 8],
-            urls: ["kit.com"],
-            matching: "contains",
-          },
-        ],
-      },
-    ],
+    all: [signupCondition, engagementCondition],
   };
 
   it("filters using a nested JSON body without optional pagination", async () => {
@@ -817,6 +823,15 @@ describe("subscriber requests through Kit", () => {
 
     const result = await kit.subscribers.filter(filterBody);
     expectTypeOf(result).toEqualTypeOf<FilterSubscribers>();
+    expectTypeOf(signupCondition).toExtend<
+      FilterSubscriberBody["all"][number]
+    >();
+    expectTypeOf(engagementCondition).toExtend<
+      FilterSubscriberBody["all"][number]
+    >();
+    expectTypeOf(urlCondition).toExtend<
+      NonNullable<FilterSubscriberBodyAllBase["any"]>[number]
+    >();
     expect(result).toEqual(response);
     expect(await request("POST", "/subscribers/filter").json()).toEqual(
       filterBody
@@ -824,15 +839,20 @@ describe("subscriber requests through Kit", () => {
   });
 
   it("filters engagement by broadcast IDs using the API's plural discriminator", async () => {
-    const body: FilterSubscriberBody = {
-      all: [
-        {
-          type: "clicks",
-          count_greater_than: 2,
-          any: [{ type: "broadcasts", ids: [7, 8] }],
-        },
-      ],
+    const broadcastCondition: FilterSubscriberBodyAnyBroadcast = {
+      type: "broadcasts",
+      ids: [7, 8],
     };
+    const condition: FilterSubscriberBodyAllBase = {
+      type: "clicks",
+      count_greater_than: 2,
+      any: [broadcastCondition],
+    };
+    const body: FilterSubscriberBody = { all: [condition] };
+    expectTypeOf(broadcastCondition).toExtend<
+      NonNullable<FilterSubscriberBodyAllBase["any"]>[number]
+    >();
+    expectTypeOf(condition).toExtend<FilterSubscriberBody["all"][number]>();
     const response = { subscribers: [], pagination };
     fetchMock.mockResponseOnce(JSON.stringify(response));
 
