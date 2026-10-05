@@ -574,3 +574,60 @@ describe("broadcast Starting point option through Kit", () => {
     });
   });
 });
+
+describe("broadcast creation with a template design through Kit", () => {
+  const draft = {
+    email_template_id: 3,
+    subject: "Newsletter",
+    description: "Monthly update",
+    public: false,
+    published_at: "2026-01-01T12:00:00Z",
+    send_at: null,
+    preview_text: "Our latest news",
+    subscriber_filter: [{ all: [{ type: "tag", ids: [7] }] }],
+  } satisfies CreateBroadcastParams;
+  let kit: Kit;
+
+  beforeEach(() => {
+    fetchMock.resetMocks();
+    kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
+  });
+
+  it.each([
+    { name: "omitted content", option: {}, expected: {} },
+    { name: "undefined content", option: { content: undefined }, expected: {} },
+    {
+      name: "empty content",
+      option: { content: "" },
+      expected: { content: "" },
+    },
+    {
+      name: "custom HTML content",
+      option: {
+        content:
+          "<html><body>Hello {{ unsubscribe_url }} {{ address }}</body></html>",
+        allow_starting_point: true,
+      },
+      expected: {
+        content:
+          "<html><body>Hello {{ unsubscribe_url }} {{ address }}</body></html>",
+        allow_starting_point: true,
+      },
+    },
+  ])("preserves $name in the request", async ({ option, expected }) => {
+    const params = { ...draft, ...option } satisfies CreateBroadcastParams;
+    const response = {
+      broadcast: { id: 123, content: "<p>Template design</p>" },
+    };
+    fetchMock.mockResponseOnce(JSON.stringify(response), { status: 201 });
+
+    expect(await kit.broadcasts.create(params)).toEqual(response);
+    const requests = fetchMock.requests();
+    expect(requests).toHaveLength(1);
+    const req = requests[0]!;
+    expect(req.method).toBe("POST");
+    expect(req.url).toBe("https://api.kit.com/v4/broadcasts");
+    expect(req.headers.get("Content-Type")).toBe("application/json");
+    expect(await req.json()).toEqual({ ...draft, ...expected });
+  });
+});
