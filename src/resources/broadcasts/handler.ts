@@ -1,4 +1,5 @@
 import type { Kit, RequestOptions } from "~/index";
+import { paginationQuery } from "~/utils/pagination";
 import type {
   CreateBroadcast,
   CreateBroadcastParams,
@@ -49,24 +50,10 @@ export class BroadcastsHandler {
     params?: ListBroadcastsParams,
     options?: RequestOptions
   ): Promise<ListBroadcasts | ListSlimBroadcasts> {
-    const {
-      after,
-      before,
-      include_total_count,
-      per_page,
-      sent_after,
-      sent_before,
-      status,
-      slim,
-    } = params || {};
+    const { sent_after, sent_before, status, slim } = params || {};
 
     const query = new URLSearchParams({
-      ...(after && { after }),
-      ...(before && { before }),
-      ...(include_total_count !== undefined && {
-        include_total_count: String(include_total_count),
-      }),
-      ...(per_page && { per_page: String(per_page) }),
+      ...paginationQuery(params),
       ...(sent_after && { sent_after }),
       ...(sent_before && { sent_before }),
       ...(status && { status }),
@@ -141,23 +128,10 @@ export class BroadcastsHandler {
     params?: GetBroadcastStatsParams,
     options?: RequestOptions
   ): Promise<GetBroadcastStats> {
-    const {
-      after,
-      before,
-      include_total_count,
-      per_page,
-      sent_after,
-      sent_before,
-      status,
-    } = params || {};
+    const { sent_after, sent_before, status } = params || {};
 
     const query = new URLSearchParams({
-      ...(after && { after }),
-      ...(before && { before }),
-      ...(include_total_count !== undefined && {
-        include_total_count: String(include_total_count),
-      }),
-      ...(per_page != null && { per_page: String(per_page) }),
+      ...paginationQuery(params, { includeZeroPageSize: true }),
       ...(sent_after && { sent_after }),
       ...(sent_before && { sent_before }),
       ...(status && { status }),
@@ -189,15 +163,9 @@ export class BroadcastsHandler {
   ): Promise<GetLinkClicks | null> {
     this.validateId(id);
 
-    const { after, before, include_total_count, per_page } = params || {};
-    const query = new URLSearchParams({
-      ...(after && { after }),
-      ...(before && { before }),
-      ...(include_total_count !== undefined && {
-        include_total_count: String(include_total_count),
-      }),
-      ...(per_page !== undefined && { per_page: String(per_page) }),
-    });
+    const query = new URLSearchParams(
+      paginationQuery(params, { includeZeroPageSize: true })
+    );
 
     return await this.api.get<GetLinkClicks | null>(
       `/broadcasts/${id}/clicks`,

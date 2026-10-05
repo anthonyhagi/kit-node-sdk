@@ -1,4 +1,5 @@
 import type { Kit, RequestOptions } from "~/index";
+import { paginationQuery } from "~/utils/pagination";
 import type {
   CreatePurchase,
   CreatePurchaseParams,
@@ -28,16 +29,7 @@ export class PurchasesHandler {
     params?: ListPurchasesParams,
     options?: RequestOptions
   ): Promise<ListPurchases> {
-    const { after, before, include_total_count, per_page } = params || {};
-
-    const query = new URLSearchParams({
-      ...(after && { after }),
-      ...(before && { before }),
-      ...(include_total_count !== undefined && {
-        include_total_count: String(include_total_count),
-      }),
-      ...(per_page && { per_page: String(per_page) }),
-    });
+    const query = new URLSearchParams(paginationQuery(params));
 
     return await this.api.get<ListPurchases>("/purchases", {
       query,

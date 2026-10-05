@@ -1,4 +1,8 @@
-import type { Pagination } from "~/common/types";
+import type {
+  NonNullablePaginationParams,
+  Pagination,
+  PaginationParams,
+} from "~/common/types";
 
 /** Lifecycle states returned by Kit for a broadcast. */
 export type BroadcastStatus =
@@ -70,39 +74,7 @@ export type BroadcastSubscriberFilterGroup = {
   none?: TypedSubscriberFilterItem[] | null | undefined;
 };
 
-export interface ListBroadcastsParams {
-  /**
-   * Pass in the string from the previous request to move
-   * the cursor. This can be found in the following field:
-   *
-   * @example after: pagination.end_cursor
-   */
-  after?: string | null | undefined;
-
-  /**
-   * Pass in the string from the previous request to move
-   * the cursor. This can be found in the following field:
-   *
-   * @example before: pagination.start_cursor
-   */
-  before?: string | null | undefined;
-
-  /**
-   * To include the total count of records in the response,
-   * use `true`. For large collections, expect a slightly
-   * slower response.
-   *
-   * @example include_total_count: true
-   */
-  include_total_count?: boolean | undefined;
-
-  /**
-   * Number of results per page. Default 500, maximum 1000.
-   *
-   * @example per_page: 500
-   */
-  per_page?: number | null | undefined;
-
+export interface ListBroadcastsParams extends PaginationParams {
   /** Omit content, public URL, sending address, template, and subscriber filter. */
   slim?: boolean | undefined;
 
@@ -237,23 +209,11 @@ export interface CreateBroadcast {
   };
 }
 
-export interface GetBroadcastStatsParams extends Omit<
-  ListBroadcastsParams,
-  "slim" | "after" | "before" | "per_page" | "sent_after" | "sent_before"
-> {
-  /** Cursor from the previous page's end_cursor; null is omitted. */
-  after?: string | null | undefined;
-  /** Cursor from the next page's start_cursor; null is omitted. */
-  before?: string | null | undefined;
-  /** Number of results per page. Default 500, maximum 1000; null is omitted. */
-  per_page?: number | null | undefined;
-
+export interface GetBroadcastStatsParams extends PaginationParams {
   /** Filter broadcasts sent after this date (YYYY-MM-DD). */
   sent_after?: string | null | undefined;
-
   /** Filter broadcasts sent before this date (YYYY-MM-DD). */
   sent_before?: string | null | undefined;
-
   /** Filter broadcasts by lifecycle status. */
   status?: BroadcastStatus | undefined;
 }
@@ -274,12 +234,7 @@ export interface GetBroadcastStats {
 }
 
 /** Pagination applies to the links within the broadcast. */
-export type GetLinkClicksParams = {
-  [Key in "after" | "before" | "include_total_count" | "per_page"]?: Exclude<
-    ListBroadcastsParams[Key],
-    null
-  >;
-};
+export type GetLinkClicksParams = NonNullablePaginationParams;
 
 export interface GetLinkClicks {
   broadcast: {

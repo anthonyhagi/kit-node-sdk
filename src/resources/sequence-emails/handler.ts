@@ -1,4 +1,5 @@
 import type { Kit, RequestOptions } from "~/index";
+import { paginationQuery } from "~/utils/pagination";
 import type {
   CreateSequenceEmail,
   CreateSequenceEmailParams,
@@ -176,25 +177,13 @@ export class SequenceEmailsHandler {
     params?: ListSequenceEmailsParams,
     options?: RequestOptions
   ): Promise<ListSequenceEmails | ListSequenceEmailsWithContent | null> {
-    const {
-      after,
-      before,
-      include,
-      include_content,
-      include_total_count,
-      per_page,
-    } = params || {};
+    const { include, include_content } = params || {};
     const query = new URLSearchParams({
-      ...(after && { after }),
-      ...(before && { before }),
+      ...paginationQuery(params, { includeZeroPageSize: true }),
       ...(include && { include }),
       ...(include_content != null && {
         include_content: String(include_content),
       }),
-      ...(include_total_count !== undefined && {
-        include_total_count: String(include_total_count),
-      }),
-      ...(per_page != null && { per_page: String(per_page) }),
     });
     return await this.api.get<ListSequenceEmails | null>(
       `/sequences/${sequenceId}/emails`,

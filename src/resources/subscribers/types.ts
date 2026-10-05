@@ -1,4 +1,9 @@
-import type { Pagination, SubscriberState } from "~/common/types";
+import type {
+  NonNullablePaginationParams,
+  Pagination,
+  PaginationParams,
+  SubscriberState,
+} from "~/common/types";
 
 export interface BulkCreateSubscribersParams {
   subscribers: {
@@ -47,9 +52,7 @@ export type BulkCreateSubscribersWithoutType =
   | Omit<BulkCreateSubscribersSynchronous, "type">
   | Omit<BulkCreateSubscribersAsynchronous, "type">;
 
-export interface ListSubscribersParams {
-  after?: string | null | undefined;
-  before?: string | null | undefined;
+export interface ListSubscribersParams extends PaginationParams {
   /** Created after this date (YYYY-MM-DD). Date objects use their UTC calendar date. */
   created_after?: Date | string | undefined;
   /** Created before this date (YYYY-MM-DD). Date objects use their UTC calendar date. */
@@ -60,8 +63,6 @@ export interface ListSubscribersParams {
    * Including canceled_at requires status: "cancelled".
    */
   include?: string | undefined;
-  include_total_count?: boolean | undefined;
-  per_page?: number | null | undefined;
   /** Omit custom field values from the response for a smaller payload. */
   slim?: boolean | undefined;
   /**
@@ -171,15 +172,13 @@ export interface CreateSubscriber {
   };
 }
 
-export interface FilterSubscriberParams {
+export interface FilterSubscriberParams extends NonNullablePaginationParams {
   /**
    * Number of results per page (max 100).
    *
    * As required from the api: 1 <= x <= 100
    */
   per_page?: number | undefined;
-  after?: string | undefined;
-  before?: string | undefined;
 
   /**
    * Include total count of matching subscribers in response.
@@ -566,12 +565,7 @@ export interface GetSubscriberStats {
   };
 }
 
-export interface GetSubscriberTagsParams {
-  after?: string | null | undefined;
-  before?: string | null | undefined;
-  include_total_count?: boolean | undefined;
-  per_page?: number | null | undefined;
-}
+export interface GetSubscriberTagsParams extends PaginationParams {}
 
 export interface GetSubscriberTags {
   tags: {

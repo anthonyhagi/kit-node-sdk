@@ -1,5 +1,6 @@
 import type { Kit, RequestOptions } from "~/index";
 import { toDateOnlyString } from "~/utils/date";
+import { paginationQuery } from "~/utils/pagination";
 import type {
   BulkCreateTags,
   BulkCreateTagsParams,
@@ -274,17 +275,11 @@ export class TagsHandler {
     params?: ListTagsParams,
     options?: RequestOptions
   ): Promise<ListTags> {
-    const { after, before, include, include_total_count, per_page } =
-      params || {};
+    const { include } = params || {};
 
     const query = new URLSearchParams({
-      ...(after && { after }),
-      ...(before && { before }),
+      ...paginationQuery(params),
       ...(include && { include }),
-      ...(include_total_count !== undefined && {
-        include_total_count: String(include_total_count),
-      }),
-      ...(per_page && { per_page: String(per_page) }),
     });
 
     return await this.api.get<ListTags>("/tags", {
@@ -433,12 +428,8 @@ export class TagsHandler {
     options?: RequestOptions
   ): Promise<ListTagSubscribers | ListSlimTagSubscribers | null> {
     const {
-      after,
-      before,
       created_after,
       created_before,
-      include_total_count,
-      per_page,
       slim,
       status,
       tagged_after,
@@ -446,16 +437,11 @@ export class TagsHandler {
     } = params || {};
 
     const query = new URLSearchParams({
-      ...(after && { after }),
-      ...(before && { before }),
+      ...paginationQuery(params),
       ...(created_after && { created_after: toDateOnlyString(created_after) }),
       ...(created_before && {
         created_before: toDateOnlyString(created_before),
       }),
-      ...(include_total_count !== undefined && {
-        include_total_count: String(include_total_count),
-      }),
-      ...(per_page && { per_page: String(per_page) }),
       ...(slim !== undefined && { slim: String(slim) }),
       ...(status && { status }),
       ...(tagged_after && { tagged_after: toDateOnlyString(tagged_after) }),

@@ -1,4 +1,4 @@
-import type { Pagination } from "~/common/types";
+import type { Pagination, PaginationParams } from "~/common/types";
 import type { Nullable } from "~/utils/types";
 
 export type Tag = {
@@ -127,41 +127,9 @@ export type BulkTag = BulkTagSynchronous | BulkTagAsynchronous;
 export type BulkTagWithoutType =
   Omit<BulkTagSynchronous, "type"> | Omit<BulkTagAsynchronous, "type">;
 
-export interface ListTagsParams {
+export interface ListTagsParams extends PaginationParams {
   /** Include the number of active subscribers with each tag. */
   include?: "subscriber_count" | undefined;
-
-  /**
-   * Pass in the string from the previous request to move
-   * the cursor. This can be found in the following field:
-   *
-   * @example after: pagination.end_cursor
-   */
-  after?: string | null | undefined;
-
-  /**
-   * Pass in the string from the previous request to move
-   * the cursor. This can be found in the following field:
-   *
-   * @example after: pagination.start_cursor
-   */
-  before?: string | null | undefined;
-
-  /**
-   * To include the total count of records in the response,
-   * use `true`. For large collections, expect a slightly
-   * slower response.
-   *
-   * @example includeTotalCount: true
-   */
-  include_total_count?: boolean | undefined;
-
-  /**
-   * Number of results per page. Default 500, maximum 1000.
-   *
-   * @example perPage: 500
-   */
-  per_page?: number | null | undefined;
 }
 
 export interface ListTags {
@@ -192,25 +160,9 @@ export interface RemoveSubscriberByEmailParams {
   email_address: string;
 }
 
-export interface ListTagSubscribersParams {
+export interface ListTagSubscribersParams extends PaginationParams {
   /** Request a smaller response by omitting expensive optional fields. */
   slim?: boolean | undefined;
-
-  /**
-   * Pass in the string from the previous request to move
-   * the cursor. This can be found in the following field:
-   *
-   * @example after: pagination.end_cursor
-   */
-  after?: string | null | undefined;
-
-  /**
-   * Pass in the string from the previous request to move
-   * the cursor. This can be found in the following field:
-   *
-   * @example after: pagination.start_cursor
-   */
-  before?: string | null | undefined;
 
   /**
    * Filter subscribers who have been created after this
@@ -225,22 +177,6 @@ export interface ListTagSubscribersParams {
    * Date objects use their UTC calendar date.
    */
   created_before?: Date | string | null | undefined;
-
-  /**
-   * To include the total count of records in the response,
-   * use `true`. For large collections, expect a slightly
-   * slower response.
-   *
-   * @example includeTotalCount: true
-   */
-  include_total_count?: boolean | undefined;
-
-  /**
-   * Number of results per page.
-   *
-   * @example perPage: 500
-   */
-  per_page?: number | null | undefined;
 
   /**
    * Filter by a specific status. This defaults to "active" on

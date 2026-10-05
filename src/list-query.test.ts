@@ -3,6 +3,7 @@ import { Kit } from "~/index";
 
 type PaginationParams = {
   after?: string | undefined;
+  before?: string | undefined;
   per_page?: number | undefined;
   include_total_count?: boolean | undefined;
 };
@@ -13,7 +14,62 @@ const endpoints: {
   collection: string;
   invoke: (kit: Kit, params: PaginationParams) => Promise<unknown>;
   body?: { all: [] };
+  includeZeroPageSize?: boolean;
 }[] = [
+  {
+    name: "broadcasts.getAllStats",
+    path: "/broadcasts/stats",
+    collection: "broadcasts",
+    includeZeroPageSize: true,
+    invoke: (kit, params) => kit.broadcasts.getAllStats(params),
+  },
+  {
+    name: "broadcasts.getLinkClicksById",
+    path: "/broadcasts/7/clicks",
+    collection: "broadcast",
+    includeZeroPageSize: true,
+    invoke: (kit, params) => kit.broadcasts.getLinkClicksById(7, params),
+  },
+  {
+    name: "posts.list",
+    path: "/posts",
+    collection: "posts",
+    includeZeroPageSize: true,
+    invoke: (kit, params) => kit.posts.list(params),
+  },
+  {
+    name: "snippets.list",
+    path: "/snippets",
+    collection: "snippets",
+    includeZeroPageSize: true,
+    invoke: (kit, params) => kit.snippets.list(params),
+  },
+  {
+    name: "sequenceEmails.list",
+    path: "/sequences/8/emails",
+    collection: "emails",
+    includeZeroPageSize: true,
+    invoke: (kit, params) => kit.sequenceEmails.list(8, params),
+  },
+  {
+    name: "webhookEndpoints.list",
+    path: "/webhook_endpoints",
+    collection: "webhook_endpoints",
+    includeZeroPageSize: true,
+    invoke: (kit, params) => kit.webhookEndpoints.list(params),
+  },
+  {
+    name: "webhooks.list",
+    path: "/webhooks",
+    collection: "webhooks",
+    invoke: (kit, params) => kit.webhooks.list(params),
+  },
+  {
+    name: "sequences.list",
+    path: "/sequences",
+    collection: "sequences",
+    invoke: (kit, params) => kit.sequences.list(params),
+  },
   {
     name: "broadcasts.list",
     path: "/broadcasts",
@@ -97,11 +153,36 @@ const endpoints: {
 
 describe.each(endpoints)(
   "$name count query serialization",
-  ({ path, collection, invoke, body }) => {
+  ({ path, collection, invoke, body, includeZeroPageSize = false }) => {
     let kit: Kit;
     beforeEach(() => {
       fetchMock.resetMocks();
       kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
+    });
+
+    it("retains the endpoint's zero page-size policy", async () => {
+      fetchMock.mockResponseOnce(JSON.stringify({ [collection]: [] }));
+      await invoke(kit, { per_page: 0, include_total_count: false });
+      const url = new URL(fetchMock.requests()[0]!.url);
+      expect(Object.fromEntries(url.searchParams)).toEqual({
+        include_total_count: "false",
+        ...(includeZeroPageSize && { per_page: "0" }),
+      });
+    });
+
+    it("encodes both cursors and only sends recognized query fields", async () => {
+      fetchMock.mockResponseOnce(JSON.stringify({ [collection]: [] }));
+      const params = {
+        after: "next+/=",
+        before: "previous &?",
+        unexpected: "must not be sent",
+      };
+      await invoke(kit, params);
+      const url = new URL(fetchMock.requests()[0]!.url);
+      expect(Object.fromEntries(url.searchParams)).toEqual({
+        after: params.after,
+        before: params.before,
+      });
     });
 
     it.each([true, false, undefined])(

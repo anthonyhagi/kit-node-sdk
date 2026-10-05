@@ -1,15 +1,8 @@
-import type { Pagination } from "~/common/types";
+import type { Pagination, PaginationParams } from "~/common/types";
 
-export interface ListPostsParams {
-  /** Cursor from the previous page's end_cursor. */
-  after?: string | null | undefined;
-  /** Cursor from the next page's start_cursor. */
-  before?: string | null | undefined;
+export interface ListPostsParams extends PaginationParams {
   /** Include each post's HTML content; omitted by default. */
   include_content?: boolean | undefined;
-  include_total_count?: boolean | undefined;
-  /** Number of results per page. Default 500, maximum 1000. */
-  per_page?: number | null | undefined;
 }
 
 export interface PostListItem {

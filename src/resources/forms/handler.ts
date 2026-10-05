@@ -1,5 +1,6 @@
 import type { Kit, RequestOptions } from "~/index";
 import { toDateOnlyString } from "~/utils/date";
+import { paginationQuery } from "~/utils/pagination";
 import type {
   AddSubscriberToForm,
   AddSubscriberToFormByEmail,
@@ -79,24 +80,11 @@ export class FormsHandler {
     params?: ListFormsParams,
     options?: RequestOptions
   ): Promise<ListForms> {
-    const {
-      after,
-      before,
-      include,
-      include_total_count,
-      per_page,
-      status,
-      type,
-    } = params || {};
+    const { include, status, type } = params || {};
 
     const query = new URLSearchParams({
-      ...(after && { after }),
-      ...(before && { before }),
+      ...paginationQuery(params),
       ...(include && { include }),
-      ...(include_total_count !== undefined && {
-        include_total_count: String(include_total_count),
-      }),
-      ...(per_page && { per_page: String(per_page) }),
       ...(status && { status }),
       ...(type && { type }),
     });
@@ -142,12 +130,8 @@ export class FormsHandler {
     const {
       added_after,
       added_before,
-      after,
-      before,
       created_after,
       created_before,
-      include_total_count,
-      per_page,
       slim,
       status,
     } = params || {};
@@ -156,16 +140,11 @@ export class FormsHandler {
     const query = new URLSearchParams({
       ...(added_after && { added_after: toDateOnlyString(added_after) }),
       ...(added_before && { added_before: toDateOnlyString(added_before) }),
-      ...(after && { after }),
-      ...(before && { before }),
+      ...paginationQuery(params),
       ...(created_after && { created_after: toDateOnlyString(created_after) }),
       ...(created_before && {
         created_before: toDateOnlyString(created_before),
       }),
-      ...(include_total_count !== undefined && {
-        include_total_count: String(include_total_count),
-      }),
-      ...(per_page && { per_page: String(per_page) }),
       ...(slim !== undefined && { slim: String(slim) }),
       ...(status && { status }),
     });

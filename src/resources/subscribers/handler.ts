@@ -1,5 +1,6 @@
 import type { Kit, RequestOptions } from "~/index";
 import { toDateOnlyString } from "~/utils/date";
+import { paginationQuery } from "~/utils/pagination";
 import type {
   BulkCreateSubscribers,
   BulkCreateSubscribersParams,
@@ -98,14 +99,10 @@ export class SubscribersHandler {
     options?: RequestOptions
   ): Promise<ListFullSubscribers | ListSlimSubscribers> {
     const {
-      after,
-      before,
       created_after,
       created_before,
       email_address,
       include,
-      include_total_count,
-      per_page,
       slim,
       sort_field,
       sort_order,
@@ -115,18 +112,13 @@ export class SubscribersHandler {
     } = params || {};
 
     const query = new URLSearchParams({
-      ...(after && { after }),
-      ...(before && { before }),
+      ...paginationQuery(params),
       ...(created_after && { created_after: toDateOnlyString(created_after) }),
       ...(created_before && {
         created_before: toDateOnlyString(created_before),
       }),
       ...(email_address && { email_address }),
       ...(include && { include }),
-      ...(include_total_count !== undefined && {
-        include_total_count: String(include_total_count),
-      }),
-      ...(per_page && { per_page: String(per_page) }),
       ...(slim !== undefined && { slim: String(slim) }),
       ...(sort_field && { sort_field }),
       ...(sort_order && { sort_order }),
@@ -190,16 +182,7 @@ export class SubscribersHandler {
     params?: FilterSubscriberParams,
     options?: RequestOptions
   ): Promise<FilterSubscribers> {
-    const { after, before, include_total_count, per_page } = params || {};
-
-    const query = new URLSearchParams({
-      ...(after && { after }),
-      ...(before && { before }),
-      ...(include_total_count !== undefined && {
-        include_total_count: String(include_total_count),
-      }),
-      ...(per_page && { per_page: String(per_page) }),
-    });
+    const query = new URLSearchParams(paginationQuery(params));
 
     return await this.api.post<FilterSubscribers>("/subscribers/filter", {
       body: JSON.stringify(body || {}),
@@ -400,16 +383,7 @@ export class SubscribersHandler {
     params?: GetSubscriberTagsParams,
     options?: RequestOptions
   ): Promise<GetSubscriberTags | null> {
-    const { after, before, include_total_count, per_page } = params || {};
-
-    const query = new URLSearchParams({
-      ...(after && { after }),
-      ...(before && { before }),
-      ...(include_total_count !== undefined && {
-        include_total_count: String(include_total_count),
-      }),
-      ...(per_page && { per_page: String(per_page) }),
-    });
+    const query = new URLSearchParams(paginationQuery(params));
 
     const url = `/subscribers/${id}/tags`;
 

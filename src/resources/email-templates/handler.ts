@@ -1,4 +1,5 @@
 import type { Kit, RequestOptions } from "~/index";
+import { paginationQuery } from "~/utils/pagination";
 import type { ListEmailTemplates, ListEmailTemplatesParams } from "./types";
 
 export class EmailTemplatesHandler {
@@ -22,16 +23,7 @@ export class EmailTemplatesHandler {
     params?: ListEmailTemplatesParams,
     options?: RequestOptions
   ): Promise<ListEmailTemplates> {
-    const { after, before, include_total_count, per_page } = params || {};
-
-    const query = new URLSearchParams({
-      ...(after && { after }),
-      ...(before && { before }),
-      ...(include_total_count !== undefined && {
-        include_total_count: String(include_total_count),
-      }),
-      ...(per_page && { per_page: String(per_page) }),
-    });
+    const query = new URLSearchParams(paginationQuery(params));
 
     const url = "/email_templates";
 

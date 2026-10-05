@@ -1,4 +1,4 @@
-import type { Pagination } from "~/common/types";
+import type { Pagination, PaginationParams } from "~/common/types";
 
 export type SnippetType = "inline" | "block";
 
@@ -47,19 +47,12 @@ export type UpdateSnippetParams = {
 
 export type UpdateSnippet = GetSnippet;
 
-export interface ListSnippetsParams {
-  /** Cursor from the previous page's end_cursor. */
-  after?: string | null | undefined;
-  /** Cursor from the next page's start_cursor. */
-  before?: string | null | undefined;
+export interface ListSnippetsParams extends PaginationParams {
   /** Return only archived snippets when true; defaults to false. */
   archived?: boolean | null | undefined;
   snippet_type?: SnippetType | null | undefined;
   /** Include content and document fields; omitted by default. */
   include_content?: boolean | undefined;
-  include_total_count?: boolean | undefined;
-  /** Number of results per page. Default 500, maximum 1000. */
-  per_page?: number | null | undefined;
 }
 
 export interface SnippetDocument {
