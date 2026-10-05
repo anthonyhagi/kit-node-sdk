@@ -14,6 +14,8 @@ import type {
   GetSubscriberStatsParams,
   GetSubscriberTags,
   GetSubscriberTagsParams,
+  ListFullSubscribers,
+  ListSlimSubscribers,
   ListSubscribers,
   ListSubscribersParams,
   PinSubscriberLocation,
@@ -79,9 +81,21 @@ export class SubscribersHandler {
    * filters.
    */
   public async list(
+    params: ListSubscribersParams & { slim: true },
+    options?: RequestOptions
+  ): Promise<ListSlimSubscribers>;
+  public async list(
+    params?: ListSubscribersParams & { slim?: false | undefined },
+    options?: RequestOptions
+  ): Promise<ListFullSubscribers>;
+  public async list(
     params?: ListSubscribersParams,
     options?: RequestOptions
-  ): Promise<ListSubscribers> {
+  ): Promise<ListFullSubscribers | ListSlimSubscribers>;
+  public async list(
+    params?: ListSubscribersParams,
+    options?: RequestOptions
+  ): Promise<ListFullSubscribers | ListSlimSubscribers> {
     const {
       after,
       before,

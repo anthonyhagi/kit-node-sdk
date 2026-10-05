@@ -136,6 +136,17 @@ export interface ListSubscribers {
   pagination: Pagination;
 }
 
+/** Full list responses include custom field values. */
+export interface ListFullSubscribers {
+  subscribers: (Omit<ListSubscribers["subscribers"][number], "fields"> & {
+    fields: Record<string, string | null>;
+  })[];
+  pagination: Pagination;
+}
+
+/** Slim list responses may omit custom field values. */
+export type ListSlimSubscribers = ListSubscribers;
+
 export interface CreateSubscriberParams {
   first_name?: string | null | undefined;
   email_address: string;

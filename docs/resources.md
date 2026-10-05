@@ -1266,3 +1266,25 @@ Null values are omitted from the query; defined values and explicit
 `include_total_count: false` are preserved. The exported `ListEmailTemplatesParams`
 type matches these inputs. See the
 [Kit API reference](https://developers.kit.com/api-reference/email-templates/list-email-templates).
+
+## Full and slim subscriber-list responses
+
+`kit.subscribers.list()` infers `ListFullSubscribers` when `slim` is omitted,
+`false`, or `undefined`; each subscriber's `fields` object is required.
+With `slim: true`, it infers `ListSlimSubscribers`, whose `fields` may be omitted.
+A dynamic boolean produces the union of these response types.
+The existing `ListSubscribers` type remains compatible with both response shapes.
+
+```ts
+const full = await kit.subscribers.list();
+for (const subscriber of full.subscribers) {
+  console.log(subscriber.fields);
+}
+
+const slim = await kit.subscribers.list({ slim: true });
+for (const subscriber of slim.subscribers) {
+  console.log(subscriber.id, subscriber.email_address);
+}
+```
+
+See the [Kit API reference](https://developers.kit.com/api-reference/subscribers/list-subscribers).

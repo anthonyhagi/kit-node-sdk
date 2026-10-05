@@ -24,6 +24,8 @@ import {
   type GetSubscriberStatsParams,
   type GetSubscriberTags,
   type GetSubscriberTagsParams,
+  type ListFullSubscribers,
+  type ListSlimSubscribers,
   type ListSubscribers,
   type ListSubscribersParams,
   type PinSubscriberLocation,
@@ -87,7 +89,7 @@ describe("subscriber requests through Kit", () => {
       } satisfies ListSubscribers;
       fetchMock.mockResponseOnce(JSON.stringify(response));
       const result = await kit.subscribers.list(params);
-      expectTypeOf(result).toEqualTypeOf<ListSubscribers>();
+      expectTypeOf(result).toEqualTypeOf<ListFullSubscribers>();
       expect(result).toEqual(response);
       expect(await request("GET", "/subscribers").text()).toBe("");
     }
@@ -302,7 +304,9 @@ describe("subscriber requests through Kit", () => {
     fetchMock.mockResponseOnce(JSON.stringify(response));
 
     const result = await kit.subscribers.list(params);
-    expectTypeOf(result).toEqualTypeOf<ListSubscribers>();
+    expectTypeOf(result).toEqualTypeOf<
+      ListFullSubscribers | ListSlimSubscribers
+    >();
     expectTypeOf(result.subscribers[0]?.fields).toEqualTypeOf<
       Record<string, string | null> | undefined
     >();
@@ -631,7 +635,7 @@ describe("subscriber requests through Kit", () => {
     fetchMock.mockResponseOnce(JSON.stringify(response));
 
     const result = await kit.subscribers.list();
-    expectTypeOf(result).toEqualTypeOf<ListSubscribers>();
+    expectTypeOf(result).toEqualTypeOf<ListFullSubscribers>();
     expect(result).toEqual(response);
     request("GET", "/subscribers");
   });
