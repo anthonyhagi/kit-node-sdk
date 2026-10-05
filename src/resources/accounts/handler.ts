@@ -1,4 +1,4 @@
-import type { Kit } from "~/index";
+import type { Kit, RequestOptions } from "~/index";
 import { toDateOnlyString } from "~/utils/date";
 import type {
   GetCreatorProfile,
@@ -20,26 +20,34 @@ export class AccountsHandler {
 
   /**
    * Returns the current account and associated user information.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/accounts/get-current-account}
    * for the API route specification.
    *
    * @returns the user and account information.
    */
-  public async getCurrentAccount(): Promise<GetCurrentAccount> {
-    return await this.api.get<GetCurrentAccount>("/account");
+  public async getCurrentAccount(
+    options?: RequestOptions
+  ): Promise<GetCurrentAccount> {
+    return await this.api.get<GetCurrentAccount>("/account", {
+      signal: options?.signal,
+    });
   }
 
   /**
    * Returns list of colors for the current account.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/accounts/list-colors}
    * for the API route specification.
    *
    * @returns a list of colors as hex strings in an array.
    */
-  public async listColors(): Promise<ListColors> {
-    return await this.api.get<ListColors>("/account/colors");
+  public async listColors(options?: RequestOptions): Promise<ListColors> {
+    return await this.api.get<ListColors>("/account/colors", {
+      signal: options?.signal,
+    });
   }
 
   /**
@@ -47,12 +55,16 @@ export class AccountsHandler {
    * return the newly set colors. Include every color you want to keep.
    *
    * @param params - the required parameters to update the colors.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/accounts/update-colors}
    *
    * @returns the newly set list of hex colors in an array.
    */
-  public async updateColors(params: UpdateColorsParams): Promise<UpdateColors> {
+  public async updateColors(
+    params: UpdateColorsParams,
+    options?: RequestOptions
+  ): Promise<UpdateColors> {
     const { colors = [] } = params || {};
 
     if (colors.length === 0) {
@@ -67,32 +79,43 @@ export class AccountsHandler {
 
     const body = JSON.stringify({ colors });
 
-    return await this.api.put<UpdateColors>("/account/colors", { body });
+    return await this.api.put<UpdateColors>("/account/colors", {
+      body,
+      signal: options?.signal,
+    });
   }
 
   /**
    * Returns the Creator Profile details.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/accounts/get-creator-profile}
    *
    * @returns the details stored on the current profile or `null` if
    * the creator profile does not exist.
    */
-  public async getCreatorProfile(): Promise<GetCreatorProfile | null> {
+  public async getCreatorProfile(
+    options?: RequestOptions
+  ): Promise<GetCreatorProfile | null> {
     const url = "/account/creator_profile";
 
-    return await this.api.get<GetCreatorProfile | null>(url);
+    return await this.api.get<GetCreatorProfile | null>(url, {
+      signal: options?.signal,
+    });
   }
 
   /**
    * Returns your email stats for the last 90 days.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/accounts/get-email-stats}
    *
    * @returns the basic email statistics over the last 90 days.
    */
-  public async getEmailStats(): Promise<GetEmailStats> {
-    return await this.api.get<GetEmailStats>("/account/email_stats");
+  public async getEmailStats(options?: RequestOptions): Promise<GetEmailStats> {
+    return await this.api.get<GetEmailStats>("/account/email_stats", {
+      signal: options?.signal,
+    });
   }
 
   /**
@@ -105,6 +128,7 @@ export class AccountsHandler {
    * @param params - The optional `starting` and `ending` dates to
    * search between. If these are not provided, the endpoint
    * defaults to the last 90 days.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/accounts/get-growth-stats}
    *
@@ -112,7 +136,8 @@ export class AccountsHandler {
    * end dates.
    */
   public async getGrowthStats(
-    params?: GetGrowthStatsParams
+    params?: GetGrowthStatsParams,
+    options?: RequestOptions
   ): Promise<GetGrowthStats> {
     const { starting, ending } = params || {};
 
@@ -123,6 +148,9 @@ export class AccountsHandler {
 
     const url = "/account/growth_stats";
 
-    return await this.api.get<GetGrowthStats>(url, { query });
+    return await this.api.get<GetGrowthStats>(url, {
+      query,
+      signal: options?.signal,
+    });
   }
 }
