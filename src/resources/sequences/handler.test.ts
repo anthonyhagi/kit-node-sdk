@@ -485,6 +485,26 @@ describe("sequence requests through Kit", () => {
     >();
   });
 
+  it("preserves nullable and string custom-field values in sequence subscriber lists", async () => {
+    const response = {
+      subscribers: [
+        {
+          ...subscriber,
+          fields: { category: null, interest: "TypeScript", empty: "" },
+        },
+      ],
+      pagination,
+    } satisfies ListSequenceSubscribers;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const result = await kit.sequences.listSubscribers(7);
+    expectTypeOf(result).toEqualTypeOf<ListSequenceSubscribers | null>();
+    expectTypeOf<
+      NonNullable<typeof result>["subscribers"][number]["fields"]
+    >().toEqualTypeOf<Record<string, string | null>>();
+    expect(result).toEqual(response);
+    expect(await request("GET", "/sequences/7/subscribers").text()).toBe("");
+  });
+
   it("lists sequence subscribers without optional filters, preserving nullable names and emails", async () => {
     const response = {
       subscribers: [{ ...subscriber, first_name: null, email_address: null }],
