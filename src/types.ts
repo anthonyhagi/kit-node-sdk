@@ -64,3 +64,9 @@ export interface ClientOptions {
    */
   retryDelay?: number;
 }
+
+/** Per-request controls for resource methods. */
+export interface RequestOptions {
+  /** Cancel the request, including response reads and retry waits. */
+  signal?: AbortSignal | undefined;
+}
