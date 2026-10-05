@@ -1,4 +1,4 @@
-import type { Kit } from "~/index";
+import type { Kit, RequestOptions } from "~/index";
 import type {
   CreateSequenceEmail,
   CreateSequenceEmailParams,
@@ -18,12 +18,18 @@ export class SequenceEmailsHandler {
    *
    * @param sequenceId - The sequence containing the email.
    * @param emailId - The email to delete.
+   * @param options - Optional request controls, including cancellation.
    * @returns An empty object on success, or null when the sequence or email was not found.
    * @see {@link https://developers.kit.com/api-reference/sequence-emails/delete-a-sequence-email}
    */
-  public async delete(sequenceId: number, emailId: number): Promise<{} | null> {
+  public async delete(
+    sequenceId: number,
+    emailId: number,
+    options?: RequestOptions
+  ): Promise<{} | null> {
     return await this.api.delete<{} | null>(
-      `/sequences/${sequenceId}/emails/${emailId}`
+      `/sequences/${sequenceId}/emails/${emailId}`,
+      { signal: options?.signal }
     );
   }
 
@@ -33,17 +39,19 @@ export class SequenceEmailsHandler {
    * @param sequenceId - The sequence containing the email.
    * @param emailId - The email to update.
    * @param params - Content, timing, position, or publishing changes.
+   * @param options - Optional request controls, including cancellation.
    * @returns The updated email, or null when the sequence or email was not found.
    * @see {@link https://developers.kit.com/api-reference/sequence-emails/update-a-sequence-email}
    */
   public async update(
     sequenceId: number,
     emailId: number,
-    params: UpdateSequenceEmailParams
+    params: UpdateSequenceEmailParams,
+    options?: RequestOptions
   ): Promise<UpdateSequenceEmail | null> {
     return await this.api.put<UpdateSequenceEmail | null>(
       `/sequences/${sequenceId}/emails/${emailId}`,
-      { body: JSON.stringify(params) }
+      { body: JSON.stringify(params), signal: options?.signal }
     );
   }
 
@@ -52,16 +60,18 @@ export class SequenceEmailsHandler {
    *
    * @param sequenceId - The sequence containing the new email.
    * @param params - Content, timing, and optional publishing settings.
+   * @param options - Optional request controls, including cancellation.
    * @returns The created email, or null when the sequence was not found.
    * @see {@link https://developers.kit.com/api-reference/sequence-emails/create-a-sequence-email}
    */
   public async create(
     sequenceId: number,
-    params: CreateSequenceEmailParams
+    params: CreateSequenceEmailParams,
+    options?: RequestOptions
   ): Promise<CreateSequenceEmail | null> {
     return await this.api.post<CreateSequenceEmail | null>(
       `/sequences/${sequenceId}/emails`,
-      { body: JSON.stringify(params) }
+      { body: JSON.stringify(params), signal: options?.signal }
     );
   }
 
@@ -71,20 +81,22 @@ export class SequenceEmailsHandler {
    * @param sequenceId - The sequence containing the email.
    * @param emailId - The email to retrieve.
    * @param params - Optional stats inclusion.
+   * @param options - Optional request controls, including cancellation.
    * @returns The email details, or null when the sequence or email was not found.
    * @see {@link https://developers.kit.com/api-reference/sequence-emails/get-a-sequence-email}
    */
   public async get(
     sequenceId: number,
     emailId: number,
-    params?: GetSequenceEmailParams
+    params?: GetSequenceEmailParams,
+    options?: RequestOptions
   ): Promise<GetSequenceEmail | null> {
     const query = new URLSearchParams({
       ...(params?.include && { include: params.include }),
     });
     return await this.api.get<GetSequenceEmail | null>(
       `/sequences/${sequenceId}/emails/${emailId}`,
-      { query }
+      { query, signal: options?.signal }
     );
   }
 
@@ -93,12 +105,14 @@ export class SequenceEmailsHandler {
    *
    * @param sequenceId - The sequence containing the emails.
    * @param params - Optional pagination, content, and stats parameters.
+   * @param options - Optional request controls, including cancellation.
    * @returns A page of emails, or null when the sequence was not found.
    * @see {@link https://developers.kit.com/api-reference/sequence-emails/list-sequence-emails}
    */
   public async list(
     sequenceId: number,
-    params?: ListSequenceEmailsParams
+    params?: ListSequenceEmailsParams,
+    options?: RequestOptions
   ): Promise<ListSequenceEmails | null> {
     const {
       after,
@@ -122,7 +136,7 @@ export class SequenceEmailsHandler {
     });
     return await this.api.get<ListSequenceEmails | null>(
       `/sequences/${sequenceId}/emails`,
-      { query }
+      { query, signal: options?.signal }
     );
   }
 }

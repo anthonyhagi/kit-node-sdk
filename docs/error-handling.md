@@ -139,6 +139,21 @@ await kit.broadcasts.getAllStats(undefined, { signal });
 await kit.broadcasts.getLinkClicksById(broadcastId, undefined, { signal });
 ```
 
+All sequence-email methods also accept request options as their final argument.
+For `get()` and `list()`, pass `undefined` to skip optional inclusion or pagination
+parameters:
+
+```typescript
+await kit.sequenceEmails.get(sequenceId, emailId, undefined, { signal });
+await kit.sequenceEmails.list(sequenceId, { include: "stats" }, { signal });
+await kit.sequenceEmails.update(
+  sequenceId,
+  emailId,
+  { published: false },
+  { signal }
+);
+```
+
 Cancellation stops pending fetches, response body reads, and retry waits. An
 already-aborted signal prevents the initial request. Caller cancellations are
 never retried. `timeoutMs` still applies independently to each attempt, and timed-out
