@@ -223,6 +223,8 @@ export interface CreateBroadcast {
     send_at: string | null;
     thumbnail_alt: string | null;
     thumbnail_url: string | null;
+    /** Public web URL; null when unavailable. */
+    public_url: string | null;
     email_address: string;
     email_template: BroadcastEmailTemplate;
     subscriber_filter: BroadcastSubscriberFilterResponseGroup[];

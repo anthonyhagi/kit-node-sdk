@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
 import {
   Kit,
   type BroadcastSubscriberFilterGroup,
+  type CreateBroadcast,
   type CreateBroadcastParams,
   type GetBroadcastStatsParams,
   type GetLinkClicks,
@@ -435,6 +436,39 @@ describe("broadcast creation filters through Kit", () => {
       expect(req.url).toBe("https://api.kit.com/v4/broadcasts");
       expect(req.headers.get("Content-Type")).toBe("application/json");
       expect(await req.json()).toEqual(params);
+    }
+  );
+
+  it.each([null, "https://example.kit.com/posts/newsletter"])(
+    "exposes the create response public URL (%s)",
+    async (public_url) => {
+      const params = {
+        ...draft,
+        public: public_url !== null,
+        subscriber_filter: null,
+      } satisfies CreateBroadcastParams;
+      const response = {
+        broadcast: {
+          id: 123,
+          publication_id: 123,
+          created_at: "2026-01-01T12:00:00Z",
+          ...draft,
+          public: params.public,
+          status: "draft",
+          public_url,
+          thumbnail_alt: null,
+          thumbnail_url: null,
+          email_address: "ada@example.com",
+          email_template: { id: 2, name: "Classic" },
+          subscriber_filter: [{ all: [{ type: "all_subscribers" }] }],
+        },
+      } satisfies CreateBroadcast;
+      fetchMock.mockResponseOnce(JSON.stringify(response), { status: 201 });
+
+      const result = await kit.broadcasts.create(params);
+      expectTypeOf(result.broadcast.public_url).toEqualTypeOf<string | null>();
+      expect(result.broadcast.public_url).toBe(public_url);
+      expect(await fetchMock.requests()[0]!.json()).toEqual(params);
     }
   );
 
