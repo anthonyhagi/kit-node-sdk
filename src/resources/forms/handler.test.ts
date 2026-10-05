@@ -6,6 +6,7 @@ import {
   type AddSubscriberToFormByEmailParams,
   type BulkAddSubscribersParams,
   type BulkAddSubscribersSynchronous,
+  type Form,
   type FormReferrerUtmParameters,
   type FormSubscriber,
   type ListForms,
@@ -87,6 +88,19 @@ describe("form requests through Kit", () => {
       fetchMock.mockResponseOnce(JSON.stringify(response));
       const result = await kit.forms.list(params);
       expectTypeOf(result).toEqualTypeOf<ListForms>();
+      expectTypeOf(result.forms[0]!).toEqualTypeOf<Form>();
+      expectTypeOf<Form>().toEqualTypeOf<{
+        id: number;
+        name: string;
+        created_at: string;
+        type: string;
+        format: string | null;
+        embed_js: string;
+        embed_url: string;
+        archived: boolean;
+        uid: string;
+        subscriber_count?: number | undefined;
+      }>();
       expect(result).toEqual(response);
       expect(await request("GET", "/forms").text()).toBe("");
     }
