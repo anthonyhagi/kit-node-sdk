@@ -129,6 +129,16 @@ await kit.sequences.update(sequenceId, { active: false }, { signal });
 await kit.sequences.addSubscriberById(sequenceId, subscriberId, { signal });
 ```
 
+All broadcast methods accept request options as their final argument, including
+stats and link-click requests. Skip optional filters with `undefined`:
+
+```typescript
+await kit.broadcasts.list({ slim: true }, { signal });
+await kit.broadcasts.get(broadcastId, { signal });
+await kit.broadcasts.getAllStats(undefined, { signal });
+await kit.broadcasts.getLinkClicksById(broadcastId, undefined, { signal });
+```
+
 Cancellation stops pending fetches, response body reads, and retry waits. An
 already-aborted signal prevents the initial request. Caller cancellations are
 never retried. `timeoutMs` still applies independently to each attempt, and timed-out

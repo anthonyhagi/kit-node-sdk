@@ -1,4 +1,4 @@
-import type { Kit } from "~/index";
+import type { Kit, RequestOptions } from "~/index";
 import type {
   CreateBroadcast,
   CreateBroadcastParams,
@@ -27,22 +27,27 @@ export class BroadcastsHandler {
    * (including draft, scheduled, and already sent).
    *
    * @param params - Filters that should be applied to the request.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/broadcasts/list-broadcasts}
    *
    * @returns the paginated list of broadcasts.
    */
   public async list(
-    params: ListBroadcastsParams & { slim: true }
+    params: ListBroadcastsParams & { slim: true },
+    options?: RequestOptions
   ): Promise<ListSlimBroadcasts>;
   public async list(
-    params?: ListBroadcastsParams & { slim?: false | undefined }
+    params?: ListBroadcastsParams & { slim?: false | undefined },
+    options?: RequestOptions
   ): Promise<ListBroadcasts>;
   public async list(
-    params?: ListBroadcastsParams
+    params?: ListBroadcastsParams,
+    options?: RequestOptions
   ): Promise<ListBroadcasts | ListSlimBroadcasts>;
   public async list(
-    params?: ListBroadcastsParams
+    params?: ListBroadcastsParams,
+    options?: RequestOptions
   ): Promise<ListBroadcasts | ListSlimBroadcasts> {
     const {
       after,
@@ -72,6 +77,7 @@ export class BroadcastsHandler {
       "/broadcasts",
       {
         query,
+        signal: options?.signal,
       }
     );
   }
@@ -89,12 +95,16 @@ export class BroadcastsHandler {
    * based on Segment or Tag ids.
    *
    * @param params - The required parameters to create a broadcast.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/broadcasts/create-a-broadcast}
    *
    * @returns the created broadcast.
    */
-  public async create(params: CreateBroadcastParams): Promise<CreateBroadcast> {
+  public async create(
+    params: CreateBroadcastParams,
+    options?: RequestOptions
+  ): Promise<CreateBroadcast> {
     const { subscriber_filter } = params;
     const body = JSON.stringify({
       ...params,
@@ -104,7 +114,10 @@ export class BroadcastsHandler {
           : subscriber_filter,
     });
 
-    return await this.api.post<CreateBroadcast>("/broadcasts", { body });
+    return await this.api.post<CreateBroadcast>("/broadcasts", {
+      body,
+      signal: options?.signal,
+    });
   }
 
   /**
@@ -114,13 +127,15 @@ export class BroadcastsHandler {
    * developer authorization.
    *
    * @param params - Optional pagination, sent-date, and status filters.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/broadcasts/get-stats-for-a-list-of-broadcasts}
    *
    * @returns a page of broadcast stats and pagination details.
    */
   public async getAllStats(
-    params?: GetBroadcastStatsParams
+    params?: GetBroadcastStatsParams,
+    options?: RequestOptions
   ): Promise<GetBroadcastStats> {
     const {
       after,
@@ -146,6 +161,7 @@ export class BroadcastsHandler {
 
     return await this.api.get<GetBroadcastStats>("/broadcasts/stats", {
       query,
+      signal: options?.signal,
     });
   }
 
@@ -154,6 +170,7 @@ export class BroadcastsHandler {
    *
    * @param id - The specific Broadcast we are looking at.
    * @param params - Optional pagination parameters for the list of links.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/broadcasts/get-link-clicks-for-a-broadcast}
    *
@@ -162,7 +179,8 @@ export class BroadcastsHandler {
    */
   public async getLinkClicksById(
     id: number,
-    params?: GetLinkClicksParams
+    params?: GetLinkClicksParams,
+    options?: RequestOptions
   ): Promise<GetLinkClicks | null> {
     this.validateId(id);
 
@@ -180,6 +198,7 @@ export class BroadcastsHandler {
       `/broadcasts/${id}/clicks`,
       {
         query,
+        signal: options?.signal,
       }
     );
   }
@@ -188,46 +207,64 @@ export class BroadcastsHandler {
    * Get the stats for a single Broadcast.
    *
    * @param id - The unique ID of the Broadcast.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/broadcasts/get-stats-for-a-broadcast}
    *
    * @returns the Broadcast if it exists; `null` otherwise.
    */
-  public async getStats(id: number): Promise<GetSingleBroadcastStats | null> {
+  public async getStats(
+    id: number,
+    options?: RequestOptions
+  ): Promise<GetSingleBroadcastStats | null> {
     this.validateId(id);
     const url = `/broadcasts/${id}/stats`;
 
-    return await this.api.get<GetSingleBroadcastStats | null>(url);
+    return await this.api.get<GetSingleBroadcastStats | null>(url, {
+      signal: options?.signal,
+    });
   }
 
   /**
    * Delete a Broadcast by it's unique ID.
    *
    * @param id the unique ID of the Broadcast.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/broadcasts/delete-a-broadcast}
    *
    * @returns an empty object when deleted successfully; `null` if
    * the Broadcast was not found.
    */
-  public async delete(id: number): Promise<{} | null> {
+  public async delete(
+    id: number,
+    options?: RequestOptions
+  ): Promise<{} | null> {
     this.validateId(id);
 
-    return await this.api.delete<{} | null>(`/broadcasts/${id}`);
+    return await this.api.delete<{} | null>(`/broadcasts/${id}`, {
+      signal: options?.signal,
+    });
   }
 
   /**
    * Get a broadcast by it's unique ID.
    *
    * @param id the unique ID of the broadcast.
+   * @param options - Optional request controls, including cancellation.
    *
    * @returns the broadcast if it was found; `null` otherwise.
    * @see {@link https://developers.kit.com/api-reference/broadcasts/get-a-broadcast}
    */
-  public async get(id: number): Promise<GetBroadcast | null> {
+  public async get(
+    id: number,
+    options?: RequestOptions
+  ): Promise<GetBroadcast | null> {
     this.validateId(id);
 
-    return await this.api.get<GetBroadcast | null>(`/broadcasts/${id}`);
+    return await this.api.get<GetBroadcast | null>(`/broadcasts/${id}`, {
+      signal: options?.signal,
+    });
   }
 
   /**
@@ -243,13 +280,18 @@ export class BroadcastsHandler {
    * Kit currently supports targeting your subscribers based on segment
    * or tag ids.
    *
+   * @param id - The unique ID of the broadcast.
+   * @param params - The broadcast details to update.
+   * @param options - Optional request controls, including cancellation.
+   *
    * @returns the updated broadcast with attached details. If the
    * broadcast was not found, `null` is returned.
    * @see {@link https://developers.kit.com/api-reference/broadcasts/update-a-broadcast}
    */
   public async update(
     id: number,
-    params: UpdateBroadcastParams
+    params: UpdateBroadcastParams,
+    options?: RequestOptions
   ): Promise<UpdateBroadcast | null> {
     this.validateId(id);
 
@@ -257,6 +299,7 @@ export class BroadcastsHandler {
 
     return await this.api.put<UpdateBroadcast | null>(`/broadcasts/${id}`, {
       body,
+      signal: options?.signal,
     });
   }
 
