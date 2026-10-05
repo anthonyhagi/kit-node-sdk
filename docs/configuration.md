@@ -255,6 +255,12 @@ trigger sends. Inspect the sequence emails before attempting creation again.
 An explicit `maxRetries` request option can opt into retries for this method.
 See [Kit's sequence email behavior](https://developers.kit.com/api-reference/sequence-emails/create-a-sequence-email).
 
+`kit.broadcasts.create()` defaults to zero retries for both drafts and scheduled
+broadcasts. Replaying an uncertain creation can create another broadcast, which
+may schedule duplicate deliveries when `send_at` is supplied. Inspect existing
+broadcasts before repeating creation. An explicit `maxRetries` request option
+can opt into retries. See [Kit's broadcast creation behavior](https://developers.kit.com/api-reference/broadcasts/create-a-broadcast).
+
 `kit.webhookEndpoints.rotateSecret()` defaults to zero retries, including when
 `force: true` is supplied. After an uncertain successful rotation, replaying
 normally returns `409`; forced replay rotates again and immediately expires the
