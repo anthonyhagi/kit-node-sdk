@@ -1,4 +1,4 @@
-import type { Kit } from "~/index";
+import type { Kit, RequestOptions } from "~/index";
 import { toDateOnlyString } from "~/utils/date";
 import type {
   BulkCreateTags,
@@ -64,16 +64,20 @@ export class TagsHandler {
    * larger batches are queued, with results sent to callback_url when provided.
    *
    * @param params - Tag IDs to delete and an optional callback URL.
+   * @param options - Optional request controls, including cancellation.
+   *
    * @see {@link https://developers.kit.com/api-reference/tags/bulk-delete-tags}
    * @returns Synchronous per-tag failures, or an asynchronous acknowledgement.
    */
   public async bulkDelete(
-    params: BulkDeleteTagsParams
+    params: BulkDeleteTagsParams,
+    options?: RequestOptions
   ): Promise<BulkDeleteTags> {
     const resp = await this.api.delete<BulkDeleteTagsWithoutType>(
       "/bulk/tags",
       {
         body: JSON.stringify(params),
+        signal: options?.signal,
       }
     );
 
@@ -96,6 +100,8 @@ export class TagsHandler {
    *
    * @param params - The Tags to create and an optional `callback_url`.
    *
+   * @param options - Optional request controls, including cancellation.
+   *
    * @see {@link https://developers.kit.com/api-reference/tags/bulk-create-tags}
    *
    * @returns A `BulkCreateTags` object. If the operation is synchronous, it will
@@ -110,12 +116,16 @@ export class TagsHandler {
    * ```
    */
   public async bulkCreate(
-    params: BulkCreateTagsParams
+    params: BulkCreateTagsParams,
+    options?: RequestOptions
   ): Promise<BulkCreateTags> {
     const body = JSON.stringify(params || {});
     const url = "/bulk/tags";
 
-    const resp = await this.api.post<BulkCreateTagsWithoutType>(url, { body });
+    const resp = await this.api.post<BulkCreateTagsWithoutType>(url, {
+      body,
+      signal: options?.signal,
+    });
 
     // Add on the response type such that the caller of this method
     // understands the result. This ensures that type hinting
@@ -140,6 +150,8 @@ export class TagsHandler {
    *
    * @param params - The Tag combinations to remove and an optional `callback_url`.
    *
+   * @param options - Optional request controls, including cancellation.
+   *
    * @see {@link https://developers.kit.com/api-reference/tags/bulk-remove-tags-from-subscribers}
    *
    * @returns A `BulkRemoveTags` object. If the operation is synchronous, it will
@@ -154,13 +166,15 @@ export class TagsHandler {
    * ```
    */
   public async bulkRemove(
-    params: BulkRemoveTagsParams
+    params: BulkRemoveTagsParams,
+    options?: RequestOptions
   ): Promise<BulkRemoveTags> {
     const body = JSON.stringify(params);
     const url = "/bulk/tags/subscribers";
 
     const resp = await this.api.delete<BulkRemoveTagsWithoutType>(url, {
       body,
+      signal: options?.signal,
     });
 
     // Add on the response type such that the caller of this method
@@ -186,6 +200,8 @@ export class TagsHandler {
    *
    * @param params - The Tag combinations to create and an optional `callback_url`.
    *
+   * @param options - Optional request controls, including cancellation.
+   *
    * @see {@link https://developers.kit.com/api-reference/tags/bulk-tag-subscribers}
    *
    * @returns A `BulkTag` object. If the operation is synchronous, it will
@@ -200,11 +216,17 @@ export class TagsHandler {
    * });
    * ```
    */
-  public async bulkTag(params: BulkTagParams): Promise<BulkTag> {
+  public async bulkTag(
+    params: BulkTagParams,
+    options?: RequestOptions
+  ): Promise<BulkTag> {
     const body = JSON.stringify(params);
     const url = "/bulk/tags/subscribers";
 
-    const resp = await this.api.post<BulkTagWithoutType>(url, { body });
+    const resp = await this.api.post<BulkTagWithoutType>(url, {
+      body,
+      signal: options?.signal,
+    });
 
     // Add on the response type such that the caller of this method
     // understands the result. This ensures that type hinting
@@ -221,6 +243,8 @@ export class TagsHandler {
    * Retrieves a paginated list of all Tags.
    *
    * @param params - Optional parameters to filter by.
+   *
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/tags/list-tags}
    *
@@ -241,7 +265,10 @@ export class TagsHandler {
    * }
    * ```
    */
-  public async list(params?: ListTagsParams): Promise<ListTags> {
+  public async list(
+    params?: ListTagsParams,
+    options?: RequestOptions
+  ): Promise<ListTags> {
     const { after, before, include, include_total_count, per_page } =
       params || {};
 
@@ -255,13 +282,18 @@ export class TagsHandler {
       ...(per_page && { per_page: String(per_page) }),
     });
 
-    return await this.api.get<ListTags>("/tags", { query });
+    return await this.api.get<ListTags>("/tags", {
+      query,
+      signal: options?.signal,
+    });
   }
 
   /**
    * Creates a new Tag.
    *
    * @param params - The required parameters to create a new Tag.
+   *
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/tags/create-a-tag}
    *
@@ -273,10 +305,16 @@ export class TagsHandler {
    * await kit.tags.create({ name: 'Beginners' });
    * ```
    */
-  public async create(params: CreateTagParams): Promise<CreateTag> {
+  public async create(
+    params: CreateTagParams,
+    options?: RequestOptions
+  ): Promise<CreateTag> {
     const body = JSON.stringify(params || {});
 
-    return await this.api.post<CreateTag>("/tags", { body });
+    return await this.api.post<CreateTag>("/tags", {
+      body,
+      signal: options?.signal,
+    });
   }
 
   /**
@@ -285,6 +323,8 @@ export class TagsHandler {
    * @param tagId - The unique ID of the tag to update.
    * @param params - The parameters for the update, including the new name.
    *
+   * @param options - Optional request controls, including cancellation.
+   *
    * @see {@link https://developers.kit.com/api-reference/tags/update-tag-name}
    *
    * @returns The updated Tag object on success, or `null` if the Tag
@@ -292,11 +332,15 @@ export class TagsHandler {
    */
   public async update(
     tagId: number,
-    params: UpdateTagParams
+    params: UpdateTagParams,
+    options?: RequestOptions
   ): Promise<UpdateTag | null> {
     const body = JSON.stringify(params || {});
 
-    return await this.api.put<UpdateTag | null>(`/tags/${tagId}`, { body });
+    return await this.api.put<UpdateTag | null>(`/tags/${tagId}`, {
+      body,
+      signal: options?.signal,
+    });
   }
 
   /**
@@ -306,6 +350,8 @@ export class TagsHandler {
    * @param params - An object containing:
    *   - `email_address` — The email address of the subscriber to remove
    *     from the tag.
+   *
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/tags/remove-tag-from-subscriber-by-email-address}
    *
@@ -322,12 +368,16 @@ export class TagsHandler {
    */
   public async removeSubscriberByEmail(
     tagId: number,
-    params: RemoveSubscriberByEmailParams
+    params: RemoveSubscriberByEmailParams,
+    options?: RequestOptions
   ): Promise<{} | null> {
     const query = new URLSearchParams({ email_address: params.email_address });
     const url = `/tags/${tagId}/subscribers`;
 
-    return await this.api.delete<{} | null>(url, { query });
+    return await this.api.delete<{} | null>(url, {
+      query,
+      signal: options?.signal,
+    });
   }
 
   /**
@@ -336,6 +386,8 @@ export class TagsHandler {
    *
    * @param tagId - The unique ID of the tag.
    * @param params - Optional parameters for pagination and filtering.
+   *
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/tags/list-subscribers-for-a-tag}
    *
@@ -353,7 +405,8 @@ export class TagsHandler {
    */
   public async listSubscribers(
     tagId: number,
-    params?: ListTagSubscribersParams
+    params?: ListTagSubscribersParams,
+    options?: RequestOptions
   ): Promise<ListTagSubscribers | null> {
     const {
       after,
@@ -387,7 +440,10 @@ export class TagsHandler {
 
     const url = `/tags/${tagId}/subscribers`;
 
-    return await this.api.get<ListTagSubscribers | null>(url, { query });
+    return await this.api.get<ListTagSubscribers | null>(url, {
+      query,
+      signal: options?.signal,
+    });
   }
 
   /**
@@ -397,6 +453,8 @@ export class TagsHandler {
    *
    * @param tagId - The unique ID of the tag.
    * @param params - An object with all required parameters.
+   *
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/tags/tag-a-subscriber-by-email-address}
    *
@@ -413,12 +471,16 @@ export class TagsHandler {
    */
   public async tagSubscriberByEmail(
     tagId: number,
-    params: TagSubscriberByEmailParams
+    params: TagSubscriberByEmailParams,
+    options?: RequestOptions
   ): Promise<TagSubscriberByEmail | null> {
     const body = JSON.stringify(params || {});
     const url = `/tags/${tagId}/subscribers`;
 
-    return await this.api.post<TagSubscriberByEmail | null>(url, { body });
+    return await this.api.post<TagSubscriberByEmail | null>(url, {
+      body,
+      signal: options?.signal,
+    });
   }
 
   /**
@@ -426,6 +488,8 @@ export class TagsHandler {
    *
    * @param tagId - The unique ID of the tag.
    * @param subscriberId - The unique ID of the subscriber to remove from the tag.
+   *
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/tags/remove-tag-from-subscriber}
    *
@@ -445,11 +509,12 @@ export class TagsHandler {
    */
   public async removeSubscriber(
     tagId: number,
-    subscriberId: number
+    subscriberId: number,
+    options?: RequestOptions
   ): Promise<{} | null> {
     const url = `/tags/${tagId}/subscribers/${subscriberId}`;
 
-    return await this.api.delete<{} | null>(url);
+    return await this.api.delete<{} | null>(url, { signal: options?.signal });
   }
 
   /**
@@ -458,6 +523,8 @@ export class TagsHandler {
    *
    * @param tagId - The unique ID of the Tag.
    * @param subscriberId - The unique ID of the Subscriber to tag.
+   *
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/tags/tag-a-subscriber}
    *
@@ -471,10 +538,13 @@ export class TagsHandler {
    */
   public async tagSubscriber(
     tagId: number,
-    subscriberId: number
+    subscriberId: number,
+    options?: RequestOptions
   ): Promise<TagSubscriber | null> {
     const url = `/tags/${tagId}/subscribers/${subscriberId}`;
 
-    return await this.api.post<TagSubscriber | null>(url);
+    return await this.api.post<TagSubscriber | null>(url, {
+      signal: options?.signal,
+    });
   }
 }
