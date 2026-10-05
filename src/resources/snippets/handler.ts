@@ -73,7 +73,7 @@ export class SnippetsHandler {
     const query = new URLSearchParams({
       ...(after && { after }),
       ...(before && { before }),
-      ...(archived !== undefined && { archived: String(archived) }),
+      ...(archived != null && { archived: String(archived) }),
       ...(snippet_type && { snippet_type }),
       ...(include_content !== undefined && {
         include_content: String(include_content),
@@ -81,7 +81,7 @@ export class SnippetsHandler {
       ...(include_total_count !== undefined && {
         include_total_count: String(include_total_count),
       }),
-      ...(per_page !== undefined && { per_page: String(per_page) }),
+      ...(per_page != null && { per_page: String(per_page) }),
     });
     return await this.api.get<ListSnippets>("/snippets", { query });
   }
