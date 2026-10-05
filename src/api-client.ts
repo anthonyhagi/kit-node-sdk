@@ -160,14 +160,17 @@ export class ApiClient {
       url = `${url}?${options.query.toString()}`;
     }
 
-    const headers: Record<string, string> = {
-      ...this.defaultHeaders(),
-      ...this.authHeaders(),
-      ...options?.headers,
-    };
+    const headers = new Headers(this.defaultHeaders());
+    // Header names are case-insensitive. Set each layer in precedence order
+    // so differently cased overrides replace values instead of combining them.
+    for (const layer of [this.authHeaders(), options?.headers]) {
+      for (const [name, value] of Object.entries(layer ?? {})) {
+        headers.set(name, value);
+      }
+    }
 
     const fetchOptions: RequestInit = {
-      headers: new Headers(headers),
+      headers,
       method: method.toUpperCase(),
       body: options?.body,
     };
