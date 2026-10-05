@@ -6,6 +6,7 @@ import {
   type CreateSequenceParams,
   type GetSequence,
   type ListSequences,
+  type ListSequencesParams,
   type ListSequenceSubscribers,
   type ListSequenceSubscribersParams,
   type SequenceListItem,
@@ -55,6 +56,44 @@ describe("sequence requests through Kit", () => {
   beforeEach(() => {
     fetchMock.resetMocks();
     kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
+  });
+
+  it.each([
+    { after: null, before: null, per_page: null },
+    { after: undefined, before: undefined, per_page: undefined },
+  ] satisfies ListSequencesParams[])(
+    "omits nullable and undefined sequence pagination: %j",
+    async (params) => {
+      const response = {
+        sequences: [sequence],
+        pagination,
+      } satisfies ListSequences;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      const result = await kit.sequences.list(params);
+      expectTypeOf(result).toEqualTypeOf<ListSequences>();
+      expect(result).toEqual(response);
+      expect(await request("GET", "/sequences").text()).toBe("");
+    }
+  );
+
+  it("preserves stats and false counts alongside nullable sequence pagination", async () => {
+    const params = {
+      after: null,
+      before: null,
+      per_page: null,
+      include: "stats",
+      include_total_count: false,
+    } satisfies ListSequencesParams;
+    const response = {
+      sequences: [{ ...sequence, stats: { recipients: 100, open_rate: 0.5 } }],
+      pagination,
+    } satisfies ListSequences;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.sequences.list(params)).toEqual(response);
+    request("GET", "/sequences", {
+      include: "stats",
+      include_total_count: "false",
+    });
   });
 
   it.each([
