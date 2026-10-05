@@ -290,6 +290,7 @@ export type {
   ListFormsParams,
   ListFormSubscribers,
   ListFormSubscribersParams,
+  ListSlimFormSubscribers,
 } from "./resources/forms/types";
 
 export type {

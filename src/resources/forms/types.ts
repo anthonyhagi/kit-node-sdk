@@ -43,8 +43,7 @@ export interface BulkAddSubscribersSynchronous {
 }
 
 export type BulkAddSubscribers =
-  | BulkAddSubscribersSynchronous
-  | BulkAddSubscribersAsynchronous;
+  BulkAddSubscribersSynchronous | BulkAddSubscribersAsynchronous;
 export type BulkAddSubscribersWithoutResponseType =
   | Omit<BulkAddSubscribersSynchronous, "type">
   | Omit<BulkAddSubscribersAsynchronous, "type">;
@@ -90,12 +89,7 @@ export interface ListFormsParams {
    * the remote API.
    */
   status?:
-    | "active"
-    | "archived"
-    | "trashed"
-    | "all"
-    | (string & {})
-    | undefined;
+    "active" | "archived" | "trashed" | "all" | (string & {}) | undefined;
 
   /**
    * Filter forms and landing pages by type. Use "embed" for embedded
@@ -122,6 +116,9 @@ export interface ListForms {
 }
 
 export interface ListFormSubscribersParams {
+  /** Omit expensive fields for a faster, smaller response. */
+  slim?: boolean | undefined;
+
   /**
    * Filter subscribers who have been added to the form after this
    * date (format yyyy-mm-dd).
@@ -213,6 +210,21 @@ export interface ListFormSubscribers {
       | undefined;
     referrer?: string | undefined;
   }[];
+  pagination: Pagination;
+}
+
+/** Slim responses may omit custom fields and form subscription metadata. */
+export interface ListSlimFormSubscribers {
+  subscribers: (Omit<
+    ListFormSubscribers["subscribers"][number],
+    "fields" | "added_at" | "referrer" | "referrer_utm_parameters"
+  > &
+    Partial<
+      Pick<
+        ListFormSubscribers["subscribers"][number],
+        "fields" | "added_at" | "referrer" | "referrer_utm_parameters"
+      >
+    >)[];
   pagination: Pagination;
 }
 

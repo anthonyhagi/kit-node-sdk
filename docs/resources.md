@@ -26,6 +26,26 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
 
+## Slim form subscriber lists
+
+Pass `slim: true` to `kit.forms.listSubscribers()` for a faster, smaller response:
+
+```ts
+const result = await kit.forms.listSubscribers(7, { slim: true, per_page: 25 });
+for (const subscriber of result?.subscribers ?? []) {
+  console.log(subscriber.email_address, subscriber.fields?.category);
+}
+```
+
+`slim: true` returns `ListSlimFormSubscribers | null`. Custom fields and form
+subscription metadata (`added_at`, `referrer`, and `referrer_utm_parameters`)
+are optional in this type because Kit describes a reduced response without
+specifying every omitted field. Passing `slim: false` or omitting the option
+retains `ListFormSubscribers | null`; a dynamic boolean returns the union.
+Explicit false is sent to Kit, and undefined is omitted. Pagination and filters
+can be combined with slim; missing forms return `null`.
+See the [Kit API reference](https://developers.kit.com/api-reference/forms/list-subscribers-for-a-form).
+
 ## Updating subscriber custom-field values in bulk
 
 Use `kit.customFields.bulkUpdateSubscriberValues()` with an OAuth client. The
