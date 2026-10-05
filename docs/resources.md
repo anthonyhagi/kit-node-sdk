@@ -246,6 +246,10 @@ responses without the include option can omit it. This per-tag count is separate
 from `include_total_count`, which requests the number of tags for pagination.
 See the [Kit API reference](https://developers.kit.com/api-reference/tags/list-tags).
 
+The pagination options `after`, `before`, and `per_page` accept `null` or
+`undefined`; both are omitted from the query string. Other options such as
+`include: "subscriber_count"` and `include_total_count: false` are still sent.
+
 ## Including form subscriber counts
 
 Pass `include: "subscriber_count"` to `kit.forms.list()` to request the number
