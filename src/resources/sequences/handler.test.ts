@@ -11,6 +11,7 @@ import {
   type ListSequenceSubscribersParams,
   type ListSequencesWithStats,
   type SequenceStats,
+  type SequenceSubscriber,
   type UpdateSequence,
   type UpdateSequenceParams,
 } from "~/index";
@@ -606,6 +607,7 @@ describe("sequence requests through Kit", () => {
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.sequences.listSubscribers(7);
     expectTypeOf(result).toEqualTypeOf<ListSequenceSubscribers | null>();
+    expectTypeOf(result!.subscribers[0]!).toEqualTypeOf<SequenceSubscriber>();
     expectTypeOf<
       NonNullable<typeof result>["subscribers"][number]["fields"]
     >().toEqualTypeOf<Record<string, string | null>>();
@@ -732,6 +734,10 @@ describe("sequence requests through Kit", () => {
 
       const result = await kit.sequences.addSubscriberById(7, 42);
       expectTypeOf(result).toEqualTypeOf<AddSubscriberToSequence | null>();
+      expectTypeOf(result!.subscriber.email_address).toEqualTypeOf<string>();
+      expectTypeOf(result!.subscriber.fields).toEqualTypeOf<
+        Record<string, string>
+      >();
       expectTypeOf<
         AddSubscriberToSequence["subscriber"]["first_name"]
       >().toEqualTypeOf<string | null>();
@@ -754,6 +760,10 @@ describe("sequence requests through Kit", () => {
 
       const result = await kit.sequences.addSubscriberByEmail(7, body);
       expectTypeOf(result).toEqualTypeOf<AddSubscriberToSequence | null>();
+      expectTypeOf(result!.subscriber.email_address).toEqualTypeOf<string>();
+      expectTypeOf(result!.subscriber.fields).toEqualTypeOf<
+        Record<string, string>
+      >();
       expect(result).toEqual(response);
       expect(result?.subscriber.first_name).toBeNull();
       const req = request("POST", "/sequences/7/subscribers");

@@ -128,16 +128,28 @@ export interface ListSequenceSubscribersParams {
   status?: SubscriberState | "all" | (string & {}) | undefined;
 }
 
+/** Subscriber record returned by sequence subscriber lists. */
+export interface SequenceSubscriber {
+  id: number;
+  first_name: string | null;
+  email_address: string | null;
+  state: string;
+  created_at: string;
+  added_at: string;
+  fields: Record<string, string | null>;
+}
+
+/** Add responses retain non-null email addresses and custom field values. */
+interface AddedSequenceSubscriber extends Omit<
+  SequenceSubscriber,
+  "email_address" | "fields"
+> {
+  email_address: string;
+  fields: Record<string, string>;
+}
+
 export interface ListSequenceSubscribers {
-  subscribers: {
-    id: number;
-    first_name: string | null;
-    email_address: string | null;
-    state: string;
-    created_at: string;
-    added_at: string;
-    fields: Record<string, string | null>;
-  }[];
+  subscribers: SequenceSubscriber[];
   pagination: Pagination;
 }
 
@@ -146,15 +158,7 @@ export interface AddSubscriberByEmailParams {
 }
 
 export interface AddSubscriberToSequence {
-  subscriber: {
-    id: number;
-    first_name: string | null;
-    email_address: string;
-    state: string;
-    created_at: string;
-    added_at: string;
-    fields: Record<string, string>;
-  };
+  subscriber: AddedSequenceSubscriber;
 }
 
 /** Sequence reads explicitly requested with include: "stats". */
