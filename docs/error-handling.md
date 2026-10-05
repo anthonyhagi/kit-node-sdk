@@ -51,6 +51,26 @@ Node's 1ms fallback for overflowing timers. Calculated backoff saturates at
 `Number.MAX_SAFE_INTEGER` milliseconds if exponential growth exceeds that
 limit. A `retryDelay` of `0` keeps backoff disabled at every attempt.
 
+## Request Cancellation
+
+Pass an `AbortSignal` in the options for direct `kit.get()`, `post()`, `put()`,
+`patch()`, or `delete()` calls:
+
+```typescript
+const controller = new AbortController();
+const pendingRequest = kit.get("/subscribers", { signal: controller.signal });
+
+// Cancel when the caller no longer needs the result.
+controller.abort();
+await pendingRequest; // Rejects with the signal's abort reason.
+```
+
+Cancellation stops pending fetches, response body reads, and retry waits. An
+already-aborted signal prevents the initial request. Caller cancellations are
+never retried. `timeoutMs` still applies independently to each attempt, and timed-out
+fetches remain eligible for retry. Cancelling a request does not undo an operation
+that Kit has already processed.
+
 ## Request Timeouts
 
 Set `timeoutMs` on the client to abort an attempt that takes too long:
