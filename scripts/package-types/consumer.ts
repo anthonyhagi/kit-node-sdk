@@ -4,6 +4,7 @@ import {
   Kit,
   refreshOAuthToken,
   verifyWebhookSignature,
+  type GetPost,
   type GetSequence,
   type GetSequenceEmail,
   type GetSequenceEmailWithStats,
@@ -18,6 +19,7 @@ import {
   type ListSubscribers,
   type OAuthPKCE,
   type OAuthTokenResponse,
+  type Post,
   type RequestOptions,
   type Sequence,
   type SequenceEmail,
@@ -42,6 +44,11 @@ export type SequenceEmailContentList = Assert<
 export type SnippetResponse = Assert<Equal<GetSnippet["snippet"], Snippet>>;
 export type SnippetContentList = Assert<
   Equal<ListSnippetsWithContent["snippets"][number], Snippet>
+>;
+
+export type PostResponse = Assert<Equal<GetPost["post"], Post>>;
+export type PostContentList = Assert<
+  Equal<ListPostsWithContent["posts"][number], Post>
 >;
 
 const kit = new Kit({ apiKey: "typecheck-only", maxRetries: 0 });
