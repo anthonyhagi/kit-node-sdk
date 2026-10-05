@@ -218,6 +218,69 @@ describe("tag requests through Kit", () => {
     expect(await request("PUT", "/tags/7").json()).toEqual(body);
   });
 
+  it.each([
+    {
+      tagged_after: null,
+      tagged_before: null,
+      created_after: null,
+      created_before: null,
+      after: null,
+      before: null,
+      per_page: null,
+    },
+    {
+      tagged_after: undefined,
+      tagged_before: undefined,
+      created_after: undefined,
+      created_before: undefined,
+      after: undefined,
+      before: undefined,
+      per_page: undefined,
+    },
+  ] satisfies ListTagSubscribersParams[])(
+    "omits nullable and undefined tag subscriber filters: %j",
+    async (params) => {
+      const response = {
+        subscribers: [subscriber],
+        pagination,
+      } satisfies ListTagSubscribers;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      const result = await kit.tags.listSubscribers(7, params);
+      expectTypeOf(result).toEqualTypeOf<ListTagSubscribers | null>();
+      expect(result).toEqual(response);
+      expect(await request("GET", "/tags/7/subscribers").text()).toBe("");
+    }
+  );
+
+  it.each([true, false])(
+    "preserves slim: %s, status, and false counts alongside nullable filters",
+    async (slim) => {
+      const params = {
+        tagged_after: null,
+        tagged_before: null,
+        created_after: null,
+        created_before: null,
+        after: null,
+        before: null,
+        per_page: null,
+        slim,
+        status: "all",
+        include_total_count: false,
+      } satisfies ListTagSubscribersParams;
+      const response = {
+        subscribers: [],
+        pagination,
+      } satisfies ListTagSubscribers;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      expect(await kit.tags.listSubscribers(7, params)).toEqual(response);
+      request("GET", "/tags/7/subscribers", {
+        slim: String(slim),
+        status: "all",
+        include_total_count: "false",
+      });
+    }
+  );
+
   it("lists tagged subscribers without optional filters", async () => {
     const response = { subscribers: [subscriber], pagination };
     fetchMock.mockResponseOnce(JSON.stringify(response));

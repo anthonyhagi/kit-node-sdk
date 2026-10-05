@@ -189,6 +189,20 @@ Exported types include `BulkUpdateSubscriberValuesParams`,
 values or failures.
 See the [Kit API reference](https://developers.kit.com/api-reference/custom-fields/bulk-update-subscriber-custom-field-values).
 
+## Listing subscribers for a tag
+
+`kit.tags.listSubscribers(tagId, params)` returns a page of tagged subscribers,
+or `null` when the tag cannot be found. Filter by tagging dates with
+`tagged_after` and `tagged_before`, or subscriber creation dates with
+`created_after` and `created_before`. Date objects use their UTC calendar date.
+
+These four date filters, plus `after`, `before`, and `per_page`, accept `null`.
+Null and undefined values are omitted from the query. Status filters,
+`slim: true` or `slim: false`, and an explicit `include_total_count: false` are
+still sent when supplied alongside null filters.
+
+See the [Kit API reference](https://developers.kit.com/api-reference/tags/list-subscribers-for-a-tag).
+
 ## Including tag subscriber counts
 
 Pass `include: "subscriber_count"` to `kit.tags.list()` to request the number
