@@ -666,6 +666,15 @@ describe("form requests through Kit", () => {
     expect(result).toEqual({ type: "synchronous", ...response });
     if (result.type !== "synchronous")
       throw new Error("Expected synchronous response");
+    expectTypeOf(result.subscribers[0]!).toEqualTypeOf<{
+      id: number;
+      first_name: string;
+      email_address: string;
+      created_at: string;
+      added_at: string;
+      referrer_utm_parameters?: FormReferrerUtmParameters | undefined;
+      referrer?: string | undefined;
+    }>();
     expectTypeOf(result.failures[0]!.subscription.form_id).toEqualTypeOf<
       number | null
     >();

@@ -710,6 +710,13 @@ describe("tag requests through Kit", () => {
       type: "synchronous",
       ...response,
     });
+    expectTypeOf<BulkTagSynchronous["subscribers"][number]>().toEqualTypeOf<{
+      id: number;
+      first_name: string;
+      email_address: string;
+      created_at: string;
+      tagged_at: string;
+    }>();
     expectTypeOf<BulkTagParams["taggings"][number]["tag_id"]>().toEqualTypeOf<
       number | null
     >();

@@ -106,13 +106,7 @@ export type BulkTagCallback = Omit<BulkTagSynchronous, "type">;
 
 export interface BulkTagSynchronous {
   type: "synchronous";
-  subscribers: {
-    id: number;
-    first_name: string;
-    email_address: string;
-    created_at: string;
-    tagged_at: string;
-  }[];
+  subscribers: BulkTaggedSubscriber[];
   failures: {
     tagging: Nullable<Tagging>;
     errors: string[];
@@ -216,6 +210,14 @@ export interface TaggedSubscriber {
   created_at: string;
   tagged_at: string;
   fields: Record<string, string | null>;
+}
+
+/** Bulk tagging returns subscription metadata with a non-null first name. */
+interface BulkTaggedSubscriber extends Pick<
+  TaggedSubscriber,
+  "id" | "email_address" | "created_at" | "tagged_at"
+> {
+  first_name: string;
 }
 
 export interface ListTagSubscribers {
