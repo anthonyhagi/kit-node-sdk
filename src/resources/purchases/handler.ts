@@ -78,11 +78,8 @@ export class PurchasesHandler {
    *
    * @returns The unique Purchase.
    */
-  public async get(
-    id: number,
-    options?: RequestOptions
-  ): Promise<GetPurchase | null> {
-    return await this.api.get<GetPurchase | null>(`/purchases/${id}`, {
+  public async get(id: number, options?: RequestOptions): Promise<GetPurchase> {
+    return await this.api.get<GetPurchase>(`/purchases/${id}`, {
       signal: options?.signal,
       maxRetries: options?.maxRetries,
     });

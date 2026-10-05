@@ -87,12 +87,8 @@ const updatedSubscriber = await kit.subscribers.update(
   }
 );
 
-if (updatedSubscriber === null) {
-  console.log("Subscriber no longer exists");
-} else {
-  for (const key of updatedSubscriber.warnings ?? []) {
-    console.warn("Custom field key was ignored:", key);
-  }
+for (const key of updatedSubscriber.warnings ?? []) {
+  console.warn("Custom field key was ignored:", key);
 }
 
 // Get subscriber with their tags

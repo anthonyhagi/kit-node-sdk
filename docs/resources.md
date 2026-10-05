@@ -136,12 +136,8 @@ const updated = await kit.subscribers.update(created.subscriber.id, {
   email_address: created.subscriber.email_address,
   fields: { company: "New Company" },
 });
-if (updated === null) {
-  console.log("Subscriber no longer exists");
-} else {
-  for (const key of updated.warnings ?? []) {
-    console.warn("Custom field key was ignored:", key);
-  }
+for (const key of updated.warnings ?? []) {
+  console.warn("Custom field key was ignored:", key);
 }
 ```
 
@@ -151,8 +147,8 @@ and [updating subscribers](https://developers.kit.com/api-reference/subscribers/
 
 ## Listing a subscriber's tags
 
-`kit.subscribers.getTags(subscriberId, params)` returns a page of tags, or `null`
-when the subscriber cannot be found. Its `after`, `before`, and `per_page`
+`kit.subscribers.getTags(subscriberId, params)` returns a page of tags and throws `ApiError`
+with status 404 when the subscriber cannot be found. Its `after`, `before`, and `per_page`
 pagination parameters accept `null`. Null and undefined values are omitted from
 the query so Kit uses its defaults. An explicit `include_total_count: false` is
 still sent when supplied alongside null pagination values.
@@ -179,13 +175,13 @@ for (const subscriber of result?.subscribers ?? []) {
 }
 ```
 
-`slim: true` returns `ListSlimFormSubscribers | null`. Custom fields and form
+`slim: true` returns `ListSlimFormSubscribers`. Custom fields and form
 subscription metadata (`added_at`, `referrer`, and `referrer_utm_parameters`)
 are optional in this type because Kit describes a reduced response without
 specifying every omitted field. Passing `slim: false` or omitting the option
-retains `ListFormSubscribers | null`; a dynamic boolean returns the union.
+retains `ListFormSubscribers`; a dynamic boolean returns the union.
 Explicit false is sent to Kit, and undefined is omitted. Pagination and filters
-can be combined with slim; missing forms return `null`.
+can be combined with slim; missing forms throw `ApiError` with status 404.
 The `added_after`, `added_before`, `created_after`, `created_before`, `after`,
 `before`, and `per_page` filters accept `null`. Null and undefined values are
 omitted from the query for normal and slim responses. Status filters and
@@ -291,7 +287,7 @@ See the [Kit API reference](https://developers.kit.com/api-reference/custom-fiel
 ## Listing subscribers for a tag
 
 `kit.tags.listSubscribers(tagId, params)` returns a page of tagged subscribers,
-or `null` when the tag cannot be found. Filter by tagging dates with
+and throws `ApiError` with status 404 when the tag cannot be found. Filter by tagging dates with
 `tagged_after` and `tagged_before`, or subscriber creation dates with
 `created_after` and `created_before`. Date objects use their UTC calendar date.
 
@@ -300,11 +296,11 @@ Null and undefined values are omitted from the query. Status filters,
 `slim: true` or `slim: false`, and an explicit `include_total_count: false` are
 still sent when supplied alongside null filters.
 
-Literal `slim: true` calls return `ListSlimTagSubscribers | null`. Custom fields
+Literal `slim: true` calls return `ListSlimTagSubscribers`. Custom fields
 (`fields`) and tag subscription metadata (`tagged_at`) are optional in this type
 because Kit describes a reduced response without specifying every omitted field.
 Use optional access when reading them. Calls with `slim: false` or without `slim`
-retain `ListTagSubscribers | null`; a dynamic boolean returns the union.
+retain `ListTagSubscribers`; a dynamic boolean returns the union.
 
 See the [Kit API reference](https://developers.kit.com/api-reference/tags/list-subscribers-for-a-tag).
 
@@ -478,14 +474,12 @@ signed only with the current secret.
 
 ```ts
 const result = await kit.webhookEndpoints.revokePreviousSecret(2);
-if (result) {
-  console.log(result.webhook_endpoint.previous_secret_expires_at); // null
-}
+console.log(result.webhook_endpoint.previous_secret_expires_at); // null
 ```
 
 The exported `RevokePreviousWebhookEndpointSecret` response contains endpoint
 metadata with `previous_secret_expires_at: null` and no signing secret. Missing
-endpoints return `null`; API errors throw.
+endpoints throw `ApiError` with status 404.
 See the [Kit API reference](https://developers.kit.com/api-reference/webhooks/revoke-the-previous-webhook-endpoint-secret).
 
 ## Rotating a webhook endpoint secret
@@ -495,11 +489,9 @@ and returns the expiry timestamp for the previous secret's overlap window.
 
 ```ts
 const result = await kit.webhookEndpoints.rotateSecret(2);
-if (result) {
-  const signingSecret = result.webhook_endpoint.secret;
-  // Save signingSecret securely and use it for signature verification.
-  console.log(result.webhook_endpoint.previous_secret_expires_at);
-}
+const signingSecret = result.webhook_endpoint.secret;
+// Save signingSecret securely and use it for signature verification.
+console.log(result.webhook_endpoint.previous_secret_expires_at);
 ```
 
 Save the new secret from this response; list/get responses do not expose it.
@@ -518,7 +510,7 @@ the third argument opts into retries when replaying is appropriate; see
 
 Exported types are `RotateWebhookEndpointSecretParams` and
 `RotateWebhookEndpointSecret`. The response requires both the new secret and a
-string expiry timestamp. Missing endpoints return `null`; API errors throw.
+string expiry timestamp. Missing endpoints throw `ApiError` with status 404.
 See the [Kit API reference](https://developers.kit.com/api-reference/webhooks/rotate-a-webhook-endpoint-secret).
 
 ## Deleting a webhook endpoint
@@ -527,15 +519,12 @@ See the [Kit API reference](https://developers.kit.com/api-reference/webhooks/ro
 deliveries of its subscribed events.
 
 ```ts
-const result = await kit.webhookEndpoints.delete(2);
-if (result === null) {
-  console.log("Endpoint not found or inaccessible");
-}
+await kit.webhookEndpoints.delete(2);
 ```
 
 Kit returns an empty `204` response, which the SDK exposes as `{}`. Missing or
-inaccessible endpoints return `null`; authentication and permission errors
-throw. OAuth-created endpoints can only be deleted by the app that created them;
+inaccessible endpoints throw `ApiError` with status 404; authentication and
+permission errors also throw. OAuth-created endpoints can only be deleted by the app that created them;
 an API-key request returns a permission error. To stop deliveries temporarily,
 use `kit.webhookEndpoints.update(id, { status: "disabled" })`. See the
 [Kit API reference](https://developers.kit.com/api-reference/webhooks/delete-a-webhook-endpoint).
@@ -549,7 +538,7 @@ Use `kit.webhookEndpoints.update(id, params)` to PATCH the supplied fields.
 const result = await kit.webhookEndpoints.update(2, {
   status: "disabled",
 });
-console.log(result?.webhook_endpoint.status);
+console.log(result.webhook_endpoint.status);
 ```
 
 Set `status: "disabled"` to stop deliveries, or `"active"` to resume. Supplied
@@ -559,8 +548,8 @@ created through OAuth can only be updated by the app that created them; API-key
 updates return a permission error.
 
 Exported types are `UpdateWebhookEndpointParams` and `UpdateWebhookEndpoint`.
-Responses contain metadata without signing secrets. Missing endpoints return
-`null`; authentication, permission, and validation errors throw. See the
+Responses contain metadata without signing secrets. Missing endpoints throw
+`ApiError` with status 404; authentication, permission, and validation errors also throw. See the
 [Kit API reference](https://developers.kit.com/api-reference/webhooks/update-a-webhook-endpoint).
 
 ## Creating a webhook endpoint
@@ -593,14 +582,12 @@ events, status, source, and timestamps. Signing secrets are never included.
 
 ```ts
 const result = await kit.webhookEndpoints.get(2);
-if (result) {
-  console.log(result.webhook_endpoint.url, result.webhook_endpoint.events);
-}
+console.log(result.webhook_endpoint.url, result.webhook_endpoint.events);
 ```
 
 The exported `GetWebhookEndpoint` response wraps the shared `WebhookEndpoint`
 metadata type. Missing endpoints and endpoints inaccessible to the current
-account or app return `null`; authentication errors throw. See the
+account or app throw `ApiError` with status 404; authentication errors also throw. See the
 [Kit API reference](https://developers.kit.com/api-reference/webhooks/get-a-webhook-endpoint).
 
 ## Listing webhook endpoints
@@ -650,15 +637,13 @@ No `include_content` flag is needed.
 
 ```ts
 const result = await kit.posts.get(6);
-if (result) {
-  console.log(result.post.title, result.post.content, result.post.public_url);
-}
+console.log(result.post.title, result.post.content, result.post.public_url);
 ```
 
 The exported `GetPost` response requires `content`; list items keep it optional
 unless requested with `include_content: true`.
 Publishing, SEO, and thumbnail metadata retain their nullable types, and
-`product_id` remains optional and nullable. Missing posts return `null`;
+`product_id` remains optional and nullable. Missing posts throw `ApiError` with status 404;
 authentication errors throw. See the
 [Kit API reference](https://developers.kit.com/api-reference/posts/get-a-post).
 
@@ -756,7 +741,7 @@ a validation error. `archived: true` archives and `false` restores. Content
 changes apply on the next send of every email referencing the snippet key.
 
 Exported types are `UpdateSnippetParams` and `UpdateSnippet`. The response always
-includes content and document. Missing snippets return `null`; authentication
+includes content and document. Missing snippets throw `ApiError` with status 404; authentication
 and validation errors throw. See the
 [Kit API reference](https://developers.kit.com/api-reference/snippets/update-a-snippet).
 
@@ -767,15 +752,13 @@ no `include_content` flag is needed.
 
 ```ts
 const result = await kit.snippets.get(5);
-if (result) {
-  console.log(result.snippet.key, result.snippet.content);
-  console.log(result.snippet.document.value_html);
-}
+console.log(result.snippet.key, result.snippet.content);
+console.log(result.snippet.document.value_html);
 ```
 
 The exported `GetSnippet` response requires both `content` and `document`, while
 list items keep those fields optional unless requested with
-`include_content: true`. Missing snippets return `null`;
+`include_content: true`. Missing snippets throw `ApiError` with status 404;
 authentication errors throw. See the
 [Kit API reference](https://developers.kit.com/api-reference/snippets/get-a-snippet).
 
@@ -830,14 +813,11 @@ See the [Kit API reference](https://developers.kit.com/api-reference/snippets/li
 from a sequence. Subscribers already queued for it skip to the next email.
 
 ```ts
-const result = await kit.sequenceEmails.delete(123, 456);
-if (result === null) {
-  console.log("Sequence or email not found");
-}
+await kit.sequenceEmails.delete(123, 456);
 ```
 
 Kit returns an empty `204` response, which the SDK exposes as `{}`. Missing
-sequences or emails return `null`; authentication errors throw. To pause delivery,
+sequences or emails throw `ApiError` with status 404; authentication errors also throw. To pause delivery,
 use `kit.sequenceEmails.update(sequenceId, emailId, { published: false })`.
 See the [Kit API reference](https://developers.kit.com/api-reference/sequence-emails/delete-a-sequence-email).
 
@@ -865,7 +845,7 @@ at position zero triggers processing of its queued subscribers.
 
 The exported types are `UpdateSequenceEmailParams` and `UpdateSequenceEmail`.
 The response includes the content field and allows nullable content, preview
-text, sending days, and position. Missing sequences or emails return `null`;
+text, sending days, and position. Missing sequences or emails throw `ApiError` with status 404;
 validation errors throw. See the
 [Kit API reference](https://developers.kit.com/api-reference/sequence-emails/update-a-sequence-email).
 
@@ -901,7 +881,7 @@ to opt into retries only when replaying the creation is appropriate; see
 
 The exported types are `CreateSequenceEmailParams` and `CreateSequenceEmail`.
 The response includes `content`, which can be `null` for drafts; `preview_text`
-can also be `null`. Missing sequences return `null`, and validation errors throw.
+can also be `null`. Missing sequences throw `ApiError` with status 404, and validation errors also throw.
 See the [Kit API reference](https://developers.kit.com/api-reference/sequence-emails/create-a-sequence-email).
 
 ## Fetching a sequence email
@@ -911,16 +891,14 @@ content field, which can be `null` for drafts. Use `include: "stats"` to request
 
 ```ts
 const result = await kit.sequenceEmails.get(123, 456, { include: "stats" });
-if (result) {
-  console.log(result.email.content, result.email.stats.open_rate);
-}
+console.log(result.email.content, result.email.stats.open_rate);
 ```
 
-A literal `include: "stats"` infers `GetSequenceEmailWithStats | null`, with
+A literal `include: "stats"` infers `GetSequenceEmailWithStats`, with
 required stats when the email exists. Omitted or dynamic inclusion flags keep
 stats optional. The existing `GetSequenceEmail` response requires content; stats
 is optional. No `include_content` flag is needed. Missing sequences or emails
-return `null`. Options use the exported `GetSequenceEmailParams` type. See the
+throw `ApiError` with status 404. Options use the exported `GetSequenceEmailParams` type. See the
 [Kit API reference](https://developers.kit.com/api-reference/sequence-emails/get-a-sequence-email).
 
 ## Listing sequence emails
@@ -953,15 +931,15 @@ if (page) {
 ```
 
 Pagination supports `after`, `before`, `per_page`, and `include_total_count`.
-Missing sequences return `null`. HTML content is omitted by default; request
+Missing sequences throw `ApiError` with status 404. HTML content is omitted by default; request
 `include_content: true` to include it. A literal true flag infers
-`ListSequenceEmailsWithContent | null`, with required `content: string | null`
+`ListSequenceEmailsWithContent`, with required `content: string | null`
 on each email. Omitted, false, null, or dynamic flags keep content optional.
 Draft content and preview text can be `null`; hour-based emails return
 `send_days: null`. A literal `include: "stats"` infers
-`ListSequenceEmailsWithStats | null`, with
+`ListSequenceEmailsWithStats`, with
 required stats on each email. Combining it with literal `include_content: true`
-infers `ListSequenceEmailsWithContentAndStats | null`, requiring both fields.
+infers `ListSequenceEmailsWithContentAndStats`, requiring both fields.
 Dynamic flags retain optional fields unless the corresponding inclusion is known.
 Per-email stats use zero when no delivery data is available.
 Exported types are `ListSequenceEmails`, `ListSequenceEmailsWithContent`,
@@ -976,7 +954,7 @@ See the [Kit API reference](https://developers.kit.com/api-reference/sequence-em
 ## Listing sequence subscribers
 
 `kit.sequences.listSubscribers(sequenceId, params)` returns a page of subscribers,
-or `null` when the sequence cannot be found. Filter by subscription dates with
+and throws `ApiError` with status 404 when the sequence cannot be found. Filter by subscription dates with
 `added_after` and `added_before`, or subscriber creation dates with
 `created_after` and `created_before`. Date objects use their UTC calendar date.
 
@@ -994,14 +972,11 @@ Automations referencing the sequence need updating. If you only need to pause
 delivery, use `kit.sequences.update(id, { active: false })`.
 
 ```ts
-const result = await kit.sequences.delete(123);
-if (result === null) {
-  console.log("Sequence not found");
-}
+await kit.sequences.delete(123);
 ```
 
 The method sends a bodyless DELETE and returns `{}` for Kit's successful
-`204 No Content` response, or `null` when the sequence is missing. See the
+`204 No Content` response. Missing sequences throw `ApiError` with status 404. See the
 [Kit API reference](https://developers.kit.com/api-reference/sequences/delete-a-sequence).
 
 ## Updating a sequence
@@ -1013,14 +988,12 @@ its name or schedule:
 
 ```ts
 const result = await kit.sequences.update(123, { active: false });
-if (result) {
-  console.log(result.sequence.active);
-}
+console.log(result.sequence.active);
 ```
 
 An empty `exclude_subscriber_sources` array clears exclusions. False flags and
-`send_hour: 0` are sent as supplied. Updates return `UpdateSequence`, or `null`
-if the sequence is missing; Kit validation errors are thrown.
+`send_hour: 0` are sent as supplied. Updates return `UpdateSequence`. Missing sequences throw `ApiError` with
+status `404`; Kit validation errors are thrown.
 
 Setting `active: true` resumes queued subscribers. Schedule changes affect
 future sends and do not reschedule emails already queued. See the
@@ -1099,17 +1072,15 @@ to include deliverability statistics:
 
 ```ts
 const result = await kit.sequences.get(123, { include: "stats" });
-if (result) {
-  console.log(result.sequence.name, result.sequence.time_zone);
-  console.log(result.sequence.stats.open_rate);
-}
+console.log(result.sequence.name, result.sequence.time_zone);
+console.log(result.sequence.stats.open_rate);
 ```
 
-Missing sequences return `null`. The sending address and template can be null;
+Missing sequences throw `ApiError` with status 404. The sending address and template can be null;
 email/subscriber counts and stats may be absent. Delivery metrics can be null
 when there is no delivery data. `stats.unsubscribers` counts current cancelled
 sequence subscriptions, while `stats.email_unsubscribes` counts email events.
-A literal `include: "stats"` infers `GetSequenceWithStats | null`, with a
+A literal `include: "stats"` infers `GetSequenceWithStats`, with a
 required stats object when the sequence exists. Omitted or dynamic inclusion
 flags retain optional stats. The exported types are `GetSequence`,
 `GetSequenceWithStats`, `GetSequenceParams`, and `SequenceStats`.
@@ -1272,12 +1243,10 @@ no IDs, while targeted items include `ids`:
 
 ```ts
 const result = await kit.broadcasts.get(123);
-if (result) {
-  console.log(result.broadcast.status);
-  for (const group of result.broadcast.subscriber_filter) {
-    for (const item of group.all ?? group.any ?? group.none ?? []) {
-      console.log(item.type, item.ids);
-    }
+console.log(result.broadcast.status);
+for (const group of result.broadcast.subscriber_filter) {
+  for (const item of group.all ?? group.any ?? group.none ?? []) {
+    console.log(item.type, item.ids);
   }
 }
 ```

@@ -486,7 +486,7 @@ describe("broadcast link click pagination through Kit", () => {
   it("preserves single-ID requests and exposes tracked link IDs", async () => {
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.broadcasts.getLinkClicksById(171);
-    expectTypeOf(result).toEqualTypeOf<GetLinkClicks | null>();
+    expectTypeOf(result).toEqualTypeOf<GetLinkClicks>();
     expectTypeOf(result!.broadcast.clicks[0]!.id).toEqualTypeOf<number>();
     expect(result).toEqual(response);
     const req = fetchMock.requests()[0]!;
@@ -556,11 +556,13 @@ describe("broadcast link click pagination through Kit", () => {
     );
   });
 
-  it("preserves null responses and validates IDs before making a request", async () => {
-    fetchMock.mockResponseOnce("null");
-    expect(
-      await kit.broadcasts.getLinkClicksById(171, { per_page: 25 })
-    ).toBeNull();
+  it("throws for missing broadcasts and validates IDs before making a request", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not found"] }), {
+      status: 404,
+    });
+    await expect(
+      kit.broadcasts.getLinkClicksById(171, { per_page: 25 })
+    ).rejects.toMatchObject({ name: "ApiError", status: 404 });
     fetchMock.resetMocks();
     await expect(
       kit.broadcasts.getLinkClicksById(0, { after: "next" })

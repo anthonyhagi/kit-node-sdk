@@ -331,11 +331,14 @@ describe("webhook requests through Kit", () => {
     expect(await request("DELETE", "/webhooks/1").text()).toBe("");
   });
 
-  it("returns null when the webhook to delete is missing", async () => {
+  it("throws ApiError when the webhook to delete is missing", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not found"] }), {
       status: 404,
     });
-    expect(await kit.webhooks.delete(1)).toBeNull();
+    await expect(kit.webhooks.delete(1)).rejects.toMatchObject({
+      name: "ApiError",
+      status: 404,
+    });
     request("DELETE", "/webhooks/1");
   });
 

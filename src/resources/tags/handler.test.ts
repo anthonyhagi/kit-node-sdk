@@ -282,7 +282,7 @@ describe("tag requests through Kit", () => {
       } satisfies ListTagSubscribers;
       fetchMock.mockResponseOnce(JSON.stringify(response));
       const result = await kit.tags.listSubscribers(7, params);
-      expectTypeOf(result).toEqualTypeOf<ListTagSubscribers | null>();
+      expectTypeOf(result).toEqualTypeOf<ListTagSubscribers>();
       expect(result).toEqual(response);
       expect(await request("GET", "/tags/7/subscribers").text()).toBe("");
     }
@@ -338,7 +338,7 @@ describe("tag requests through Kit", () => {
       include_total_count: false,
       tagged_before: null,
     });
-    expectTypeOf(result).toEqualTypeOf<ListSlimTagSubscribers | null>();
+    expectTypeOf(result).toEqualTypeOf<ListSlimTagSubscribers>();
     expectTypeOf(result!.subscribers[0]!.fields).toEqualTypeOf<
       Record<string, string | null> | undefined
     >();
@@ -367,7 +367,7 @@ describe("tag requests through Kit", () => {
     } satisfies ListSlimTagSubscribers;
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.tags.listSubscribers(7, { slim: true });
-    expectTypeOf(result).toEqualTypeOf<ListSlimTagSubscribers | null>();
+    expectTypeOf(result).toEqualTypeOf<ListSlimTagSubscribers>();
     expect(result).toEqual(response);
     request("GET", "/tags/7/subscribers", { slim: "true" });
   });
@@ -381,7 +381,7 @@ describe("tag requests through Kit", () => {
       } satisfies ListTagSubscribers;
       fetchMock.mockResponseOnce(JSON.stringify(response));
       const result = await kit.tags.listSubscribers(7, { slim });
-      expectTypeOf(result).toEqualTypeOf<ListTagSubscribers | null>();
+      expectTypeOf(result).toEqualTypeOf<ListTagSubscribers>();
       expectTypeOf(result!.subscribers[0]!.fields).toEqualTypeOf<
         Record<string, string | null>
       >();
@@ -395,11 +395,13 @@ describe("tag requests through Kit", () => {
     }
   );
 
-  it("returns null when a slim tag subscriber list is not found", async () => {
+  it("throws ApiError when a slim tag subscriber list is not found", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
       status: 404,
     });
-    expect(await kit.tags.listSubscribers(404, { slim: true })).toBeNull();
+    await expect(
+      kit.tags.listSubscribers(404, { slim: true })
+    ).rejects.toMatchObject({ name: "ApiError", status: 404 });
     request("GET", "/tags/404/subscribers", { slim: "true" });
   });
 
@@ -407,7 +409,7 @@ describe("tag requests through Kit", () => {
     const response = { subscribers: [subscriber], pagination };
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.tags.listSubscribers(7);
-    expectTypeOf(result).toEqualTypeOf<ListTagSubscribers | null>();
+    expectTypeOf(result).toEqualTypeOf<ListTagSubscribers>();
     expect(result).toEqual(response);
     expect(await request("GET", "/tags/7/subscribers").text()).toBe("");
   });
@@ -432,7 +434,7 @@ describe("tag requests through Kit", () => {
 
       const result = await kit.tags.listSubscribers(7, params);
       expectTypeOf(result).toEqualTypeOf<
-        ListTagSubscribers | ListSlimTagSubscribers | null
+        ListTagSubscribers | ListSlimTagSubscribers
       >();
       expect(result).toEqual(response);
       expect(await request("GET", "/tags/7/subscribers", query).text()).toBe(
@@ -568,7 +570,7 @@ describe("tag requests through Kit", () => {
       fetchMock.mockResponseOnce(JSON.stringify(response), { status });
 
       const result = await kit.tags.tagSubscriber(7, 42);
-      expectTypeOf(result).toEqualTypeOf<TagSubscriber | null>();
+      expectTypeOf(result).toEqualTypeOf<TagSubscriber>();
       expectTypeOf(result!.subscriber.first_name).toEqualTypeOf<
         string | null
       >();
@@ -588,7 +590,7 @@ describe("tag requests through Kit", () => {
       fetchMock.mockResponseOnce(JSON.stringify(response), { status });
 
       const result = await kit.tags.tagSubscriberByEmail(7, body);
-      expectTypeOf(result).toEqualTypeOf<TagSubscriberByEmail | null>();
+      expectTypeOf(result).toEqualTypeOf<TagSubscriberByEmail>();
       expectTypeOf(result!.subscriber.first_name).toEqualTypeOf<
         string | null
       >();
@@ -758,7 +760,7 @@ describe("tag requests through Kit", () => {
     "removeSubscriber",
     "removeSubscriberByEmail",
   ] as const)(
-    "returns null from %s when the tag or subscriber is missing",
+    "throws ApiError from %s when the tag or subscriber is missing",
     async (method) => {
       fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not found"] }), {
         status: 404,
@@ -766,24 +768,24 @@ describe("tag requests through Kit", () => {
       let result;
       switch (method) {
         case "update":
-          result = await kit.tags.update(7, { name: "Renamed" });
+          result = kit.tags.update(7, { name: "Renamed" });
           break;
         case "listSubscribers":
-          result = await kit.tags.listSubscribers(7);
+          result = kit.tags.listSubscribers(7);
           break;
         case "tagSubscriber":
-          result = await kit.tags.tagSubscriber(7, 42);
+          result = kit.tags.tagSubscriber(7, 42);
           break;
         case "removeSubscriber":
-          result = await kit.tags.removeSubscriber(7, 42);
+          result = kit.tags.removeSubscriber(7, 42);
           break;
         case "tagSubscriberByEmail":
-          result = await kit.tags.tagSubscriberByEmail(7, {
+          result = kit.tags.tagSubscriberByEmail(7, {
             email_address: subscriber.email_address,
           });
           break;
         case "removeSubscriberByEmail":
-          result = await kit.tags.removeSubscriberByEmail(7, {
+          result = kit.tags.removeSubscriberByEmail(7, {
             email_address: subscriber.email_address,
           });
           expect(
@@ -793,7 +795,10 @@ describe("tag requests through Kit", () => {
           ).toBe("");
           break;
       }
-      expect(result).toBeNull();
+      await expect(result).rejects.toMatchObject({
+        name: "ApiError",
+        status: 404,
+      });
       expect(fetchMock.requests()).toHaveLength(1);
     }
   );

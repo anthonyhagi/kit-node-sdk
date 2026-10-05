@@ -63,6 +63,16 @@ try {
       Promise.resolve(new Response("Unauthorized", { status: 401 }));
     await assert.rejects(kit.accounts.listColors(), ApiError);
 
+    const notFound = { errors: ["Missing resource"] };
+    globalThis.fetch = () =>
+      Promise.resolve(Response.json(notFound, { status: 404 }));
+    await assert.rejects(kit.accounts.listColors(), (error) => {
+      assert.ok(error instanceof ApiError);
+      assert.equal(error.status, 404);
+      assert.deepEqual(error.details, notFound);
+      return true;
+    });
+
     const pkce = generateOAuthPKCE();
     assert.match(pkce.code_verifier, /^[\w-]{43}$/);
     assert.equal(pkce.code_challenge_method, "S256");
