@@ -150,10 +150,13 @@ export interface ListSlimBroadcasts {
 export interface CreateBroadcastParams {
   /**
    * Id of the email template to use. Uses the account's default
-   * template if not provided. 'Starting point' template is not
-   * supported.
+   * template if not provided. When supplying content with a Starting
+   * point template, set allow_starting_point to true.
    */
   email_template_id?: number | undefined;
+
+  /** Allow custom HTML content when using a Starting point email template. */
+  allow_starting_point?: boolean | undefined;
 
   /**
    * The sending email address to use. Uses the account's
@@ -295,9 +298,13 @@ export interface GetBroadcast {
 export interface UpdateBroadcastParams {
   /**
    * Id of the email template to use. Uses the account's default template
-   * if not provided.
+   * if not provided. When supplying content with a Starting point
+   * template, set allow_starting_point to true.
    */
   email_template_id: number | null;
+
+  /** Allow custom HTML content when using a Starting point email template. */
+  allow_starting_point?: boolean | undefined;
 
   /**
    * The sending email address to use. Uses the account's sending email
