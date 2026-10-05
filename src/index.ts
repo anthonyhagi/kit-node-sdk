@@ -461,6 +461,7 @@ export type {
   ListTagSubscribersParams,
   RemoveSubscriberByEmailParams,
   Tag,
+  TaggedSubscriber,
   Tagging,
   TagSubscriber,
   TagSubscriberByEmail,

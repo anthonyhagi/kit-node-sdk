@@ -207,16 +207,19 @@ export interface ListTagSubscribersParams extends PaginationParams {
   tagged_before?: Date | string | null | undefined;
 }
 
+/** Subscriber record returned when listing a tag or tagging by ID or email. */
+export interface TaggedSubscriber {
+  id: number;
+  first_name: string | null;
+  email_address: string;
+  state: string;
+  created_at: string;
+  tagged_at: string;
+  fields: Record<string, string | null>;
+}
+
 export interface ListTagSubscribers {
-  subscribers: {
-    id: number;
-    first_name: string | null;
-    email_address: string;
-    state: string;
-    created_at: string;
-    tagged_at: string;
-    fields: Record<string, string | null>;
-  }[];
+  subscribers: TaggedSubscriber[];
   pagination: Pagination;
 }
 
@@ -237,25 +240,9 @@ export interface TagSubscriberByEmailParams {
 }
 
 export interface TagSubscriberByEmail {
-  subscriber: {
-    id: number;
-    first_name: string | null;
-    email_address: string;
-    state: string;
-    created_at: string;
-    tagged_at: string;
-    fields: Record<string, string | null>;
-  };
+  subscriber: TaggedSubscriber;
 }
 
 export interface TagSubscriber {
-  subscriber: {
-    id: number;
-    first_name: string | null;
-    email_address: string;
-    state: string;
-    created_at: string;
-    tagged_at: string;
-    fields: Record<string, string | null>;
-  };
+  subscriber: TaggedSubscriber;
 }
