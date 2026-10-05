@@ -106,3 +106,38 @@ export interface UpdateCustomField {
     label: string;
   };
 }
+
+export interface BulkUpdateSubscriberValuesParams {
+  custom_field_values: {
+    subscriber_id: number | null;
+    subscriber_custom_field_id: number;
+    value: string;
+  }[];
+  /** Callback URL for asynchronous results; pass null when no callback is needed. */
+  callback_url: string | null;
+}
+
+export interface BulkUpdateSubscriberValuesSynchronous {
+  type: "synchronous";
+  custom_field_values: {
+    subscriber_id: number;
+    subscriber_custom_field_id: number;
+    value: string;
+  }[];
+  failures: {
+    errors: string[];
+    custom_field_value: BulkUpdateSubscriberValuesParams["custom_field_values"][number];
+  }[];
+}
+
+export interface BulkUpdateSubscriberValuesAsynchronous {
+  type: "asynchronous";
+}
+
+export type BulkUpdateSubscriberValues =
+  | BulkUpdateSubscriberValuesSynchronous
+  | BulkUpdateSubscriberValuesAsynchronous;
+
+export type BulkUpdateSubscriberValuesWithoutResponseType =
+  | Omit<BulkUpdateSubscriberValuesSynchronous, "type">
+  | Omit<BulkUpdateSubscriberValuesAsynchronous, "type">;
