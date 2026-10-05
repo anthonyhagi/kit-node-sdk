@@ -407,6 +407,8 @@ export type {
   GetSubscriberStatsParams,
   GetSubscriberTags,
   GetSubscriberTagsParams,
+  ListFullSubscribers,
+  ListSlimSubscribers,
   ListSubscribers,
   ListSubscribersParams,
   PinSubscriberLocation,

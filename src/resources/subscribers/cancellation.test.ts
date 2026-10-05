@@ -9,6 +9,8 @@ import {
 } from "vitest";
 import {
   Kit,
+  type ListFullSubscribers,
+  type ListSlimSubscribers,
   type ListSubscribers,
   type ListSubscribersParams,
   type RequestOptions,
@@ -59,7 +61,9 @@ describe("subscriber list cancellation", () => {
       const options = { signal: controller.signal } satisfies RequestOptions;
       fetchMock.mockResponseOnce(JSON.stringify(response));
       const result = await kit.subscribers.list(filters, options);
-      expectTypeOf(result).toEqualTypeOf<ListSubscribers>();
+      expectTypeOf(result).toEqualTypeOf<
+        ListFullSubscribers | ListSlimSubscribers
+      >();
       expect(result).toEqual(response);
       expect(fetchMock).toHaveBeenCalledTimes(1);
       const [url, init] = fetchMock.mock.calls[0]!;
