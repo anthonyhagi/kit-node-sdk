@@ -297,6 +297,7 @@ export type {
 } from "./resources/custom-fields/types";
 
 export type {
+  EmailTemplate,
   ListEmailTemplates,
   ListEmailTemplatesParams,
 } from "./resources/email-templates/types";
@@ -343,6 +344,7 @@ export type {
 export type {
   ListSegments,
   ListSegmentsParams,
+  Segment,
 } from "./resources/segments/types";
 
 export type {
