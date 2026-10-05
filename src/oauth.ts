@@ -1,4 +1,30 @@
+import { createHash, randomBytes } from "node:crypto";
 import { ApiError } from "./errors";
+
+export interface OAuthPKCE {
+  /** Save this secret verifier for the authorization code exchange. */
+  code_verifier: string;
+  /** Send this challenge in the authorization URL. */
+  code_challenge: string;
+  code_challenge_method: "S256";
+}
+
+/**
+ * Generate a fresh 256-bit PKCE verifier and its SHA-256 base64url challenge.
+ * Save the verifier before redirecting and reuse it in exchangeOAuthCode().
+ *
+ * @see {@link https://developers.kit.com/api-reference/oauth-proof-key-for-code-exchange-flow}
+ */
+export function generateOAuthPKCE(): OAuthPKCE {
+  const code_verifier = randomBytes(32).toString("base64url");
+  return {
+    code_verifier,
+    code_challenge: createHash("sha256")
+      .update(code_verifier)
+      .digest("base64url"),
+    code_challenge_method: "S256",
+  };
+}
 
 export interface RevokeOAuthTokenParams {
   /** Kit-issued access token or refresh token to invalidate. */

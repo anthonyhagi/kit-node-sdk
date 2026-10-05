@@ -56,6 +56,19 @@ See [Kit's authorization-code flow](https://developers.kit.com/api-reference/oau
 
 ### Exchanging a PKCE Authorization Code
 
+Generate a fresh verifier and challenge before starting each authorization flow:
+
+```typescript
+import { generateOAuthPKCE } from "@anthonyhagi/kit-node-sdk";
+
+const pkce = generateOAuthPKCE();
+// Save pkce.code_verifier with this authorization session.
+// Send pkce.code_challenge and pkce.code_challenge_method in the authorization URL.
+```
+
+The helper returns `OAuthPKCE` synchronously, using 32 cryptographically random
+bytes for a 43-character verifier and a SHA-256, base64url challenge without padding.
+
 For PKCE, supply the original verifier saved before the authorization redirect:
 
 ```typescript
