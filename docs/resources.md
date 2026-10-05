@@ -108,6 +108,47 @@ console.log(result.subscriber.id, result.subscriber.state);
 
 See the [Kit API reference](https://developers.kit.com/api-reference/subscribers/create-a-subscriber).
 
+## Checking subscriber custom-field warnings
+
+For `kit.subscribers.create()` and `kit.subscribers.update()`, supply custom field
+**keys**, such as `company`, rather than display labels such as `Company`.
+The fields must already exist on the account. Use `kit.customFields.list()` to
+inspect their `key` and `label` values, following pagination for additional
+results, or `kit.customFields.create({ label: "Company" })` to create a field and
+read its generated `custom_field.key`.
+
+Kit's request and response schemas document unknown keys as ignored, with the
+subscriber still created or updated. Each entry in the optional `warnings` array
+names an ignored key. Inspect warnings even when the request succeeds; that
+success does not mean every submitted custom field was saved.
+
+```ts
+// Assume the company custom field already exists with key "company".
+const created = await kit.subscribers.create({
+  email_address: "ada@example.com",
+  fields: { company: "Acme Corp" },
+});
+for (const key of created.warnings ?? []) {
+  console.warn("Custom field key was ignored:", key);
+}
+
+const updated = await kit.subscribers.update(created.subscriber.id, {
+  email_address: created.subscriber.email_address,
+  fields: { company: "New Company" },
+});
+if (updated === null) {
+  console.log("Subscriber no longer exists");
+} else {
+  for (const key of updated.warnings ?? []) {
+    console.warn("Custom field key was ignored:", key);
+  }
+}
+```
+
+Correct the field key or create the missing definition before resending its
+value. See Kit's schemas for [creating subscribers](https://developers.kit.com/api-reference/subscribers/create-a-subscriber)
+and [updating subscribers](https://developers.kit.com/api-reference/subscribers/update-a-subscriber).
+
 ## Listing a subscriber's tags
 
 `kit.subscribers.getTags(subscriberId, params)` returns a page of tags, or `null`
