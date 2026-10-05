@@ -12,6 +12,7 @@ import type {
   ListFormsParams,
   ListFormSubscribers,
   ListFormSubscribersParams,
+  ListSlimFormSubscribers,
 } from "./types";
 
 export class FormsHandler {
@@ -109,8 +110,20 @@ export class FormsHandler {
    */
   public async listSubscribers(
     id: number,
+    params: ListFormSubscribersParams & { slim: true }
+  ): Promise<ListSlimFormSubscribers | null>;
+  public async listSubscribers(
+    id: number,
+    params?: ListFormSubscribersParams & { slim?: false | undefined }
+  ): Promise<ListFormSubscribers | null>;
+  public async listSubscribers(
+    id: number,
     params?: ListFormSubscribersParams
-  ): Promise<ListFormSubscribers | null> {
+  ): Promise<ListFormSubscribers | ListSlimFormSubscribers | null>;
+  public async listSubscribers(
+    id: number,
+    params?: ListFormSubscribersParams
+  ): Promise<ListFormSubscribers | ListSlimFormSubscribers | null> {
     const {
       added_after,
       added_before,
@@ -120,6 +133,7 @@ export class FormsHandler {
       created_before,
       include_total_count,
       per_page,
+      slim,
       status,
     } = params || {};
 
@@ -135,10 +149,13 @@ export class FormsHandler {
         include_total_count: String(include_total_count),
       }),
       ...(per_page && { per_page: String(per_page) }),
+      ...(slim !== undefined && { slim: String(slim) }),
       ...(status && { status }),
     });
 
-    return await this.api.get<ListFormSubscribers | null>(url, { query });
+    return await this.api.get<
+      ListFormSubscribers | ListSlimFormSubscribers | null
+    >(url, { query });
   }
 
   /**

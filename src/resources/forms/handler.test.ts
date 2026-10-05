@@ -8,6 +8,8 @@ import {
   type ListForms,
   type ListFormsParams,
   type ListFormSubscribers,
+  type ListFormSubscribersParams,
+  type ListSlimFormSubscribers,
 } from "~/index";
 
 const form = {
@@ -195,6 +197,104 @@ describe("form requests through Kit", () => {
     >().toEqualTypeOf<Record<string, string | null>>();
     expect(result).toEqual(response);
     expect(await request("GET", "/forms/7/subscribers").text()).toBe("");
+  });
+
+  it("requests a slim list with pagination and filters and accepts omitted expensive fields", async () => {
+    const response = {
+      subscribers: [
+        {
+          id: 42,
+          first_name: null,
+          email_address: subscriber.email_address,
+          state: "active",
+          created_at: subscriber.created_at,
+        },
+      ],
+      pagination,
+    } satisfies ListSlimFormSubscribers;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const result = await kit.forms.listSubscribers(7, {
+      slim: true,
+      after: "next+/=",
+      per_page: 25,
+      include_total_count: false,
+      status: "all",
+      added_after: "2026-01-01",
+      created_before: "2026-02-01",
+    });
+    expectTypeOf(result).toEqualTypeOf<ListSlimFormSubscribers | null>();
+    expectTypeOf(result!.subscribers[0]!.fields).toEqualTypeOf<
+      Record<string, string | null> | undefined
+    >();
+    expect(result).toEqual(response);
+    request("GET", "/forms/7/subscribers", {
+      slim: "true",
+      after: "next+/=",
+      per_page: "25",
+      include_total_count: "false",
+      status: "all",
+      added_after: "2026-01-01",
+      created_before: "2026-02-01",
+    });
+  });
+
+  it("preserves optional fields when a slim response includes them", async () => {
+    const response = {
+      subscribers: [subscriber],
+      pagination,
+    } satisfies ListSlimFormSubscribers;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.forms.listSubscribers(7, { slim: true })).toEqual(
+      response
+    );
+    request("GET", "/forms/7/subscribers", { slim: "true" });
+  });
+
+  it("preserves explicit false and the full response type", async () => {
+    const response = {
+      subscribers: [subscriber],
+      pagination,
+    } satisfies ListFormSubscribers;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const result = await kit.forms.listSubscribers(7, { slim: false });
+    expectTypeOf(result).toEqualTypeOf<ListFormSubscribers | null>();
+    expectTypeOf(result!.subscribers[0]!.fields).toEqualTypeOf<
+      Record<string, string | null>
+    >();
+    expect(result).toEqual(response);
+    request("GET", "/forms/7/subscribers", { slim: "false" });
+  });
+
+  it("omits undefined slim and keeps the full response type", async () => {
+    fetchMock.mockResponseOnce(
+      JSON.stringify({ subscribers: [subscriber], pagination })
+    );
+    const result = await kit.forms.listSubscribers(7, { slim: undefined });
+    expectTypeOf(result).toEqualTypeOf<ListFormSubscribers | null>();
+    request("GET", "/forms/7/subscribers");
+  });
+
+  it.each([true, false])(
+    "supports a dynamic slim boolean: %s",
+    async (slim) => {
+      const params = { slim } satisfies ListFormSubscribersParams;
+      const response = { subscribers: [subscriber], pagination };
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      const result = await kit.forms.listSubscribers(7, params);
+      expectTypeOf(result).toEqualTypeOf<
+        ListFormSubscribers | ListSlimFormSubscribers | null
+      >();
+      expect(result).toEqual(response);
+      request("GET", "/forms/7/subscribers", { slim: String(slim) });
+    }
+  );
+
+  it("returns null for a missing form when slim is true", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
+      status: 404,
+    });
+    expect(await kit.forms.listSubscribers(404, { slim: true })).toBeNull();
+    request("GET", "/forms/404/subscribers", { slim: "true" });
   });
 
   it("lists form subscribers without optional filters", async () => {
