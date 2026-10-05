@@ -1,4 +1,4 @@
-import type { Kit } from "~/index";
+import type { Kit, RequestOptions } from "~/index";
 import type {
   BulkCreate,
   BulkCreateParams,
@@ -25,16 +25,18 @@ export class CustomFieldsHandler {
    * Create or update subscriber custom-field values in bulk. Requires OAuth.
    *
    * @param params - Values to update and callback URL (or null).
+   * @param options - Optional request controls, including cancellation.
    * @returns Synchronous values and failures for up to 100 entries, or an asynchronous acknowledgement.
    * @see {@link https://developers.kit.com/api-reference/custom-fields/bulk-update-subscriber-custom-field-values}
    */
   public async bulkUpdateSubscriberValues(
-    params: BulkUpdateSubscriberValuesParams
+    params: BulkUpdateSubscriberValuesParams,
+    options?: RequestOptions
   ): Promise<BulkUpdateSubscriberValues> {
     const resp =
       await this.api.post<BulkUpdateSubscriberValuesWithoutResponseType>(
         "/bulk/custom_fields/subscribers",
-        { body: JSON.stringify(params) }
+        { body: JSON.stringify(params), signal: options?.signal }
       );
     if ("custom_field_values" in resp) {
       return { type: "synchronous", ...resp };
@@ -53,6 +55,7 @@ export class CustomFieldsHandler {
    * callback URL. This will notify you of any failures in processing.
    *
    * @param params - The required fields to run this request.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/custom-fields/bulk-create-custom-fields}
    *
@@ -60,12 +63,16 @@ export class CustomFieldsHandler {
    * failures that may have occurred. For over 100 fields,
    * an empty object will be returned.
    */
-  public async bulkCreate(params: BulkCreateParams): Promise<BulkCreate> {
+  public async bulkCreate(
+    params: BulkCreateParams,
+    options?: RequestOptions
+  ): Promise<BulkCreate> {
     const body = JSON.stringify(params || {});
     const url = "/bulk/custom_fields";
 
     const resp = await this.api.post<BulkCreateWithoutResponseType>(url, {
       body,
+      signal: options?.signal,
     });
 
     // Add on the response type such that the caller of this method
@@ -92,13 +99,15 @@ export class CustomFieldsHandler {
    * your forms or emails.
    *
    * @param params - The optional filtering to apply to the request.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/custom-fields/list-custom-fields}
    *
    * @returns a paginated list of all custom fields.
    */
   public async list(
-    params?: ListCustomFieldsParams
+    params?: ListCustomFieldsParams,
+    options?: RequestOptions
   ): Promise<ListCustomFields> {
     const { after, before, include_total_count, per_page } = params || {};
 
@@ -113,7 +122,10 @@ export class CustomFieldsHandler {
 
     const url = "/custom_fields";
 
-    return await this.api.get<ListCustomFields>(url, { query });
+    return await this.api.get<ListCustomFields>(url, {
+      query,
+      signal: options?.signal,
+    });
   }
 
   /**
@@ -133,18 +145,23 @@ export class CustomFieldsHandler {
    * the key of the custom field prefixed with `ck_field`.
    *
    * @param params - The required fields to create a new Custom Field.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/custom-fields/create-a-custom-field}
    *
    * @returns the newly created custom field.
    */
   public async create(
-    params: CreateCustomFieldParams
+    params: CreateCustomFieldParams,
+    options?: RequestOptions
   ): Promise<CreateCustomField> {
     const body = JSON.stringify(params || {});
     const url = "/custom_fields";
 
-    return await this.api.post<CreateCustomField>(url, { body });
+    return await this.api.post<CreateCustomField>(url, {
+      body,
+      signal: options?.signal,
+    });
   }
 
   /**
@@ -153,16 +170,20 @@ export class CustomFieldsHandler {
    * This will remove all data in this field from your subscribers.
    *
    * @param id - The unique ID of the custom field.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/custom-fields/delete-custom-field}
    *
    * @returns an empty object when deleted successfully; `null` if
    * the custom field was not found.
    */
-  public async delete(id: number): Promise<{} | null> {
+  public async delete(
+    id: number,
+    options?: RequestOptions
+  ): Promise<{} | null> {
     const url = `/custom_fields/${id}`;
 
-    return await this.api.delete<{} | null>(url);
+    return await this.api.delete<{} | null>(url, { signal: options?.signal });
   }
 
   /**
@@ -181,6 +202,7 @@ export class CustomFieldsHandler {
    *
    * @param id - The unique ID of the custom field.
    * @param params - The details to update to.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/custom-fields/update-a-custom-field}
    *
@@ -189,11 +211,15 @@ export class CustomFieldsHandler {
    */
   public async update(
     id: number,
-    params: UpdateCustomFieldParams
+    params: UpdateCustomFieldParams,
+    options?: RequestOptions
   ): Promise<UpdateCustomField | null> {
     const body = JSON.stringify(params || {});
     const url = `/custom_fields/${id}`;
 
-    return await this.api.put<UpdateCustomField | null>(url, { body });
+    return await this.api.put<UpdateCustomField | null>(url, {
+      body,
+      signal: options?.signal,
+    });
   }
 }

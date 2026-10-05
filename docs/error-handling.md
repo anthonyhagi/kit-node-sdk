@@ -182,6 +182,19 @@ await kit.webhooks.create({ target_url, event }, { signal });
 await kit.webhooks.delete(webhookId, { signal });
 ```
 
+All custom-field methods accept request options as their final argument, including
+bulk creation and subscriber-value updates:
+
+```typescript
+await kit.customFields.list(undefined, { signal });
+await kit.customFields.create({ label: "Company" }, { signal });
+await kit.customFields.bulkCreate({ custom_fields }, { signal });
+await kit.customFields.bulkUpdateSubscriberValues(
+  { custom_field_values, callback_url: null },
+  { signal }
+);
+```
+
 Cancellation stops pending fetches, response body reads, and retry waits. An
 already-aborted signal prevents the initial request. Caller cancellations are
 never retried. `timeoutMs` still applies independently to each attempt, and timed-out
