@@ -1,5 +1,14 @@
 import type { Pagination, PaginationParams } from "~/common/types";
 
+/** UTM values Kit parsed from the form subscriber's referring URL. */
+export interface FormReferrerUtmParameters {
+  source: string;
+  medium: string;
+  campaign: string;
+  term: string;
+  content: string;
+}
+
 export interface BulkAddSubscribersParams {
   additions: {
     form_id: number | null;
@@ -27,15 +36,7 @@ export interface BulkAddSubscribersSynchronous {
     email_address: string;
     created_at: string;
     added_at: string;
-    referrer_utm_parameters?:
-      | {
-          source: string;
-          medium: string;
-          campaign: string;
-          term: string;
-          content: string;
-        }
-      | undefined;
+    referrer_utm_parameters?: FormReferrerUtmParameters | undefined;
     referrer?: string | undefined;
   }[];
   failures: {
@@ -138,26 +139,31 @@ export interface ListFormSubscribersParams extends PaginationParams {
     | undefined;
 }
 
+/** Full subscriber record returned by form subscriber lists. */
+export interface FormSubscriber {
+  id: number;
+  first_name: string | null;
+  email_address: string;
+  state: string;
+  created_at: string;
+  added_at: string;
+  fields: Record<string, string | null>;
+  referrer_utm_parameters?: FormReferrerUtmParameters | undefined;
+  referrer?: string | undefined;
+}
+
+/** Add responses retain their string-only custom field values. */
+interface AddedFormSubscriber extends Omit<FormSubscriber, "fields"> {
+  fields: Record<string, string>;
+}
+
+/** The ID-based add endpoint can also return a null state. */
+interface AddedFormSubscriberById extends Omit<AddedFormSubscriber, "state"> {
+  state: string | null;
+}
+
 export interface ListFormSubscribers {
-  subscribers: {
-    id: number;
-    first_name: string | null;
-    email_address: string;
-    state: string;
-    created_at: string;
-    added_at: string;
-    fields: Record<string, string | null>;
-    referrer_utm_parameters?:
-      | {
-          source: string;
-          medium: string;
-          campaign: string;
-          term: string;
-          content: string;
-        }
-      | undefined;
-    referrer?: string | undefined;
-  }[];
+  subscribers: FormSubscriber[];
   pagination: Pagination;
 }
 
@@ -196,25 +202,7 @@ export interface AddSubscriberToFormByEmailParams {
 }
 
 export interface AddSubscriberToFormByEmail {
-  subscriber: {
-    id: number;
-    first_name: string | null;
-    email_address: string;
-    state: string;
-    created_at: string;
-    added_at: string;
-    fields: Record<string, string>;
-    referrer_utm_parameters?:
-      | {
-          source: string;
-          medium: string;
-          campaign: string;
-          term: string;
-          content: string;
-        }
-      | undefined;
-    referrer?: string | undefined;
-  };
+  subscriber: AddedFormSubscriber;
 }
 
 export interface AddSubscriberToFormParams {
@@ -222,23 +210,5 @@ export interface AddSubscriberToFormParams {
 }
 
 export interface AddSubscriberToForm {
-  subscriber: {
-    id: number;
-    first_name: string | null;
-    email_address: string;
-    state: string | null;
-    created_at: string;
-    added_at: string;
-    fields: Record<string, string>;
-    referrer_utm_parameters?:
-      | {
-          source: string;
-          medium: string;
-          campaign: string;
-          term: string;
-          content: string;
-        }
-      | undefined;
-    referrer?: string | undefined;
-  };
+  subscriber: AddedFormSubscriberById;
 }
