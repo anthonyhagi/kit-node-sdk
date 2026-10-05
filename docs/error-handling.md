@@ -97,6 +97,15 @@ For methods with optional filters, pass `undefined` to skip them:
 The exported `RequestOptions` type describes these controls; the signal is never
 sent as a query parameter.
 
+All tag methods also accept request options as their final argument:
+
+```typescript
+await kit.tags.tagSubscriber(tagId, subscriberId, { signal });
+await kit.tags.bulkTag({ taggings }, { signal });
+await kit.tags.list(undefined, { signal });
+await kit.tags.listSubscribers(tagId, undefined, { signal });
+```
+
 Cancellation stops pending fetches, response body reads, and retry waits. An
 already-aborted signal prevents the initial request. Caller cancellations are
 never retried. `timeoutMs` still applies independently to each attempt, and timed-out
