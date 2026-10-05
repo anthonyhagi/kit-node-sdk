@@ -43,7 +43,7 @@ export interface ClientOptions {
    * Must be a non-negative safe integer; invalid values throw at
    * construction. Set to 0 to disable retries. Defaults to 3.
    * Resource request options can override this; purchases.create() and
-   * sequenceEmails.create() default to 0.
+   * sequenceEmails.create() and broadcasts.create() default to 0.
    */
   maxRetries?: number;
 
@@ -69,7 +69,7 @@ export interface ClientOptions {
 
 /** Per-request controls for resource methods. */
 export interface RequestOptions {
-  /** Override the client retry limit; non-negative safe integer. Purchase and sequence email creation default to 0. */
+  /** Override the client retry limit; non-negative safe integer. Purchase, sequence email, and broadcast creation default to 0. */
   maxRetries?: number | undefined;
   /** Cancel the request, including response reads and retry waits. */
   signal?: AbortSignal | undefined;

@@ -94,6 +94,8 @@ export class BroadcastsHandler {
    * Scheduled Broadcasts should contain a subject and your content,
    * at a minimum. Kit currently supports targeting your subscribers
    * based on Segment or Tag ids.
+   * Automatic retries default to 0 because replaying an uncertain creation
+   * can create another broadcast. Request options can explicitly override this.
    *
    * @param params - The required parameters to create a broadcast.
    * @param options - Optional request controls, including cancellation.
@@ -118,7 +120,7 @@ export class BroadcastsHandler {
     return await this.api.post<CreateBroadcast>("/broadcasts", {
       body,
       signal: options?.signal,
-      maxRetries: options?.maxRetries,
+      maxRetries: options?.maxRetries ?? 0,
     });
   }
 

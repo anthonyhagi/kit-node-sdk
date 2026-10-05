@@ -586,6 +586,91 @@ describe("broadcast creation filters through Kit", () => {
     kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
   });
 
+  it.each([null, "2026-10-06T09:00:00Z"])(
+    "does not retry broadcast creation with send_at %s",
+    async (send_at) => {
+      const params = {
+        ...draft,
+        send_at,
+        subscriber_filter: null,
+      } satisfies CreateBroadcastParams;
+      for (const failure of ["network", 500, 503, 429] as const) {
+        fetchMock.resetMocks();
+        kit = new Kit({ apiKey: "test-key", maxRetries: 3, retryDelay: 0 });
+        if (failure === "network") {
+          fetchMock.mockRejectOnce(new Error("Connection lost"));
+        } else {
+          fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Failed"] }), {
+            status: failure,
+          });
+        }
+        fetchMock.mockResponseOnce("{}");
+        await expect(kit.broadcasts.create(params)).rejects.toThrow();
+        expect(fetchMock.requests()).toHaveLength(1);
+        expect(await fetchMock.requests()[0]!.json()).toEqual(params);
+      }
+    }
+  );
+
+  it.each([null, "2026-10-06T09:00:00Z"])(
+    "honors an explicit retry override with send_at %s",
+    async (send_at) => {
+      kit = new Kit({ apiKey: "test-key", maxRetries: 0, retryDelay: 0 });
+      const params = {
+        ...draft,
+        send_at,
+        subscriber_filter: null,
+      } satisfies CreateBroadcastParams;
+      const response = {
+        broadcast: {
+          ...draft,
+          send_at,
+          id: 123,
+          publication_id: 123,
+          created_at: "2026-01-01T12:00:00Z",
+          status: send_at ? "scheduled" : "draft",
+          public_url: null,
+          thumbnail_alt: null,
+          thumbnail_url: null,
+          email_address: "ada@example.com",
+          email_template: { id: 2, name: "Classic" },
+          subscriber_filter: [{ all: [{ type: "all_subscribers" }] }],
+        },
+      } satisfies CreateBroadcast;
+      fetchMock.mockRejectOnce(new Error("Connection lost"));
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      expect(await kit.broadcasts.create(params, { maxRetries: 1 })).toEqual(
+        response
+      );
+      expect(fetchMock.requests()).toHaveLength(2);
+      for (const req of fetchMock.requests()) {
+        expect(await req.json()).toEqual(params);
+      }
+      expect(kit.maxRetries).toBe(0);
+    }
+  );
+
+  it("does not retry creation for an undefined override", async () => {
+    kit = new Kit({ apiKey: "test-key", maxRetries: 3, retryDelay: 0 });
+    fetchMock.mockRejectOnce(new Error("Connection lost"));
+    await expect(
+      kit.broadcasts.create(
+        { ...draft, subscriber_filter: null },
+        { maxRetries: undefined }
+      )
+    ).rejects.toThrow("Connection lost");
+    expect(fetchMock.requests()).toHaveLength(1);
+  });
+
+  it("retains client retries for broadcast reads", async () => {
+    kit = new Kit({ apiKey: "test-key", maxRetries: 1, retryDelay: 0 });
+    const response = { broadcasts: [], pagination } satisfies ListBroadcasts;
+    fetchMock.mockRejectOnce(new Error("Connection lost"));
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.broadcasts.list()).toEqual(response);
+    expect(fetchMock.requests()).toHaveLength(2);
+  });
+
   it.each(["all", "any", "none"] as const)(
     "sends an array with a %s group targeting tags and segments",
     async (mode) => {
