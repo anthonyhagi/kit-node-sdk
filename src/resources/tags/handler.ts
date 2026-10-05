@@ -1,5 +1,5 @@
 import type { Kit } from "~/index";
-import { toDateString } from "~/utils/date";
+import { toDateOnlyString } from "~/utils/date";
 import type {
   BulkCreateTags,
   BulkCreateTagsParams,
@@ -371,16 +371,18 @@ export class TagsHandler {
     const query = new URLSearchParams({
       ...(after && { after }),
       ...(before && { before }),
-      ...(created_after && { created_after: toDateString(created_after) }),
-      ...(created_before && { created_before: toDateString(created_before) }),
+      ...(created_after && { created_after: toDateOnlyString(created_after) }),
+      ...(created_before && {
+        created_before: toDateOnlyString(created_before),
+      }),
       ...(include_total_count !== undefined && {
         include_total_count: String(include_total_count),
       }),
       ...(per_page && { per_page: String(per_page) }),
       ...(slim !== undefined && { slim: String(slim) }),
       ...(status && { status }),
-      ...(tagged_after && { tagged_after: toDateString(tagged_after) }),
-      ...(tagged_before && { tagged_before: toDateString(tagged_before) }),
+      ...(tagged_after && { tagged_after: toDateOnlyString(tagged_after) }),
+      ...(tagged_before && { tagged_before: toDateOnlyString(tagged_before) }),
     });
 
     const url = `/tags/${tagId}/subscribers`;

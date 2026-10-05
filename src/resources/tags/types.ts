@@ -206,12 +206,14 @@ export interface ListTagSubscribersParams {
   /**
    * Filter subscribers who have been created after this
    * date (format yyyy-mm-dd).
+   * Date objects use their UTC calendar date.
    */
   created_after?: Date | string | undefined;
 
   /**
    * Filter subscribers who have been created before this
    * date (format yyyy-mm-dd).
+   * Date objects use their UTC calendar date.
    */
   created_before?: Date | string | undefined;
 
@@ -248,12 +250,14 @@ export interface ListTagSubscribersParams {
   /**
    * Filter subscribers who have been tagged after this date
    * (format yyyy-mm-dd).
+   * Date objects use their UTC calendar date.
    */
   tagged_after?: Date | string | undefined;
 
   /**
    * Filter subscribers who have been tagged before this date
    * (format yyyy-mm-dd).
+   * Date objects use their UTC calendar date.
    */
   tagged_before?: Date | string | undefined;
 }
