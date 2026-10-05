@@ -57,6 +57,74 @@ describe("sequence requests through Kit", () => {
     kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
   });
 
+  it.each([
+    {
+      added_after: null,
+      added_before: null,
+      created_after: null,
+      created_before: null,
+      after: null,
+      before: null,
+      per_page: null,
+    },
+    {
+      added_after: undefined,
+      added_before: undefined,
+      created_after: undefined,
+      created_before: undefined,
+      after: undefined,
+      before: undefined,
+      per_page: undefined,
+    },
+  ] satisfies ListSequenceSubscribersParams[])(
+    "omits nullable and undefined subscriber filters: %j",
+    async (params) => {
+      const response = {
+        subscribers: [subscriber],
+        pagination,
+      } satisfies ListSequenceSubscribers;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      const result = await kit.sequences.listSubscribers(7, params);
+      expectTypeOf(result).toEqualTypeOf<ListSequenceSubscribers | null>();
+      expect(result).toEqual(response);
+      expect(await request("GET", "/sequences/7/subscribers").text()).toBe("");
+    }
+  );
+
+  it.each([
+    "active",
+    "inactive",
+    "bounced",
+    "complained",
+    "cancelled",
+    "all",
+  ] as const)(
+    "preserves %s status and false counts alongside nullable subscriber filters",
+    async (status) => {
+      const params = {
+        added_after: null,
+        added_before: null,
+        created_after: null,
+        created_before: null,
+        after: null,
+        before: null,
+        per_page: null,
+        status,
+        include_total_count: false,
+      } satisfies ListSequenceSubscribersParams;
+      const response = {
+        subscribers: [subscriber],
+        pagination,
+      } satisfies ListSequenceSubscribers;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      expect(await kit.sequences.listSubscribers(7, params)).toEqual(response);
+      request("GET", "/sequences/7/subscribers", {
+        status,
+        include_total_count: "false",
+      });
+    }
+  );
+
   const customFieldCases: {
     name: string;
     fields: ListSequenceSubscribers["subscribers"][number]["fields"];

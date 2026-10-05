@@ -796,6 +796,19 @@ Null and undefined values are omitted from the query so Kit uses its defaults.
 An explicit `include_content: false` is sent as `false`.
 See the [Kit API reference](https://developers.kit.com/api-reference/sequence-emails/list-sequence-emails).
 
+## Listing sequence subscribers
+
+`kit.sequences.listSubscribers(sequenceId, params)` returns a page of subscribers,
+or `null` when the sequence cannot be found. Filter by subscription dates with
+`added_after` and `added_before`, or subscriber creation dates with
+`created_after` and `created_before`. Date objects use their UTC calendar date.
+
+These four date filters, plus `after`, `before`, and `per_page`, accept `null`.
+Null and undefined values are omitted from the query so Kit uses its defaults.
+Status filters and an explicit `include_total_count: false` are still sent.
+
+See the [Kit API reference](https://developers.kit.com/api-reference/sequences/list-subscribers-for-a-sequence).
+
 ## Deleting a sequence
 
 `kit.sequences.delete(id)` soft-deletes a sequence and stops active deliveries
