@@ -551,10 +551,10 @@ export interface GetSubscriberStats {
 }
 
 export interface GetSubscriberTagsParams {
-  after?: string | undefined;
-  before?: string | undefined;
+  after?: string | null | undefined;
+  before?: string | null | undefined;
   include_total_count?: boolean | undefined;
-  per_page?: number | undefined;
+  per_page?: number | null | undefined;
 }
 
 export interface GetSubscriberTags {

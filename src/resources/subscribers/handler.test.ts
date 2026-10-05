@@ -22,6 +22,8 @@ import {
   type GetSubscriber,
   type GetSubscriberStats,
   type GetSubscriberStatsParams,
+  type GetSubscriberTags,
+  type GetSubscriberTagsParams,
   type ListSubscribers,
   type ListSubscribersParams,
   type PinSubscriberLocation,
@@ -123,6 +125,39 @@ describe("subscriber requests through Kit", () => {
       });
     }
   );
+
+  it.each([
+    { after: null, before: null, per_page: null },
+    { after: undefined, before: undefined, per_page: undefined },
+  ] satisfies GetSubscriberTagsParams[])(
+    "omits nullable and undefined subscriber tag pagination: %j",
+    async (params) => {
+      const response = {
+        tags: [
+          { id: 7, name: "Newsletter", tagged_at: "2026-01-01T00:00:00Z" },
+        ],
+        pagination,
+      } satisfies GetSubscriberTags;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      const result = await kit.subscribers.getTags(42, params);
+      expectTypeOf(result).toEqualTypeOf<GetSubscriberTags | null>();
+      expect(result).toEqual(response);
+      expect(await request("GET", "/subscribers/42/tags").text()).toBe("");
+    }
+  );
+
+  it("preserves false total-count flags with nullable subscriber tag pagination", async () => {
+    const params = {
+      after: null,
+      before: null,
+      per_page: null,
+      include_total_count: false,
+    } satisfies GetSubscriberTagsParams;
+    const response = { tags: [], pagination } satisfies GetSubscriberTags;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.subscribers.getTags(42, params)).toEqual(response);
+    request("GET", "/subscribers/42/tags", { include_total_count: "false" });
+  });
 
   it("lists subscribers without optional query parameters", async () => {
     const response = { subscribers: [subscriber], pagination };

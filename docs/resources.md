@@ -88,6 +88,16 @@ await kit.forms.addSubscriberByEmail(7, {
 The subscriber must already exist. See
 [Kit's endpoint reference](https://developers.kit.com/api-reference/forms/add-subscriber-to-form-by-email-address).
 
+## Listing a subscriber's tags
+
+`kit.subscribers.getTags(subscriberId, params)` returns a page of tags, or `null`
+when the subscriber cannot be found. Its `after`, `before`, and `per_page`
+pagination parameters accept `null`. Null and undefined values are omitted from
+the query so Kit uses its defaults. An explicit `include_total_count: false` is
+still sent when supplied alongside null pagination values.
+
+See the [Kit API reference](https://developers.kit.com/api-reference/subscribers/list-tags-for-a-subscriber).
+
 ## Nullable subscriber list pagination
 
 `kit.subscribers.list(params)` accepts `null` for the `after`, `before`, and
