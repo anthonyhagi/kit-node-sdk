@@ -141,17 +141,17 @@ export interface ListSequences {
 
 export interface ListSequenceSubscribersParams {
   /** Added after this date (YYYY-MM-DD). Date objects use their UTC calendar date. */
-  added_after?: Date | string | undefined;
+  added_after?: Date | string | null | undefined;
   /** Added before this date (YYYY-MM-DD). Date objects use their UTC calendar date. */
-  added_before?: Date | string | undefined;
-  after?: string | undefined;
-  before?: string | undefined;
+  added_before?: Date | string | null | undefined;
+  after?: string | null | undefined;
+  before?: string | null | undefined;
   /** Created after this date (YYYY-MM-DD). Date objects use their UTC calendar date. */
-  created_after?: Date | string | undefined;
+  created_after?: Date | string | null | undefined;
   /** Created before this date (YYYY-MM-DD). Date objects use their UTC calendar date. */
-  created_before?: Date | string | undefined;
+  created_before?: Date | string | null | undefined;
   include_total_count?: boolean | undefined;
-  per_page?: number | undefined;
+  per_page?: number | null | undefined;
   status?: SubscriberState | "all" | (string & {}) | undefined;
 }
 
