@@ -88,6 +88,15 @@ await kit.forms.addSubscriberByEmail(7, {
 The subscriber must already exist. See
 [Kit's endpoint reference](https://developers.kit.com/api-reference/forms/add-subscriber-to-form-by-email-address).
 
+## Nullable subscriber list pagination
+
+`kit.subscribers.list(params)` accepts `null` for the `after`, `before`, and
+`per_page` pagination parameters. Null and undefined values are omitted from the
+query so Kit uses its defaults. Sorting, status, includes, date filters, and
+explicit false flags can still be supplied alongside null pagination values.
+
+See the [Kit API reference](https://developers.kit.com/api-reference/subscribers/list-subscribers).
+
 ## Slim form subscriber lists
 
 Pass `slim: true` to `kit.forms.listSubscribers()` for a faster, smaller response:

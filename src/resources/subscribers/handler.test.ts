@@ -73,6 +73,57 @@ describe("subscriber requests through Kit", () => {
     kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
   });
 
+  it.each([
+    { after: null, before: null, per_page: null },
+    { after: undefined, before: undefined, per_page: undefined },
+  ] satisfies ListSubscribersParams[])(
+    "omits nullable and undefined subscriber pagination: %j",
+    async (params) => {
+      const response = {
+        subscribers: [subscriber],
+        pagination,
+      } satisfies ListSubscribers;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      const result = await kit.subscribers.list(params);
+      expectTypeOf(result).toEqualTypeOf<ListSubscribers>();
+      expect(result).toEqual(response);
+      expect(await request("GET", "/subscribers").text()).toBe("");
+    }
+  );
+
+  it.each([true, false])(
+    "preserves slim: %s, sorting, status, includes, and false counts with null pagination",
+    async (slim) => {
+      const params = {
+        after: null,
+        before: null,
+        per_page: null,
+        slim,
+        status: "cancelled",
+        include: "canceled_at,tags",
+        sort_field: "cancelled_at",
+        sort_order: "desc",
+        include_total_count: false,
+        created_after: new Date("2026-01-01T00:00:00Z"),
+      } satisfies ListSubscribersParams;
+      const response = {
+        subscribers: [],
+        pagination,
+      } satisfies ListSubscribers;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      expect(await kit.subscribers.list(params)).toEqual(response);
+      request("GET", "/subscribers", {
+        slim: String(slim),
+        status: "cancelled",
+        include: "canceled_at,tags",
+        sort_field: "cancelled_at",
+        sort_order: "desc",
+        include_total_count: "false",
+        created_after: "2026-01-01",
+      });
+    }
+  );
+
   it("lists subscribers without optional query parameters", async () => {
     const response = { subscribers: [subscriber], pagination };
     fetchMock.mockResponseOnce(JSON.stringify(response));

@@ -48,8 +48,8 @@ export type BulkCreateSubscribersWithoutType =
   | Omit<BulkCreateSubscribersAsynchronous, "type">;
 
 export interface ListSubscribersParams {
-  after?: string | undefined;
-  before?: string | undefined;
+  after?: string | null | undefined;
+  before?: string | null | undefined;
   /** Created after this date (YYYY-MM-DD). Date objects use their UTC calendar date. */
   created_after?: Date | string | undefined;
   /** Created before this date (YYYY-MM-DD). Date objects use their UTC calendar date. */
@@ -61,7 +61,7 @@ export interface ListSubscribersParams {
    */
   include?: string | undefined;
   include_total_count?: boolean | undefined;
-  per_page?: number | undefined;
+  per_page?: number | null | undefined;
   /** Omit custom field values from the response for a smaller payload. */
   slim?: boolean | undefined;
   /**
