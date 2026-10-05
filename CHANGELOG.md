@@ -1,5 +1,35 @@
 # @anthonyhagi/kit-node-sdk
 
+## 0.7.0
+
+### Minor Changes
+
+- b37aa95: Support optional AbortSignal cancellation for listing, creating, and deleting legacy webhooks.
+- 6f3a6a0: Support optional AbortSignal cancellation across all account methods, including account details, creator profiles, colors, and statistics.
+- b2ed568: Support optional AbortSignal cancellation for listing, fetching, and creating purchases.
+- 3f02060: Breaking: raise the minimum supported Node.js version from 18 to 22. Node 18 and 20 users must upgrade their runtime before installing this release. Target Node 22 in the compiled package and verify packed ESM/CommonJS usage on Node 22.0.0, latest Node 22, and Node 24.
+- 9fced24: Support optional AbortSignal cancellation across all custom-field methods, including bulk field creation and subscriber-value updates.
+- e80311a: Support optional AbortSignal cancellation across all webhook endpoint methods, including signing secret rotation and previous-secret revocation.
+- 25fd257: Support optional AbortSignal cancellation for posts, segments, and email templates, completing cancellation support across resource methods.
+- b35c389: Support optional AbortSignal cancellation for listing, fetching, creating, and updating snippets.
+
+### Patch Changes
+
+- 1db2ca6: Fix request header overrides to replace default and authentication headers regardless of casing. Lowercase or mixed-case overrides no longer combine values such as Content-Type or Authorization with the original header.
+- 179cd2b: Accept documented nullable broadcast list filters for normal and slim responses.
+- 22fd29f: Accept documented nullable broadcast stats list filters and omit null query values while preserving status filters and explicit false count flags.
+- 3e9b9fb: Allow nullable referrers when adding form subscribers by email and preserve defined referrer values in the request body.
+- 5eec5d6: Accept documented nullable form list filters while preserving subscriber-count inclusion and explicit false total-count flags.
+- c01e26f: Accept documented nullable form subscriber list filters for normal and slim responses.
+- b8d8acb: Accept documented nullable sequence email list parameters and omit null query values while preserving explicit false content flags.
+- c5d4f3c: Accept documented nullable sequence subscriber list filters while preserving status filters and explicit false total-count flags.
+- 5cff9f4: Accept documented nullable snippet list parameters and omit null query values while preserving explicit false flags.
+- 40a86c5: Accept documented nullable tag subscriber list filters while preserving status filters and explicit false flags.
+- 4c3a525: Accept documented nullable webhook endpoint pagination parameters and omit null query values while preserving status filters and explicit false count flags.
+- bded8c0: Fix low-level request query merging when the path already contains query parameters or a fragment. Additional parameters now append to the existing query before the fragment, preserving repeated keys and correctly encoding values.
+- 521269a: Expose ListSlimTagSubscribers and return it for slim tag subscriber listing, allowing omitted custom fields and tagging metadata while retaining full response types for normal requests.
+- cdfa226: Make URL filter patterns and matching mode optional, allowing ID-only filters and Kit's default exact matching behavior.
+
 ## 0.6.0
 
 ### Minor Changes
