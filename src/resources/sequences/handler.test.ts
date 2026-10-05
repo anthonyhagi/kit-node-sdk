@@ -7,6 +7,7 @@ import {
   type GetSequence,
   type ListSequences,
   type ListSequenceSubscribers,
+  type ListSequenceSubscribersParams,
   type SequenceListItem,
   type SequenceStats,
   type UpdateSequence,
@@ -540,13 +541,52 @@ describe("sequence requests through Kit", () => {
         per_page: "25",
         include_total_count: "true",
         status: "all",
-        added_after: "2026-01-01T00:00:00.000Z",
+        added_after: "2026-01-01",
         added_before: "2026-02-01",
         created_after: "2026-03-01",
-        created_before: "2026-04-01T00:00:00.000Z",
+        created_before: "2026-04-01",
       });
     }
   );
+
+  describe.each([
+    "added_after",
+    "added_before",
+    "created_after",
+    "created_before",
+  ] as const)("sequence subscriber date filter %s", (field) => {
+    it.each([
+      {
+        name: "positive offset crossing to the previous UTC day",
+        value: new Date("2026-01-01T00:30:00+10:30"),
+        expected: "2025-12-31",
+      },
+      {
+        name: "negative offset crossing to the next UTC day",
+        value: new Date("2026-01-01T23:30:00-08:00"),
+        expected: "2026-01-02",
+      },
+      {
+        name: "date string passthrough",
+        value: "2026-03-15",
+        expected: "2026-03-15",
+      },
+    ])("formats $name", async ({ value, expected }) => {
+      const params = { [field]: value } satisfies ListSequenceSubscribersParams;
+      const response = {
+        subscribers: [],
+        pagination,
+      } satisfies ListSequenceSubscribers;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+
+      expect(await kit.sequences.listSubscribers(7, params)).toEqual(response);
+      expect(
+        await request("GET", "/sequences/7/subscribers", {
+          [field]: expected,
+        }).text()
+      ).toBe("");
+    });
+  });
 
   it.each([200, 201])(
     "adds a subscriber by email with a JSON body on status %i",

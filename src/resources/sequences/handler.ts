@@ -1,5 +1,5 @@
 import type { Kit } from "~/index";
-import { toDateString } from "~/utils/date";
+import { toDateOnlyString } from "~/utils/date";
 import type {
   AddSubscriberByEmailParams,
   AddSubscriberToSequence,
@@ -137,12 +137,14 @@ export class SequencesHandler {
     } = params || {};
 
     const query = new URLSearchParams({
-      ...(added_after && { added_after: toDateString(added_after) }),
-      ...(added_before && { added_before: toDateString(added_before) }),
+      ...(added_after && { added_after: toDateOnlyString(added_after) }),
+      ...(added_before && { added_before: toDateOnlyString(added_before) }),
       ...(after && { after }),
       ...(before && { before }),
-      ...(created_after && { created_after: toDateString(created_after) }),
-      ...(created_before && { created_before: toDateString(created_before) }),
+      ...(created_after && { created_after: toDateOnlyString(created_after) }),
+      ...(created_before && {
+        created_before: toDateOnlyString(created_before),
+      }),
       ...(include_total_count !== undefined && {
         include_total_count: String(include_total_count),
       }),
