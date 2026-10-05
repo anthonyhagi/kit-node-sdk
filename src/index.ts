@@ -329,6 +329,8 @@ export type {
   GetPurchase,
   ListPurchases,
   ListPurchasesParams,
+  Purchase,
+  PurchaseProduct,
 } from "./resources/purchases/types";
 
 export type {

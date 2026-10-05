@@ -2,30 +2,36 @@ import type { Pagination, PaginationParams } from "~/common/types";
 
 export interface ListPurchasesParams extends PaginationParams {}
 
+/** A purchased line item returned by Kit. External IDs remain strings. */
+export interface PurchaseProduct {
+  quantity: number;
+  lid: string;
+  unit_price: number;
+  sku: string | null;
+  name: string;
+  pid: string;
+}
+
+/** Purchase record shared by list, create, and get responses. */
+export interface Purchase {
+  id: number;
+  transaction_id: string;
+  status: string;
+  subscriber_id: number;
+  /** Purchase origin; not guaranteed to be included by Kit. */
+  source?: string | undefined;
+  email_address: string;
+  currency: string;
+  transaction_time: string;
+  subtotal: number;
+  discount: number;
+  tax: number;
+  total: number;
+  products: PurchaseProduct[];
+}
+
 export interface ListPurchases {
-  purchases: {
-    id: number;
-    transaction_id: string;
-    status: string;
-    subscriber_id: number;
-    /** Purchase origin; not guaranteed to be included by Kit. */
-    source?: string | undefined;
-    email_address: string;
-    currency: string;
-    transaction_time: string;
-    subtotal: number;
-    discount: number;
-    tax: number;
-    total: number;
-    products: {
-      quantity: number;
-      lid: string;
-      unit_price: number;
-      sku: string | null;
-      name: string;
-      pid: string;
-    }[];
-  }[];
+  purchases: Purchase[];
   pagination: Pagination;
 }
 
@@ -102,53 +108,9 @@ export interface CreatePurchaseParams {
 }
 
 export interface CreatePurchase {
-  purchase: {
-    id: number;
-    transaction_id: string;
-    status: string;
-    subscriber_id: number;
-    /** Purchase origin; not guaranteed to be included by Kit. */
-    source?: string | undefined;
-    email_address: string;
-    currency: string;
-    transaction_time: string;
-    subtotal: number;
-    discount: number;
-    tax: number;
-    total: number;
-    products: {
-      quantity: number;
-      lid: string;
-      unit_price: number;
-      sku: string | null;
-      name: string;
-      pid: string;
-    }[];
-  };
+  purchase: Purchase;
 }
 
 export interface GetPurchase {
-  purchase: {
-    id: number;
-    transaction_id: string;
-    status: string;
-    subscriber_id: number;
-    /** Purchase origin; not guaranteed to be included by Kit. */
-    source?: string | undefined;
-    email_address: string;
-    currency: string;
-    transaction_time: string;
-    subtotal: number;
-    discount: number;
-    tax: number;
-    total: number;
-    products: {
-      quantity: number;
-      lid: string;
-      unit_price: number;
-      sku: string | null;
-      name: string;
-      pid: string;
-    }[];
-  };
+  purchase: Purchase;
 }
