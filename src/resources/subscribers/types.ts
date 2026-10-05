@@ -35,8 +35,7 @@ export interface BulkCreateSubscribersAsynchronous {
 }
 
 export type BulkCreateSubscribers =
-  | BulkCreateSubscribersSynchronous
-  | BulkCreateSubscribersAsynchronous;
+  BulkCreateSubscribersSynchronous | BulkCreateSubscribersAsynchronous;
 
 export type BulkCreateSubscribersWithoutType =
   | Omit<BulkCreateSubscribersSynchronous, "type">

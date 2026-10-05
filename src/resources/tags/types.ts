@@ -57,8 +57,7 @@ export interface BulkCreateTagsAsynchronous {
 }
 
 export type BulkCreateTags =
-  | BulkCreateTagsSynchronous
-  | BulkCreateTagsAsynchronous;
+  BulkCreateTagsSynchronous | BulkCreateTagsAsynchronous;
 
 export type BulkCreateTagsWithoutType =
   | Omit<BulkCreateTagsSynchronous, "type">
@@ -82,8 +81,7 @@ export interface BulkRemoveTagsAsynchronous {
 }
 
 export type BulkRemoveTags =
-  | BulkRemoveTagsSynchronous
-  | BulkRemoveTagsAsynchronous;
+  BulkRemoveTagsSynchronous | BulkRemoveTagsAsynchronous;
 
 export type BulkRemoveTagsWithoutType =
   | Omit<BulkRemoveTagsSynchronous, "type">
@@ -115,8 +113,7 @@ export interface BulkTagAsynchronous {
 
 export type BulkTag = BulkTagSynchronous | BulkTagAsynchronous;
 export type BulkTagWithoutType =
-  | Omit<BulkTagSynchronous, "type">
-  | Omit<BulkTagAsynchronous, "type">;
+  Omit<BulkTagSynchronous, "type"> | Omit<BulkTagAsynchronous, "type">;
 
 export interface ListTagsParams {
   /** Include the number of active subscribers with each tag. */
