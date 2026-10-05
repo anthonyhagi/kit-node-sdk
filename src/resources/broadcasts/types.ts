@@ -71,7 +71,7 @@ export interface ListBroadcastsParams {
    *
    * @example after: pagination.end_cursor
    */
-  after?: string | undefined;
+  after?: string | null | undefined;
 
   /**
    * Pass in the string from the previous request to move
@@ -79,7 +79,7 @@ export interface ListBroadcastsParams {
    *
    * @example before: pagination.start_cursor
    */
-  before?: string | undefined;
+  before?: string | null | undefined;
 
   /**
    * To include the total count of records in the response,
@@ -95,16 +95,16 @@ export interface ListBroadcastsParams {
    *
    * @example per_page: 500
    */
-  per_page?: number | undefined;
+  per_page?: number | null | undefined;
 
   /** Omit content, public URL, sending address, template, and subscriber filter. */
   slim?: boolean | undefined;
 
   /** Filter broadcasts sent after this date (YYYY-MM-DD). */
-  sent_after?: string | undefined;
+  sent_after?: string | null | undefined;
 
   /** Filter broadcasts sent before this date (YYYY-MM-DD). */
-  sent_before?: string | undefined;
+  sent_before?: string | null | undefined;
 
   /** Filter broadcasts by lifecycle status. */
   status?: BroadcastStatus | undefined;
@@ -268,10 +268,12 @@ export interface GetBroadcastStats {
 }
 
 /** Pagination applies to the links within the broadcast. */
-export type GetLinkClicksParams = Pick<
-  ListBroadcastsParams,
-  "after" | "before" | "include_total_count" | "per_page"
->;
+export type GetLinkClicksParams = {
+  [Key in "after" | "before" | "include_total_count" | "per_page"]?: Exclude<
+    ListBroadcastsParams[Key],
+    null
+  >;
+};
 
 export interface GetLinkClicks {
   broadcast: {
