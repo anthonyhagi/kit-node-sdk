@@ -64,7 +64,7 @@ export interface ListFormsParams {
    *
    * @example after: pagination.end_cursor
    */
-  after?: string | undefined;
+  after?: string | null | undefined;
 
   /**
    * Pass in the string from the previous request to move
@@ -72,7 +72,7 @@ export interface ListFormsParams {
    *
    * @example after: pagination.start_cursor
    */
-  before?: string | undefined;
+  before?: string | null | undefined;
 
   /**
    * To include the total count of records in the response,
@@ -88,20 +88,26 @@ export interface ListFormsParams {
    *
    * @example perPage: 500
    */
-  per_page?: number | undefined;
+  per_page?: number | null | undefined;
 
   /**
    * Filter by a specific status. This defaults to "active" on
    * the remote API.
    */
   status?:
-    "active" | "archived" | "trashed" | "all" | (string & {}) | undefined;
+    | "active"
+    | "archived"
+    | "trashed"
+    | "all"
+    | (string & {})
+    | null
+    | undefined;
 
   /**
    * Filter forms and landing pages by type. Use "embed" for embedded
    * forms. Use "hosted" for landing pages.
    */
-  type?: "embed" | "hosted" | (string & {}) | undefined;
+  type?: "embed" | "hosted" | (string & {}) | null | undefined;
 }
 
 export interface ListForms {

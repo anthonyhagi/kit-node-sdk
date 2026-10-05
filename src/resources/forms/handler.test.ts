@@ -69,6 +69,49 @@ describe("form requests through Kit", () => {
     expect(await request("GET", "/forms").text()).toBe("");
   });
 
+  it.each([
+    { after: null, before: null, per_page: null, status: null, type: null },
+    {
+      after: undefined,
+      before: undefined,
+      per_page: undefined,
+      status: undefined,
+      type: undefined,
+    },
+  ] satisfies ListFormsParams[])(
+    "omits nullable and undefined form list filters: %j",
+    async (params) => {
+      const response = { forms: [form], pagination } satisfies ListForms;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      const result = await kit.forms.list(params);
+      expectTypeOf(result).toEqualTypeOf<ListForms>();
+      expect(result).toEqual(response);
+      expect(await request("GET", "/forms").text()).toBe("");
+    }
+  );
+
+  it("preserves subscriber counts and false total counts alongside null filters", async () => {
+    const params = {
+      after: null,
+      before: null,
+      per_page: null,
+      status: null,
+      type: null,
+      include: "subscriber_count",
+      include_total_count: false,
+    } satisfies ListFormsParams;
+    const response = {
+      forms: [{ ...form, subscriber_count: 0 }],
+      pagination,
+    } satisfies ListForms;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.forms.list(params)).toEqual(response);
+    request("GET", "/forms", {
+      include: "subscriber_count",
+      include_total_count: "false",
+    });
+  });
+
   it.each(["after", "before"] as const)(
     "encodes the %s form cursor with status and type filters",
     async (cursor) => {

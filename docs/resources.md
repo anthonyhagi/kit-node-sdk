@@ -218,6 +218,11 @@ The exported `ListFormsParams` type accepts this include option, and `ListForms`
 exposes `subscriber_count` as an optional number. A form can have a count of zero;
 responses without the include option can omit it. This per-form count is separate
 from `include_total_count`, which requests the number of forms for pagination.
+The `after`, `before`, `per_page`, `status`, and `type` list filters accept `null`.
+Null and undefined values are omitted from the query so Kit uses its defaults.
+`include: "subscriber_count"` and an explicit `include_total_count: false` are
+still sent when supplied alongside null filters.
+
 See the [Kit API reference](https://developers.kit.com/api-reference/forms/list-forms).
 
 ## Custom-field events for legacy webhooks
