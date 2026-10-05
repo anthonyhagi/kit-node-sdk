@@ -135,13 +135,13 @@ export interface ListFormSubscribersParams {
    * Filter subscribers who have been added to the form after this
    * date (format yyyy-mm-dd). Date objects use their UTC calendar date.
    */
-  added_after?: Date | string | undefined;
+  added_after?: Date | string | null | undefined;
 
   /**
    * Filter subscribers who have been added to the form before this
    * date (format yyyy-mm-dd). Date objects use their UTC calendar date.
    */
-  added_before?: Date | string | undefined;
+  added_before?: Date | string | null | undefined;
 
   /**
    * Pass in the string from the previous request to move
@@ -149,7 +149,7 @@ export interface ListFormSubscribersParams {
    *
    * @example after: pagination.end_cursor
    */
-  after?: string | undefined;
+  after?: string | null | undefined;
 
   /**
    * Pass in the string from the previous request to move
@@ -157,19 +157,19 @@ export interface ListFormSubscribersParams {
    *
    * @example after: pagination.start_cursor
    */
-  before?: string | undefined;
+  before?: string | null | undefined;
 
   /**
    * Filter subscribers who have been created after this date
    * (format yyyy-mm-dd). Date objects use their UTC calendar date.
    */
-  created_after?: Date | string | undefined;
+  created_after?: Date | string | null | undefined;
 
   /**
    * Filter subscribers who have been created before this date
    * (format yyyy-mm-dd). Date objects use their UTC calendar date.
    */
-  created_before?: Date | string | undefined;
+  created_before?: Date | string | null | undefined;
 
   /**
    * To include the total count of records in the response,
@@ -185,7 +185,7 @@ export interface ListFormSubscribersParams {
    *
    * @example perPage: 500
    */
-  per_page?: number | undefined;
+  per_page?: number | null | undefined;
 
   /**
    * Filter by a specific status. This defaults to "active" on

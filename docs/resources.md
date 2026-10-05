@@ -106,6 +106,11 @@ specifying every omitted field. Passing `slim: false` or omitting the option
 retains `ListFormSubscribers | null`; a dynamic boolean returns the union.
 Explicit false is sent to Kit, and undefined is omitted. Pagination and filters
 can be combined with slim; missing forms return `null`.
+The `added_after`, `added_before`, `created_after`, `created_before`, `after`,
+`before`, and `per_page` filters accept `null`. Null and undefined values are
+omitted from the query for normal and slim responses. Status filters and
+explicit false flags are still sent.
+
 See the [Kit API reference](https://developers.kit.com/api-reference/forms/list-subscribers-for-a-form).
 
 ## Bulk completion callbacks
