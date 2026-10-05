@@ -178,6 +178,9 @@ export interface RemoveSubscriberByEmailParams {
 }
 
 export interface ListTagSubscribersParams {
+  /** Request a smaller response by omitting expensive optional fields. */
+  slim?: boolean | undefined;
+
   /**
    * Pass in the string from the previous request to move
    * the cursor. This can be found in the following field:
