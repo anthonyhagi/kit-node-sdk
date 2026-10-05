@@ -9,6 +9,7 @@ import {
   type ListBroadcasts,
   type ListBroadcastsParams,
   type ListSlimBroadcasts,
+  type UpdateBroadcastParams,
 } from "~/index";
 
 const pagination = {
@@ -497,6 +498,79 @@ describe("broadcast creation filters through Kit", () => {
       published_at: "2026-01-01T12:00:00.000Z",
       send_at: "2026-02-01T12:00:00.000Z",
       subscriber_filter: [group],
+    });
+  });
+});
+
+describe("broadcast Starting point option through Kit", () => {
+  const draft = {
+    email_template_id: 3,
+    email_address: null,
+    subject: "Newsletter",
+    content:
+      "<html><body>Hello {{ unsubscribe_url }} {{ address }}</body></html>",
+    description: "Monthly update",
+    public: false,
+    published_at: "2026-01-01T12:00:00Z",
+    send_at: null,
+    thumbnail_alt: null,
+    thumbnail_url: null,
+    preview_text: "Our latest news",
+    subscriber_filter: [
+      { all: [{ type: "tag", ids: [7] }], any: null, none: null },
+    ],
+  };
+  let kit: Kit;
+
+  beforeEach(() => {
+    fetchMock.resetMocks();
+    kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
+  });
+
+  describe.each(["create", "update"] as const)("%s", (method) => {
+    it.each([
+      {
+        name: "enabled",
+        option: { allow_starting_point: true },
+        expected: true,
+      },
+      {
+        name: "disabled",
+        option: { allow_starting_point: false },
+        expected: false,
+      },
+      { name: "omitted", option: {}, expected: undefined },
+      {
+        name: "undefined",
+        option: { allow_starting_point: undefined },
+        expected: undefined,
+      },
+    ])("serializes the $name option", async ({ option, expected }) => {
+      const response = { broadcast: { id: 123, ...draft } };
+      fetchMock.mockResponseOnce(JSON.stringify(response), {
+        status: method === "create" ? 201 : 200,
+      });
+
+      const params = { ...draft, ...option } satisfies CreateBroadcastParams &
+        UpdateBroadcastParams;
+      const result =
+        method === "create"
+          ? await kit.broadcasts.create(params)
+          : await kit.broadcasts.update(123, params);
+
+      expect(result).toEqual(response);
+      const requests = fetchMock.requests();
+      expect(requests).toHaveLength(1);
+      const req = requests[0]!;
+      expect(req.method).toBe(method === "create" ? "POST" : "PUT");
+      expect(req.url).toBe(
+        `https://api.kit.com/v4/broadcasts${method === "update" ? "/123" : ""}`
+      );
+      expect(req.headers.get("Content-Type")).toBe("application/json");
+      expect(await req.json()).toEqual({
+        ...draft,
+        ...(expected !== undefined && { allow_starting_point: expected }),
+      });
     });
   });
 });
