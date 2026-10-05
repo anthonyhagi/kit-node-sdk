@@ -108,7 +108,8 @@ interface BroadcastResponse {
   subscriber_filter: BroadcastSubscriberFilterResponseGroup[];
 }
 
-interface ListedBroadcast extends BroadcastResponse {
+/** Full broadcast list record with optional URL, click, and stats enrichments. */
+export interface BroadcastListItem extends BroadcastResponse {
   public_url?: string | null | undefined;
   clicks?: BroadcastLinkClick[] | undefined;
   stats?: BroadcastStats | undefined;
@@ -124,12 +125,14 @@ interface CreatedBroadcast extends BroadcastResponse {
   public_url: string | null;
 }
 
-interface BroadcastWithPublicUrl extends BroadcastResponse {
+/** Broadcast record returned by single reads and updates. */
+export interface Broadcast extends BroadcastResponse {
+  /** Public web URL; null when unavailable. */
   public_url: string | null;
 }
 
 export interface ListBroadcasts {
-  broadcasts: ListedBroadcast[];
+  broadcasts: BroadcastListItem[];
   pagination: Pagination;
 }
 
@@ -253,7 +256,7 @@ export interface GetSingleBroadcastStats {
 }
 
 export interface GetBroadcast {
-  broadcast: BroadcastWithPublicUrl;
+  broadcast: Broadcast;
 }
 
 export interface UpdateBroadcastParams {
@@ -313,5 +316,5 @@ export interface UpdateBroadcastParams {
 }
 
 export interface UpdateBroadcast {
-  broadcast: BroadcastWithPublicUrl;
+  broadcast: Broadcast;
 }

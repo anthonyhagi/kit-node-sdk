@@ -4,6 +4,9 @@ import {
   Kit,
   refreshOAuthToken,
   verifyWebhookSignature,
+  type Broadcast,
+  type BroadcastListItem,
+  type GetBroadcast,
   type GetPost,
   type GetSequence,
   type GetSequenceEmail,
@@ -11,6 +14,7 @@ import {
   type GetSequenceWithStats,
   type GetSnippet,
   type GetSubscriber,
+  type ListBroadcasts,
   type ListPostsWithContent,
   type ListSequenceEmailsWithContent,
   type ListSequenceEmailsWithContentAndStats,
@@ -24,6 +28,7 @@ import {
   type Sequence,
   type SequenceEmail,
   type Snippet,
+  type UpdateBroadcast,
   type WebhookDelivery,
 } from "@anthonyhagi/kit-node-sdk";
 
@@ -49,6 +54,16 @@ export type SnippetContentList = Assert<
 export type PostResponse = Assert<Equal<GetPost["post"], Post>>;
 export type PostContentList = Assert<
   Equal<ListPostsWithContent["posts"][number], Post>
+>;
+
+export type BroadcastResponse = Assert<
+  Equal<GetBroadcast["broadcast"], Broadcast>
+>;
+export type BroadcastUpdateResponse = Assert<
+  Equal<UpdateBroadcast["broadcast"], Broadcast>
+>;
+export type BroadcastListResponse = Assert<
+  Equal<ListBroadcasts["broadcasts"][number], BroadcastListItem>
 >;
 
 const kit = new Kit({ apiKey: "typecheck-only", maxRetries: 0 });

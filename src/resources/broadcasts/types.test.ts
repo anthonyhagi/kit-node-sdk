@@ -1,7 +1,9 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
 import type {
+  Broadcast,
   BroadcastEmailTemplate,
   BroadcastLinkClick,
+  BroadcastListItem,
   BroadcastStats,
   BroadcastStatus,
   BroadcastSubscriberFilterResponseGroup,
@@ -139,6 +141,9 @@ type ExpectedBroadcast = {
 
 describe("broadcast response compatibility", () => {
   it("preserves get and update fields, nullability, and required public_url", () => {
+    expectTypeOf<GetBroadcast["broadcast"]>().toEqualTypeOf<Broadcast>();
+    expectTypeOf<UpdateBroadcast["broadcast"]>().toEqualTypeOf<Broadcast>();
+    expectTypeOf<Broadcast>().toEqualTypeOf<ExpectedBroadcast>();
     expectTypeOf<
       GetBroadcast["broadcast"]
     >().toEqualTypeOf<ExpectedBroadcast>();
@@ -189,6 +194,7 @@ describe("broadcast response compatibility", () => {
 
   it("keeps list enrichments and public_url optional", () => {
     type Listed = ListBroadcasts["broadcasts"][number];
+    expectTypeOf<Listed>().toEqualTypeOf<BroadcastListItem>();
     expectTypeOf<
       Omit<Listed, "public_url" | "clicks" | "stats">
     >().toEqualTypeOf<Omit<ExpectedBroadcast, "public_url">>();

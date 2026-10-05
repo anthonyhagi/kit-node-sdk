@@ -248,8 +248,10 @@ export type { ClientOptions, RequestOptions };
 
 export type {
   BasicSubscriberFilterItem,
+  Broadcast,
   BroadcastEmailTemplate,
   BroadcastLinkClick,
+  BroadcastListItem,
   BroadcastStats,
   BroadcastStatus,
   BroadcastSubscriberFilterGroup,
