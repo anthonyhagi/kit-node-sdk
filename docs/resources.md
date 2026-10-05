@@ -201,6 +201,12 @@ Null and undefined values are omitted from the query. Status filters,
 `slim: true` or `slim: false`, and an explicit `include_total_count: false` are
 still sent when supplied alongside null filters.
 
+Literal `slim: true` calls return `ListSlimTagSubscribers | null`. Custom fields
+(`fields`) and tag subscription metadata (`tagged_at`) are optional in this type
+because Kit describes a reduced response without specifying every omitted field.
+Use optional access when reading them. Calls with `slim: false` or without `slim`
+retain `ListTagSubscribers | null`; a dynamic boolean returns the union.
+
 See the [Kit API reference](https://developers.kit.com/api-reference/tags/list-subscribers-for-a-tag).
 
 ## Including tag subscriber counts

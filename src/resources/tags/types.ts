@@ -284,6 +284,18 @@ export interface ListTagSubscribers {
   pagination: Pagination;
 }
 
+/** Slim responses may omit custom fields and tag subscription metadata. */
+export interface ListSlimTagSubscribers {
+  subscribers: (Omit<
+    ListTagSubscribers["subscribers"][number],
+    "fields" | "tagged_at"
+  > &
+    Partial<
+      Pick<ListTagSubscribers["subscribers"][number], "fields" | "tagged_at">
+    >)[];
+  pagination: Pagination;
+}
+
 export interface TagSubscriberByEmailParams {
   email_address: string;
 }

@@ -8,6 +8,7 @@ import {
   type BulkDeleteTagsSynchronous,
   type BulkTagParams,
   type BulkTagSynchronous,
+  type ListSlimTagSubscribers,
   type ListTags,
   type ListTagsParams,
   type ListTagSubscribers,
@@ -281,10 +282,98 @@ describe("tag requests through Kit", () => {
     }
   );
 
+  it("accepts omitted fields in slim responses and retains pagination and filters", async () => {
+    const slimSubscriber = {
+      id: subscriber.id,
+      first_name: subscriber.first_name,
+      email_address: subscriber.email_address,
+      state: subscriber.state,
+      created_at: subscriber.created_at,
+    };
+    const response = {
+      subscribers: [slimSubscriber],
+      pagination,
+    } satisfies ListSlimTagSubscribers;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const result = await kit.tags.listSubscribers(7, {
+      slim: true,
+      after: "next+/=",
+      per_page: 25,
+      status: "all",
+      include_total_count: false,
+      tagged_before: null,
+    });
+    expectTypeOf(result).toEqualTypeOf<ListSlimTagSubscribers | null>();
+    expectTypeOf(result!.subscribers[0]!.fields).toEqualTypeOf<
+      Record<string, string | null> | undefined
+    >();
+    expectTypeOf(result!.subscribers[0]!.tagged_at).toEqualTypeOf<
+      string | undefined
+    >();
+    expectTypeOf<typeof slimSubscriber>().not.toExtend<
+      ListTagSubscribers["subscribers"][number]
+    >();
+    expect(result).toEqual(response);
+    expect(result!.subscribers[0]).not.toHaveProperty("fields");
+    expect(result!.subscribers[0]).not.toHaveProperty("tagged_at");
+    request("GET", "/tags/7/subscribers", {
+      slim: "true",
+      after: "next+/=",
+      per_page: "25",
+      status: "all",
+      include_total_count: "false",
+    });
+  });
+
+  it("preserves optional metadata when slim responses include it", async () => {
+    const response = {
+      subscribers: [subscriber],
+      pagination,
+    } satisfies ListSlimTagSubscribers;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const result = await kit.tags.listSubscribers(7, { slim: true });
+    expectTypeOf(result).toEqualTypeOf<ListSlimTagSubscribers | null>();
+    expect(result).toEqual(response);
+    request("GET", "/tags/7/subscribers", { slim: "true" });
+  });
+
+  it.each([false, undefined] as const)(
+    "retains full response types with slim: %s",
+    async (slim) => {
+      const response = {
+        subscribers: [subscriber],
+        pagination,
+      } satisfies ListTagSubscribers;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      const result = await kit.tags.listSubscribers(7, { slim });
+      expectTypeOf(result).toEqualTypeOf<ListTagSubscribers | null>();
+      expectTypeOf(result!.subscribers[0]!.fields).toEqualTypeOf<
+        Record<string, string | null>
+      >();
+      expectTypeOf(result!.subscribers[0]!.tagged_at).toEqualTypeOf<string>();
+      expect(result).toEqual(response);
+      request(
+        "GET",
+        "/tags/7/subscribers",
+        slim === undefined ? {} : { slim: "false" }
+      );
+    }
+  );
+
+  it("returns null when a slim tag subscriber list is not found", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
+      status: 404,
+    });
+    expect(await kit.tags.listSubscribers(404, { slim: true })).toBeNull();
+    request("GET", "/tags/404/subscribers", { slim: "true" });
+  });
+
   it("lists tagged subscribers without optional filters", async () => {
     const response = { subscribers: [subscriber], pagination };
     fetchMock.mockResponseOnce(JSON.stringify(response));
-    expect(await kit.tags.listSubscribers(7)).toEqual(response);
+    const result = await kit.tags.listSubscribers(7);
+    expectTypeOf(result).toEqualTypeOf<ListTagSubscribers | null>();
+    expect(result).toEqual(response);
     expect(await request("GET", "/tags/7/subscribers").text()).toBe("");
   });
 
@@ -307,7 +396,9 @@ describe("tag requests through Kit", () => {
       fetchMock.mockResponseOnce(JSON.stringify(response));
 
       const result = await kit.tags.listSubscribers(7, params);
-      expectTypeOf(result).toEqualTypeOf<ListTagSubscribers | null>();
+      expectTypeOf(result).toEqualTypeOf<
+        ListTagSubscribers | ListSlimTagSubscribers | null
+      >();
       expect(result).toEqual(response);
       expect(await request("GET", "/tags/7/subscribers", query).text()).toBe(
         ""
