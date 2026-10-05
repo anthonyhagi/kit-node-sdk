@@ -998,6 +998,10 @@ if (firstPage.pagination.has_next_page && firstPage.pagination.end_cursor) {
 }
 ```
 
+The `after`, `before`, `per_page`, `sent_after`, and `sent_before` filters also
+accept `null`. Null and undefined values are omitted from the query. This works
+with both normal and slim responses; status and explicit false flags are still sent.
+
 Keep the same filters on subsequent pages. All filters are optional; calls
 without arguments continue to work. See the [Kit API reference](https://developers.kit.com/api-reference/broadcasts/list-broadcasts).
 

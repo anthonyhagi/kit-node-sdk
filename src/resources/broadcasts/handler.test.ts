@@ -41,6 +41,39 @@ describe("broadcast list filters through Kit", () => {
     expect(await requests[0]!.text()).toBe("");
   });
 
+  it.each([
+    {
+      after: null,
+      before: null,
+      per_page: null,
+      sent_after: null,
+      sent_before: null,
+    },
+    {
+      after: undefined,
+      before: undefined,
+      per_page: undefined,
+      sent_after: undefined,
+      sent_before: undefined,
+    },
+  ] satisfies ListBroadcastsParams[])(
+    "omits nullable and undefined list filters: %j",
+    async (params) => {
+      const response = { broadcasts: [], pagination } satisfies ListBroadcasts;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      const result = await kit.broadcasts.list(params);
+      expectTypeOf(result).toEqualTypeOf<ListBroadcasts>();
+      expectTypeOf<{ per_page: null }>().not.toExtend<GetLinkClicksParams>();
+      expectTypeOf<{ after: null }>().not.toExtend<GetLinkClicksParams>();
+      expectTypeOf<{ before: null }>().not.toExtend<GetLinkClicksParams>();
+      expect(result).toEqual(response);
+      expect(fetchMock.requests()).toHaveLength(1);
+      const req = fetchMock.requests()[0]!;
+      expect(req.method).toBe("GET");
+      expect(req.url).toBe("https://api.kit.com/v4/broadcasts");
+    }
+  );
+
   it.each(["after", "before"] as const)(
     "combines %s pagination with status and both date bounds",
     async (cursor) => {
@@ -133,7 +166,9 @@ describe("slim broadcast lists through Kit", () => {
       per_page: 25,
       status: "completed",
       sent_after: "2026-01-01",
-    });
+      before: null,
+      sent_before: null,
+    } satisfies ListBroadcastsParams & { slim: true });
     expectTypeOf(result).toEqualTypeOf<ListSlimBroadcasts>();
     type OmittedFields = Extract<
       keyof ListSlimBroadcasts["broadcasts"][number],
@@ -156,6 +191,33 @@ describe("slim broadcast lists through Kit", () => {
     });
   });
 
+  it("omits all nullable filters while preserving the slim response type", async () => {
+    const response = {
+      broadcasts: [broadcast],
+      pagination,
+    } satisfies ListSlimBroadcasts;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const result = await kit.broadcasts.list({
+      slim: true,
+      after: null,
+      before: null,
+      per_page: null,
+      sent_after: null,
+      sent_before: null,
+      status: "draft",
+      include_total_count: false,
+    } satisfies ListBroadcastsParams & { slim: true });
+    expectTypeOf(result).toEqualTypeOf<ListSlimBroadcasts>();
+    expect(result).toEqual(response);
+    expect(
+      Object.fromEntries(new URL(fetchMock.requests()[0]!.url).searchParams)
+    ).toEqual({
+      slim: "true",
+      status: "draft",
+      include_total_count: "false",
+    });
+  });
+
   it("sends explicit false and preserves the full response type", async () => {
     const response = {
       broadcasts: [
@@ -171,12 +233,21 @@ describe("slim broadcast lists through Kit", () => {
       pagination,
     } satisfies ListBroadcasts;
     fetchMock.mockResponseOnce(JSON.stringify(response));
-    const result = await kit.broadcasts.list({ slim: false });
+    const result = await kit.broadcasts.list({
+      slim: false,
+      after: null,
+      before: null,
+      per_page: null,
+      sent_after: null,
+      sent_before: null,
+      status: "draft",
+      include_total_count: false,
+    } satisfies ListBroadcastsParams & { slim: false });
     expectTypeOf(result).toEqualTypeOf<ListBroadcasts>();
     expect(result).toEqual(response);
     expect(
       Object.fromEntries(new URL(fetchMock.requests()[0]!.url).searchParams)
-    ).toEqual({ slim: "false" });
+    ).toEqual({ slim: "false", status: "draft", include_total_count: "false" });
   });
 
   it("preserves the full response type for default calls", async () => {
