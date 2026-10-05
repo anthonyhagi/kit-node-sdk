@@ -121,13 +121,13 @@ export interface ListFormSubscribersParams {
 
   /**
    * Filter subscribers who have been added to the form after this
-   * date (format yyyy-mm-dd).
+   * date (format yyyy-mm-dd). Date objects use their UTC calendar date.
    */
   added_after?: Date | string | undefined;
 
   /**
    * Filter subscribers who have been added to the form before this
-   * date (format yyyy-mm-dd).
+   * date (format yyyy-mm-dd). Date objects use their UTC calendar date.
    */
   added_before?: Date | string | undefined;
 
@@ -149,13 +149,13 @@ export interface ListFormSubscribersParams {
 
   /**
    * Filter subscribers who have been created after this date
-   * (format yyyy-mm-dd).
+   * (format yyyy-mm-dd). Date objects use their UTC calendar date.
    */
   created_after?: Date | string | undefined;
 
   /**
    * Filter subscribers who have been created before this date
-   * (format yyyy-mm-dd).
+   * (format yyyy-mm-dd). Date objects use their UTC calendar date.
    */
   created_before?: Date | string | undefined;
 
