@@ -148,8 +148,11 @@ export interface ListFullSubscribers {
 export type ListSlimSubscribers = ListSubscribers;
 
 export interface CreateSubscriberParams {
+  /** Updated when a subscriber with the same email address already exists. */
   first_name?: string | null | undefined;
+  /** Identifies an existing subscriber or creates one when no match exists. */
   email_address: string;
+  /** Applies to new subscribers only; cannot change an existing subscriber's state. */
   state?: SubscriberState | (string & {}) | null | undefined;
   fields?: Record<string, string> | null | undefined;
 }

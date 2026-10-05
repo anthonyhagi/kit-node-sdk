@@ -88,6 +88,26 @@ await kit.forms.addSubscriberByEmail(7, {
 The subscriber must already exist. See
 [Kit's endpoint reference](https://developers.kit.com/api-reference/forms/add-subscriber-to-form-by-email-address).
 
+## Creating or updating a subscriber by email
+
+`kit.subscribers.create()` matches subscribers by `email_address`. If no match
+exists, Kit creates a subscriber with the supplied first name and state. If a
+subscriber already exists, Kit updates the first name, but this endpoint cannot
+change their state. Passing `state: "active"` does not reactivate an existing
+cancelled subscriber.
+
+```ts
+const result = await kit.subscribers.create({
+  email_address: "ada@example.com",
+  first_name: "Ada",
+  state: "active", // Applies only if this email creates a new subscriber.
+});
+// Inspect the returned state; an existing subscriber retains their state.
+console.log(result.subscriber.id, result.subscriber.state);
+```
+
+See the [Kit API reference](https://developers.kit.com/api-reference/subscribers/create-a-subscriber).
+
 ## Listing a subscriber's tags
 
 `kit.subscribers.getTags(subscriberId, params)` returns a page of tags, or `null`
