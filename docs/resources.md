@@ -904,11 +904,13 @@ content field, which can be `null` for drafts. Use `include: "stats"` to request
 ```ts
 const result = await kit.sequenceEmails.get(123, 456, { include: "stats" });
 if (result) {
-  console.log(result.email.content, result.email.stats?.open_rate);
+  console.log(result.email.content, result.email.stats.open_rate);
 }
 ```
 
-The response uses `GetSequenceEmail`, where `content` is required and `stats`
+A literal `include: "stats"` infers `GetSequenceEmailWithStats | null`, with
+required stats when the email exists. Omitted or dynamic inclusion flags keep
+stats optional. The existing `GetSequenceEmail` response requires content; stats
 is optional. No `include_content` flag is needed. Missing sequences or emails
 return `null`. Options use the exported `GetSequenceEmailParams` type. See the
 [Kit API reference](https://developers.kit.com/api-reference/sequence-emails/get-a-sequence-email).
@@ -917,7 +919,8 @@ return `null`. Options use the exported `GetSequenceEmailParams` type. See the
 
 Use `kit.sequenceEmails.list(sequenceId, params)` to fetch a page of emails
 ordered by position. Each item includes its subject, publication state,
-template, delay, and sending days. Content and stats are optional:
+template, delay, and sending days. Content and stats are optional unless
+explicitly requested:
 
 ```ts
 const page = await kit.sequenceEmails.list(123, {
@@ -927,7 +930,7 @@ const page = await kit.sequenceEmails.list(123, {
 });
 if (page) {
   for (const email of page.emails) {
-    console.log(email.subject, email.content, email.stats?.open_rate);
+    console.log(email.subject, email.content, email.stats.open_rate);
   }
   if (page.pagination.has_next_page && page.pagination.end_cursor) {
     const next = await kit.sequenceEmails.list(123, {
@@ -947,8 +950,14 @@ Missing sequences return `null`. HTML content is omitted by default; request
 `ListSequenceEmailsWithContent | null`, with required `content: string | null`
 on each email. Omitted, false, null, or dynamic flags keep content optional.
 Draft content and preview text can be `null`; hour-based emails return
-`send_days: null`. Per-email stats use zero when no delivery data is available.
+`send_days: null`. A literal `include: "stats"` infers
+`ListSequenceEmailsWithStats | null`, with
+required stats on each email. Combining it with literal `include_content: true`
+infers `ListSequenceEmailsWithContentAndStats | null`, requiring both fields.
+Dynamic flags retain optional fields unless the corresponding inclusion is known.
+Per-email stats use zero when no delivery data is available.
 Exported types are `ListSequenceEmails`, `ListSequenceEmailsWithContent`,
+`ListSequenceEmailsWithStats`, `ListSequenceEmailsWithContentAndStats`,
 `ListSequenceEmailsParams`, `SequenceEmailListItem`, and `SequenceEmailStats`.
 
 The `after`, `before`, `per_page`, and `include_content` parameters accept `null`.

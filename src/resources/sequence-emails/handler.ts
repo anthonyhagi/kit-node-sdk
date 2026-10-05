@@ -4,9 +4,12 @@ import type {
   CreateSequenceEmailParams,
   GetSequenceEmail,
   GetSequenceEmailParams,
+  GetSequenceEmailWithStats,
   ListSequenceEmails,
   ListSequenceEmailsParams,
   ListSequenceEmailsWithContent,
+  ListSequenceEmailsWithContentAndStats,
+  ListSequenceEmailsWithStats,
   UpdateSequenceEmail,
   UpdateSequenceEmailParams,
 } from "./types";
@@ -99,9 +102,27 @@ export class SequenceEmailsHandler {
   public async get(
     sequenceId: number,
     emailId: number,
+    params: GetSequenceEmailParams & { include: "stats" },
+    options?: RequestOptions
+  ): Promise<GetSequenceEmailWithStats | null>;
+  public async get(
+    sequenceId: number,
+    emailId: number,
+    params?: GetSequenceEmailParams & { include?: undefined },
+    options?: RequestOptions
+  ): Promise<GetSequenceEmail | null>;
+  public async get(
+    sequenceId: number,
+    emailId: number,
     params?: GetSequenceEmailParams,
     options?: RequestOptions
-  ): Promise<GetSequenceEmail | null> {
+  ): Promise<GetSequenceEmail | GetSequenceEmailWithStats | null>;
+  public async get(
+    sequenceId: number,
+    emailId: number,
+    params?: GetSequenceEmailParams,
+    options?: RequestOptions
+  ): Promise<GetSequenceEmail | GetSequenceEmailWithStats | null> {
     const query = new URLSearchParams({
       ...(params?.include && { include: params.include }),
     });
@@ -120,6 +141,19 @@ export class SequenceEmailsHandler {
    * @returns A page of emails, or null when the sequence was not found.
    * @see {@link https://developers.kit.com/api-reference/sequence-emails/list-sequence-emails}
    */
+  public async list(
+    sequenceId: number,
+    params: ListSequenceEmailsParams & {
+      include: "stats";
+      include_content: true;
+    },
+    options?: RequestOptions
+  ): Promise<ListSequenceEmailsWithContentAndStats | null>;
+  public async list(
+    sequenceId: number,
+    params: ListSequenceEmailsParams & { include: "stats" },
+    options?: RequestOptions
+  ): Promise<ListSequenceEmailsWithStats | null>;
   public async list(
     sequenceId: number,
     params: ListSequenceEmailsParams & { include_content: true },

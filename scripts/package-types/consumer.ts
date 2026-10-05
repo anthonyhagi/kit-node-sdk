@@ -4,10 +4,12 @@ import {
   Kit,
   refreshOAuthToken,
   verifyWebhookSignature,
+  type GetSequenceEmailWithStats,
   type GetSequenceWithStats,
   type GetSubscriber,
   type ListPostsWithContent,
   type ListSequenceEmailsWithContent,
+  type ListSequenceEmailsWithContentAndStats,
   type ListSequencesWithStats,
   type ListSnippetsWithContent,
   type ListSubscribers,
@@ -83,6 +85,37 @@ export function sequenceOpenRates(
   page: ListSequencesWithStats
 ): (number | null | undefined)[] {
   return page.sequences.map((sequence) => sequence.stats.open_rate);
+}
+
+export const emailWithStats = kit.sequenceEmails.get(
+  123,
+  456,
+  { include: "stats" },
+  options
+);
+export const emailsWithContentAndStats = kit.sequenceEmails.list(
+  123,
+  { include: "stats", include_content: true },
+  options
+);
+export type EmailStatsResult = Assert<
+  Equal<typeof emailWithStats, Promise<GetSequenceEmailWithStats | null>>
+>;
+export type EmailContentStatsResult = Assert<
+  Equal<
+    typeof emailsWithContentAndStats,
+    Promise<ListSequenceEmailsWithContentAndStats | null>
+  >
+>;
+export function emailStatsContent(
+  page: ListSequenceEmailsWithContentAndStats | null
+): (string | null)[] {
+  return (
+    page?.emails.map((email) => {
+      const stats = email.stats;
+      return stats.open_rate === 0 ? email.content : null;
+    }) ?? []
+  );
 }
 
 export const pkce = generateOAuthPKCE();

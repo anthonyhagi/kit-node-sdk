@@ -115,3 +115,31 @@ export interface GetSequenceEmail {
     content: string | null;
   };
 }
+
+/** Email reads explicitly requested with include: "stats". */
+export interface GetSequenceEmailWithStats extends Omit<
+  GetSequenceEmail,
+  "email"
+> {
+  email: Omit<GetSequenceEmail["email"], "stats"> & {
+    stats: SequenceEmailStats;
+  };
+}
+
+/** Email lists explicitly requested with include: "stats". */
+export interface ListSequenceEmailsWithStats extends Omit<
+  ListSequenceEmails,
+  "emails"
+> {
+  emails: (Omit<SequenceEmailListItem, "stats"> & {
+    stats: SequenceEmailStats;
+  })[];
+}
+
+/** Email lists explicitly requesting both content and stats. */
+export interface ListSequenceEmailsWithContentAndStats extends Omit<
+  ListSequenceEmails,
+  "emails"
+> {
+  emails: GetSequenceEmailWithStats["email"][];
+}
