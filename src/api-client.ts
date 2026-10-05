@@ -371,7 +371,7 @@ export class ApiClient {
     // Exponential backoff: baseDelay * (2 ^ attempt) with some jitter
     const exponentialDelay = this.retryDelay * 2 ** attempt;
 
-    // Add jitter to prevent thundering herd (±25% randomization)
+    // Add jitter to prevent thundering herd (±12.5% randomization)
     const jitter = exponentialDelay * 0.25 * (Math.random() - 0.5);
 
     const milliseconds = exponentialDelay + jitter;
