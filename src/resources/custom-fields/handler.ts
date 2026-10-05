@@ -3,6 +3,9 @@ import type {
   BulkCreate,
   BulkCreateParams,
   BulkCreateWithoutResponseType,
+  BulkUpdateSubscriberValues,
+  BulkUpdateSubscriberValuesParams,
+  BulkUpdateSubscriberValuesWithoutResponseType,
   CreateCustomField,
   CreateCustomFieldParams,
   ListCustomFields,
@@ -16,6 +19,27 @@ export class CustomFieldsHandler {
 
   constructor(api: Kit) {
     this.api = api;
+  }
+
+  /**
+   * Create or update subscriber custom-field values in bulk. Requires OAuth.
+   *
+   * @param params - Values to update and callback URL (or null).
+   * @returns Synchronous values and failures for up to 100 entries, or an asynchronous acknowledgement.
+   * @see {@link https://developers.kit.com/api-reference/custom-fields/bulk-update-subscriber-custom-field-values}
+   */
+  public async bulkUpdateSubscriberValues(
+    params: BulkUpdateSubscriberValuesParams
+  ): Promise<BulkUpdateSubscriberValues> {
+    const resp =
+      await this.api.post<BulkUpdateSubscriberValuesWithoutResponseType>(
+        "/bulk/custom_fields/subscribers",
+        { body: JSON.stringify(params) }
+      );
+    if ("custom_field_values" in resp) {
+      return { type: "synchronous", ...resp };
+    }
+    return { type: "asynchronous", ...resp };
   }
 
   /**

@@ -10,7 +10,7 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 | -------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
 | **`kit.accounts`**         | Account and user information, creator profiles, email/growth stats | `getCurrentAccount()`, `getEmailStats()`, `getGrowthStats()`                                                                |
 | **`kit.broadcasts`**       | One-off emails sent to subscribers                                 | `list()`, `create()`, `update()`, `getStats()`                                                                              |
-| **`kit.customFields`**     | Additional fields for subscriber profiles and forms                | `list()`, `create()`, `update()`, `bulkCreate()`                                                                            |
+| **`kit.customFields`**     | Additional fields for subscriber profiles and forms                | `list()`, `create()`, `update()`, `bulkCreate()`, `bulkUpdateSubscriberValues()`                                            |
 | **`kit.emailTemplates`**   | Pre-designed email layouts                                         | `list()`                                                                                                                    |
 | **`kit.forms`**            | Web forms for collecting subscriber information                    | `list()`, `addSubscriber()`, `addSubscriberByEmail()`, `listSubscribers()`                                                  |
 | **`kit.posts`**            | Content published to the creator’s Kit site or sent by email       | `list()`, `get()`                                                                                                           |
@@ -25,6 +25,38 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 | **`kit.webhooks`**         | HTTP callbacks for real-time notifications                         | `list()`, `create()`                                                                                                        |
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
+
+## Updating subscriber custom-field values in bulk
+
+Use `kit.customFields.bulkUpdateSubscriberValues()` with an OAuth client. The
+custom fields must already exist. Each entry pairs a subscriber ID with the
+custom field's `subscriber_custom_field_id` and a string value:
+
+```ts
+const kit = new Kit({ apiKey: accessToken, authType: "oauth" });
+const result = await kit.customFields.bulkUpdateSubscriberValues({
+  custom_field_values: [
+    { subscriber_id: 622, subscriber_custom_field_id: 157, value: "Smith" },
+  ],
+  callback_url: null,
+});
+if (result.type === "synchronous") {
+  console.log(result.custom_field_values, result.failures);
+}
+```
+
+`callback_url` is required; pass `null` when no callback is needed. Up to 100
+values are processed synchronously, with successful values and per-entry
+failures. More than 100 values are processed asynchronously; provide a callback
+URL to receive completion results. Invalid subscribers or custom fields can fail
+individually while other entries succeed. API errors, including the `413` queued
+bulk-request limit and `422` invalid batch response, throw.
+
+Exported types include `BulkUpdateSubscriberValuesParams`,
+`BulkUpdateSubscriberValues`, `BulkUpdateSubscriberValuesSynchronous`, and
+`BulkUpdateSubscriberValuesAsynchronous`. Narrow on `result.type` before reading
+values or failures.
+See the [Kit API reference](https://developers.kit.com/api-reference/custom-fields/bulk-update-subscriber-custom-field-values).
 
 ## Including tag subscriber counts
 

@@ -1,5 +1,10 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { Kit } from "~/index";
+import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
+import {
+  Kit,
+  type BulkUpdateSubscriberValues,
+  type BulkUpdateSubscriberValuesParams,
+  type BulkUpdateSubscriberValuesSynchronous,
+} from "~/index";
 
 const field = {
   id: 7,
@@ -174,4 +179,149 @@ describe("custom-field requests through Kit", () => {
       label: "Last name",
     });
   });
+});
+
+describe("bulk subscriber custom-field value updates through Kit", () => {
+  let kit: Kit;
+  beforeEach(() => {
+    fetchMock.resetMocks();
+    kit = new Kit({ apiKey: "oauth-token", authType: "oauth", maxRetries: 0 });
+  });
+
+  it("posts values with OAuth and preserves mixed synchronous results", async () => {
+    const params = {
+      custom_field_values: [
+        {
+          subscriber_id: 622,
+          subscriber_custom_field_id: 157,
+          value: "Smith & Jones",
+        },
+        {
+          subscriber_id: null,
+          subscriber_custom_field_id: 157,
+          value: "Jones",
+        },
+        {
+          subscriber_id: 622,
+          subscriber_custom_field_id: 999999,
+          value: "Test",
+        },
+      ],
+      callback_url: null,
+    } satisfies BulkUpdateSubscriberValuesParams;
+    const response = {
+      custom_field_values: [
+        {
+          subscriber_id: 622,
+          subscriber_custom_field_id: 157,
+          value: "Smith & Jones",
+        },
+      ],
+      failures: [
+        {
+          errors: ["Subscriber does not exist"],
+          custom_field_value: params.custom_field_values[1]!,
+        },
+        {
+          errors: ["Custom field does not exist"],
+          custom_field_value: params.custom_field_values[2]!,
+        },
+      ],
+    } satisfies Omit<BulkUpdateSubscriberValuesSynchronous, "type">;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const result = await kit.customFields.bulkUpdateSubscriberValues(params);
+    expectTypeOf(result).toEqualTypeOf<BulkUpdateSubscriberValues>();
+    expect(result).toEqual({ type: "synchronous", ...response });
+    if (result.type !== "synchronous")
+      throw new Error("Expected synchronous result");
+    expectTypeOf(
+      result.custom_field_values[0]!.subscriber_id
+    ).toEqualTypeOf<number>();
+    expectTypeOf(
+      result.failures[0]!.custom_field_value.subscriber_id
+    ).toEqualTypeOf<number | null>();
+    const req = request("POST", "/bulk/custom_fields/subscribers");
+    expect(req.headers.get("Authorization")).toBe("Bearer oauth-token");
+    expect(req.headers.get("X-Kit-Api-Key")).toBeNull();
+    expect(req.headers.get("Content-Type")).toBe("application/json");
+    expect(await req.json()).toEqual(params);
+  });
+
+  it("recognizes an empty values array in a synchronous response", async () => {
+    const params = {
+      custom_field_values: [
+        { subscriber_id: 622, subscriber_custom_field_id: 157, value: "" },
+      ],
+      callback_url: null,
+    } satisfies BulkUpdateSubscriberValuesParams;
+    const response = { custom_field_values: [], failures: [] } satisfies Omit<
+      BulkUpdateSubscriberValuesSynchronous,
+      "type"
+    >;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.customFields.bulkUpdateSubscriberValues(params)).toEqual({
+      type: "synchronous",
+      ...response,
+    });
+    expect(
+      await request("POST", "/bulk/custom_fields/subscribers").json()
+    ).toEqual(params);
+  });
+
+  it.each(["{}", ""])(
+    "handles an asynchronous response body %j and preserves the callback",
+    async (responseBody) => {
+      const params = {
+        custom_field_values: Array.from({ length: 101 }, (_, i) => ({
+          subscriber_id: i + 1,
+          subscriber_custom_field_id: 157,
+          value: "Value",
+        })),
+        callback_url:
+          "https://example.com/hooks/kit?source=custom-fields&token=a%2Bb",
+      } satisfies BulkUpdateSubscriberValuesParams;
+      fetchMock.mockResponseOnce(responseBody, { status: 202 });
+      expect(await kit.customFields.bulkUpdateSubscriberValues(params)).toEqual(
+        { type: "asynchronous" }
+      );
+      expect(
+        await request("POST", "/bulk/custom_fields/subscribers").json()
+      ).toEqual(params);
+    }
+  );
+
+  it.each([
+    {
+      status: 401,
+      message: "The access token is invalid",
+      expected: "Authentication failed",
+    },
+    {
+      status: 413,
+      message: "This request exceeds your queued bulk requests limit.",
+      expected: "This request exceeds your queued bulk requests limit.",
+    },
+    {
+      status: 422,
+      message: "No custom field values included for processing",
+      expected: "No custom field values included for processing",
+    },
+  ])(
+    "surfaces a $status error without repeating the update",
+    async ({ status, message, expected }) => {
+      const params = {
+        custom_field_values: [],
+        callback_url: null,
+      } satisfies BulkUpdateSubscriberValuesParams;
+      fetchMock.mockResponseOnce(JSON.stringify({ errors: [message] }), {
+        status,
+      });
+      await expect(
+        kit.customFields.bulkUpdateSubscriberValues(params)
+      ).rejects.toThrow(expected);
+      expect(
+        await request("POST", "/bulk/custom_fields/subscribers").json()
+      ).toEqual(params);
+    }
+  );
 });
