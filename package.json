@@ -21,6 +21,7 @@
     "convert kit.com",
     "convertkit"
   ],
+  "sideEffects": false,
   "exports": {
     ".": {
       "import": {
