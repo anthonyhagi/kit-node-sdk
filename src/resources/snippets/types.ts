@@ -18,7 +18,7 @@ export type CreateSnippetParams =
     };
 
 export interface CreateSnippet {
-  snippet: Omit<GetSnippet["snippet"], "document"> & {
+  snippet: Omit<Snippet, "document"> & {
     document: Omit<SnippetDocument, "value_html"> & {
       /** Inline snippets can return a document without HTML. */
       value_html: string | null;
@@ -90,13 +90,16 @@ export interface ListSnippetsWithContent extends Omit<
   ListSnippets,
   "snippets"
 > {
-  snippets: GetSnippet["snippet"][];
+  snippets: Snippet[];
 }
 
+/** Full snippet record returned by reads, updates, and lists requesting content. */
+export type Snippet = Omit<SnippetListItem, "content" | "document"> & {
+  /** Full reads always include content and document. */
+  content: string;
+  document: SnippetDocument;
+};
+
 export interface GetSnippet {
-  snippet: Omit<SnippetListItem, "content" | "document"> & {
-    /** Single-snippet reads always include content and document. */
-    content: string;
-    document: SnippetDocument;
-  };
+  snippet: Snippet;
 }

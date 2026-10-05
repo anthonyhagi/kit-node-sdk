@@ -8,6 +8,7 @@ import {
   type GetSequenceEmail,
   type GetSequenceEmailWithStats,
   type GetSequenceWithStats,
+  type GetSnippet,
   type GetSubscriber,
   type ListPostsWithContent,
   type ListSequenceEmailsWithContent,
@@ -20,6 +21,7 @@ import {
   type RequestOptions,
   type Sequence,
   type SequenceEmail,
+  type Snippet,
   type WebhookDelivery,
 } from "@anthonyhagi/kit-node-sdk";
 
@@ -35,6 +37,11 @@ export type SequenceEmailResponse = Assert<
 >;
 export type SequenceEmailContentList = Assert<
   Equal<ListSequenceEmailsWithContent["emails"][number], SequenceEmail>
+>;
+
+export type SnippetResponse = Assert<Equal<GetSnippet["snippet"], Snippet>>;
+export type SnippetContentList = Assert<
+  Equal<ListSnippetsWithContent["snippets"][number], Snippet>
 >;
 
 const kit = new Kit({ apiKey: "typecheck-only", maxRetries: 0 });

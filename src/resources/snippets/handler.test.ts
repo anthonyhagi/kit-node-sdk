@@ -6,6 +6,7 @@ import {
   type GetSnippet,
   type ListSnippets,
   type ListSnippetsParams,
+  type Snippet,
   type SnippetDocument,
   type SnippetType,
   type UpdateSnippet,
@@ -285,6 +286,7 @@ describe("snippet get requests through Kit", () => {
       fetchMock.mockResponseOnce(JSON.stringify(response));
       const result = await kit.snippets.get(5);
       expectTypeOf(result).toEqualTypeOf<GetSnippet | null>();
+      expectTypeOf(result!.snippet).toEqualTypeOf<Snippet>();
       expectTypeOf(result!.snippet.content).toEqualTypeOf<string>();
       expectTypeOf(result!.snippet.document).toEqualTypeOf<SnippetDocument>();
       expectTypeOf<typeof snippet>().not.toExtend<GetSnippet["snippet"]>();
@@ -366,6 +368,7 @@ describe("snippet update requests through Kit", () => {
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.snippets.update(5, params);
     expectTypeOf(result).toEqualTypeOf<UpdateSnippet | null>();
+    expectTypeOf(result!.snippet).toEqualTypeOf<Snippet>();
     expectTypeOf(result!.snippet.content).toEqualTypeOf<string>();
     expectTypeOf(result!.snippet.document).toEqualTypeOf<SnippetDocument>();
     expect(result).toEqual(response);
@@ -535,6 +538,13 @@ describe("snippet create requests through Kit", () => {
     fetchMock.mockResponseOnce(JSON.stringify(response), { status: 201 });
     const result = await kit.snippets.create(params);
     expectTypeOf(result).toEqualTypeOf<CreateSnippet>();
+    expectTypeOf(result.snippet).toEqualTypeOf<
+      Omit<Snippet, "document"> & {
+        document: Omit<SnippetDocument, "value_html"> & {
+          value_html: string | null;
+        };
+      }
+    >();
     expectTypeOf(result.snippet.content).toEqualTypeOf<string>();
     expectTypeOf(result.snippet.document.value_html).toEqualTypeOf<
       string | null
