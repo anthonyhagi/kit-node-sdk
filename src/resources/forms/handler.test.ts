@@ -243,6 +243,103 @@ describe("form requests through Kit", () => {
     expect(await request("GET", "/forms/7/subscribers").text()).toBe("");
   });
 
+  it.each([
+    {
+      added_after: null,
+      added_before: null,
+      created_after: null,
+      created_before: null,
+      after: null,
+      before: null,
+      per_page: null,
+    },
+    {
+      added_after: undefined,
+      added_before: undefined,
+      created_after: undefined,
+      created_before: undefined,
+      after: undefined,
+      before: undefined,
+      per_page: undefined,
+    },
+  ] satisfies ListFormSubscribersParams[])(
+    "omits nullable and undefined subscriber filters: %j",
+    async (params) => {
+      const response = {
+        subscribers: [subscriber],
+        pagination,
+      } satisfies ListFormSubscribers;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      const result = await kit.forms.listSubscribers(7, params);
+      expectTypeOf(result).toEqualTypeOf<ListFormSubscribers | null>();
+      expect(result).toEqual(response);
+      expect(await request("GET", "/forms/7/subscribers").text()).toBe("");
+    }
+  );
+
+  it("preserves slim responses and status and false counts alongside null filters", async () => {
+    const slimSubscriber = {
+      id: subscriber.id,
+      first_name: subscriber.first_name,
+      email_address: subscriber.email_address,
+      state: subscriber.state,
+      created_at: subscriber.created_at,
+    };
+    const response = {
+      subscribers: [slimSubscriber],
+      pagination,
+    } satisfies ListSlimFormSubscribers;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const params = {
+      slim: true,
+      added_after: null,
+      added_before: null,
+      created_after: null,
+      created_before: null,
+      after: null,
+      before: null,
+      per_page: null,
+      status: "all",
+      include_total_count: false,
+    } satisfies ListFormSubscribersParams & { slim: true };
+    const result = await kit.forms.listSubscribers(7, params);
+    expectTypeOf(result).toEqualTypeOf<ListSlimFormSubscribers | null>();
+    expect(result).toEqual(response);
+    request("GET", "/forms/7/subscribers", {
+      slim: "true",
+      status: "all",
+      include_total_count: "false",
+    });
+  });
+
+  it("preserves full responses and explicit false flags alongside null filters", async () => {
+    const response = {
+      subscribers: [subscriber],
+      pagination,
+    } satisfies ListFormSubscribers;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const params = {
+      slim: false,
+      added_after: null,
+      added_before: null,
+      created_after: null,
+      created_before: null,
+      after: null,
+      before: null,
+      per_page: null,
+      status: "active",
+      include_total_count: false,
+    } satisfies ListFormSubscribersParams & { slim: false };
+    const result = await kit.forms.listSubscribers(7, params);
+    expectTypeOf(result).toEqualTypeOf<ListFormSubscribers | null>();
+    expect(result).toEqual(response);
+    request("GET", "/forms/7/subscribers", {
+      slim: "false",
+      status: "active",
+      include_total_count: "false",
+    });
+  });
+
   it("requests a slim list with pagination and filters and accepts omitted expensive fields", async () => {
     const response = {
       subscribers: [
