@@ -23,6 +23,17 @@ export interface RefreshOAuthTokenParams {
 
 export type RefreshOAuthTokenOptions = RevokeOAuthTokenOptions;
 
+export interface ExchangeOAuthCodeParams {
+  client_id: string;
+  client_secret: string;
+  /** Authorization code received at the OAuth callback. */
+  code: string;
+  /** Redirect URI used for authorization, matching an app-configured URI. */
+  redirect_uri: string;
+}
+
+export type ExchangeOAuthCodeOptions = RevokeOAuthTokenOptions;
+
 export interface OAuthTokenResponse {
   access_token: string;
   token_type: string;
@@ -48,22 +59,40 @@ export async function refreshOAuthToken(
   options?: RefreshOAuthTokenOptions
 ): Promise<OAuthTokenResponse> {
   const { client_id, refresh_token } = params;
-  const baseUrl = options?.baseUrl ?? "https://api.kit.com/v4";
-  const response = await fetch(`${baseUrl.replace(/\/$/, "")}/oauth/token`, {
-    method: "POST",
-    signal: options?.signal,
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
+  return await requestOAuthTokens(
+    {
       client_id,
       grant_type: "refresh_token",
       refresh_token,
-    }),
-  });
-  const responseBody = await readOAuthResponse(response, "refresh");
-  return JSON.parse(responseBody) as OAuthTokenResponse;
+    },
+    options,
+    "refresh"
+  );
+}
+
+/**
+ * Exchange an authorization code for access and refresh tokens using client credentials.
+ * Makes one request without automatic retries. Network and parsing failures
+ * propagate; HTTP failures throw ApiError.
+ *
+ * @see {@link https://developers.kit.com/api-reference/oauth-refresh-token-flow}
+ */
+export async function exchangeOAuthCode(
+  params: ExchangeOAuthCodeParams,
+  options?: ExchangeOAuthCodeOptions
+): Promise<OAuthTokenResponse> {
+  const { client_id, client_secret, code, redirect_uri } = params;
+  return await requestOAuthTokens(
+    {
+      client_id,
+      client_secret,
+      grant_type: "authorization_code",
+      code,
+      redirect_uri,
+    },
+    options,
+    "exchange"
+  );
 }
 
 /**
@@ -96,9 +125,28 @@ export async function revokeOAuthToken(
   await readOAuthResponse(response, "revocation");
 }
 
+async function requestOAuthTokens(
+  body: Record<string, string>,
+  options: RevokeOAuthTokenOptions | undefined,
+  operation: "refresh" | "exchange"
+): Promise<OAuthTokenResponse> {
+  const baseUrl = options?.baseUrl ?? "https://api.kit.com/v4";
+  const response = await fetch(`${baseUrl.replace(/\/$/, "")}/oauth/token`, {
+    method: "POST",
+    signal: options?.signal,
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  const responseBody = await readOAuthResponse(response, operation);
+  return JSON.parse(responseBody) as OAuthTokenResponse;
+}
+
 async function readOAuthResponse(
   response: Response,
-  operation: "refresh" | "revocation"
+  operation: "refresh" | "revocation" | "exchange"
 ): Promise<string> {
   const responseBody = await response.text();
   if (!response.ok) {
