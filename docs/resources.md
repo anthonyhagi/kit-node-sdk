@@ -885,6 +885,12 @@ subsequent emails require a positive delay. Publishing an immediate email or
 inserting a published email earlier in the sequence can trigger deliveries to
 existing subscribers.
 
+Creation disables automatic retries by default, even if the client configures
+retries. An uncertain request may already have added an email, so inspect the
+sequence before repeating it. Pass an explicit `maxRetries` in the third argument
+to opt into retries only when replaying the creation is appropriate; see
+[per-request retry limits](configuration.md#per-request-retry-limits).
+
 The exported types are `CreateSequenceEmailParams` and `CreateSequenceEmail`.
 The response includes `content`, which can be `null` for drafts; `preview_text`
 can also be `null`. Missing sequences return `null`, and validation errors throw.
