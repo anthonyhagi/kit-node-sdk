@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
-import { Kit, type GetEmailStats } from "~/index";
+import { Kit, type GetCurrentAccount, type GetEmailStats } from "~/index";
 
 const response = {
   stats: {
@@ -115,12 +115,107 @@ describe("account requests through Kit", () => {
           utc_offset: "+10:30",
         },
       },
-    };
+    } satisfies GetCurrentAccount;
     fetchMock.mockResponseOnce(JSON.stringify(response));
-    expect(await kit.accounts.getCurrentAccount()).toEqual(response);
+    const result = await kit.accounts.getCurrentAccount();
+    expect(result).toEqual(response);
+    expect(result.user.id).toBeUndefined();
+    expect(result.account.sending_addresses).toBeUndefined();
+    expect(result.account.plan).toBeUndefined();
     const req = request("GET", "/account");
     expect(req.headers.get("X-Kit-Api-Key")).toBe("test-key");
     expect(await req.text()).toBe("");
+  });
+
+  it.each([null, "2026-11-01T00:00:00Z"])(
+    "exposes sending addresses and plan details with date %s",
+    async (date) => {
+      const response = {
+        user: { id: 29, email: "ada@example.com" },
+        account: {
+          id: 29,
+          name: "Ada's newsletter",
+          plan_type: "creator",
+          primary_email_address: "ada@example.com",
+          created_at: "2026-01-01T00:00:00Z",
+          timezone: {
+            name: "Australia/Adelaide",
+            friendly_name: "Adelaide",
+            utc_offset: "+10:30",
+          },
+          sending_addresses: [
+            {
+              email_address: "ada@example.com",
+              from_name: "Ada",
+              status: "verified",
+              is_default: true,
+              is_verified: true,
+              is_dmarc_configured: true,
+            },
+            {
+              email_address: "news@example.com",
+              from_name: "Newsletter",
+              status: "pending",
+              is_default: false,
+              is_verified: false,
+              is_dmarc_configured: false,
+            },
+          ],
+          plan: {
+            plan_type: "creator",
+            interval: "month",
+            subscriber_limit: 1000,
+            on_trial: false,
+            trial_lapse_date: date,
+            renews_at: date,
+            cancels_at: date,
+          },
+        },
+      } satisfies GetCurrentAccount;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      const result = await kit.accounts.getCurrentAccount();
+      expectTypeOf(result).toEqualTypeOf<GetCurrentAccount>();
+      expectTypeOf(result.user.id).toEqualTypeOf<number | undefined>();
+      expectTypeOf(result.account.plan!.trial_lapse_date).toEqualTypeOf<
+        string | null
+      >();
+      expectTypeOf(result.account.plan!.renews_at).toEqualTypeOf<
+        string | null
+      >();
+      expectTypeOf(result.account.plan!.cancels_at).toEqualTypeOf<
+        string | null
+      >();
+      expectTypeOf(
+        result.account.sending_addresses![0]!.is_verified
+      ).toEqualTypeOf<boolean>();
+      expectTypeOf(
+        result.account.sending_addresses![0]!.is_dmarc_configured
+      ).toEqualTypeOf<boolean>();
+      expect(result).toEqual(response);
+      expect(await request("GET", "/account").text()).toBe("");
+    }
+  );
+
+  it("accepts an empty sending address list", async () => {
+    const response = {
+      user: { email: "ada@example.com" },
+      account: {
+        id: 29,
+        name: "Ada's newsletter",
+        plan_type: "creator",
+        primary_email_address: "ada@example.com",
+        created_at: "2026-01-01T00:00:00Z",
+        timezone: {
+          name: "Australia/Adelaide",
+          friendly_name: "Adelaide",
+          utc_offset: "+10:30",
+        },
+        sending_addresses: [],
+      },
+    } satisfies GetCurrentAccount;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.accounts.getCurrentAccount()).toEqual(response);
+    request("GET", "/account");
   });
 
   it("lists the account colors", async () => {

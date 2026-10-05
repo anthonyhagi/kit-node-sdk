@@ -26,6 +26,30 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
 
+## Account sending addresses and plan details
+
+`kit.accounts.getCurrentAccount()` exposes optional `user.id`,
+`account.sending_addresses`, and `account.plan` in the exported
+`GetCurrentAccount` response type. Sending addresses include the sender name,
+status, default flag, verification flag, and DMARC configuration flag. Plan
+information includes the billing interval, subscriber limit, trial flag, and
+nullable trial, renewal, and cancellation dates.
+
+```ts
+const result = await kit.accounts.getCurrentAccount();
+for (const address of result.account.sending_addresses ?? []) {
+  console.log(
+    address.email_address,
+    address.is_verified,
+    address.is_dmarc_configured
+  );
+}
+console.log(result.account.plan?.renews_at);
+```
+
+These fields can be omitted; plan dates can be `null` when not applicable.
+See the [Kit API reference](https://developers.kit.com/api-reference/accounts/get-current-account).
+
 ## Slim form subscriber lists
 
 Pass `slim: true` to `kit.forms.listSubscribers()` for a faster, smaller response:
