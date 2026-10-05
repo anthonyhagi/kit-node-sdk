@@ -1,5 +1,18 @@
 import type { Pagination, PaginationParams } from "~/common/types";
 
+/** Custom field definition returned by list, create, and update operations. */
+export interface CustomField {
+  id: number;
+  name: string;
+  key: string;
+  label: string;
+}
+
+/** Successful bulk creation results also include the field creation timestamp. */
+export interface BulkCreatedCustomField extends CustomField {
+  created_at: string;
+}
+
 export interface BulkCreateParams {
   custom_fields: {
     label: string;
@@ -16,13 +29,7 @@ export type BulkCreateCallback = Omit<BulkCreateSynchronous, "type">;
 
 export interface BulkCreateSynchronous {
   type: "synchronous";
-  custom_fields: {
-    id: number;
-    label: string;
-    key: string;
-    name: string;
-    created_at: string;
-  }[];
+  custom_fields: BulkCreatedCustomField[];
   failures: {
     custom_field: {
       id: number;
@@ -42,12 +49,7 @@ export type BulkCreateWithoutResponseType =
 export interface ListCustomFieldsParams extends PaginationParams {}
 
 export interface ListCustomFields {
-  custom_fields: {
-    id: number;
-    name: string;
-    key: string;
-    label: string;
-  }[];
+  custom_fields: CustomField[];
   pagination: Pagination;
 }
 
@@ -56,12 +58,7 @@ export interface CreateCustomFieldParams {
 }
 
 export interface CreateCustomField {
-  custom_field: {
-    id: number;
-    name: string;
-    key: string;
-    label: string;
-  };
+  custom_field: CustomField;
 }
 
 export interface UpdateCustomFieldParams {
@@ -69,12 +66,7 @@ export interface UpdateCustomFieldParams {
 }
 
 export interface UpdateCustomField {
-  custom_field: {
-    id: number;
-    name: string;
-    key: string;
-    label: string;
-  };
+  custom_field: CustomField;
 }
 
 export interface BulkUpdateSubscriberValuesParams {
