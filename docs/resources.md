@@ -1059,6 +1059,10 @@ const firstPage = await kit.broadcasts.getAllStats({
   include_total_count: true,
 });
 
+for (const broadcast of firstPage.broadcasts) {
+  console.log(broadcast.id, broadcast.subject, broadcast.send_at);
+}
+
 if (firstPage.pagination.has_next_page && firstPage.pagination.end_cursor) {
   const nextPage = await kit.broadcasts.getAllStats({
     after: firstPage.pagination.end_cursor,
@@ -1069,6 +1073,10 @@ if (firstPage.pagination.has_next_page && firstPage.pagination.end_cursor) {
   });
 }
 ```
+
+Each stats item can include `subject` and `send_at` alongside `id` and `stats`.
+These metadata fields are optional in `GetBroadcastStats`; `send_at` can also be
+`null` for an unscheduled broadcast. Handle omitted fields when displaying them.
 
 Keep the same filters when paging. Requesting the total count can slow responses,
 so request it on the first page and reuse it. Existing calls without arguments
