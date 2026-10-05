@@ -372,6 +372,7 @@ export type {
   ListSequenceSubscribers,
   ListSequenceSubscribersParams,
   ListSequencesWithStats,
+  Sequence,
   SequenceListItem,
   SequenceSendDay,
   SequenceStats,
