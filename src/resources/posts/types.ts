@@ -39,6 +39,11 @@ export interface ListPosts {
   pagination: Pagination;
 }
 
+/** Post lists requested with include_content: true include HTML on each item. */
+export interface ListPostsWithContent extends Omit<ListPosts, "posts"> {
+  posts: GetPost["post"][];
+}
+
 export interface GetPost {
   post: Omit<PostListItem, "content"> & {
     /** Single-post reads always include HTML content. */

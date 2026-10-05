@@ -647,7 +647,8 @@ if (result) {
 }
 ```
 
-The exported `GetPost` response requires `content`; list items keep it optional.
+The exported `GetPost` response requires `content`; list items keep it optional
+unless requested with `include_content: true`.
 Publishing, SEO, and thumbnail metadata retain their nullable types, and
 `product_id` remains optional and nullable. Missing posts return `null`;
 authentication errors throw. See the
@@ -657,6 +658,9 @@ authentication errors throw. See the
 
 Use `kit.posts.list(params)` to fetch posts and their publishing metadata. HTML
 content is omitted by default; request `include_content: true` to include it.
+A literal true flag infers `ListPostsWithContent`, with required `content` on
+each item. Omitted or false flags return the existing `ListPosts` type; dynamic
+boolean flags retain optional content.
 
 ```ts
 const page = await kit.posts.list({
@@ -683,7 +687,8 @@ timestamps. Description and thumbnail fields can also be null. `product_id` is
 optional and nullable when no paid-post product is configured. A post sent as a
 broadcast shares its `publication_id` with that broadcast. API errors throw.
 
-Exported types are `ListPosts`, `ListPostsParams`, and `PostListItem`. See the
+Exported types are `ListPosts`, `ListPostsWithContent`, `ListPostsParams`, and
+`PostListItem`. See the
 [Kit API reference](https://developers.kit.com/api-reference/posts/list-posts).
 
 ## Creating a snippet
