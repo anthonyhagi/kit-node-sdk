@@ -173,6 +173,15 @@ await kit.webhookEndpoints.rotateSecret(endpointId, undefined, { signal });
 await kit.webhookEndpoints.revokePreviousSecret(endpointId, { signal });
 ```
 
+The legacy `kit.webhooks` methods also accept request options as their final
+argument:
+
+```typescript
+await kit.webhooks.list(undefined, { signal });
+await kit.webhooks.create({ target_url, event }, { signal });
+await kit.webhooks.delete(webhookId, { signal });
+```
+
 Cancellation stops pending fetches, response body reads, and retry waits. An
 already-aborted signal prevents the initial request. Caller cancellations are
 never retried. `timeoutMs` still applies independently to each attempt, and timed-out
