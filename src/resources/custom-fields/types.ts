@@ -11,6 +11,9 @@ export interface BulkCreateAsynchronous {
   type: "asynchronous";
 }
 
+/** Completed results posted by Kit to callback_url, without the SDK discriminator. */
+export type BulkCreateCallback = Omit<BulkCreateSynchronous, "type">;
+
 export interface BulkCreateSynchronous {
   type: "synchronous";
   custom_fields: {
@@ -115,6 +118,12 @@ export interface BulkUpdateSubscriberValuesParams {
   /** Callback URL for asynchronous results; pass null when no callback is needed. */
   callback_url: string | null;
 }
+
+/** Completed results posted by Kit to callback_url, without the SDK discriminator. */
+export type BulkUpdateSubscriberValuesCallback = Omit<
+  BulkUpdateSubscriberValuesSynchronous,
+  "type"
+>;
 
 export interface BulkUpdateSubscriberValuesSynchronous {
   type: "synchronous";
