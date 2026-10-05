@@ -1,5 +1,8 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
 import type {
+  BroadcastEmailTemplate,
+  BroadcastLinkClick,
+  BroadcastStats,
   BroadcastStatus,
   BroadcastSubscriberFilterResponseGroup,
   BroadcastSubscriberFilterResponseItem,
@@ -110,5 +113,91 @@ describe("broadcast response types", () => {
       "aborted",
     ] satisfies BroadcastStatus[];
     expect(statuses).toHaveLength(5);
+  });
+});
+
+// These expectations capture the public response contract independently of the shared base.
+type ExpectedBroadcast = {
+  status: BroadcastStatus;
+  id: number;
+  publication_id: number;
+  created_at: string;
+  subject: string;
+  preview_text: string | null;
+  description: string | null;
+  content: string | null;
+  public: boolean;
+  published_at: string | null;
+  send_at: string | null;
+  thumbnail_alt: string | null;
+  thumbnail_url: string | null;
+  public_url: string | null;
+  email_address: string | null;
+  email_template: BroadcastEmailTemplate;
+  subscriber_filter: BroadcastSubscriberFilterResponseGroup[];
+};
+
+describe("broadcast response compatibility", () => {
+  it("preserves get and update fields, nullability, and required public_url", () => {
+    expectTypeOf<
+      GetBroadcast["broadcast"]
+    >().toEqualTypeOf<ExpectedBroadcast>();
+    expectTypeOf<
+      UpdateBroadcast["broadcast"]
+    >().toEqualTypeOf<ExpectedBroadcast>();
+  });
+
+  it("keeps create fields non-null without adding list-only fields", () => {
+    type Created = CreateBroadcast["broadcast"];
+    expectTypeOf<keyof Created>().toEqualTypeOf<keyof ExpectedBroadcast>();
+    expectTypeOf<
+      Pick<
+        Created,
+        | "preview_text"
+        | "description"
+        | "content"
+        | "published_at"
+        | "email_address"
+      >
+    >().toEqualTypeOf<{
+      preview_text: string;
+      description: string;
+      content: string;
+      published_at: string;
+      email_address: string;
+    }>();
+    expectTypeOf<
+      Omit<
+        Created,
+        | "preview_text"
+        | "description"
+        | "content"
+        | "published_at"
+        | "email_address"
+      >
+    >().toEqualTypeOf<
+      Omit<
+        ExpectedBroadcast,
+        | "preview_text"
+        | "description"
+        | "content"
+        | "published_at"
+        | "email_address"
+      >
+    >();
+  });
+
+  it("keeps list enrichments and public_url optional", () => {
+    type Listed = ListBroadcasts["broadcasts"][number];
+    expectTypeOf<
+      Omit<Listed, "public_url" | "clicks" | "stats">
+    >().toEqualTypeOf<Omit<ExpectedBroadcast, "public_url">>();
+    expectTypeOf<
+      Pick<Listed, "public_url" | "clicks" | "stats">
+    >().toEqualTypeOf<{
+      public_url?: string | null | undefined;
+      clicks?: BroadcastLinkClick[] | undefined;
+      stats?: BroadcastStats | undefined;
+    }>();
   });
 });
