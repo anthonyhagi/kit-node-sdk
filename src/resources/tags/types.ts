@@ -202,7 +202,7 @@ export interface ListTagSubscribersParams {
    *
    * @example after: pagination.end_cursor
    */
-  after?: string | undefined;
+  after?: string | null | undefined;
 
   /**
    * Pass in the string from the previous request to move
@@ -210,21 +210,21 @@ export interface ListTagSubscribersParams {
    *
    * @example after: pagination.start_cursor
    */
-  before?: string | undefined;
+  before?: string | null | undefined;
 
   /**
    * Filter subscribers who have been created after this
    * date (format yyyy-mm-dd).
    * Date objects use their UTC calendar date.
    */
-  created_after?: Date | string | undefined;
+  created_after?: Date | string | null | undefined;
 
   /**
    * Filter subscribers who have been created before this
    * date (format yyyy-mm-dd).
    * Date objects use their UTC calendar date.
    */
-  created_before?: Date | string | undefined;
+  created_before?: Date | string | null | undefined;
 
   /**
    * To include the total count of records in the response,
@@ -240,7 +240,7 @@ export interface ListTagSubscribersParams {
    *
    * @example perPage: 500
    */
-  per_page?: number | undefined;
+  per_page?: number | null | undefined;
 
   /**
    * Filter by a specific status. This defaults to "active" on
@@ -261,14 +261,14 @@ export interface ListTagSubscribersParams {
    * (format yyyy-mm-dd).
    * Date objects use their UTC calendar date.
    */
-  tagged_after?: Date | string | undefined;
+  tagged_after?: Date | string | null | undefined;
 
   /**
    * Filter subscribers who have been tagged before this date
    * (format yyyy-mm-dd).
    * Date objects use their UTC calendar date.
    */
-  tagged_before?: Date | string | undefined;
+  tagged_before?: Date | string | null | undefined;
 }
 
 export interface ListTagSubscribers {
