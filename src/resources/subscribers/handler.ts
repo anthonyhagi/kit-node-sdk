@@ -1,5 +1,5 @@
 import type { Kit } from "~/index";
-import { toDateString } from "~/utils/date";
+import { toDateOnlyString } from "~/utils/date";
 import type {
   BulkCreateSubscribers,
   BulkCreateSubscribersParams,
@@ -95,8 +95,10 @@ export class SubscribersHandler {
     const query = new URLSearchParams({
       ...(after && { after }),
       ...(before && { before }),
-      ...(created_after && { created_after: toDateString(created_after) }),
-      ...(created_before && { created_before: toDateString(created_before) }),
+      ...(created_after && { created_after: toDateOnlyString(created_after) }),
+      ...(created_before && {
+        created_before: toDateOnlyString(created_before),
+      }),
       ...(email_address && { email_address }),
       ...(include && { include }),
       ...(include_total_count !== undefined && {
@@ -107,8 +109,10 @@ export class SubscribersHandler {
       ...(sort_field && { sort_field }),
       ...(sort_order && { sort_order }),
       ...(status && { status }),
-      ...(updated_after && { updated_after: toDateString(updated_after) }),
-      ...(updated_before && { updated_before: toDateString(updated_before) }),
+      ...(updated_after && { updated_after: toDateOnlyString(updated_after) }),
+      ...(updated_before && {
+        updated_before: toDateOnlyString(updated_before),
+      }),
     });
 
     const url = "/subscribers";

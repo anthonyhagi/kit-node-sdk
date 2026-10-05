@@ -77,6 +77,43 @@ describe("subscriber requests through Kit", () => {
     expect(await request("GET", "/subscribers").text()).toBe("");
   });
 
+  describe.each([
+    "created_after",
+    "created_before",
+    "updated_after",
+    "updated_before",
+  ] as const)("subscriber list date filter %s", (field) => {
+    it.each([
+      {
+        name: "positive offset crossing to the previous UTC day",
+        value: new Date("2026-01-01T00:30:00+10:30"),
+        expected: "2025-12-31",
+      },
+      {
+        name: "negative offset crossing to the next UTC day",
+        value: new Date("2026-01-01T23:30:00-08:00"),
+        expected: "2026-01-02",
+      },
+      {
+        name: "date string passthrough",
+        value: "2026-03-15",
+        expected: "2026-03-15",
+      },
+    ])("formats $name", async ({ value, expected }) => {
+      const params = { [field]: value } satisfies ListSubscribersParams;
+      const response = {
+        subscribers: [],
+        pagination,
+      } satisfies ListSubscribers;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+
+      expect(await kit.subscribers.list(params)).toEqual(response);
+      expect(
+        await request("GET", "/subscribers", { [field]: expected }).text()
+      ).toBe("");
+    });
+  });
+
   it.each([
     "id",
     "created_at",
@@ -345,10 +382,10 @@ describe("subscriber requests through Kit", () => {
 
       request("GET", "/subscribers", {
         [cursor]: "next+/=",
-        created_after: "2026-01-01T00:00:00.000Z",
+        created_after: "2026-01-01",
         created_before: "2026-02-01T00:00:00Z",
         updated_after: "2026-03-01T00:00:00Z",
-        updated_before: "2026-04-01T00:00:00.000Z",
+        updated_before: "2026-04-01",
         email_address: "ada+newsletter@example.com",
         include_total_count: "true",
         per_page: "25",
