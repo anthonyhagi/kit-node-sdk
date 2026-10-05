@@ -233,13 +233,20 @@ export interface CreateBroadcast {
 
 export interface GetBroadcastStatsParams extends Omit<
   ListBroadcastsParams,
-  "slim"
+  "slim" | "after" | "before" | "per_page" | "sent_after" | "sent_before"
 > {
+  /** Cursor from the previous page's end_cursor; null is omitted. */
+  after?: string | null | undefined;
+  /** Cursor from the next page's start_cursor; null is omitted. */
+  before?: string | null | undefined;
+  /** Number of results per page. Default 500, maximum 1000; null is omitted. */
+  per_page?: number | null | undefined;
+
   /** Filter broadcasts sent after this date (YYYY-MM-DD). */
-  sent_after?: string | undefined;
+  sent_after?: string | null | undefined;
 
   /** Filter broadcasts sent before this date (YYYY-MM-DD). */
-  sent_before?: string | undefined;
+  sent_before?: string | null | undefined;
 
   /** Filter broadcasts by lifecycle status. */
   status?: BroadcastStatus | undefined;

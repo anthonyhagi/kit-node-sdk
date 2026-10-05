@@ -1114,6 +1114,10 @@ Each stats item can include `subject` and `send_at` alongside `id` and `stats`.
 These metadata fields are optional in `GetBroadcastStats`; `send_at` can also be
 `null` for an unscheduled broadcast. Handle omitted fields when displaying them.
 
+The stats list's `after`, `before`, `per_page`, `sent_after`, and `sent_before`
+parameters accept `null`. Null and undefined values are omitted from the query.
+Status filters and an explicit `include_total_count: false` are still sent.
+
 Keep the same filters when paging. Requesting the total count can slow responses,
 so request it on the first page and reuse it. Existing calls without arguments
 continue to work. See the [Kit API reference](https://developers.kit.com/api-reference/broadcasts/get-stats-for-a-list-of-broadcasts)

@@ -153,7 +153,7 @@ export class BroadcastsHandler {
       ...(include_total_count !== undefined && {
         include_total_count: String(include_total_count),
       }),
-      ...(per_page !== undefined && { per_page: String(per_page) }),
+      ...(per_page != null && { per_page: String(per_page) }),
       ...(sent_after && { sent_after }),
       ...(sent_before && { sent_before }),
       ...(status && { status }),
