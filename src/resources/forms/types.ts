@@ -13,6 +13,12 @@ export interface BulkAddSubscribersAsynchronous {
   type: "asynchronous";
 }
 
+/** Completed results posted by Kit to callback_url, without the SDK discriminator. */
+export type BulkAddSubscribersCallback = Omit<
+  BulkAddSubscribersSynchronous,
+  "type"
+>;
+
 export interface BulkAddSubscribersSynchronous {
   type: "synchronous";
   subscribers: {

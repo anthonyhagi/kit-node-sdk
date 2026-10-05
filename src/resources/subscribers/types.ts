@@ -10,6 +10,12 @@ export interface BulkCreateSubscribersParams {
   callback_url?: string | null | undefined;
 }
 
+/** Completed results posted by Kit to callback_url, without the SDK discriminator. */
+export type BulkCreateSubscribersCallback = Omit<
+  BulkCreateSubscribersSynchronous,
+  "type"
+>;
+
 export interface BulkCreateSubscribersSynchronous {
   type: "synchronous";
   subscribers: {

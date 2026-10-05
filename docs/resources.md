@@ -90,6 +90,50 @@ Explicit false is sent to Kit, and undefined is omitted. Pagination and filters
 can be combined with slim; missing forms return `null`.
 See the [Kit API reference](https://developers.kit.com/api-reference/forms/list-subscribers-for-a-form).
 
+## Bulk completion callbacks
+
+Large bulk requests are queued. When you provide `callback_url`, Kit posts the
+completed result to that URL using the endpoint's synchronous response shape.
+The SDK adds `type: "synchronous"` or `type: "asynchronous"` to direct method
+results; Kit's callback body has neither discriminator.
+
+Use the exported callback type for your operation:
+
+| SDK method                                      | Callback payload type                |
+| ----------------------------------------------- | ------------------------------------ |
+| `kit.subscribers.bulkCreate()`                  | `BulkCreateSubscribersCallback`      |
+| `kit.forms.bulkAddSubscribers()`                | `BulkAddSubscribersCallback`         |
+| `kit.customFields.bulkCreate()`                 | `BulkCreateCallback`                 |
+| `kit.customFields.bulkUpdateSubscriberValues()` | `BulkUpdateSubscriberValuesCallback` |
+| `kit.tags.bulkCreate()`                         | `BulkCreateTagsCallback`             |
+| `kit.tags.bulkDelete()`                         | `BulkDeleteTagsCallback`             |
+| `kit.tags.bulkRemove()`                         | `BulkRemoveTagsCallback`             |
+| `kit.tags.bulkTag()`                            | `BulkTagCallback`                    |
+
+For example, a callback receiver for bulk subscriber creation can handle
+successful records and per-subscriber failures:
+
+```ts
+import type { BulkCreateSubscribersCallback } from "@anthonyhagi/kit-node-sdk";
+
+async function receiveBulkSubscribers(request: Request) {
+  const result = (await request.json()) as BulkCreateSubscribersCallback;
+  for (const subscriber of result.subscribers) {
+    console.log("Created subscriber", subscriber.id);
+  }
+  for (const failure of result.failures) {
+    console.error(failure.subscriber.email_address, failure.errors);
+  }
+  return new Response(null, { status: 204 });
+}
+```
+
+These are TypeScript types, not runtime validators. A queued acknowledgement
+contains no completion results; wait for the callback and inspect `failures`
+even when the bulk request was accepted. These bulk completion callbacks are
+separate from signed webhook endpoint deliveries.
+See [Kit's bulk processing guide](https://developers.kit.com/api-reference/bulk-and-async-processing).
+
 ## Updating subscriber custom-field values in bulk
 
 Use `kit.customFields.bulkUpdateSubscriberValues()` with an OAuth client. The

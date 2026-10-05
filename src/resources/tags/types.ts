@@ -17,6 +17,9 @@ export interface BulkDeleteTagsParams {
   callback_url?: string | null | undefined;
 }
 
+/** Completed results posted by Kit to callback_url, without the SDK discriminator. */
+export type BulkDeleteTagsCallback = Omit<BulkDeleteTagsSynchronous, "type">;
+
 export interface BulkDeleteTagsSynchronous {
   type: "synchronous";
   failures: {
@@ -43,6 +46,9 @@ export interface BulkCreateTagsParams {
   callback_url?: string | null | undefined;
 }
 
+/** Completed results posted by Kit to callback_url, without the SDK discriminator. */
+export type BulkCreateTagsCallback = Omit<BulkCreateTagsSynchronous, "type">;
+
 export interface BulkCreateTagsSynchronous {
   type: "synchronous";
   tags: Tag[];
@@ -68,6 +74,9 @@ export interface BulkRemoveTagsParams {
   callback_url?: string | null | undefined;
 }
 
+/** Completed results posted by Kit to callback_url, without the SDK discriminator. */
+export type BulkRemoveTagsCallback = Omit<BulkRemoveTagsSynchronous, "type">;
+
 export interface BulkRemoveTagsSynchronous {
   type: "synchronous";
   failures: {
@@ -91,6 +100,9 @@ export interface BulkTagParams {
   taggings: Nullable<Tagging>[];
   callback_url?: string | null | undefined;
 }
+
+/** Completed results posted by Kit to callback_url, without the SDK discriminator. */
+export type BulkTagCallback = Omit<BulkTagSynchronous, "type">;
 
 export interface BulkTagSynchronous {
   type: "synchronous";
