@@ -1,6 +1,7 @@
 export interface GetCurrentAccount {
   user: {
     email: string;
+    id?: number | undefined;
   };
   account: {
     id: number;
@@ -8,6 +9,27 @@ export interface GetCurrentAccount {
     plan_type: string;
     primary_email_address: string;
     created_at: string;
+    sending_addresses?:
+      | {
+          email_address: string;
+          from_name: string;
+          status: string;
+          is_default: boolean;
+          is_verified: boolean;
+          is_dmarc_configured: boolean;
+        }[]
+      | undefined;
+    plan?:
+      | {
+          plan_type: string;
+          interval: string;
+          subscriber_limit: number;
+          on_trial: boolean;
+          trial_lapse_date: string | null;
+          renews_at: string | null;
+          cancels_at: string | null;
+        }
+      | undefined;
     timezone: {
       name: string;
       friendly_name: string;
