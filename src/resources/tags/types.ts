@@ -12,6 +12,30 @@ export type Tagging = {
   subscriber_id: number;
 };
 
+export interface BulkDeleteTagsParams {
+  tags: { id: number }[];
+  callback_url?: string | null | undefined;
+}
+
+export interface BulkDeleteTagsSynchronous {
+  type: "synchronous";
+  failures: {
+    tag: { id: number };
+    errors: string[];
+  }[];
+}
+
+export interface BulkDeleteTagsAsynchronous {
+  type: "asynchronous";
+}
+
+export type BulkDeleteTags =
+  BulkDeleteTagsSynchronous | BulkDeleteTagsAsynchronous;
+
+export type BulkDeleteTagsWithoutType =
+  | Omit<BulkDeleteTagsSynchronous, "type">
+  | Omit<BulkDeleteTagsAsynchronous, "type">;
+
 export interface BulkCreateTagsParams {
   tags: {
     name: string;

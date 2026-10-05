@@ -1,6 +1,11 @@
 import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
 import {
   Kit,
+  type ApiError,
+  type BulkDeleteTags,
+  type BulkDeleteTagsAsynchronous,
+  type BulkDeleteTagsParams,
+  type BulkDeleteTagsSynchronous,
   type BulkTagParams,
   type BulkTagSynchronous,
   type TagSubscriber,
@@ -47,6 +52,88 @@ describe("tag requests through Kit", () => {
     fetchMock.resetMocks();
     kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
   });
+
+  it.each([
+    { failures: [] },
+    { failures: [{ tag: { id: 92 }, errors: ["Tag does not exist"] }] },
+  ] satisfies Omit<BulkDeleteTagsSynchronous, "type">[])(
+    "bulk deletes tag definitions and preserves failures $failures",
+    async (response) => {
+      kit = new Kit({
+        apiKey: "oauth-token",
+        authType: "oauth",
+        maxRetries: 0,
+      });
+      const body = {
+        tags: [{ id: 91 }, { id: 92 }],
+      } satisfies BulkDeleteTagsParams;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+
+      const result = await kit.tags.bulkDelete(body);
+      expectTypeOf(result).toEqualTypeOf<BulkDeleteTags>();
+      expect(result).toEqual({ type: "synchronous", ...response });
+      if (result.type === "synchronous") {
+        expectTypeOf(result).toEqualTypeOf<BulkDeleteTagsSynchronous>();
+        expect(result.failures).toEqual(response.failures);
+      } else {
+        expect.unreachable("Expected a synchronous result");
+      }
+      const req = request("DELETE", "/bulk/tags");
+      expect(req.headers.get("Authorization")).toBe("Bearer oauth-token");
+      expect(req.headers.get("Content-Type")).toBe("application/json");
+      expect(await req.json()).toEqual(body);
+    }
+  );
+
+  it.each([
+    { name: "omitted", callback: {} },
+    { name: "null", callback: { callback_url: null } },
+    {
+      name: "URL",
+      callback: { callback_url: "https://example.com/hooks/kit?source=tags" },
+    },
+  ] as const)(
+    "bulk deletes tags asynchronously with callback $name",
+    async ({ callback }) => {
+      const body = {
+        tags: Array.from({ length: 101 }, (_, i) => ({ id: i + 1 })),
+        ...callback,
+      } satisfies BulkDeleteTagsParams;
+      fetchMock.mockResponseOnce("{}", { status: 202 });
+
+      const result = await kit.tags.bulkDelete(body);
+      expect(result).toEqual({ type: "asynchronous" });
+      if (result.type === "asynchronous") {
+        expectTypeOf(result).toEqualTypeOf<BulkDeleteTagsAsynchronous>();
+      } else {
+        expect.unreachable("Expected an asynchronous result");
+      }
+      expect(await request("DELETE", "/bulk/tags").json()).toEqual(body);
+    }
+  );
+
+  it.each([
+    { status: 401, message: "The access token is invalid", tags: [{ id: 91 }] },
+    {
+      status: 413,
+      message: "This request exceeds your queued bulk requests limit",
+      tags: [{ id: 91 }],
+    },
+    { status: 422, message: "No tags included for processing", tags: [] },
+  ])(
+    "preserves bulk tag deletion error $status",
+    async ({ status, message, tags }) => {
+      const details = { errors: [message] };
+      fetchMock.mockResponseOnce(JSON.stringify(details), { status });
+
+      await expect(kit.tags.bulkDelete({ tags })).rejects.toMatchObject({
+        name: "ApiError",
+        status,
+        details,
+      } satisfies Partial<ApiError>);
+      expect(await request("DELETE", "/bulk/tags").json()).toEqual({ tags });
+    }
+  );
 
   it("lists tags without optional pagination", async () => {
     const response = { tags: [tag], pagination };
