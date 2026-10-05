@@ -2,6 +2,96 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiClient } from "./api-client";
 import { Kit } from "./index";
 
+describe("request query merging", () => {
+  beforeEach(() => {
+    fetchMock.resetMocks();
+    fetchMock.mockResponseOnce("{}");
+  });
+
+  it.each(["get", "post", "put", "patch", "delete"] as const)(
+    "merges an existing query for %s requests",
+    async (method) => {
+      const api = new ApiClient({ baseUrl: "https://example.com/v4" });
+
+      await api[method]("/subscribers?status=active", {
+        query: new URLSearchParams({ per_page: "10" }),
+      });
+
+      expect(fetchMock.requests()[0]!.url).toBe(
+        "https://example.com/v4/subscribers?status=active&per_page=10"
+      );
+    }
+  );
+
+  it.each(["/subscribers#results", "/subscribers?status=active#results"])(
+    "places query parameters before the fragment in %s",
+    async (path) => {
+      const api = new ApiClient({ baseUrl: "https://example.com/v4" });
+
+      await api.get(path, { query: new URLSearchParams({ per_page: "10" }) });
+
+      const url = new URL(fetchMock.requests()[0]!.url);
+      expect(url.searchParams.get("per_page")).toBe("10");
+      expect(url.searchParams.get("status")).toBe(
+        path.includes("?") ? "active" : null
+      );
+      expect(url.hash).toBe("#results");
+    }
+  );
+
+  it("preserves repeated parameters and encoded values without mutating the query", async () => {
+    const api = new ApiClient({ baseUrl: "https://example.com/v4" });
+    const query = new URLSearchParams([
+      ["tag", "second"],
+      ["tag", "third"],
+      ["email", "a+b@example.com"],
+      ["search", "a & b # c"],
+      ["empty", ""],
+    ]);
+    const originalQuery = query.toString();
+
+    await api.get("/subscribers?tag=first&name=Jane%20Doe", { query });
+
+    const url = new URL(fetchMock.requests()[0]!.url);
+    expect(url.searchParams.getAll("tag")).toEqual([
+      "first",
+      "second",
+      "third",
+    ]);
+    expect(url.searchParams.get("name")).toBe("Jane Doe");
+    expect(url.searchParams.get("email")).toBe("a+b@example.com");
+    expect(url.searchParams.get("search")).toBe("a & b # c");
+    expect(url.searchParams.get("empty")).toBe("");
+    expect(query.toString()).toBe(originalQuery);
+  });
+
+  it.each([undefined, new URLSearchParams()])(
+    "preserves an existing query and fragment with empty options %s",
+    async (query) => {
+      const api = new ApiClient({ baseUrl: "https://example.com/v4" });
+
+      await api.get("/subscribers?status=active#results", { query });
+
+      expect(fetchMock.requests()[0]!.url).toBe(
+        "https://example.com/v4/subscribers?status=active#results"
+      );
+    }
+  );
+
+  it.each([
+    ["https://example.com/v4", "subscribers"],
+    ["https://example.com/v4/", "/subscribers"],
+  ])("keeps the base path when joining %s and %s", async (baseUrl, path) => {
+    const api = new ApiClient({ baseUrl });
+
+    await api.get(path, { query: new URLSearchParams({ per_page: "10" }) });
+
+    expect(fetchMock.requests()[0]!.url).toBe(
+      "https://example.com/v4/subscribers?per_page=10"
+    );
+  });
+});
+
 describe("request header overrides", () => {
   beforeEach(() => {
     fetchMock.resetMocks();

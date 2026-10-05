@@ -157,7 +157,13 @@ export class ApiClient {
     let url = `${cleanedBaseUrl}/${cleanedPath}`;
 
     if (options?.query && options.query.size > 0) {
-      url = `${url}?${options.query.toString()}`;
+      const parsedUrl = new URL(url);
+      // Append to the existing query, before any fragment. Preserve repeated
+      // parameters rather than collapsing them into a single value.
+      for (const [name, value] of options.query) {
+        parsedUrl.searchParams.append(name, value);
+      }
+      url = parsedUrl.href;
     }
 
     const headers = new Headers(this.defaultHeaders());
