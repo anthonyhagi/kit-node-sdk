@@ -31,6 +31,7 @@ import {
   type PinSubscriberLocation,
   type PinSubscriberLocationParams,
   type Subscriber,
+  type SubscriberLocation,
   type UpdateSubscriber,
   type UpdateSubscriberLocation,
   type UpdateSubscriberLocationParams,
@@ -428,6 +429,9 @@ describe("subscriber requests through Kit", () => {
 
     const result = await kit.subscribers.list(params);
     expectTypeOf(result).toEqualTypeOf<ListSubscribers>();
+    expectTypeOf(result.subscribers[0]!.location).toEqualTypeOf<
+      SubscriberLocation | null | undefined
+    >();
     expectTypeOf(result.subscribers[0]?.location?.latitude).toEqualTypeOf<
       number | null | undefined
     >();
@@ -622,6 +626,11 @@ describe("subscriber requests through Kit", () => {
     expectTypeOf(result?.subscriber.canceled_at).toEqualTypeOf<
       string | null | undefined
     >();
+    expectTypeOf<
+      NonNullable<GetSubscriber["subscriber"]["location"]>
+    >().toEqualTypeOf<{
+      [Key in keyof SubscriberLocation]?: SubscriberLocation[Key] | undefined;
+    }>();
     expectTypeOf(result?.subscriber.location?.latitude).toEqualTypeOf<
       number | null | undefined
     >();
@@ -1203,6 +1212,11 @@ describe("subscriber requests through Kit", () => {
 
     const result = await kit.subscribers.filter(body);
     expectTypeOf(result).toEqualTypeOf<FilterSubscribers>();
+    expectTypeOf<
+      NonNullable<FilterSubscribers["subscribers"][number]["location"]>
+    >().toEqualTypeOf<{
+      [Key in keyof SubscriberLocation]?: SubscriberLocation[Key] | undefined;
+    }>();
     expect(result).toEqual(response);
     expect(await request("POST", "/subscribers/filter").json()).toEqual(body);
   });

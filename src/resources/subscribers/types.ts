@@ -15,6 +15,21 @@ export interface Subscriber {
   fields: Record<string, string | null>;
 }
 
+/** Location fields returned by subscriber reads; individual values may be unknown. */
+export interface SubscriberLocation {
+  city: string | null;
+  state: string | null;
+  country: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  timezone: string | null;
+}
+
+/** Get and filter responses also permit omitted or explicitly undefined fields. */
+type PartialSubscriberLocation = {
+  [Key in keyof SubscriberLocation]?: SubscriberLocation[Key] | undefined;
+};
+
 export interface BulkCreateSubscribersParams {
   subscribers: {
     first_name?: string | null | undefined;
@@ -119,17 +134,7 @@ export interface ListSubscribers {
       | { id?: number | null | undefined; name?: string | null | undefined }[]
       | undefined;
     /** Included when location is requested. */
-    location?:
-      | {
-          city: string | null;
-          state: string | null;
-          country: string | null;
-          latitude: number | null;
-          longitude: number | null;
-          timezone: string | null;
-        }
-      | null
-      | undefined;
+    location?: SubscriberLocation | null | undefined;
     /** Included when canceled_at is requested with status: "cancelled". */
     canceled_at?: string | null | undefined;
   })[];
@@ -406,17 +411,7 @@ export interface FilterSubscribers {
     /** Included when tags are requested. */
     tags?: { id?: number | undefined; name?: string | undefined }[] | undefined;
     /** Included when location is requested; null when unavailable. */
-    location?:
-      | {
-          city?: string | null | undefined;
-          state?: string | null | undefined;
-          country?: string | null | undefined;
-          latitude?: number | null | undefined;
-          longitude?: number | null | undefined;
-          timezone?: string | null | undefined;
-        }
-      | null
-      | undefined;
+    location?: PartialSubscriberLocation | null | undefined;
     /** Most recent state transition timestamp, included when canceled_at is requested. */
     canceled_at?: string | null | undefined;
     /** Engagement over the requested range, included when stats are requested. */
@@ -453,16 +448,7 @@ export interface GetSubscriber {
     /** Cancellation timestamp, when present. */
     canceled_at?: string | null | undefined;
     /** Primary location. Individual fields are null when not yet determined. */
-    location?:
-      | {
-          city?: string | null | undefined;
-          state?: string | null | undefined;
-          country?: string | null | undefined;
-          latitude?: number | null | undefined;
-          longitude?: number | null | undefined;
-          timezone?: string | null | undefined;
-        }
-      | undefined;
+    location?: PartialSubscriberLocation | undefined;
   };
 }
 
