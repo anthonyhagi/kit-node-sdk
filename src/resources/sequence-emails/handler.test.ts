@@ -6,6 +6,7 @@ import {
   type GetSequenceEmail,
   type ListSequenceEmails,
   type ListSequenceEmailsParams,
+  type SequenceEmail,
   type SequenceEmailStats,
   type UpdateSequenceEmail,
   type UpdateSequenceEmailParams,
@@ -46,6 +47,7 @@ describe("sequence email get requests through Kit", () => {
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.sequenceEmails.get(108, 6);
     expectTypeOf(result).toEqualTypeOf<GetSequenceEmail | null>();
+    expectTypeOf(result!.email).toEqualTypeOf<SequenceEmail>();
     expectTypeOf(result!.email.content).toEqualTypeOf<string | null>();
     expectTypeOf(result!.email.stats).toEqualTypeOf<
       SequenceEmailStats | undefined
@@ -416,6 +418,9 @@ describe("sequence email create requests through Kit", () => {
     fetchMock.mockResponseOnce(JSON.stringify(response), { status: 201 });
     const result = await kit.sequenceEmails.create(108, params);
     expectTypeOf(result).toEqualTypeOf<CreateSequenceEmail | null>();
+    expectTypeOf(result!.email).toEqualTypeOf<
+      Omit<SequenceEmail, "stats" | "position"> & { position: number | null }
+    >();
     expectTypeOf(result!.email.content).toEqualTypeOf<string | null>();
     expectTypeOf(result!.email.preview_text).toEqualTypeOf<string | null>();
     expectTypeOf(result!.email.send_days).toEqualTypeOf<string[] | null>();
@@ -565,6 +570,9 @@ describe("sequence email update requests through Kit", () => {
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.sequenceEmails.update(108, 6, params);
     expectTypeOf(result).toEqualTypeOf<UpdateSequenceEmail | null>();
+    expectTypeOf(result!.email).toEqualTypeOf<
+      Omit<SequenceEmail, "stats" | "position"> & { position: number | null }
+    >();
     expectTypeOf(result!.email.content).toEqualTypeOf<string | null>();
     expectTypeOf(result!.email.position).toEqualTypeOf<number | null>();
     expectTypeOf<{

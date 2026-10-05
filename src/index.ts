@@ -353,6 +353,7 @@ export type {
   ListSequenceEmailsWithContent,
   ListSequenceEmailsWithContentAndStats,
   ListSequenceEmailsWithStats,
+  SequenceEmail,
   SequenceEmailListItem,
   SequenceEmailStats,
   UpdateSequenceEmail,
