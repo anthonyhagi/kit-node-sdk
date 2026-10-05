@@ -56,7 +56,7 @@
     "build": "tsdown",
     "clean": "rm -rf dist",
     "typecheck": "tsc",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings=0",
     "lint:package": "publint",
     "format": "prettier -w .",
     "test": "vitest run",
