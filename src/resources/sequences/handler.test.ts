@@ -56,6 +56,38 @@ describe("sequence requests through Kit", () => {
     kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
   });
 
+  const customFieldCases: {
+    name: string;
+    fields: ListSequenceSubscribers["subscribers"][number]["fields"];
+  }[] = [
+    {
+      name: "mixed string and null values",
+      fields: { interest: "TypeScript", birthday: null },
+    },
+    { name: "only null values", fields: { interest: null } },
+    { name: "empty fields", fields: {} },
+  ];
+
+  it.each(customFieldCases)(
+    "preserves sequence subscriber custom fields with $name",
+    async ({ fields }) => {
+      const response = {
+        subscribers: [{ ...subscriber, fields }],
+        pagination,
+      } satisfies ListSequenceSubscribers;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+
+      const result = await kit.sequences.listSubscribers(7);
+      expectTypeOf(result).toEqualTypeOf<ListSequenceSubscribers | null>();
+      expectTypeOf<
+        ListSequenceSubscribers["subscribers"][number]["fields"]
+      >().toEqualTypeOf<Record<string, string | null>>();
+      expect(result).toEqual(response);
+      expect(result?.subscribers[0]?.fields).toEqual(fields);
+      expect(await request("GET", "/sequences/7/subscribers").text()).toBe("");
+    }
+  );
+
   it("deletes a sequence with a bodyless request and handles 204 responses", async () => {
     fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
     const result = await kit.sequences.delete(7);
