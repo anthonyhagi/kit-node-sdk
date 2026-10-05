@@ -85,7 +85,15 @@ const subscribers = await kit.subscribers.list(
 );
 ```
 
-Use `kit.subscribers.list(undefined, { signal })` when no filters are needed.
+All subscriber methods accept request options as their final argument. For
+example, `kit.subscribers.get(id, { signal })` and
+`kit.subscribers.update(id, params, { signal })` support cancellation too.
+
+For methods with optional filters, pass `undefined` to skip them:
+`kit.subscribers.list(undefined, { signal })`,
+`kit.subscribers.filter(body, undefined, { signal })`,
+`kit.subscribers.getStats(id, undefined, { signal })`, or
+`kit.subscribers.getTags(id, undefined, { signal })`.
 The exported `RequestOptions` type describes these controls; the signal is never
 sent as a query parameter.
 
