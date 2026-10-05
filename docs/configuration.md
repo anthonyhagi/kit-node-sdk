@@ -249,6 +249,12 @@ line items. Inspect the purchase before resending products. An explicit request
 limit can opt into retries, for example `kit.purchases.create(params, { maxRetries: 1 })`;
 do so only when you have established that replaying the request is appropriate.
 
+`kit.sequenceEmails.create()` also defaults to zero retries. Replaying an
+uncertain creation can add another email to the sequence; publishing it can
+trigger sends. Inspect the sequence emails before attempting creation again.
+An explicit `maxRetries` request option can opt into retries for this method.
+See [Kit's sequence email behavior](https://developers.kit.com/api-reference/sequence-emails/create-a-sequence-email).
+
 Other resource methods retain the client retry policy. See
 [Kit's purchase behavior](https://developers.kit.com/api-reference/purchases/create-a-purchase).
 
