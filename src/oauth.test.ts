@@ -219,6 +219,119 @@ describe("OAuth token refresh", () => {
   });
 });
 
+describe.each(["refresh", "revocation", "exchange"] as const)(
+  "OAuth %s cancellation",
+  (operation) => {
+    const refreshParams = {
+      client_id: "client-id",
+      refresh_token: "refresh-token",
+    } satisfies RefreshOAuthTokenParams;
+    const responseBody =
+      operation === "revocation"
+        ? ""
+        : JSON.stringify({ access_token: "replacement" });
+
+    beforeEach(() => {
+      fetchMock.resetMocks();
+    });
+
+    function invoke(signal?: AbortSignal) {
+      return operation === "refresh"
+        ? refreshOAuthToken(refreshParams, { signal })
+        : operation === "exchange"
+          ? exchangeOAuthCode(
+              {
+                client_id: "client-id",
+                client_secret: "client-secret",
+                code: "code",
+                redirect_uri: "https://example.com/callback",
+              },
+              { signal }
+            )
+          : revokeOAuthToken(credentials, { signal });
+    }
+
+    it("passes the caller's signal and completes without aborting it", async () => {
+      const controller = new AbortController();
+      fetchMock.mockResponseOnce(responseBody);
+      await invoke(controller.signal);
+      expect(fetchMock.mock.calls[0]?.[1]?.signal).toBe(controller.signal);
+      expect(controller.signal.aborted).toBe(false);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it("preserves requests without a signal", async () => {
+      fetchMock.mockResponseOnce(responseBody);
+      await invoke();
+      expect(fetchMock.mock.calls[0]?.[1]?.signal).toBeUndefined();
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it("propagates a pre-aborted signal's reason without retrying", async () => {
+      const controller = new AbortController();
+      const reason = new Error("Already cancelled");
+      controller.abort(reason);
+      fetchMock.mockImplementation((_input, init) => {
+        expect(init?.signal).toBe(controller.signal);
+        init?.signal?.throwIfAborted();
+        return Promise.resolve(new Response(responseBody));
+      });
+      await expect(invoke(controller.signal)).rejects.toBe(reason);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it("cancels a pending fetch without retrying", async () => {
+      const controller = new AbortController();
+      const reason = new Error("Request cancelled");
+      fetchMock.mockImplementation(
+        (_input, init) =>
+          new Promise<Response>((_resolve, reject) => {
+            expect(init?.signal).toBe(controller.signal);
+            init?.signal?.addEventListener(
+              "abort",
+              () => reject(init.signal?.reason),
+              { once: true }
+            );
+          })
+      );
+      const result = expect(invoke(controller.signal)).rejects.toBe(reason);
+      controller.abort(reason);
+      await result;
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([200, 401])(
+      "cancels a stalled %s response body without retrying",
+      async (status) => {
+        const controller = new AbortController();
+        const reason = new Error("Body reading cancelled");
+        fetchMock.mockImplementation((_input, init) =>
+          Promise.resolve(
+            new Response(
+              new ReadableStream({
+                start(stream) {
+                  expect(init?.signal).toBe(controller.signal);
+                  init?.signal?.addEventListener(
+                    "abort",
+                    () => stream.error(init.signal?.reason),
+                    { once: true }
+                  );
+                },
+              }),
+              { status }
+            )
+          )
+        );
+        const result = expect(invoke(controller.signal)).rejects.toBe(reason);
+        // Let the helper receive the response and begin reading its body.
+        await Promise.resolve();
+        controller.abort(reason);
+        await result;
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+      }
+    );
+  }
+);
 describe("OAuth authorization code exchange", () => {
   const params = {
     client_id: "client+id",

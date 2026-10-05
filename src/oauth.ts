@@ -11,6 +11,8 @@ export interface RevokeOAuthTokenParams {
 export interface RevokeOAuthTokenOptions {
   /** Defaults to https://api.kit.com/v4. */
   baseUrl?: string | undefined;
+  /** Cancel the request and response body reading without retrying. */
+  signal?: AbortSignal | undefined;
 }
 
 export interface RefreshOAuthTokenParams {
@@ -121,6 +123,7 @@ export async function revokeOAuthToken(
   const baseUrl = options?.baseUrl ?? "https://api.kit.com/v4";
   const response = await fetch(`${baseUrl.replace(/\/$/, "")}/oauth/revoke`, {
     method: "POST",
+    signal: options?.signal,
     headers: {
       Accept: "application/json",
       "Content-Type": "application/x-www-form-urlencoded",
@@ -139,6 +142,7 @@ async function requestOAuthTokens(
   const baseUrl = options?.baseUrl ?? "https://api.kit.com/v4";
   const response = await fetch(`${baseUrl.replace(/\/$/, "")}/oauth/token`, {
     method: "POST",
+    signal: options?.signal,
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",

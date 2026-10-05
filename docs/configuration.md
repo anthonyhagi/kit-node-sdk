@@ -127,6 +127,27 @@ The helper makes one request. HTTP failures throw `ApiError` with `status` and
 
 See [Kit's token revocation documentation](https://developers.kit.com/api-reference/oauth-token-revocation).
 
+### Cancelling OAuth requests
+
+All three OAuth helpers accept an optional `signal` in their second argument, alongside
+`baseUrl`. Use an `AbortController` to cancel a pending request or response read:
+
+```typescript
+const controller = new AbortController();
+const pendingRefresh = refreshOAuthToken(
+  { client_id: clientId, refresh_token: storedRefreshToken },
+  { signal: controller.signal }
+);
+
+// Cancel when the caller no longer needs the result.
+controller.abort();
+await pendingRefresh; // Rejects with the signal's abort reason.
+```
+
+Cancellation propagates without retries. The same option is available on
+`revokeOAuthToken(params, { signal: controller.signal })` and
+`exchangeOAuthCode(params, { signal: controller.signal })`.
+
 ### Configuration Options
 
 The Kit constructor accepts the following options:
