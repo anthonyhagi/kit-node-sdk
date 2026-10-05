@@ -1216,3 +1216,11 @@ Null values are omitted from the query; defined values and explicit
 `include_total_count: false` are preserved. The exported `ListSegmentsParams`
 type matches these inputs. See the
 [Kit API reference](https://developers.kit.com/api-reference/segments/list-segments).
+
+## Nullable email-template pagination
+
+`kit.emailTemplates.list()` accepts `null` for `after`, `before`, and `per_page`.
+Null values are omitted from the query; defined values and explicit
+`include_total_count: false` are preserved. The exported `ListEmailTemplatesParams`
+type matches these inputs. See the
+[Kit API reference](https://developers.kit.com/api-reference/email-templates/list-email-templates).
