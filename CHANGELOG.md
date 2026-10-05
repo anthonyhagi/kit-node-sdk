@@ -1,5 +1,71 @@
 # @anthonyhagi/kit-node-sdk
 
+## 0.6.0
+
+### Minor Changes
+
+- 13f0801: Expose optional user IDs, account sending addresses with verification and DMARC flags, and account plan details with nullable dates in `GetCurrentAccount` responses.
+- 79d91c2: Support per-request AbortSignal cancellation on direct API methods, including response reads and retry waits. Caller cancellations propagate without retrying; per-attempt timeout retries remain supported.
+- 6e41801: Expose the optional allow_starting_point flag for broadcast creation and updates so callers can send custom HTML with Starting point templates.
+- 8c85ee1: Export completed callback payload types for all eight bulk methods, without the SDK-only synchronous/asynchronous discriminator, and document handling callbacks.
+- 0231b4a: Add `customFields.bulkUpdateSubscriberValues()` for OAuth bulk updates of subscriber custom-field values, with typed synchronous results, per-entry failures, and asynchronous acknowledgements.
+- c2dfd35: Add tags.bulkDelete() and public request and response types for deleting tag definitions in bulk, including synchronous per-tag failures and asynchronous callback support.
+- f363f4c: Support optional AbortSignal cancellation across all tag methods, including pagination, subscriber tagging and removal, and bulk operations.
+- 594a858: Support `include: "subscriber_count"` in `kit.forms.list()` and expose optional active subscriber counts in form list responses.
+- 2354057: Support optional AbortSignal cancellation across all sequence methods, including subscriber enrollment, pagination, and sequence management.
+- 131f25a: Add `generateOAuthPKCE()` to generate a cryptographically random verifier and its S256 challenge for Kit's PKCE authorization flow.
+- 03b1292: Add `buildOAuthAuthorizationUrl()` for standard and PKCE authorization redirects, including encoded state, scope, and tenant parameters.
+- 521f21d: Allow OAuth code exchange, token refresh, and revocation requests to be cancelled with an optional AbortSignal, without automatic retries.
+- 796e702: Add `exchangeOAuthCode()` to exchange an authorization code and client credentials for typed access and refresh tokens using a single request.
+- 8335bd7: Support PKCE authorization code exchanges by accepting a `code_verifier` in place of a `client_secret` in `exchangeOAuthCode()`.
+- b925e03: Add `refreshOAuthToken()` and a typed `OAuthTokenResponse` for obtaining replacement access and refresh tokens. The helper makes one request because Kit refresh tokens are single-use.
+- 33cc110: Add the exported `revokeOAuthToken()` helper to invalidate Kit-issued access or refresh tokens when a creator disconnects an OAuth app.
+- 707a39a: Support optional AbortSignal cancellation across all broadcast methods while preserving slim list response inference.
+- 6c2e322: Support optional AbortSignal cancellation across all form methods while preserving slim subscriber response inference.
+- 55684ec: Support `slim` in `forms.listSubscribers()` with exported slim response types, optional expensive fields, and full response inference when slim is false or omitted.
+- cc24bba: Support the `slim` option on `subscribers.list()` and make list response custom fields optional because slim responses omit them. Preserve explicit false values in the query string.
+- a41c0bd: Support optional AbortSignal cancellation across all sequence-email methods, including content management, pagination, and stats reads.
+- 164e07a: Add optional RequestOptions to subscribers.list() so callers can cancel filtered and paginated requests with an AbortSignal.
+- dece27e: Support comma-separated `include` fields on `subscribers.list()` and type optional attribution, tags, location, and cancellation details in list responses. Document that requesting `canceled_at` requires `status: "cancelled"`.
+- 8593b8c: Support `include: "subscriber_count"` in `kit.tags.list()` and expose optional active subscriber counts in tag list responses.
+- 10e1ea7: Add the slim option to tags.listSubscribers() for requesting smaller responses, preserving explicit false values alongside pagination and filters.
+- df3e8d0: Support optional AbortSignal cancellation across all subscriber methods, including mutations, location operations, stats, tags, and engagement filtering.
+- f027aff: Export webhook delivery envelopes and discriminated event payload types for the currently available webhook endpoint events.
+- 4200b64: Add a raw-body webhook signature verifier with timestamp tolerance, constant-time HMAC comparison, and support for secret rotation.
+
+### Patch Changes
+
+- 3b137e9: Expose the nullable public_url field returned by broadcast creation, matching Kit's API response and the get/update response types.
+- b5fe813: Expose optional subject and nullable send_at metadata in broadcast stats list responses.
+- 64a3f7a: Allow callers to omit content when creating a broadcast with a Starting point template to use the template's own design.
+- 8200489: Align bulk subscriber request fields with Kit's schema: first_name, email_address, and state are optional and nullable. Missing or invalid email addresses remain subject to the API's per-subscriber failures.
+- 2d6ec53: Correct subscriber stats date-filter comments and document Kit's email stats retention window and HTTP 400 error handling starting October 15, 2026.
+- 537dcb4: Document eventual consistency, using returned subscriber IDs after writes, and the distinction between stale successful reads and SDK retries.
+- b978d19: Format Date inputs for form subscriber added and created filters as UTC YYYY-MM-DD dates, preserving string inputs.
+- 2112e04: Preserve explicit `include_total_count: false` across the remaining paginated list and subscriber filter methods, while continuing to omit undefined values.
+- 02809fd: Allow nullable form and subscriber IDs in bulk form subscription requests, and nullable form IDs in synchronous failure responses, matching the Kit API schema.
+- 82b44ea: Allow nullable tag and subscriber IDs in `tags.bulkTag()` requests, matching the Kit API schema.
+- b811185: Allow a null position in sequence email creation responses to match Kit's API schema. Callers should check for null before using the returned position as a number.
+- be1eb0b: Allow null custom-field values in `forms.listSubscribers()` responses, matching the Kit API schema and examples.
+- d663724: Allow null first names in form subscription responses from `addSubscriber()` and `addSubscriberByEmail()`, matching the Kit API schema.
+- 7df78ce: Allow null subscriber state in `forms.addSubscriber()` responses, matching the Kit API's newly added subscription response schema.
+- edacb6c: Allow null custom-field values in `sequences.listSubscribers()` responses, matching the Kit API schema and examples.
+- c8bbd10: Make purchase response sources optional for list, get, and create responses to match Kit's API schema. Callers should check whether `source` is present before using it.
+- d06e464: Mark the package as free of import-time side effects so bundlers can remove unused imports.
+- 6c86b31: Correct account palette documentation and the empty-palette error to use the supported 10-color limit, and clarify that updating colors replaces the entire palette.
+- f09539d: Export the remaining subscriber engagement, signup-date, broadcast, and URL filter condition types from the package entry point.
+- 2f7c95f: Format Date inputs for sequence subscriber added/created date filters as YYYY-MM-DD using their UTC calendar date, preserving string inputs.
+- 1164499: Allow null custom-field values in sequence subscriber list responses, matching Kit's documented response.
+- 258d8d8: Allow null first names in sequence enrollment responses by subscriber ID and email address, matching Kit's response schemas.
+- e564ca4: Format Date inputs for subscriber list created/updated date filters as YYYY-MM-DD using their UTC calendar date, preserving string inputs.
+- 0585f51: Expose optional `location` and `canceled_at` fields on `GetSubscriber`. Type cancellation timestamps and undetermined location fields as nullable, matching Kit's response schema.
+- d8f0871: Expose optional custom-field `warnings` arrays on subscriber create and update responses so callers can identify unknown field keys ignored by Kit.
+- 31941cf: Complete subscriber list sort field suggestions with created_at, canceled_at, and the documented engagement metrics. Document cancellation status and engagement email filter restrictions while preserving custom sort strings.
+- fcad677: Format Date inputs for tagged subscriber created/tagged date filters as YYYY-MM-DD using their UTC calendar date, preserving string inputs.
+- 8ee67bb: Allow null first names in subscriber tagging responses by ID and email address, matching Kit's response schema.
+- 793632f: Preserve explicit `include_total_count: false` in legacy webhook list requests while continuing to omit undefined values.
+- 0206315: Correct `event.initiator_value` in legacy webhook list responses to an optional nullable string, matching link-click URL configuration.
+
 ## 0.5.0
 
 ### Minor Changes
