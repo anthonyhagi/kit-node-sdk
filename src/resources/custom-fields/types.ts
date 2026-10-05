@@ -34,8 +34,7 @@ export interface BulkCreateSynchronous {
 
 export type BulkCreate = BulkCreateAsynchronous | BulkCreateSynchronous;
 export type BulkCreateWithoutResponseType =
-  | Omit<BulkCreateAsynchronous, "type">
-  | Omit<BulkCreateSynchronous, "type">;
+  Omit<BulkCreateAsynchronous, "type"> | Omit<BulkCreateSynchronous, "type">;
 
 export interface ListCustomFieldsParams {
   /**

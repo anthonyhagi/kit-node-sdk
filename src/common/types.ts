@@ -9,8 +9,4 @@ export type Pagination = {
 };
 
 export type SubscriberState =
-  | "active"
-  | "bounced"
-  | "cancelled"
-  | "complained"
-  | "inactive";
+  "active" | "bounced" | "cancelled" | "complained" | "inactive";
