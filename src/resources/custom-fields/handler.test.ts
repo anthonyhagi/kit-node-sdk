@@ -42,6 +42,69 @@ describe("custom-field requests through Kit", () => {
     kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
   });
 
+  it("accepts documented nullable pagination parameters", () => {
+    expectTypeOf<ListCustomFieldsParams["after"]>().toEqualTypeOf<
+      string | null | undefined
+    >();
+    expectTypeOf<ListCustomFieldsParams["before"]>().toEqualTypeOf<
+      string | null | undefined
+    >();
+    expectTypeOf<ListCustomFieldsParams["per_page"]>().toEqualTypeOf<
+      number | null | undefined
+    >();
+    expectTypeOf<ListCustomFieldsParams["include_total_count"]>().toEqualTypeOf<
+      boolean | undefined
+    >();
+  });
+
+  it.each([
+    {
+      params: {
+        after: null,
+        before: "previous",
+        per_page: 25,
+        include_total_count: false,
+      },
+      expected: {
+        before: "previous",
+        per_page: "25",
+        include_total_count: "false",
+      },
+    },
+    {
+      params: {
+        after: "next",
+        before: null,
+        per_page: 25,
+        include_total_count: true,
+      },
+      expected: { after: "next", per_page: "25", include_total_count: "true" },
+    },
+    {
+      params: {
+        after: "next",
+        before: "previous",
+        per_page: null,
+        include_total_count: false,
+      },
+      expected: {
+        after: "next",
+        before: "previous",
+        include_total_count: "false",
+      },
+    },
+  ])(
+    "omits null values while preserving defined options $params",
+    async ({ params, expected }) => {
+      const response = { custom_fields: [field], pagination };
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+
+      await expect(kit.customFields.list(params)).resolves.toEqual(response);
+
+      request("GET", "/custom_fields", expected);
+    }
+  );
+
   it.each([
     { after: null, before: null, per_page: null },
     { after: undefined, before: undefined, per_page: undefined },
