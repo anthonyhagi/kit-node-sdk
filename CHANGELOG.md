@@ -1,5 +1,14 @@
 # @anthonyhagi/kit-node-sdk
 
+## 0.7.1
+
+### Patch Changes
+
+- 642e6c7: Accept documented nullable post-list pagination parameters and omit null page sizes instead of sending per_page=null. Preserve defined pagination values and explicit false content and total-count flags.
+- 619fdea: Accept documented nullable purchase-list pagination parameters. Null cursors and page sizes are omitted from the query while defined values and explicit false total-count flags are preserved.
+- 0eab867: Accept documented nullable subscriber list pagination parameters while preserving sorting, filters, includes, and explicit false flags.
+- 075ef2c: Accept documented nullable subscriber tag pagination parameters while preserving explicit false total-count flags.
+
 ## 0.7.0
 
 ### Minor Changes
