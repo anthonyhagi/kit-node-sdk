@@ -171,7 +171,7 @@ export interface AddSubscriberByEmailParams {
 export interface AddSubscriberToSequence {
   subscriber: {
     id: number;
-    first_name: string;
+    first_name: string | null;
     email_address: string;
     state: string;
     created_at: string;

@@ -575,6 +575,46 @@ describe("sequence requests through Kit", () => {
     }
   );
 
+  it.each([200, 201])(
+    "preserves null first names when enrolling by ID on status %i",
+    async (status) => {
+      const response = {
+        subscriber: { ...subscriber, first_name: null },
+      } satisfies AddSubscriberToSequence;
+      fetchMock.mockResponseOnce(JSON.stringify(response), { status });
+
+      const result = await kit.sequences.addSubscriberById(7, 42);
+      expectTypeOf(result).toEqualTypeOf<AddSubscriberToSequence | null>();
+      expectTypeOf<
+        AddSubscriberToSequence["subscriber"]["first_name"]
+      >().toEqualTypeOf<string | null>();
+      expect(result).toEqual(response);
+      expect(result?.subscriber.first_name).toBeNull();
+      expect(await request("POST", "/sequences/7/subscribers/42").text()).toBe(
+        ""
+      );
+    }
+  );
+
+  it.each([200, 201])(
+    "preserves null first names when enrolling by email on status %i",
+    async (status) => {
+      const body = { email_address: subscriber.email_address };
+      const response = {
+        subscriber: { ...subscriber, first_name: null },
+      } satisfies AddSubscriberToSequence;
+      fetchMock.mockResponseOnce(JSON.stringify(response), { status });
+
+      const result = await kit.sequences.addSubscriberByEmail(7, body);
+      expectTypeOf(result).toEqualTypeOf<AddSubscriberToSequence | null>();
+      expect(result).toEqual(response);
+      expect(result?.subscriber.first_name).toBeNull();
+      const req = request("POST", "/sequences/7/subscribers");
+      expect(req.headers.get("Content-Type")).toBe("application/json");
+      expect(await req.json()).toEqual(body);
+    }
+  );
+
   it.each([
     "listSubscribers",
     "addSubscriberById",
