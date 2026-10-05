@@ -70,6 +70,24 @@ console.log(result.account.plan?.renews_at);
 These fields can be omitted; plan dates can be `null` when not applicable.
 See the [Kit API reference](https://developers.kit.com/api-reference/accounts/get-current-account).
 
+## Nullable referrer when adding a form subscriber by email
+
+`kit.forms.addSubscriberByEmail()` accepts a string, `URL`, or `null` for
+`referrer`. The exported `AddSubscriberToFormByEmailParams` type includes these
+values. Supplied values, including `null` and an empty string, are sent as-is;
+an omitted or `undefined` referrer is left out of the JSON body. `URL` objects
+serialize to their URL string.
+
+```ts
+await kit.forms.addSubscriberByEmail(7, {
+  email_address: "ada@example.com",
+  referrer: null,
+});
+```
+
+The subscriber must already exist. See
+[Kit's endpoint reference](https://developers.kit.com/api-reference/forms/add-subscriber-to-form-by-email-address).
+
 ## Slim form subscriber lists
 
 Pass `slim: true` to `kit.forms.listSubscribers()` for a faster, smaller response:
