@@ -1,4 +1,4 @@
-import type { Kit } from "~/index";
+import type { Kit, RequestOptions } from "~/index";
 import { toDateOnlyString } from "~/utils/date";
 import type {
   AddSubscriberByEmailParams,
@@ -26,12 +26,16 @@ export class SequencesHandler {
    * Get a paginated list of all Sequences.
    *
    * @param params - Optional pagination and stats inclusion parameters.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/sequences/list-sequences}
    *
    * @returns The paginated list of Sequences.
    */
-  public async list(params?: ListSequencesParams): Promise<ListSequences> {
+  public async list(
+    params?: ListSequencesParams,
+    options?: RequestOptions
+  ): Promise<ListSequences> {
     const { after, before, include, include_total_count, per_page } =
       params || {};
 
@@ -45,19 +49,27 @@ export class SequencesHandler {
       ...(per_page && { per_page: String(per_page) }),
     });
 
-    return await this.api.get<ListSequences>("/sequences", { query });
+    return await this.api.get<ListSequences>("/sequences", {
+      query,
+      signal: options?.signal,
+    });
   }
 
   /**
    * Create an empty sequence. Only the name is required; Kit supplies defaults.
    *
    * @param params - The name and optional sending settings and exclusions.
+   * @param options - Optional request controls, including cancellation.
    * @returns The created sequence details.
    * @see {@link https://developers.kit.com/api-reference/sequences/create-a-sequence}
    */
-  public async create(params: CreateSequenceParams): Promise<CreateSequence> {
+  public async create(
+    params: CreateSequenceParams,
+    options?: RequestOptions
+  ): Promise<CreateSequence> {
     return await this.api.post<CreateSequence>("/sequences", {
       body: JSON.stringify(params),
+      signal: options?.signal,
     });
   }
 
@@ -66,18 +78,21 @@ export class SequencesHandler {
    *
    * @param id - The unique ID of the sequence.
    * @param params - Optional data to include in the response.
+   * @param options - Optional request controls, including cancellation.
    * @returns The sequence details, or null if the sequence was not found.
    * @see {@link https://developers.kit.com/api-reference/sequences/get-a-sequence}
    */
   public async get(
     id: number,
-    params?: GetSequenceParams
+    params?: GetSequenceParams,
+    options?: RequestOptions
   ): Promise<GetSequence | null> {
     const query = new URLSearchParams({
       ...(params?.include && { include: params.include }),
     });
     return await this.api.get<GetSequence | null>(`/sequences/${id}`, {
       query,
+      signal: options?.signal,
     });
   }
 
@@ -86,15 +101,18 @@ export class SequencesHandler {
    *
    * @param id - The unique ID of the sequence.
    * @param params - The settings to change.
+   * @param options - Optional request controls, including cancellation.
    * @returns The updated sequence, or null if it was not found.
    * @see {@link https://developers.kit.com/api-reference/sequences/update-a-sequence}
    */
   public async update(
     id: number,
-    params: UpdateSequenceParams
+    params: UpdateSequenceParams,
+    options?: RequestOptions
   ): Promise<UpdateSequence | null> {
     return await this.api.put<UpdateSequence | null>(`/sequences/${id}`, {
       body: JSON.stringify(params),
+      signal: options?.signal,
     });
   }
 
@@ -103,11 +121,17 @@ export class SequencesHandler {
    * Associated state is cleaned up in the background.
    *
    * @param id - The unique ID of the sequence.
+   * @param options - Optional request controls, including cancellation.
    * @returns An empty object on success, or null if the sequence was not found.
    * @see {@link https://developers.kit.com/api-reference/sequences/delete-a-sequence}
    */
-  public async delete(id: number): Promise<{} | null> {
-    return await this.api.delete<{} | null>(`/sequences/${id}`);
+  public async delete(
+    id: number,
+    options?: RequestOptions
+  ): Promise<{} | null> {
+    return await this.api.delete<{} | null>(`/sequences/${id}`, {
+      signal: options?.signal,
+    });
   }
 
   /**
@@ -115,6 +139,7 @@ export class SequencesHandler {
    *
    * @param id - The unique ID of the Sequence.
    * @param params - Optional parameters to filter by.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/sequences/list-subscribers-for-a-sequence}
    *
@@ -122,7 +147,8 @@ export class SequencesHandler {
    */
   public async listSubscribers(
     id: number,
-    params?: ListSequenceSubscribersParams
+    params?: ListSequenceSubscribersParams,
+    options?: RequestOptions
   ): Promise<ListSequenceSubscribers | null> {
     const {
       added_after,
@@ -154,7 +180,10 @@ export class SequencesHandler {
 
     const url = `/sequences/${id}/subscribers`;
 
-    return await this.api.get<ListSequenceSubscribers | null>(url, { query });
+    return await this.api.get<ListSequenceSubscribers | null>(url, {
+      query,
+      signal: options?.signal,
+    });
   }
 
   /**
@@ -162,6 +191,7 @@ export class SequencesHandler {
    *
    * @param id - The unique ID of the Sequence.
    * @param params - The email address of the Subscriber to add.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/sequences/add-subscriber-to-sequence-by-email-address}
    *
@@ -169,13 +199,17 @@ export class SequencesHandler {
    */
   public async addSubscriberByEmail(
     id: number,
-    params: AddSubscriberByEmailParams
+    params: AddSubscriberByEmailParams,
+    options?: RequestOptions
   ): Promise<AddSubscriberToSequence | null> {
     const body = JSON.stringify(params || {});
 
     const url = `/sequences/${id}/subscribers`;
 
-    return await this.api.post<AddSubscriberToSequence | null>(url, { body });
+    return await this.api.post<AddSubscriberToSequence | null>(url, {
+      body,
+      signal: options?.signal,
+    });
   }
 
   /**
@@ -183,6 +217,7 @@ export class SequencesHandler {
    *
    * @param sequenceId - The unique ID of the Sequence.
    * @param subscriberId - The unique ID of the Subscriber.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/sequences/add-subscriber-to-sequence}
    *
@@ -190,10 +225,13 @@ export class SequencesHandler {
    */
   public async addSubscriberById(
     sequenceId: number,
-    subscriberId: number
+    subscriberId: number,
+    options?: RequestOptions
   ): Promise<AddSubscriberToSequence | null> {
     const url = `/sequences/${sequenceId}/subscribers/${subscriberId}`;
 
-    return await this.api.post<AddSubscriberToSequence | null>(url);
+    return await this.api.post<AddSubscriberToSequence | null>(url, {
+      signal: options?.signal,
+    });
   }
 }

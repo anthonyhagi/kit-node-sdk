@@ -119,6 +119,16 @@ await kit.forms.addSubscriber(formId, subscriberId, undefined, { signal });
 await kit.forms.bulkAddSubscribers({ additions }, { signal });
 ```
 
+All sequence methods accept request options as their final argument:
+
+```typescript
+await kit.sequences.list(undefined, { signal });
+await kit.sequences.get(sequenceId, undefined, { signal });
+await kit.sequences.listSubscribers(sequenceId, undefined, { signal });
+await kit.sequences.update(sequenceId, { active: false }, { signal });
+await kit.sequences.addSubscriberById(sequenceId, subscriberId, { signal });
+```
+
 Cancellation stops pending fetches, response body reads, and retry waits. An
 already-aborted signal prevents the initial request. Caller cancellations are
 never retried. `timeoutMs` still applies independently to each attempt, and timed-out
