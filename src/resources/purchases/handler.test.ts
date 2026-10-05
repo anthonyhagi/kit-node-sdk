@@ -5,6 +5,8 @@ import {
   type GetPurchase,
   type ListPurchases,
   type ListPurchasesParams,
+  type Purchase,
+  type PurchaseProduct,
 } from "~/index";
 
 // First purchase in Kit's documented list response:
@@ -162,6 +164,8 @@ describe("purchase list response through Kit", () => {
     expectTypeOf(result).toEqualTypeOf<ListPurchases>();
     const listedPurchase = result.purchases[0]!;
     const product = listedPurchase.products[0]!;
+    expectTypeOf(listedPurchase).toEqualTypeOf<Purchase>();
+    expectTypeOf(product).toEqualTypeOf<PurchaseProduct>();
     expectTypeOf(listedPurchase.transaction_id).toEqualTypeOf<string>();
     expectTypeOf(product.lid).toEqualTypeOf<string>();
     expectTypeOf(listedPurchase.id).toEqualTypeOf<number>();
@@ -187,6 +191,7 @@ describe("purchase list response through Kit", () => {
     });
     const result = await kit.purchases.get(14);
     expect(result).toEqual(response);
+    expectTypeOf(result!.purchase).toEqualTypeOf<Purchase>();
     expectTypeOf(result!.purchase.subscriber_id).toEqualTypeOf<number>();
     expectTypeOf(result!.purchase.source).toEqualTypeOf<string | undefined>();
     expect(result!.purchase.subscriber_id).toBe(24);
@@ -217,6 +222,7 @@ describe("purchase list response through Kit", () => {
       },
     });
     expect(result).toEqual(response);
+    expectTypeOf(result.purchase).toEqualTypeOf<Purchase>();
     expectTypeOf(result.purchase.subscriber_id).toEqualTypeOf<number>();
     expectTypeOf(result.purchase.source).toEqualTypeOf<string | undefined>();
     expect(result.purchase.subscriber_id).toBe(42);
