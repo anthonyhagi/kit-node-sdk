@@ -30,6 +30,7 @@ import {
   type ListSubscribersParams,
   type PinSubscriberLocation,
   type PinSubscriberLocationParams,
+  type Subscriber,
   type UpdateSubscriber,
   type UpdateSubscriberLocation,
   type UpdateSubscriberLocationParams,
@@ -617,6 +618,7 @@ describe("subscriber requests through Kit", () => {
 
     const result = await kit.subscribers.get(42);
     expectTypeOf(result).toEqualTypeOf<GetSubscriber | null>();
+    expectTypeOf(result!.subscriber).toExtend<Subscriber>();
     expectTypeOf(result?.subscriber.canceled_at).toEqualTypeOf<
       string | null | undefined
     >();
@@ -646,6 +648,7 @@ describe("subscriber requests through Kit", () => {
 
     const result = await kit.subscribers.get(42);
     expectTypeOf(result).toEqualTypeOf<GetSubscriber | null>();
+    expectTypeOf(result!.subscriber).toExtend<Subscriber>();
     expect(result).toEqual(response);
     request("GET", "/subscribers/42");
   });
@@ -659,6 +662,7 @@ describe("subscriber requests through Kit", () => {
 
     const result = await kit.subscribers.create(body);
     expectTypeOf(result).toEqualTypeOf<CreateSubscriber>();
+    expectTypeOf(result.subscriber).toEqualTypeOf<Subscriber>();
     expect(result).toEqual(response);
     expect(await request("POST", "/subscribers").json()).toEqual(body);
   });
@@ -672,6 +676,7 @@ describe("subscriber requests through Kit", () => {
 
     const result = await kit.subscribers.update(42, body);
     expectTypeOf(result).toEqualTypeOf<UpdateSubscriber | null>();
+    expectTypeOf(result!.subscriber).toEqualTypeOf<Subscriber>();
     expect(result).toEqual(response);
     expect(await request("PUT", "/subscribers/42").json()).toEqual(body);
   });

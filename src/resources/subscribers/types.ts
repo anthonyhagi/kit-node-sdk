@@ -5,6 +5,16 @@ import type {
   SubscriberState,
 } from "~/common/types";
 
+/** Core subscriber record returned by create, get, and update operations. */
+export interface Subscriber {
+  id: number;
+  first_name: string | null;
+  email_address: string;
+  state: SubscriberState;
+  created_at: string;
+  fields: Record<string, string | null>;
+}
+
 export interface BulkCreateSubscribersParams {
   subscribers: {
     first_name?: string | null | undefined;
@@ -162,14 +172,7 @@ export interface CreateSubscriberParams {
 export interface CreateSubscriber {
   /** Unknown custom field keys that were ignored while creating the subscriber. */
   warnings?: string[] | undefined;
-  subscriber: {
-    id: number;
-    first_name: string | null;
-    email_address: string;
-    state: SubscriberState;
-    created_at: string;
-    fields: Record<string, string | null>;
-  };
+  subscriber: Subscriber;
 }
 
 export interface FilterSubscriberParams extends NonNullablePaginationParams {
@@ -458,13 +461,7 @@ export interface FilterSubscribers {
 }
 
 export interface GetSubscriber {
-  subscriber: {
-    id: number;
-    first_name: string | null;
-    email_address: string;
-    state: SubscriberState;
-    created_at: string;
-    fields: Record<string, string | null>;
+  subscriber: Subscriber & {
     /** Cancellation timestamp, when present. */
     canceled_at?: string | null | undefined;
     /** Primary location. Individual fields are null when not yet determined. */
@@ -491,14 +488,7 @@ export interface UpdateSubscriberParams {
 export interface UpdateSubscriber {
   /** Unknown custom field keys that were ignored while updating the subscriber. */
   warnings?: string[] | undefined;
-  subscriber: {
-    id: number;
-    first_name: string | null;
-    email_address: string;
-    state: SubscriberState;
-    created_at: string;
-    fields: Record<string, string | null>;
-  };
+  subscriber: Subscriber;
 }
 
 export interface PinSubscriberLocationParams {
