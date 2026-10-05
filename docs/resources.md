@@ -776,6 +776,10 @@ Missing sequences return `null`. HTML content is omitted by default; request
 `null`; hour-based emails return `send_days: null`. Per-email stats use zero when no delivery
 data is available. Exported types are `ListSequenceEmails`,
 `ListSequenceEmailsParams`, `SequenceEmailListItem`, and `SequenceEmailStats`.
+
+The `after`, `before`, `per_page`, and `include_content` parameters accept `null`.
+Null and undefined values are omitted from the query so Kit uses its defaults.
+An explicit `include_content: false` is sent as `false`.
 See the [Kit API reference](https://developers.kit.com/api-reference/sequence-emails/list-sequence-emails).
 
 ## Deleting a sequence

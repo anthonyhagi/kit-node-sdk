@@ -46,9 +46,18 @@ export interface UpdateSequenceEmail {
   };
 }
 
-export interface ListSequenceEmailsParams extends ListSequencesParams {
-  /** Include each email's HTML content; omitted by default. */
-  include_content?: boolean | undefined;
+export interface ListSequenceEmailsParams extends Omit<
+  ListSequencesParams,
+  "after" | "before" | "per_page"
+> {
+  /** Cursor from the previous page's end_cursor; null is omitted. */
+  after?: string | null | undefined;
+  /** Cursor from the next page's start_cursor; null is omitted. */
+  before?: string | null | undefined;
+  /** Number of results per page. Default 500, maximum 1000; null is omitted. */
+  per_page?: number | null | undefined;
+  /** Include each email's HTML content; omitted by default. Null is omitted. */
+  include_content?: boolean | null | undefined;
 }
 
 /** Per-email metrics are zero when there is no deliverability data. */
