@@ -76,6 +76,19 @@ controller.abort();
 await pendingRequest; // Rejects with the signal's abort reason.
 ```
 
+For subscriber list requests, pass request controls as the second argument:
+
+```typescript
+const subscribers = await kit.subscribers.list(
+  { status: "active", per_page: 25, after: nextCursor },
+  { signal: controller.signal }
+);
+```
+
+Use `kit.subscribers.list(undefined, { signal })` when no filters are needed.
+The exported `RequestOptions` type describes these controls; the signal is never
+sent as a query parameter.
+
 Cancellation stops pending fetches, response body reads, and retry waits. An
 already-aborted signal prevents the initial request. Caller cancellations are
 never retried. `timeoutMs` still applies independently to each attempt, and timed-out
