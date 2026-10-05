@@ -1,4 +1,4 @@
-import type { Kit } from "~/index";
+import type { Kit, RequestOptions } from "~/index";
 import { toDateOnlyString } from "~/utils/date";
 import type {
   AddSubscriberToForm,
@@ -33,6 +33,7 @@ export class FormsHandler {
    * callback URL. This will notify you of any failures in processing.
    *
    * @param params - The required fields to run this request.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/forms/bulk-add-subscribers-to-forms}
    *
@@ -41,14 +42,15 @@ export class FormsHandler {
    * object will be returned.
    */
   public async bulkAddSubscribers(
-    params: BulkAddSubscribersParams
+    params: BulkAddSubscribersParams,
+    options?: RequestOptions
   ): Promise<BulkAddSubscribers> {
     const body = JSON.stringify(params || {});
     const url = "/bulk/forms/subscribers";
 
     const resp = await this.api.post<BulkAddSubscribersWithoutResponseType>(
       url,
-      { body }
+      { body, signal: options?.signal }
     );
 
     // Add on the response type such that the caller of this method
@@ -67,12 +69,16 @@ export class FormsHandler {
    * hosted) for your account (including active and archived).
    *
    * @param params - Optional filters to apply.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/forms/list-forms}
    *
    * @returns the paginated list of all forms and landing pages.
    */
-  public async list(params?: ListFormsParams): Promise<ListForms> {
+  public async list(
+    params?: ListFormsParams,
+    options?: RequestOptions
+  ): Promise<ListForms> {
     const {
       after,
       before,
@@ -95,7 +101,10 @@ export class FormsHandler {
       ...(type && { type }),
     });
 
-    return await this.api.get<ListForms>("/forms", { query });
+    return await this.api.get<ListForms>("/forms", {
+      query,
+      signal: options?.signal,
+    });
   }
 
   /**
@@ -103,6 +112,7 @@ export class FormsHandler {
    *
    * @param id - The unique ID of the form.
    * @param params - The optional filters to apply.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/forms/list-subscribers-for-a-form}
    *
@@ -110,19 +120,23 @@ export class FormsHandler {
    */
   public async listSubscribers(
     id: number,
-    params: ListFormSubscribersParams & { slim: true }
+    params: ListFormSubscribersParams & { slim: true },
+    options?: RequestOptions
   ): Promise<ListSlimFormSubscribers | null>;
   public async listSubscribers(
     id: number,
-    params?: ListFormSubscribersParams & { slim?: false | undefined }
+    params?: ListFormSubscribersParams & { slim?: false | undefined },
+    options?: RequestOptions
   ): Promise<ListFormSubscribers | null>;
   public async listSubscribers(
     id: number,
-    params?: ListFormSubscribersParams
+    params?: ListFormSubscribersParams,
+    options?: RequestOptions
   ): Promise<ListFormSubscribers | ListSlimFormSubscribers | null>;
   public async listSubscribers(
     id: number,
-    params?: ListFormSubscribersParams
+    params?: ListFormSubscribersParams,
+    options?: RequestOptions
   ): Promise<ListFormSubscribers | ListSlimFormSubscribers | null> {
     const {
       added_after,
@@ -157,7 +171,7 @@ export class FormsHandler {
 
     return await this.api.get<
       ListFormSubscribers | ListSlimFormSubscribers | null
-    >(url, { query });
+    >(url, { query, signal: options?.signal });
   }
 
   /**
@@ -169,6 +183,7 @@ export class FormsHandler {
    * @param id - The unique ID of the form to add the subscriber to.
    * @param params - The required and optional parameters to add
    * the subscriber.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/forms/add-subscriber-to-form-by-email-address}
    *
@@ -176,7 +191,8 @@ export class FormsHandler {
    */
   public async addSubscriberByEmail(
     id: number,
-    params: AddSubscriberToFormByEmailParams
+    params: AddSubscriberToFormByEmailParams,
+    options?: RequestOptions
   ): Promise<AddSubscriberToFormByEmail | null> {
     const { email_address, referrer } = params || {};
 
@@ -189,6 +205,7 @@ export class FormsHandler {
 
     return await this.api.post<AddSubscriberToFormByEmail | null>(url, {
       body,
+      signal: options?.signal,
     });
   }
 
@@ -199,6 +216,7 @@ export class FormsHandler {
    * @param subscriberId - The unique ID of the subscriber.
    * @param params - Optional parameters to specify when adding the
    * Subscriber.
+   * @param options - Optional request controls, including cancellation.
    *
    * @see {@link https://developers.kit.com/api-reference/forms/add-subscriber-to-form}
    *
@@ -207,12 +225,16 @@ export class FormsHandler {
   public async addSubscriber(
     formId: number,
     subscriberId: number,
-    params?: AddSubscriberToFormParams
+    params?: AddSubscriberToFormParams,
+    options?: RequestOptions
   ): Promise<AddSubscriberToForm | null> {
     const body = JSON.stringify(params || {});
 
     const url = `/forms/${formId}/subscribers/${subscriberId}`;
 
-    return await this.api.post<AddSubscriberToForm | null>(url, { body });
+    return await this.api.post<AddSubscriberToForm | null>(url, {
+      body,
+      signal: options?.signal,
+    });
   }
 }
