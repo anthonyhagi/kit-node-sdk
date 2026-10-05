@@ -3,6 +3,7 @@ import {
   Kit,
   type CreateWebhookParams,
   type ListWebhooks,
+  type ListWebhooksParams,
   type WebhookEvent,
 } from "~/index";
 
@@ -52,6 +53,54 @@ describe("webhook requests through Kit", () => {
   beforeEach(() => {
     fetchMock.resetMocks();
     kit = new Kit({ apiKey: "test-key", maxRetries: 0 });
+  });
+
+  it.each([
+    { after: null, before: null, per_page: null },
+    { after: undefined, before: undefined, per_page: undefined },
+  ] satisfies ListWebhooksParams[])(
+    "omits nullable and undefined legacy webhook pagination: %j",
+    async (params) => {
+      const response = {
+        webhooks: [
+          {
+            id: 1,
+            account_id: 42,
+            event: { name: "tag_add", tag_id: 10 },
+            target_url: targetUrl,
+          },
+        ],
+        pagination,
+      } satisfies ListWebhooks;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      const result = await kit.webhooks.list(params);
+      expectTypeOf(result).toEqualTypeOf<ListWebhooks>();
+      expect(result).toEqual(response);
+      expect(await request("GET", "/webhooks").text()).toBe("");
+    }
+  );
+
+  it("preserves false total counts alongside null legacy webhook pagination", async () => {
+    const params = {
+      after: null,
+      before: null,
+      per_page: null,
+      include_total_count: false,
+    } satisfies ListWebhooksParams;
+    const response = {
+      webhooks: [
+        {
+          id: 1,
+          account_id: 42,
+          event: { name: "tag_add", tag_id: 10 },
+          target_url: targetUrl,
+        },
+      ],
+      pagination,
+    } satisfies ListWebhooks;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    expect(await kit.webhooks.list(params)).toEqual(response);
+    request("GET", "/webhooks", { include_total_count: "false" });
   });
 
   it("lists webhooks without optional pagination and preserves event configuration", async () => {
