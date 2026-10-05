@@ -213,11 +213,13 @@ export class TagsHandler {
    * ```
    */
   public async list(params?: ListTagsParams): Promise<ListTags> {
-    const { after, before, include_total_count, per_page } = params || {};
+    const { after, before, include, include_total_count, per_page } =
+      params || {};
 
     const query = new URLSearchParams({
       ...(after && { after }),
       ...(before && { before }),
+      ...(include && { include }),
       ...(include_total_count !== undefined && {
         include_total_count: String(include_total_count),
       }),

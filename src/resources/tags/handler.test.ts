@@ -3,6 +3,8 @@ import {
   Kit,
   type BulkTagParams,
   type BulkTagSynchronous,
+  type ListTags,
+  type ListTagsParams,
   type TagSubscriber,
   type TagSubscriberByEmail,
 } from "~/index";
@@ -52,6 +54,43 @@ describe("tag requests through Kit", () => {
     const response = { tags: [tag], pagination };
     fetchMock.mockResponseOnce(JSON.stringify(response));
     expect(await kit.tags.list()).toEqual(response);
+    expect(await request("GET", "/tags").text()).toBe("");
+  });
+
+  it.each([0, 42])(
+    "requests and preserves a subscriber count of %i",
+    async (subscriber_count) => {
+      const response = {
+        tags: [{ ...tag, subscriber_count }],
+        pagination,
+      } satisfies ListTags;
+      const params = {
+        include: "subscriber_count",
+        after: "next+/=",
+        per_page: 25,
+        include_total_count: false,
+      } satisfies ListTagsParams;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      const result = await kit.tags.list(params);
+      expect(result).toEqual(response);
+      expectTypeOf(result.tags[0]!.subscriber_count).toEqualTypeOf<
+        number | undefined
+      >();
+      request("GET", "/tags", {
+        include: "subscriber_count",
+        after: "next+/=",
+        per_page: "25",
+        include_total_count: "false",
+      });
+    }
+  );
+
+  it("omits undefined includes and accepts tags without subscriber counts", async () => {
+    const response = { tags: [tag], pagination } satisfies ListTags;
+    fetchMock.mockResponseOnce(JSON.stringify(response));
+    const result = await kit.tags.list({ include: undefined });
+    expect(result).toEqual(response);
+    expect(result.tags[0]!.subscriber_count).toBeUndefined();
     expect(await request("GET", "/tags").text()).toBe("");
   });
 
