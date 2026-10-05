@@ -20,7 +20,10 @@ export interface CreateSequenceEmailParams {
 }
 
 export interface CreateSequenceEmail {
-  email: Omit<GetSequenceEmail["email"], "stats">;
+  email: Omit<GetSequenceEmail["email"], "stats" | "position"> & {
+    /** Kit may return a null position when creating an email. */
+    position: number | null;
+  };
 }
 
 /** Only supplied fields change; omitted fields retain their existing values. */
