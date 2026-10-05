@@ -77,9 +77,13 @@ describe("sequence email stats inference", () => {
       expectTypeOf(single).toExtend<GetSequenceEmail | null>();
       expect(result).toEqual(page);
       expect(single!.email.stats.open_rate).toBe(0);
-      expect(new URL(fetchMock.requests()[0]!.url).search).toBe(
-        "?include=stats&include_content=true&per_page=25"
-      );
+      expect(
+        Object.fromEntries(new URL(fetchMock.requests()[0]!.url).searchParams)
+      ).toEqual({
+        include: "stats",
+        include_content: "true",
+        per_page: "25",
+      });
       expect(new URL(fetchMock.requests()[1]!.url).search).toBe(
         "?include=stats"
       );

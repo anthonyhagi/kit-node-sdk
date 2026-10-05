@@ -1,4 +1,5 @@
 import type { Kit, RequestOptions } from "~/index";
+import { paginationQuery } from "~/utils/pagination";
 import type {
   CreateSnippet,
   CreateSnippetParams,
@@ -95,27 +96,14 @@ export class SnippetsHandler {
     params?: ListSnippetsParams,
     options?: RequestOptions
   ): Promise<ListSnippets | ListSnippetsWithContent> {
-    const {
-      after,
-      before,
-      archived,
-      snippet_type,
-      include_content,
-      include_total_count,
-      per_page,
-    } = params || {};
+    const { archived, snippet_type, include_content } = params || {};
     const query = new URLSearchParams({
-      ...(after && { after }),
-      ...(before && { before }),
+      ...paginationQuery(params, { includeZeroPageSize: true }),
       ...(archived != null && { archived: String(archived) }),
       ...(snippet_type && { snippet_type }),
       ...(include_content !== undefined && {
         include_content: String(include_content),
       }),
-      ...(include_total_count !== undefined && {
-        include_total_count: String(include_total_count),
-      }),
-      ...(per_page != null && { per_page: String(per_page) }),
     });
     return await this.api.get<ListSnippets>("/snippets", {
       query,

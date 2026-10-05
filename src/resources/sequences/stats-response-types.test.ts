@@ -73,9 +73,12 @@ describe("sequence stats response inference", () => {
       expect(page).toEqual(list);
       expect(result).toEqual(single);
       const requests = fetchMock.requests();
-      expect(new URL(requests[0]!.url).search).toBe(
-        "?include=stats&per_page=25"
-      );
+      expect(
+        Object.fromEntries(new URL(requests[0]!.url).searchParams)
+      ).toEqual({
+        include: "stats",
+        per_page: "25",
+      });
       expect(new URL(requests[1]!.url).search).toBe("?include=stats");
       expect(fetchMock.mock.calls[0]![1]?.signal).toBe(controller.signal);
       expect(fetchMock.mock.calls[1]![1]?.signal).toBe(controller.signal);

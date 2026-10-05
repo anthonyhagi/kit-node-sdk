@@ -1,5 +1,6 @@
 import type { Kit, RequestOptions } from "~/index";
 import { toDateOnlyString } from "~/utils/date";
+import { paginationQuery } from "~/utils/pagination";
 import type {
   AddSubscriberByEmailParams,
   AddSubscriberToSequence,
@@ -50,17 +51,11 @@ export class SequencesHandler {
     params?: ListSequencesParams,
     options?: RequestOptions
   ): Promise<ListSequences | ListSequencesWithStats> {
-    const { after, before, include, include_total_count, per_page } =
-      params || {};
+    const { include } = params || {};
 
     const query = new URLSearchParams({
-      ...(after && { after }),
-      ...(before && { before }),
+      ...paginationQuery(params),
       ...(include && { include }),
-      ...(include_total_count !== undefined && {
-        include_total_count: String(include_total_count),
-      }),
-      ...(per_page && { per_page: String(per_page) }),
     });
 
     return await this.api.get<ListSequences>("/sequences", {
@@ -184,31 +179,17 @@ export class SequencesHandler {
     params?: ListSequenceSubscribersParams,
     options?: RequestOptions
   ): Promise<ListSequenceSubscribers | null> {
-    const {
-      added_after,
-      added_before,
-      after,
-      before,
-      created_after,
-      created_before,
-      include_total_count,
-      per_page,
-      status,
-    } = params || {};
+    const { added_after, added_before, created_after, created_before, status } =
+      params || {};
 
     const query = new URLSearchParams({
       ...(added_after && { added_after: toDateOnlyString(added_after) }),
       ...(added_before && { added_before: toDateOnlyString(added_before) }),
-      ...(after && { after }),
-      ...(before && { before }),
+      ...paginationQuery(params),
       ...(created_after && { created_after: toDateOnlyString(created_after) }),
       ...(created_before && {
         created_before: toDateOnlyString(created_before),
       }),
-      ...(include_total_count !== undefined && {
-        include_total_count: String(include_total_count),
-      }),
-      ...(per_page && { per_page: String(per_page) }),
       ...(status && { status }),
     });
 

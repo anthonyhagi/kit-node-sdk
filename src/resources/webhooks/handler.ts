@@ -1,4 +1,5 @@
 import type { Kit, RequestOptions } from "~/index";
+import { paginationQuery } from "~/utils/pagination";
 import type {
   CreateWebhook,
   CreateWebhookParams,
@@ -27,16 +28,7 @@ export class WebhooksHandler {
     params?: ListWebhooksParams,
     options?: RequestOptions
   ): Promise<ListWebhooks> {
-    const { after, before, include_total_count, per_page } = params || {};
-
-    const query = new URLSearchParams({
-      ...(after && { after }),
-      ...(before && { before }),
-      ...(include_total_count !== undefined && {
-        include_total_count: String(include_total_count),
-      }),
-      ...(per_page && { per_page: String(per_page) }),
-    });
+    const query = new URLSearchParams(paginationQuery(params));
 
     return await this.api.get<ListWebhooks>("/webhooks", {
       query,

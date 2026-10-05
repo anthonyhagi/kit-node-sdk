@@ -1,4 +1,5 @@
 import type { Kit, RequestOptions } from "~/index";
+import { paginationQuery } from "~/utils/pagination";
 import type {
   BulkCreate,
   BulkCreateParams,
@@ -114,16 +115,7 @@ export class CustomFieldsHandler {
     params?: ListCustomFieldsParams,
     options?: RequestOptions
   ): Promise<ListCustomFields> {
-    const { after, before, include_total_count, per_page } = params || {};
-
-    const query = new URLSearchParams({
-      ...(after && { after }),
-      ...(before && { before }),
-      ...(include_total_count !== undefined && {
-        include_total_count: String(include_total_count),
-      }),
-      ...(per_page && { per_page: String(per_page) }),
-    });
+    const query = new URLSearchParams(paginationQuery(params));
 
     const url = "/custom_fields";
 

@@ -1,4 +1,5 @@
 import type { Kit, RequestOptions } from "~/index";
+import { paginationQuery } from "~/utils/pagination";
 import type {
   CreateWebhookEndpoint,
   CreateWebhookEndpointParams,
@@ -151,15 +152,9 @@ export class WebhookEndpointsHandler {
     params?: ListWebhookEndpointsParams,
     options?: RequestOptions
   ): Promise<ListWebhookEndpoints> {
-    const { after, before, include_total_count, per_page, status } =
-      params || {};
+    const { status } = params || {};
     const query = new URLSearchParams({
-      ...(after && { after }),
-      ...(before && { before }),
-      ...(include_total_count !== undefined && {
-        include_total_count: String(include_total_count),
-      }),
-      ...(per_page != null && { per_page: String(per_page) }),
+      ...paginationQuery(params, { includeZeroPageSize: true }),
       ...(status && { status }),
     });
     return await this.api.get<ListWebhookEndpoints>("/webhook_endpoints", {

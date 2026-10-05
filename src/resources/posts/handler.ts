@@ -1,4 +1,5 @@
 import type { Kit, RequestOptions } from "~/index";
+import { paginationQuery } from "~/utils/pagination";
 import type {
   GetPost,
   ListPosts,
@@ -51,18 +52,12 @@ export class PostsHandler {
     params?: ListPostsParams,
     options?: RequestOptions
   ): Promise<ListPosts | ListPostsWithContent> {
-    const { after, before, include_content, include_total_count, per_page } =
-      params || {};
+    const { include_content } = params || {};
     const query = new URLSearchParams({
-      ...(after && { after }),
-      ...(before && { before }),
+      ...paginationQuery(params, { includeZeroPageSize: true }),
       ...(include_content !== undefined && {
         include_content: String(include_content),
       }),
-      ...(include_total_count !== undefined && {
-        include_total_count: String(include_total_count),
-      }),
-      ...(per_page != null && { per_page: String(per_page) }),
     });
     return await this.api.get<ListPosts>("/posts", {
       query,
