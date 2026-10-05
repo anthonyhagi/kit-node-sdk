@@ -132,6 +132,40 @@ describe("webhook endpoint list requests through Kit", () => {
     request({ include_total_count: "false" });
   });
 
+  it.each([
+    { after: null, before: null, per_page: null },
+    { after: undefined, before: undefined, per_page: undefined },
+  ] satisfies ListWebhookEndpointsParams[])(
+    "omits nullable and undefined pagination parameters: %j",
+    async (params) => {
+      const response = {
+        webhook_endpoints: [endpoint],
+        pagination,
+      } satisfies ListWebhookEndpoints;
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      expect(await kit.webhookEndpoints.list(params)).toEqual(response);
+      request();
+    }
+  );
+
+  it.each(["active", "disabled"] satisfies WebhookEndpointStatus[])(
+    "preserves %s status and false count flags alongside nullable pagination",
+    async (status) => {
+      const params = {
+        after: null,
+        before: null,
+        per_page: null,
+        status,
+        include_total_count: false,
+      } satisfies ListWebhookEndpointsParams;
+      fetchMock.mockResponseOnce(
+        JSON.stringify({ webhook_endpoints: [], pagination })
+      );
+      await kit.webhookEndpoints.list(params);
+      request({ status, include_total_count: "false" });
+    }
+  );
+
   it("preserves app metadata and the previous secret expiry timestamp", async () => {
     const response = {
       webhook_endpoints: [

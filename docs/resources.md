@@ -479,6 +479,10 @@ Exported types are `ListWebhookEndpoints`, `ListWebhookEndpointsParams`,
 `WebhookEndpoint`, and `WebhookEndpointStatus`. See the
 [Kit API reference](https://developers.kit.com/api-reference/webhooks/list-webhook-endpoints).
 
+The `after`, `before`, and `per_page` parameters accept `null`. Null and undefined
+values are omitted from the query so Kit uses its defaults. Status filters and
+an explicit `include_total_count: false` are still sent.
+
 ## Fetching a post
 
 `kit.posts.get(id)` returns the post's full HTML content and publishing metadata.
