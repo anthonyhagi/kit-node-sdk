@@ -206,13 +206,13 @@ export class BroadcastsHandler {
    *
    * @see {@link https://developers.kit.com/api-reference/broadcasts/delete-a-broadcast}
    *
-   * @returns an empty object when deleted successfully.
+   * @returns Resolves without a value on success.
    * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    */
-  public async delete(id: number, options?: RequestOptions): Promise<{}> {
+  public async delete(id: number, options?: RequestOptions): Promise<void> {
     this.validateId(id);
 
-    return await this.api.delete<{}>(`/broadcasts/${id}`, {
+    await this.api.delete<void>(`/broadcasts/${id}`, {
       signal: options?.signal,
       maxRetries: options?.maxRetries,
     });

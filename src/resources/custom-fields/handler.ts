@@ -173,13 +173,13 @@ export class CustomFieldsHandler {
    *
    * @see {@link https://developers.kit.com/api-reference/custom-fields/delete-custom-field}
    *
-   * @returns an empty object when deleted successfully.
+   * @returns Resolves without a value on success.
    * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    */
-  public async delete(id: number, options?: RequestOptions): Promise<{}> {
+  public async delete(id: number, options?: RequestOptions): Promise<void> {
     const url = `/custom_fields/${id}`;
 
-    return await this.api.delete<{}>(url, {
+    await this.api.delete<void>(url, {
       signal: options?.signal,
       maxRetries: options?.maxRetries,
     });

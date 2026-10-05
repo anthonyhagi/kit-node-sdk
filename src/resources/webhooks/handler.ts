@@ -68,12 +68,12 @@ export class WebhooksHandler {
    *
    * @see {@link https://developers.kit.com/api-reference/webhooks/delete-a-webhook}
    *
-   * @returns An empty object on successful deletion.
+   * @returns Resolves without a value on success.
    * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    */
-  public async delete(id: number, options?: RequestOptions): Promise<{}> {
-    return await this.api.delete<{}>(`/webhooks/${id}`, {
+  public async delete(id: number, options?: RequestOptions): Promise<void> {
+    await this.api.delete<void>(`/webhooks/${id}`, {
       signal: options?.signal,
       maxRetries: options?.maxRetries,
     });
