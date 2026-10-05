@@ -250,7 +250,7 @@ export interface AddSubscriberToFormByEmailParams {
    * If any UTM query params are attached, they will be parsed in the
    * remote API.
    */
-  referrer?: URL | string | undefined;
+  referrer?: URL | string | null | undefined;
 }
 
 export interface AddSubscriberToFormByEmail {

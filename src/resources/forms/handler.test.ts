@@ -3,6 +3,7 @@ import {
   Kit,
   type AddSubscriberToForm,
   type AddSubscriberToFormByEmail,
+  type AddSubscriberToFormByEmailParams,
   type BulkAddSubscribersParams,
   type BulkAddSubscribersSynchronous,
   type ListForms,
@@ -381,6 +382,28 @@ describe("form requests through Kit", () => {
     expect(req.headers.get("Content-Type")).toBe("application/json");
     expect(await req.json()).toEqual(body);
   });
+
+  it.each([null, "", undefined])(
+    "serializes a defined referrer and omits undefined (%s)",
+    async (value) => {
+      const body = {
+        email_address: subscriber.email_address,
+        referrer: value,
+      } satisfies AddSubscriberToFormByEmailParams;
+      fetchMock.mockResponseOnce(JSON.stringify({ subscriber }));
+      await kit.forms.addSubscriberByEmail(7, body);
+      const serialized = await request("POST", "/forms/7/subscribers").json();
+      expect(serialized).toEqual({
+        email_address: subscriber.email_address,
+        ...(value !== undefined && { referrer: value }),
+      });
+      if (value === undefined) {
+        expect(serialized).not.toHaveProperty("referrer");
+      } else {
+        expect(serialized).toHaveProperty("referrer", value);
+      }
+    }
+  );
 
   it.each(["string", "URL"] as const)(
     "preserves a %s referrer when adding by email",

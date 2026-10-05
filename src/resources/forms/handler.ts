@@ -198,7 +198,7 @@ export class FormsHandler {
 
     const body = JSON.stringify({
       email_address,
-      ...(referrer && { referrer }),
+      ...(referrer !== undefined && { referrer }),
     });
 
     const url = `/forms/${id}/subscribers`;
