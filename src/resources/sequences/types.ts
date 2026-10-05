@@ -140,11 +140,15 @@ export interface ListSequences {
 }
 
 export interface ListSequenceSubscribersParams {
+  /** Added after this date (YYYY-MM-DD). Date objects use their UTC calendar date. */
   added_after?: Date | string | undefined;
+  /** Added before this date (YYYY-MM-DD). Date objects use their UTC calendar date. */
   added_before?: Date | string | undefined;
   after?: string | undefined;
   before?: string | undefined;
+  /** Created after this date (YYYY-MM-DD). Date objects use their UTC calendar date. */
   created_after?: Date | string | undefined;
+  /** Created before this date (YYYY-MM-DD). Date objects use their UTC calendar date. */
   created_before?: Date | string | undefined;
   include_total_count?: boolean | undefined;
   per_page?: number | undefined;
