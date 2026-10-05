@@ -26,6 +26,26 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 
 See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
 
+## Email stats retention
+
+Starting **October 15, 2026**, Kit makes email stats available through the API
+for a rolling **five-year (60-month)** window. This covers sends, opens, clicks,
+bounces, and unsubscribes; subscriber records, tags, custom fields, purchases,
+and broadcast content are unaffected.
+
+| SDK method                                     | Retention behavior                                                                                         |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `kit.broadcasts.getStats(id)`                  | Stats for broadcasts sent before the window return HTTP 400.                                               |
+| `kit.broadcasts.getAllStats(params)`           | Broadcasts sent before the window are omitted.                                                             |
+| `kit.broadcasts.getLinkClicksById(id, params)` | Click data older than the window is unavailable.                                                           |
+| `kit.subscribers.getStats(id, params)`         | Date parameters are clamped to the window; dates outside it return HTTP 400.                               |
+| `kit.subscribers.filter(body, params)`         | Engagement-condition date bounds are clamped; a `stats` include range outside the window returns HTTP 400. |
+
+See [retention errors](error-handling.md#email-stats-retention-errors) for SDK
+error handling and [Kit's retention policy](https://developers.kit.com/api-reference/email-data-retention)
+for details. Applications maintaining longer histories should sync stats before
+they age out of the window.
+
 ## Account sending addresses and plan details
 
 `kit.accounts.getCurrentAccount()` exposes optional `user.id`,

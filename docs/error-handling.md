@@ -31,6 +31,17 @@ Retryable failures expose the final response after exhausting retry attempts.
 Network errors, timeouts, and successful response parsing failures retain their
 original error types. A 404 continues to return `null`.
 
+## Email stats retention errors
+
+Starting October 15, 2026, requests for broadcast stats or explicit stats date
+ranges outside Kit's five-year retention window can return HTTP 400. The SDK
+throws an `ApiError` with `status === 400` without retrying. These responses do
+not return `null`. For date-range errors, Kit indicates the earliest available
+date in the response; inspect `details` after validating its shape.
+
+See [affected SDK methods](resources.md#email-stats-retention) and
+[Kit's retention policy](https://developers.kit.com/api-reference/email-data-retention).
+
 ## Exponential Backoff
 
 Retries use exponential backoff with jitter to prevent overwhelming servers:

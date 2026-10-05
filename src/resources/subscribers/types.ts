@@ -503,16 +503,18 @@ export interface GetSubscriberStatsParams {
   /**
    * Filter to stats for emails sent after this date (YYYY-MM-DD).
    *
-   * NOTE: This functionality was added on 2025-06-28 and will only
-   * include stats for emails sent before this date.
+   * Starting October 15, 2026, Kit limits email stats to the last five years.
+   * Explicit dates outside that window return a 400 error.
+   * @see https://developers.kit.com/api-reference/email-data-retention
    */
   email_sent_after?: string | undefined;
 
   /**
    * Filter to stats for emails sent before this date (YYYY-MM-DD).
    *
-   * NOTE: This functionality was added on 2025-06-28 and will only
-   * include stats for emails sent before this date.
+   * Starting October 15, 2026, Kit limits email stats to the last five years.
+   * Explicit dates outside that window return a 400 error.
+   * @see https://developers.kit.com/api-reference/email-data-retention
    */
   email_sent_before?: string | undefined;
 }
