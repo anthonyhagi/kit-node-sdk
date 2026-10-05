@@ -109,6 +109,16 @@ await kit.tags.list(undefined, { signal });
 await kit.tags.listSubscribers(tagId, undefined, { signal });
 ```
 
+All form methods accept request options as their final argument too. Pass
+`undefined` for optional filters or referral parameters when skipping them:
+
+```typescript
+await kit.forms.list(undefined, { signal });
+await kit.forms.listSubscribers(formId, { slim: true }, { signal });
+await kit.forms.addSubscriber(formId, subscriberId, undefined, { signal });
+await kit.forms.bulkAddSubscribers({ additions }, { signal });
+```
+
 Cancellation stops pending fetches, response body reads, and retry waits. An
 already-aborted signal prevents the initial request. Caller cancellations are
 never retried. `timeoutMs` still applies independently to each attempt, and timed-out
