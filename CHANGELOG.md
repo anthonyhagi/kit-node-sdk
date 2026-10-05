@@ -1,5 +1,29 @@
 # @anthonyhagi/kit-node-sdk
 
+## 0.7.2
+
+### Patch Changes
+
+- f1a6b95: Infer required stats objects when sequence lists and reads explicitly request include: "stats". Export ListSequencesWithStats and GetSequenceWithStats while preserving existing response types and nullable metrics.
+- d8e2329: Disable automatic broadcast creation retries by default to avoid duplicate drafts or scheduled broadcasts after uncertain failures. Explicit request retry overrides remain available.
+- 148de49: Infer required HTML content for post lists requested with include_content: true. Export ListPostsWithContent while preserving existing ListPosts compatibility.
+- 096a66b: Infer required stats for sequence email reads and lists requesting include: "stats", including combined content and stats requests. Export dedicated response types while preserving existing broad types, nullable content, and missing-record responses.
+- 8ed378c: Accept nullable pagination options in customFields.list() to match the Kit API v4 documentation.
+- 95759c2: Accept documented nullable email-template pagination parameters. Null cursors and page sizes are omitted from the query while defined values and explicit false total-count flags are preserved.
+- 24e4250: Accept nullable pagination options in legacy webhooks.list() to match the Kit API v4 documentation.
+- ac7b06a: Accept documented nullable segment-list pagination parameters. Null cursors and page sizes are omitted from the query while defined values and explicit false total-count flags are preserved.
+- 8f58c1a: Accept nullable pagination options in sequences.list() to match the Kit API v4 documentation.
+- 2d36161: Accept nullable pagination options in tags.list() to match the Kit API v4 documentation.
+- 837f42b: Add per-request maxRetries overrides and disable automatic purchase creation retries by default to avoid duplicating appended line items after uncertain failures.
+- 4f8dea2: Document purchase updates by transaction ID and the additive product behavior, including an example that sends only newly synced line items.
+- d598c74: Infer required content and document fields for snippet lists requested with include_content: true. Export ListSnippetsWithContent while preserving existing ListSnippets compatibility.
+- 4806994: Disable automatic webhook endpoint secret rotation retries by default to avoid replaying uncertain rotations. Explicit request retry overrides remain available.
+- 9d2d107: Disable automatic sequence email creation retries by default to avoid creating duplicate steps after uncertain failures. Explicit request retry overrides remain available.
+- 709efb2: Infer required nullable content for sequence email lists requested with include_content: true. Export ListSequenceEmailsWithContent while preserving existing ListSequenceEmails compatibility and null responses for missing sequences.
+- b61481e: Document subscriber custom field keys and warning handling in create and update examples.
+- 571dea8: Infer full and slim subscriber-list responses from the slim parameter. Full requests expose required custom field values through ListFullSubscribers, while slim and dynamic requests allow omitted fields. Export ListSlimSubscribers and retain the existing broad ListSubscribers type for compatibility.
+- 94da3ba: Document subscriber creation by email as an upsert and clarify that state applies only to new subscribers.
+
 ## 0.7.1
 
 ### Patch Changes
