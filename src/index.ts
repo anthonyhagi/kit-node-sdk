@@ -389,6 +389,7 @@ export type {
   ListSnippets,
   ListSnippetsParams,
   ListSnippetsWithContent,
+  Snippet,
   SnippetDocument,
   SnippetListItem,
   SnippetType,
