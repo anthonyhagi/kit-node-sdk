@@ -51,6 +51,10 @@ Unless shown otherwise, the TypeScript snippets below assume you have imported
 `Kit` and initialized `const kit = new Kit({ apiKey: "YOUR_API_KEY" })` as in
 [Getting started](getting-started.md). Replace example IDs with the numeric IDs from your account.
 
+See [Data consistency](data-consistency.md) when reading subscriber lists or
+counts after a write. The guide shows how to use returned IDs for subsequent
+operations.
+
 ## Working with Subscribers
 
 ```typescript

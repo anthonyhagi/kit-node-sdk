@@ -31,6 +31,9 @@ Retryable failures expose the final response after exhausting retry attempts.
 Network errors, timeouts, and successful response parsing failures retain their
 original error types. A 404 continues to return `null`.
 
+Successful responses are not retried to check data freshness. See
+[Data consistency](data-consistency.md) for reading lists and counts after writes.
+
 ## Email stats retention errors
 
 Starting October 15, 2026, requests for broadcast stats or explicit stats date

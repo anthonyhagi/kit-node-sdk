@@ -7,6 +7,7 @@
 | [Getting started](getting-started.md)                 | Installation, runtime requirements, ESM, CommonJS, and TypeScript        |
 | [Configuration](configuration.md)                     | API keys, OAuth bearer tokens, environment variables, and client options |
 | [API resources](resources.md)                         | Supported resources and their methods                                    |
+| [Data consistency](data-consistency.md)               | Propagation delays, returned IDs, and stale list results                 |
 | [Examples](examples.md)                               | Cursor pagination, subscribers, tags, forms, and sequences               |
 | [Errors, retries, and rate limits](error-handling.md) | Error responses, empty bodies, backoff, and retry settings               |
 
