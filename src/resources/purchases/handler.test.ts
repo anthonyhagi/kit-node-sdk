@@ -4,6 +4,7 @@ import {
   type CreatePurchase,
   type GetPurchase,
   type ListPurchases,
+  type ListPurchasesParams,
 } from "~/index";
 
 // First purchase in Kit's documented list response:
@@ -47,6 +48,71 @@ describe("purchase list response through Kit", () => {
   beforeEach(() => {
     fetchMock.resetMocks();
   });
+
+  it("accepts documented nullable pagination parameters", () => {
+    expectTypeOf<ListPurchasesParams["after"]>().toEqualTypeOf<
+      string | null | undefined
+    >();
+    expectTypeOf<ListPurchasesParams["before"]>().toEqualTypeOf<
+      string | null | undefined
+    >();
+    expectTypeOf<ListPurchasesParams["per_page"]>().toEqualTypeOf<
+      number | null | undefined
+    >();
+    expectTypeOf<ListPurchasesParams["include_total_count"]>().toEqualTypeOf<
+      boolean | undefined
+    >();
+  });
+
+  it.each([
+    {
+      params: { after: null, before: null, per_page: null },
+      expected: "",
+    },
+    {
+      params: {
+        after: null,
+        before: "previous-cursor",
+        per_page: 25,
+        include_total_count: false,
+      },
+      expected: "before=previous-cursor&include_total_count=false&per_page=25",
+    },
+    {
+      params: {
+        after: "next-cursor",
+        before: null,
+        per_page: 25,
+        include_total_count: true,
+      },
+      expected: "after=next-cursor&include_total_count=true&per_page=25",
+    },
+    {
+      params: {
+        after: "next-cursor",
+        before: "previous-cursor",
+        per_page: null,
+        include_total_count: false,
+      },
+      expected:
+        "after=next-cursor&before=previous-cursor&include_total_count=false",
+    },
+  ])(
+    "omits null pagination values from $params",
+    async ({ params, expected }) => {
+      fetchMock.mockResponseOnce(JSON.stringify(response));
+      const kit = new Kit({ apiKey: "oauth-token", authType: "oauth" });
+
+      await expect(kit.purchases.list(params)).resolves.toEqual(response);
+
+      const request = fetchMock.requests()[0]!;
+      const url = new URL(request.url);
+      expect(url.pathname).toBe("/v4/purchases");
+      expect(url.searchParams.toString()).toBe(expected);
+      expect(request.method).toBe("GET");
+      expect(request.headers.get("Authorization")).toBe("Bearer oauth-token");
+    }
+  );
 
   it("preserves string transaction and line-item IDs from the API", async () => {
     fetchMock.mockResponseOnce(JSON.stringify(response));
