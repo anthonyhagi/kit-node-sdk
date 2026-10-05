@@ -12,7 +12,7 @@ This project is not maintained or endorsed by Kit.com.
 npm install @anthonyhagi/kit-node-sdk
 ```
 
-Requires Node.js >= 18.0.0. TypeScript projects require TypeScript >= 5.0.
+Requires Node.js >= 22.0.0. TypeScript projects require TypeScript >= 5.0.
 
 ## Quick start
 

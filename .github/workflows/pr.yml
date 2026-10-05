@@ -99,3 +99,33 @@ jobs:
 
       - name: ⚡ Run vitest
         run: npm run test
+
+  runtime:
+    name: 📦 Runtime (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22.0.0, "22", "24"]
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v7
+
+      - name: ⎔ Setup build node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.21.0
+
+      - name: 📥 Download deps
+        uses: bahmutov/npm-install@v1
+
+      - name: 🏗️ Run build
+        run: npm run build
+
+      - name: ⎔ Setup consumer node
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: 📦 Check packed SDK runtime
+        run: npm run test:package-runtime
