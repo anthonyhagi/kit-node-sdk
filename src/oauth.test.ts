@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
 import {
   ApiError,
+  exchangeOAuthCode,
   refreshOAuthToken,
   revokeOAuthToken,
+  type ExchangeOAuthCodeParams,
   type OAuthTokenResponse,
   type RefreshOAuthTokenParams,
   type RevokeOAuthTokenParams,
@@ -214,5 +216,125 @@ describe("OAuth token refresh", () => {
     expectTypeOf<{
       refresh_token: string;
     }>().not.toExtend<RefreshOAuthTokenParams>();
+  });
+});
+
+describe("OAuth authorization code exchange", () => {
+  const params = {
+    client_id: "client+id",
+    client_secret: "secret&value= /",
+    code: "callback+code&value= /",
+    redirect_uri: "https://example.com/oauth/callback?next=%2Fhome",
+  } satisfies ExchangeOAuthCodeParams;
+  const tokens = {
+    access_token: "initial-access-token",
+    token_type: "Bearer",
+    expires_in: 172800,
+    refresh_token: "initial-refresh-token",
+    scope: "public",
+    created_at: 1710270147,
+  } satisfies OAuthTokenResponse;
+
+  beforeEach(() => {
+    fetchMock.resetMocks();
+  });
+
+  it("posts client credentials, code, and redirect URI as JSON and returns tokens", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify(tokens));
+    const result = await exchangeOAuthCode(params);
+    expectTypeOf(result).toEqualTypeOf<OAuthTokenResponse>();
+    expect(result).toEqual(tokens);
+    const requests = fetchMock.requests();
+    expect(requests).toHaveLength(1);
+    const request = requests[0]!;
+    expect(request.url).toBe("https://api.kit.com/v4/oauth/token");
+    expect(request.method).toBe("POST");
+    expect(request.headers.get("Content-Type")).toBe("application/json");
+    expect(request.headers.get("Accept")).toBe("application/json");
+    expect(request.headers.has("Authorization")).toBe(false);
+    expect(request.headers.has("X-Kit-Api-Key")).toBe(false);
+    expect(await request.json()).toEqual({
+      ...params,
+      grant_type: "authorization_code",
+    });
+  });
+
+  it.each(["https://example.com/v4", "https://example.com/v4/"])(
+    "supports an overridden base URL %s",
+    async (baseUrl) => {
+      fetchMock.mockResponseOnce(JSON.stringify(tokens));
+      expect(await exchangeOAuthCode(params, { baseUrl })).toEqual(tokens);
+      expect(fetchMock.requests()[0]!.url).toBe(
+        "https://example.com/v4/oauth/token"
+      );
+    }
+  );
+
+  it.each([
+    {
+      status: 400,
+      body: '{"error":"invalid_grant"}',
+      details: { error: "invalid_grant" },
+    },
+    {
+      status: 401,
+      body: "Invalid client credentials",
+      details: "Invalid client credentials",
+    },
+    { status: 404, body: "", details: "" },
+    {
+      status: 429,
+      body: '{"error":"rate_limited"}',
+      details: { error: "rate_limited" },
+    },
+    { status: 500, body: "Server error", details: "Server error" },
+  ])(
+    "throws ApiError without retrying status $status",
+    async ({ status, body, details }) => {
+      fetchMock.mockResponseOnce(body, { status });
+      const error = await exchangeOAuthCode(params).catch(
+        (error: unknown) => error
+      );
+      expect(error).toBeInstanceOf(ApiError);
+      expect(error).toMatchObject({
+        status,
+        details,
+        message: `OAuth token exchange failed. Status: ${status}`,
+      });
+      expect(fetchMock.requests()).toHaveLength(1);
+    }
+  );
+
+  it("propagates network failures without repeating the exchange", async () => {
+    const error = new TypeError("Network failure");
+    fetchMock.mockRejectOnce(error);
+    await expect(exchangeOAuthCode(params)).rejects.toBe(error);
+    expect(fetchMock.requests()).toHaveLength(1);
+  });
+
+  it.each(["", "invalid JSON"])(
+    "rejects malformed success body %j without retrying",
+    async (body) => {
+      fetchMock.mockResponseOnce(body);
+      await expect(exchangeOAuthCode(params)).rejects.toBeInstanceOf(
+        SyntaxError
+      );
+      expect(fetchMock.requests()).toHaveLength(1);
+    }
+  );
+
+  it("requires client credentials, the callback code, and redirect URI", () => {
+    expectTypeOf<
+      Omit<ExchangeOAuthCodeParams, "client_id">
+    >().not.toExtend<ExchangeOAuthCodeParams>();
+    expectTypeOf<
+      Omit<ExchangeOAuthCodeParams, "client_secret">
+    >().not.toExtend<ExchangeOAuthCodeParams>();
+    expectTypeOf<
+      Omit<ExchangeOAuthCodeParams, "code">
+    >().not.toExtend<ExchangeOAuthCodeParams>();
+    expectTypeOf<
+      Omit<ExchangeOAuthCodeParams, "redirect_uri">
+    >().not.toExtend<ExchangeOAuthCodeParams>();
   });
 });
