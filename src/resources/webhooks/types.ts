@@ -2,21 +2,27 @@ import type { Pagination, PaginationParams } from "~/common/types";
 
 export interface ListWebhooksParams extends PaginationParams {}
 
+/** Event configuration returned by legacy webhook lists. */
+export interface WebhookEventResponse {
+  name: string;
+  tag_id?: number | null | undefined;
+  form_id?: number | null | undefined;
+  sequence_id?: number | undefined;
+  product_id?: number | undefined;
+  /** Link URL for link-click subscriptions, otherwise null or omitted. */
+  initiator_value?: string | null | undefined;
+}
+
+/** Legacy webhook subscription returned by webhook lists. */
+export interface Webhook {
+  id: number;
+  account_id: number;
+  event: WebhookEventResponse;
+  target_url: string;
+}
+
 export interface ListWebhooks {
-  webhooks: {
-    id: number;
-    account_id: number;
-    event: {
-      name: string;
-      tag_id?: number | null | undefined;
-      form_id?: number | null | undefined;
-      sequence_id?: number | undefined;
-      product_id?: number | undefined;
-      /** Link URL for link-click subscriptions, otherwise null or omitted. */
-      initiator_value?: string | null | undefined;
-    };
-    target_url: string;
-  }[];
+  webhooks: Webhook[];
   pagination: Pagination;
 }
 
@@ -164,13 +170,10 @@ export interface CreateWebhookParams {
 }
 
 export interface CreateWebhook {
-  webhook: {
-    id: number;
-    account_id: number;
-    event: {
-      name: string;
+  webhook: Omit<Webhook, "event"> & {
+    event: Pick<WebhookEventResponse, "name"> & {
+      /** Creation always includes this field, even when no link URL applies. */
       initiator_value: string | null;
     };
-    target_url: string;
   };
 }
