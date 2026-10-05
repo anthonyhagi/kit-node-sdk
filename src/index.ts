@@ -313,6 +313,7 @@ export type {
   BulkAddSubscribersParams,
   BulkAddSubscribersSynchronous,
   BulkAddSubscribersWithoutResponseType,
+  Form,
   FormReferrerUtmParameters,
   FormSubscriber,
   ListForms,

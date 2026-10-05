@@ -71,20 +71,23 @@ export interface ListFormsParams extends PaginationParams {
   type?: "embed" | "hosted" | (string & {}) | null | undefined;
 }
 
+/** Form or landing page metadata returned by form lists. */
+export interface Form {
+  id: number;
+  name: string;
+  created_at: string;
+  type: string;
+  format: string | null;
+  embed_js: string;
+  embed_url: string;
+  archived: boolean;
+  uid: string;
+  /** Returned when include is subscriber_count; counts active subscribers. */
+  subscriber_count?: number | undefined;
+}
+
 export interface ListForms {
-  forms: {
-    id: number;
-    name: string;
-    created_at: string;
-    type: string;
-    format: string | null;
-    embed_js: string;
-    embed_url: string;
-    archived: boolean;
-    uid: string;
-    /** Returned when include is subscriber_count; counts active subscribers. */
-    subscriber_count?: number | undefined;
-  }[];
+  forms: Form[];
   pagination: Pagination;
 }
 

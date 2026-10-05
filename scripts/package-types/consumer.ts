@@ -7,6 +7,7 @@ import {
   type Broadcast,
   type BroadcastListItem,
   type EmailTemplate,
+  type Form,
   type GetBroadcast,
   type GetPost,
   type GetSequence,
@@ -17,6 +18,7 @@ import {
   type GetSubscriber,
   type ListBroadcasts,
   type ListEmailTemplates,
+  type ListForms,
   type ListPostsWithContent,
   type ListSegments,
   type ListSequenceEmailsWithContent,
@@ -76,6 +78,8 @@ export type EmailTemplateListResponse = Assert<
 export type SegmentListResponse = Assert<
   Equal<ListSegments["segments"][number], Segment>
 >;
+
+export type FormListResponse = Assert<Equal<ListForms["forms"][number], Form>>;
 
 const kit = new Kit({ apiKey: "typecheck-only", maxRetries: 0 });
 const options = {
