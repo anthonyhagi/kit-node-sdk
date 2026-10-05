@@ -221,6 +221,7 @@ export {
   refreshOAuthToken,
   revokeOAuthToken,
 } from "./oauth";
+export { verifyWebhookSignature } from "./webhook-signature";
 export type {
   BuildOAuthAuthorizationUrlOptions,
   BuildOAuthAuthorizationUrlParams,
@@ -233,8 +234,6 @@ export type {
   RevokeOAuthTokenOptions,
   RevokeOAuthTokenParams,
 } from "./oauth";
-export type { ClientOptions };
-
 export type {
   GetCreatorProfile,
   GetCurrentAccount,
@@ -245,6 +244,7 @@ export type {
   UpdateColors,
   UpdateColorsParams,
 } from "./resources/accounts/types";
+export type { ClientOptions };
 
 export type {
   BasicSubscriberFilterItem,
@@ -464,3 +464,5 @@ export type {
   ListWebhooksParams,
   WebhookEvent,
 } from "./resources/webhooks/types";
+
+export type { VerifyWebhookSignatureOptions } from "./webhook-signature";

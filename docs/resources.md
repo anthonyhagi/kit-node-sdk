@@ -181,6 +181,50 @@ For new integrations, use `kit.webhookEndpoints`; these event names belong to
 the legacy webhook API.
 See the [Kit API reference](https://developers.kit.com/api-reference/webhooks-legacy/create-a-webhook).
 
+## Verifying webhook endpoint deliveries
+
+Use the exported `verifyWebhookSignature()` before parsing or processing a
+webhook endpoint delivery. Pass the exact raw body, the `X-Kit-Signature` header,
+and the secret saved when creating or rotating the endpoint:
+
+```ts
+import { verifyWebhookSignature } from "@anthonyhagi/kit-node-sdk";
+
+async function receiveKitWebhook(request: Request, signingSecret: string) {
+  const rawBody = new Uint8Array(await request.arrayBuffer());
+  const valid = verifyWebhookSignature(
+    rawBody,
+    request.headers.get("X-Kit-Signature"),
+    signingSecret
+  );
+  if (!valid) {
+    return new Response("Invalid signature", { status: 401 });
+  }
+
+  const delivery = JSON.parse(new TextDecoder().decode(rawBody));
+  for (const event of delivery.events) {
+    // Deduplicate by event.id before applying your application logic.
+    console.log(event.id, event.type);
+  }
+  return new Response(null, { status: 204 });
+}
+```
+
+The helper accepts a string or `Uint8Array` (including Node.js `Buffer`), checks
+HMAC-SHA256 with constant-time comparisons, and accepts any matching `v1`
+signature during secret rotation. Missing or malformed headers, invalid
+signatures, empty secrets, and timestamps more than 300 seconds in the past or
+future return `false`. Pass `{ toleranceSeconds: 60 }` as the fourth argument to
+customize the clock tolerance; a negative or non-finite tolerance throws
+`RangeError`. `VerifyWebhookSignatureOptions` is also exported.
+
+Capture the raw body before any JSON middleware changes it. Re-serializing a
+parsed payload can change its bytes and invalidate the signature. Verification
+does not deduplicate events: a retry or re-emission can deliver the same event
+again, so deduplicate using each event's `id`, rather than `delivery_id`.
+See [Kit's signature protocol](https://developers.kit.com/webhooks/verifying-signatures)
+and [delivery format](https://developers.kit.com/webhooks/delivery-format).
+
 ## Revoking the previous webhook endpoint secret
 
 After switching your receiver to a rotated signing secret, call
