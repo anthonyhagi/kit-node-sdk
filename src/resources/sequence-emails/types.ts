@@ -99,6 +99,14 @@ export interface ListSequenceEmails {
   pagination: Pagination;
 }
 
+/** Email lists requested with include_content: true include nullable HTML content. */
+export interface ListSequenceEmailsWithContent extends Omit<
+  ListSequenceEmails,
+  "emails"
+> {
+  emails: GetSequenceEmail["email"][];
+}
+
 export type GetSequenceEmailParams = Pick<ListSequenceEmailsParams, "include">;
 
 export interface GetSequenceEmail {

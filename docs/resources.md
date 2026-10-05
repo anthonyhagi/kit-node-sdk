@@ -943,9 +943,12 @@ if (page) {
 
 Pagination supports `after`, `before`, `per_page`, and `include_total_count`.
 Missing sequences return `null`. HTML content is omitted by default; request
-`include_content: true` to include it. Draft content and preview text can be
-`null`; hour-based emails return `send_days: null`. Per-email stats use zero when no delivery
-data is available. Exported types are `ListSequenceEmails`,
+`include_content: true` to include it. A literal true flag infers
+`ListSequenceEmailsWithContent | null`, with required `content: string | null`
+on each email. Omitted, false, null, or dynamic flags keep content optional.
+Draft content and preview text can be `null`; hour-based emails return
+`send_days: null`. Per-email stats use zero when no delivery data is available.
+Exported types are `ListSequenceEmails`, `ListSequenceEmailsWithContent`,
 `ListSequenceEmailsParams`, `SequenceEmailListItem`, and `SequenceEmailStats`.
 
 The `after`, `before`, `per_page`, and `include_content` parameters accept `null`.

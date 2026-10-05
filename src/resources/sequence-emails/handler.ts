@@ -6,6 +6,7 @@ import type {
   GetSequenceEmailParams,
   ListSequenceEmails,
   ListSequenceEmailsParams,
+  ListSequenceEmailsWithContent,
   UpdateSequenceEmail,
   UpdateSequenceEmailParams,
 } from "./types";
@@ -121,9 +122,26 @@ export class SequenceEmailsHandler {
    */
   public async list(
     sequenceId: number,
+    params: ListSequenceEmailsParams & { include_content: true },
+    options?: RequestOptions
+  ): Promise<ListSequenceEmailsWithContent | null>;
+  public async list(
+    sequenceId: number,
+    params?: ListSequenceEmailsParams & {
+      include_content?: false | null | undefined;
+    },
+    options?: RequestOptions
+  ): Promise<ListSequenceEmails | null>;
+  public async list(
+    sequenceId: number,
     params?: ListSequenceEmailsParams,
     options?: RequestOptions
-  ): Promise<ListSequenceEmails | null> {
+  ): Promise<ListSequenceEmails | ListSequenceEmailsWithContent | null>;
+  public async list(
+    sequenceId: number,
+    params?: ListSequenceEmailsParams,
+    options?: RequestOptions
+  ): Promise<ListSequenceEmails | ListSequenceEmailsWithContent | null> {
     const {
       after,
       before,

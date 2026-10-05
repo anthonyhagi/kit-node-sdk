@@ -343,6 +343,7 @@ export type {
   GetSequenceEmailParams,
   ListSequenceEmails,
   ListSequenceEmailsParams,
+  ListSequenceEmailsWithContent,
   SequenceEmailListItem,
   SequenceEmailStats,
   UpdateSequenceEmail,
