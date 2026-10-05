@@ -32,6 +32,7 @@ export class AccountsHandler {
   ): Promise<GetCurrentAccount> {
     return await this.api.get<GetCurrentAccount>("/account", {
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -47,6 +48,7 @@ export class AccountsHandler {
   public async listColors(options?: RequestOptions): Promise<ListColors> {
     return await this.api.get<ListColors>("/account/colors", {
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -82,6 +84,7 @@ export class AccountsHandler {
     return await this.api.put<UpdateColors>("/account/colors", {
       body,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -101,6 +104,7 @@ export class AccountsHandler {
 
     return await this.api.get<GetCreatorProfile | null>(url, {
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -115,6 +119,7 @@ export class AccountsHandler {
   public async getEmailStats(options?: RequestOptions): Promise<GetEmailStats> {
     return await this.api.get<GetEmailStats>("/account/email_stats", {
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -151,6 +156,7 @@ export class AccountsHandler {
     return await this.api.get<GetGrowthStats>(url, {
       query,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 }

@@ -29,7 +29,7 @@ export class SequenceEmailsHandler {
   ): Promise<{} | null> {
     return await this.api.delete<{} | null>(
       `/sequences/${sequenceId}/emails/${emailId}`,
-      { signal: options?.signal }
+      { signal: options?.signal, maxRetries: options?.maxRetries }
     );
   }
 
@@ -51,7 +51,11 @@ export class SequenceEmailsHandler {
   ): Promise<UpdateSequenceEmail | null> {
     return await this.api.put<UpdateSequenceEmail | null>(
       `/sequences/${sequenceId}/emails/${emailId}`,
-      { body: JSON.stringify(params), signal: options?.signal }
+      {
+        body: JSON.stringify(params),
+        signal: options?.signal,
+        maxRetries: options?.maxRetries,
+      }
     );
   }
 
@@ -71,7 +75,11 @@ export class SequenceEmailsHandler {
   ): Promise<CreateSequenceEmail | null> {
     return await this.api.post<CreateSequenceEmail | null>(
       `/sequences/${sequenceId}/emails`,
-      { body: JSON.stringify(params), signal: options?.signal }
+      {
+        body: JSON.stringify(params),
+        signal: options?.signal,
+        maxRetries: options?.maxRetries,
+      }
     );
   }
 
@@ -96,7 +104,7 @@ export class SequenceEmailsHandler {
     });
     return await this.api.get<GetSequenceEmail | null>(
       `/sequences/${sequenceId}/emails/${emailId}`,
-      { query, signal: options?.signal }
+      { query, signal: options?.signal, maxRetries: options?.maxRetries }
     );
   }
 
@@ -136,7 +144,7 @@ export class SequenceEmailsHandler {
     });
     return await this.api.get<ListSequenceEmails | null>(
       `/sequences/${sequenceId}/emails`,
-      { query, signal: options?.signal }
+      { query, signal: options?.signal, maxRetries: options?.maxRetries }
     );
   }
 }

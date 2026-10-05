@@ -29,7 +29,7 @@ export class WebhookEndpointsHandler {
   ): Promise<RevokePreviousWebhookEndpointSecret | null> {
     return await this.api.post<RevokePreviousWebhookEndpointSecret | null>(
       `/webhook_endpoints/${id}/revoke_previous_secret`,
-      { signal: options?.signal }
+      { signal: options?.signal, maxRetries: options?.maxRetries }
     );
   }
 
@@ -49,7 +49,11 @@ export class WebhookEndpointsHandler {
   ): Promise<RotateWebhookEndpointSecret | null> {
     return await this.api.post<RotateWebhookEndpointSecret | null>(
       `/webhook_endpoints/${id}/rotate_secret`,
-      { body: JSON.stringify(params || {}), signal: options?.signal }
+      {
+        body: JSON.stringify(params || {}),
+        signal: options?.signal,
+        maxRetries: options?.maxRetries,
+      }
     );
   }
 
@@ -67,6 +71,7 @@ export class WebhookEndpointsHandler {
   ): Promise<{} | null> {
     return await this.api.delete<{} | null>(`/webhook_endpoints/${id}`, {
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -86,7 +91,11 @@ export class WebhookEndpointsHandler {
   ): Promise<UpdateWebhookEndpoint | null> {
     return await this.api.patch<UpdateWebhookEndpoint | null>(
       `/webhook_endpoints/${id}`,
-      { body: JSON.stringify(params), signal: options?.signal }
+      {
+        body: JSON.stringify(params),
+        signal: options?.signal,
+        maxRetries: options?.maxRetries,
+      }
     );
   }
 
@@ -105,6 +114,7 @@ export class WebhookEndpointsHandler {
     return await this.api.post<CreateWebhookEndpoint>("/webhook_endpoints", {
       body: JSON.stringify(params),
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -122,7 +132,7 @@ export class WebhookEndpointsHandler {
   ): Promise<GetWebhookEndpoint | null> {
     return await this.api.get<GetWebhookEndpoint | null>(
       `/webhook_endpoints/${id}`,
-      { signal: options?.signal }
+      { signal: options?.signal, maxRetries: options?.maxRetries }
     );
   }
 
@@ -152,6 +162,7 @@ export class WebhookEndpointsHandler {
     return await this.api.get<ListWebhookEndpoints>("/webhook_endpoints", {
       query,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 }

@@ -36,7 +36,11 @@ export class CustomFieldsHandler {
     const resp =
       await this.api.post<BulkUpdateSubscriberValuesWithoutResponseType>(
         "/bulk/custom_fields/subscribers",
-        { body: JSON.stringify(params), signal: options?.signal }
+        {
+          body: JSON.stringify(params),
+          signal: options?.signal,
+          maxRetries: options?.maxRetries,
+        }
       );
     if ("custom_field_values" in resp) {
       return { type: "synchronous", ...resp };
@@ -73,6 +77,7 @@ export class CustomFieldsHandler {
     const resp = await this.api.post<BulkCreateWithoutResponseType>(url, {
       body,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
 
     // Add on the response type such that the caller of this method
@@ -125,6 +130,7 @@ export class CustomFieldsHandler {
     return await this.api.get<ListCustomFields>(url, {
       query,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -161,6 +167,7 @@ export class CustomFieldsHandler {
     return await this.api.post<CreateCustomField>(url, {
       body,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -183,7 +190,10 @@ export class CustomFieldsHandler {
   ): Promise<{} | null> {
     const url = `/custom_fields/${id}`;
 
-    return await this.api.delete<{} | null>(url, { signal: options?.signal });
+    return await this.api.delete<{} | null>(url, {
+      signal: options?.signal,
+      maxRetries: options?.maxRetries,
+    });
   }
 
   /**
@@ -220,6 +230,7 @@ export class CustomFieldsHandler {
     return await this.api.put<UpdateCustomField | null>(url, {
       body,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 }

@@ -30,6 +30,7 @@ export class SnippetsHandler {
     return await this.api.put<UpdateSnippet | null>(`/snippets/${id}`, {
       body: JSON.stringify(params),
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -48,6 +49,7 @@ export class SnippetsHandler {
     return await this.api.post<CreateSnippet>("/snippets", {
       body: JSON.stringify(params),
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -65,6 +67,7 @@ export class SnippetsHandler {
   ): Promise<GetSnippet | null> {
     return await this.api.get<GetSnippet | null>(`/snippets/${id}`, {
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -117,6 +120,7 @@ export class SnippetsHandler {
     return await this.api.get<ListSnippets>("/snippets", {
       query,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 }

@@ -50,7 +50,7 @@ export class FormsHandler {
 
     const resp = await this.api.post<BulkAddSubscribersWithoutResponseType>(
       url,
-      { body, signal: options?.signal }
+      { body, signal: options?.signal, maxRetries: options?.maxRetries }
     );
 
     // Add on the response type such that the caller of this method
@@ -104,6 +104,7 @@ export class FormsHandler {
     return await this.api.get<ListForms>("/forms", {
       query,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -171,7 +172,7 @@ export class FormsHandler {
 
     return await this.api.get<
       ListFormSubscribers | ListSlimFormSubscribers | null
-    >(url, { query, signal: options?.signal });
+    >(url, { query, signal: options?.signal, maxRetries: options?.maxRetries });
   }
 
   /**
@@ -206,6 +207,7 @@ export class FormsHandler {
     return await this.api.post<AddSubscriberToFormByEmail | null>(url, {
       body,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -235,6 +237,7 @@ export class FormsHandler {
     return await this.api.post<AddSubscriberToForm | null>(url, {
       body,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 }

@@ -41,6 +41,7 @@ export class WebhooksHandler {
     return await this.api.get<ListWebhooks>("/webhooks", {
       query,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -63,6 +64,7 @@ export class WebhooksHandler {
     return await this.api.post<CreateWebhook>("/webhooks", {
       body,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -83,6 +85,7 @@ export class WebhooksHandler {
   ): Promise<{} | null> {
     return await this.api.delete<{} | null>(`/webhooks/${id}`, {
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 }

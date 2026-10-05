@@ -42,6 +42,7 @@ export class PurchasesHandler {
     return await this.api.get<ListPurchases>("/purchases", {
       query,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -52,6 +53,8 @@ export class PurchasesHandler {
    * the same products duplicates its line items; send only products that
    * have not already been synced for this transaction_id.
    * If the email address has no subscriber, Kit creates an active subscriber.
+   * Automatic retries default to 0 to avoid duplicating products after an
+   * uncertain outcome. Request options can explicitly override this limit.
    *
    * @param params - The required details to record a Purchase.
    * @param options - Optional request controls, including cancellation.
@@ -69,6 +72,7 @@ export class PurchasesHandler {
     return await this.api.post<CreatePurchase>("/purchases", {
       body,
       signal: options?.signal,
+      maxRetries: options?.maxRetries ?? 0,
     });
   }
 
@@ -88,6 +92,7 @@ export class PurchasesHandler {
   ): Promise<GetPurchase | null> {
     return await this.api.get<GetPurchase | null>(`/purchases/${id}`, {
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 }

@@ -79,6 +79,8 @@ export class ApiClient {
     options?: {
       /** Cancel this request, including response reads and retry waits. */
       signal?: AbortSignal | undefined;
+      /** Override the client retry limit for this request. */
+      maxRetries?: number | undefined;
       headers?: Record<string, string>;
       query?: URLSearchParams | undefined;
     }
@@ -91,6 +93,8 @@ export class ApiClient {
     options?: {
       /** Cancel this request, including response reads and retry waits. */
       signal?: AbortSignal | undefined;
+      /** Override the client retry limit for this request. */
+      maxRetries?: number | undefined;
       headers?: Record<string, string>;
       query?: URLSearchParams | undefined;
       body?: RequestInit["body"];
@@ -104,6 +108,8 @@ export class ApiClient {
     options?: {
       /** Cancel this request, including response reads and retry waits. */
       signal?: AbortSignal | undefined;
+      /** Override the client retry limit for this request. */
+      maxRetries?: number | undefined;
       headers?: Record<string, string>;
       query?: URLSearchParams | undefined;
       body?: RequestInit["body"];
@@ -117,6 +123,8 @@ export class ApiClient {
     options?: {
       /** Cancel this request, including response reads and retry waits. */
       signal?: AbortSignal | undefined;
+      /** Override the client retry limit for this request. */
+      maxRetries?: number | undefined;
       headers?: Record<string, string>;
       query?: URLSearchParams | undefined;
       body?: RequestInit["body"];
@@ -130,6 +138,8 @@ export class ApiClient {
     options?: {
       /** Cancel this request, including response reads and retry waits. */
       signal?: AbortSignal | undefined;
+      /** Override the client retry limit for this request. */
+      maxRetries?: number | undefined;
       headers?: Record<string, string>;
       query?: URLSearchParams | undefined;
       body?: RequestInit["body"];
@@ -144,11 +154,18 @@ export class ApiClient {
     options?: {
       /** Cancel this request, including response reads and retry waits. */
       signal?: AbortSignal | undefined;
+      /** Override the client retry limit for this request. */
+      maxRetries?: number | undefined;
       headers?: Record<string, string>;
       query?: URLSearchParams | undefined;
       body?: RequestInit["body"];
     }
   ): Promise<TResponseType> {
+    const maxRetries = options?.maxRetries ?? this.maxRetries;
+    if (!Number.isSafeInteger(maxRetries) || maxRetries < 0) {
+      throw new RangeError("maxRetries must be a non-negative safe integer");
+    }
+
     const cleanedBaseUrl = this.baseUrl.endsWith("/")
       ? this.baseUrl.slice(0, -1)
       : this.baseUrl;
@@ -185,7 +202,7 @@ export class ApiClient {
     // retrying the request. For specified errors, we should
     // retry the request until we have exhausted
     // all attempts.
-    for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
       options?.signal?.throwIfAborted();
       const controller = this.timeoutMs > 0 ? new AbortController() : undefined;
       const abortAttempt = () => controller?.abort(options?.signal?.reason);
@@ -222,7 +239,7 @@ export class ApiClient {
           // Caller cancellation never retries, regardless of the fetch error.
           options?.signal?.throwIfAborted();
           // Only fetch failures are eligible for network retries.
-          if (error instanceof Error && attempt < this.maxRetries) {
+          if (error instanceof Error && attempt < maxRetries) {
             await this.waitForRetry(attempt, undefined, options?.signal);
             continue;
           }
@@ -231,7 +248,7 @@ export class ApiClient {
 
         options?.signal?.throwIfAborted();
         if (!resp.ok) {
-          if (this.shouldRetry(resp.status) && attempt < this.maxRetries) {
+          if (this.shouldRetry(resp.status) && attempt < maxRetries) {
             clearTimeout(timer);
             try {
               await resp.body?.cancel();

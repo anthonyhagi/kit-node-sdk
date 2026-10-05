@@ -867,3 +867,53 @@ describe("api-client", () => {
     });
   });
 });
+
+describe("per-request retry limits", () => {
+  beforeEach(() => {
+    fetchMock.resetMocks();
+  });
+
+  it.each(["get", "post", "put", "patch", "delete"] as const)(
+    "honors zero retries for %s without changing the client default",
+    async (method) => {
+      const api = new ApiClient({
+        baseUrl: "http://localhost",
+        maxRetries: 3,
+        retryDelay: 0,
+      });
+      fetchMock.mockRejectOnce(new Error("Connection lost"));
+      await expect(api[method]("/route", { maxRetries: 0 })).rejects.toThrow(
+        "Connection lost"
+      );
+      expect(fetchMock.requests()).toHaveLength(1);
+      expect(api.maxRetries).toBe(3);
+    }
+  );
+
+  it.each([-1, 0.5, NaN, Infinity, Number.MAX_SAFE_INTEGER + 1])(
+    "rejects invalid request retry limit %s before sending",
+    async (maxRetries) => {
+      const api = new ApiClient({ baseUrl: "http://localhost" });
+      await expect(api.get("/route", { maxRetries })).rejects.toThrow(
+        RangeError
+      );
+      expect(fetchMock.requests()).toHaveLength(0);
+    }
+  );
+
+  it("forwards the override from another resource and falls back for undefined", async () => {
+    const kit = new Kit({ apiKey: "test-key", maxRetries: 1, retryDelay: 0 });
+    fetchMock.mockRejectOnce(new Error("Connection lost"));
+    await expect(
+      kit.segments.list(undefined, { maxRetries: 0 })
+    ).rejects.toThrow("Connection lost");
+    expect(fetchMock.requests()).toHaveLength(1);
+    fetchMock.resetMocks();
+    fetchMock.mockRejectOnce(new Error("Connection lost"));
+    fetchMock.mockResponseOnce(
+      JSON.stringify({ segments: [], pagination: {} })
+    );
+    await kit.segments.list(undefined, { maxRetries: undefined });
+    expect(fetchMock.requests()).toHaveLength(2);
+  });
+});

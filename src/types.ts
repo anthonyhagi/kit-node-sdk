@@ -42,6 +42,7 @@ export interface ClientOptions {
    *
    * Must be a non-negative safe integer; invalid values throw at
    * construction. Set to 0 to disable retries. Defaults to 3.
+   * Resource request options can override this; purchases.create() defaults to 0.
    */
   maxRetries?: number;
 
@@ -67,6 +68,8 @@ export interface ClientOptions {
 
 /** Per-request controls for resource methods. */
 export interface RequestOptions {
+  /** Override the client retry limit; non-negative safe integer. Purchase creation defaults to 0. */
+  maxRetries?: number | undefined;
   /** Cancel the request, including response reads and retry waits. */
   signal?: AbortSignal | undefined;
 }

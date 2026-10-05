@@ -78,6 +78,7 @@ export class BroadcastsHandler {
       {
         query,
         signal: options?.signal,
+        maxRetries: options?.maxRetries,
       }
     );
   }
@@ -117,6 +118,7 @@ export class BroadcastsHandler {
     return await this.api.post<CreateBroadcast>("/broadcasts", {
       body,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -162,6 +164,7 @@ export class BroadcastsHandler {
     return await this.api.get<GetBroadcastStats>("/broadcasts/stats", {
       query,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -199,6 +202,7 @@ export class BroadcastsHandler {
       {
         query,
         signal: options?.signal,
+        maxRetries: options?.maxRetries,
       }
     );
   }
@@ -222,6 +226,7 @@ export class BroadcastsHandler {
 
     return await this.api.get<GetSingleBroadcastStats | null>(url, {
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -244,6 +249,7 @@ export class BroadcastsHandler {
 
     return await this.api.delete<{} | null>(`/broadcasts/${id}`, {
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -264,6 +270,7 @@ export class BroadcastsHandler {
 
     return await this.api.get<GetBroadcast | null>(`/broadcasts/${id}`, {
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 
@@ -300,6 +307,7 @@ export class BroadcastsHandler {
     return await this.api.put<UpdateBroadcast | null>(`/broadcasts/${id}`, {
       body,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 

@@ -1341,6 +1341,11 @@ const result = await kit.purchases.create({
 console.log(result.purchase.id);
 ```
 
+Purchase creation disables automatic retries by default, even if the client has
+`maxRetries` configured. This prevents the SDK from automatically replaying an
+uncertain write. An explicit request option can override the limit; see
+[per-request retry limits](configuration.md#per-request-retry-limits).
+
 Track which line items have been synced for each transaction. Reusing the
 transaction identifier or line-item identifier does not make replaying the
 products safe. If a request's outcome is uncertain, inspect the existing purchase

@@ -36,6 +36,7 @@ export class SegmentsHandler {
     return await this.api.get<ListSegments>("/segments", {
       query,
       signal: options?.signal,
+      maxRetries: options?.maxRetries,
     });
   }
 }
