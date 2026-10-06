@@ -1,5 +1,11 @@
 import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
-import { Kit, type GetCurrentAccount, type GetEmailStats } from "~/index";
+import {
+  Kit,
+  type AccountEmailStats,
+  type AccountGrowthStats,
+  type GetCurrentAccount,
+  type GetEmailStats,
+} from "~/index";
 
 const response = {
   stats: {
@@ -22,7 +28,9 @@ describe("growth stats requests through Kit", () => {
   });
 
   it("preserves default requests and the account-timezone response", async () => {
-    expect(await kit.accounts.getGrowthStats()).toEqual(response);
+    const result = await kit.accounts.getGrowthStats();
+    expectTypeOf(result.stats).toEqualTypeOf<AccountGrowthStats>();
+    expect(result).toEqual(response);
     const requests = fetchMock.requests();
     expect(requests).toHaveLength(1);
     expect(requests[0]!.url).toBe(
@@ -292,6 +300,7 @@ describe("account requests through Kit", () => {
 
     const result = await kit.accounts.getEmailStats();
     expectTypeOf(result).toEqualTypeOf<GetEmailStats>();
+    expectTypeOf(result.stats).toEqualTypeOf<AccountEmailStats>();
     expectTypeOf(result.stats.open_rate).toEqualTypeOf<number>();
     expectTypeOf(result.stats.click_rate).toEqualTypeOf<number>();
     expectTypeOf(result.stats.unsubscribe_rate).toEqualTypeOf<number>();

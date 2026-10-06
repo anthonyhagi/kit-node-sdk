@@ -235,6 +235,8 @@ export type {
   RevokeOAuthTokenParams,
 } from "./oauth";
 export type {
+  AccountEmailStats,
+  AccountGrowthStats,
   GetCreatorProfile,
   GetCurrentAccount,
   GetEmailStats,

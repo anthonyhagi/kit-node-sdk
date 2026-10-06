@@ -67,21 +67,24 @@ export interface GetCreatorProfile {
   };
 }
 
+/** Account-wide email engagement and tracking statistics. */
+export interface AccountEmailStats {
+  sent: number;
+  clicked: number;
+  opened: number;
+  open_rate: number;
+  click_rate: number;
+  unsubscribe_rate: number;
+  bounce_rate: number;
+  email_stats_mode: "last_90" | (string & {});
+  open_tracking_enabled: boolean;
+  click_tracking_enabled: boolean;
+  starting: string;
+  ending: string;
+}
+
 export interface GetEmailStats {
-  stats: {
-    sent: number;
-    clicked: number;
-    opened: number;
-    open_rate: number;
-    click_rate: number;
-    unsubscribe_rate: number;
-    bounce_rate: number;
-    email_stats_mode: "last_90" | (string & {});
-    open_tracking_enabled: boolean;
-    click_tracking_enabled: boolean;
-    starting: string;
-    ending: string;
-  };
+  stats: AccountEmailStats;
 }
 
 export interface GetGrowthStatsParams {
@@ -101,13 +104,16 @@ export interface GetGrowthStatsParams {
   starting?: Date | string | undefined;
 }
 
+/** Account subscriber growth statistics for the requested date range. */
+export interface AccountGrowthStats {
+  cancellations: number;
+  net_new_subscribers: number;
+  new_subscribers: number;
+  subscribers: number;
+  starting: string;
+  ending: string;
+}
+
 export interface GetGrowthStats {
-  stats: {
-    cancellations: number;
-    net_new_subscribers: number;
-    new_subscribers: number;
-    subscribers: number;
-    starting: string;
-    ending: string;
-  };
+  stats: AccountGrowthStats;
 }
