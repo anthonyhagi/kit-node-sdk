@@ -448,6 +448,7 @@ export type {
   Subscriber,
   SubscriberLocation,
   SubscriberStats,
+  SubscriberTag,
   UpdateSubscriber,
   UpdateSubscriberLocation,
   UpdateSubscriberLocationParams,

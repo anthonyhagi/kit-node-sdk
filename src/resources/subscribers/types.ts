@@ -4,6 +4,7 @@ import type {
   PaginationParams,
   SubscriberState,
 } from "~/common/types";
+import type { Tag } from "~/resources/tags/types";
 
 /** Core subscriber record shared by subscriber response types. */
 export interface Subscriber {
@@ -528,12 +529,13 @@ export interface GetSubscriberStats {
 
 export interface GetSubscriberTagsParams extends PaginationParams {}
 
+/** Tag record attached to a subscriber, with optional subscription timestamps. */
+export interface SubscriberTag extends Pick<Tag, "id" | "name"> {
+  added_at?: string | undefined;
+  tagged_at?: string | undefined;
+}
+
 export interface GetSubscriberTags {
-  tags: {
-    id: number;
-    name: string;
-    added_at?: string | undefined;
-    tagged_at?: string | undefined;
-  }[];
+  tags: SubscriberTag[];
   pagination: Pagination;
 }
