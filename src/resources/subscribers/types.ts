@@ -415,21 +415,7 @@ export interface FilterSubscribers {
     /** Most recent state transition timestamp, included when canceled_at is requested. */
     canceled_at?: string | null | undefined;
     /** Engagement over the requested range, included when stats are requested. */
-    stats?:
-      | {
-          sent?: number | undefined;
-          opened?: number | undefined;
-          clicked?: number | undefined;
-          bounced?: number | undefined;
-          open_rate?: number | undefined;
-          click_rate?: number | undefined;
-          last_sent?: string | null | undefined;
-          last_opened?: string | null | undefined;
-          last_clicked?: string | null | undefined;
-          sends_since_last_open?: number | undefined;
-          sends_since_last_click?: number | undefined;
-        }
-      | undefined;
+    stats?: PartialSubscriberStats | undefined;
     /** All custom field values, included when custom_fields is requested. */
     fields?: Record<string, string | null> | undefined;
   }[];
@@ -510,22 +496,33 @@ export interface GetSubscriberStatsParams {
   email_sent_before?: string | undefined;
 }
 
+/** Engagement statistics returned by the subscriber stats endpoint. */
+export interface SubscriberStats {
+  sent: number;
+  opened: number;
+  clicked: number;
+  bounced: number;
+  open_rate: number;
+  click_rate: number;
+  last_sent: string;
+  last_opened: string;
+  last_clicked: string;
+  sends_since_last_open: number;
+  sends_since_last_click: number;
+}
+
+/** Filter responses permit partial stats and null timestamps for missing events. */
+type PartialSubscriberStats = {
+  [Key in keyof SubscriberStats]?:
+    | SubscriberStats[Key]
+    | (Key extends "last_sent" | "last_opened" | "last_clicked" ? null : never)
+    | undefined;
+};
+
 export interface GetSubscriberStats {
   subscriber: {
     id: number;
-    stats: {
-      sent: number;
-      opened: number;
-      clicked: number;
-      bounced: number;
-      open_rate: number;
-      click_rate: number;
-      last_sent: string;
-      last_opened: string;
-      last_clicked: string;
-      sends_since_last_open: number;
-      sends_since_last_click: number;
-    };
+    stats: SubscriberStats;
   };
 }
 

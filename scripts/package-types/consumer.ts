@@ -13,6 +13,7 @@ import {
   type CreateWebhook,
   type CreatorProfile,
   type EmailTemplate,
+  type FilterSubscribers,
   type Form,
   type GetBroadcast,
   type GetCreatorProfile,
@@ -26,6 +27,7 @@ import {
   type GetSequenceWithStats,
   type GetSnippet,
   type GetSubscriber,
+  type GetSubscriberStats,
   type ListBroadcasts,
   type ListEmailTemplates,
   type ListForms,
@@ -45,6 +47,7 @@ import {
   type Sequence,
   type SequenceEmail,
   type Snippet,
+  type SubscriberStats,
   type UpdateBroadcast,
   type Webhook,
   type WebhookDelivery,
@@ -122,6 +125,16 @@ export type CurrentAccountUserResponse = Assert<
 >;
 export type CreatorProfileResponse = Assert<
   Equal<GetCreatorProfile["profile"], CreatorProfile>
+>;
+
+export type SubscriberStatsResponse = Assert<
+  Equal<GetSubscriberStats["subscriber"]["stats"], SubscriberStats>
+>;
+export type FilteredSubscriberLastSent = Assert<
+  Equal<
+    NonNullable<FilterSubscribers["subscribers"][number]["stats"]>["last_sent"],
+    string | null | undefined
+  >
 >;
 
 const kit = new Kit({ apiKey: "typecheck-only", maxRetries: 0 });
