@@ -3,6 +3,7 @@ import type {
   PaginationParams,
   SubscriberState,
 } from "~/common/types";
+import type { Subscriber } from "~/resources/subscribers/types";
 
 export type SequenceSendDay =
   | "monday"
@@ -127,14 +128,13 @@ export interface ListSequenceSubscribersParams {
 }
 
 /** Subscriber record returned by sequence subscriber lists. */
-export interface SequenceSubscriber {
-  id: number;
-  first_name: string | null;
+export interface SequenceSubscriber extends Omit<
+  Subscriber,
+  "email_address" | "state"
+> {
   email_address: string | null;
   state: string;
-  created_at: string;
   added_at: string;
-  fields: Record<string, string | null>;
 }
 
 /** Add responses retain non-null email addresses and custom field values. */
