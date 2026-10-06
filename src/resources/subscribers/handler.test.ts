@@ -33,6 +33,7 @@ import {
   type Subscriber,
   type SubscriberLocation,
   type SubscriberStats,
+  type SubscriberTag,
   type UpdateSubscriber,
   type UpdateSubscriberLocation,
   type UpdateSubscriberLocationParams,
@@ -146,6 +147,13 @@ describe("subscriber requests through Kit", () => {
       fetchMock.mockResponseOnce(JSON.stringify(response));
       const result = await kit.subscribers.getTags(42, params);
       expectTypeOf(result).toEqualTypeOf<GetSubscriberTags | null>();
+      expectTypeOf(result!.tags[0]!).toEqualTypeOf<SubscriberTag>();
+      expectTypeOf<SubscriberTag>().toEqualTypeOf<{
+        id: number;
+        name: string;
+        added_at?: string | undefined;
+        tagged_at?: string | undefined;
+      }>();
       expect(result).toEqual(response);
       expect(await request("GET", "/subscribers/42/tags").text()).toBe("");
     }

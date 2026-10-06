@@ -31,6 +31,7 @@ import {
   type GetSnippet,
   type GetSubscriber,
   type GetSubscriberStats,
+  type GetSubscriberTags,
   type ListBroadcasts,
   type ListEmailTemplates,
   type ListForms,
@@ -51,6 +52,7 @@ import {
   type SequenceEmail,
   type Snippet,
   type SubscriberStats,
+  type SubscriberTag,
   type UpdateBroadcast,
   type Webhook,
   type WebhookDelivery,
@@ -148,6 +150,13 @@ export type AccountSendingAddressesResponse = Assert<
 >;
 export type AccountTimezoneResponse = Assert<
   Equal<Account["timezone"], AccountTimezone>
+>;
+
+export type SubscriberTagResponse = Assert<
+  Equal<GetSubscriberTags["tags"][number], SubscriberTag>
+>;
+export type SubscriberTagKeys = Assert<
+  Equal<keyof SubscriberTag, "id" | "name" | "added_at" | "tagged_at">
 >;
 
 const kit = new Kit({ apiKey: "typecheck-only", maxRetries: 0 });
