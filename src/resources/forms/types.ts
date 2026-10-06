@@ -1,4 +1,5 @@
 import type { Pagination, PaginationParams } from "~/common/types";
+import type { Subscriber } from "~/resources/subscribers/types";
 
 /** UTM values Kit parsed from the form subscriber's referring URL. */
 export interface FormReferrerUtmParameters {
@@ -135,14 +136,9 @@ export interface ListFormSubscribersParams extends PaginationParams {
 }
 
 /** Full subscriber record returned by form subscriber lists. */
-export interface FormSubscriber {
-  id: number;
-  first_name: string | null;
-  email_address: string;
+export interface FormSubscriber extends Omit<Subscriber, "state"> {
   state: string;
-  created_at: string;
   added_at: string;
-  fields: Record<string, string | null>;
   referrer_utm_parameters?: FormReferrerUtmParameters | undefined;
   referrer?: string | undefined;
 }

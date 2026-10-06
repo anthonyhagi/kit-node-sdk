@@ -18,6 +18,7 @@ import {
   type EmailTemplate,
   type FilterSubscribers,
   type Form,
+  type FormSubscriber,
   type GetBroadcast,
   type GetCreatorProfile,
   type GetCurrentAccount,
@@ -53,9 +54,11 @@ import {
   type Segment,
   type Sequence,
   type SequenceEmail,
+  type SequenceSubscriber,
   type Snippet,
   type SubscriberStats,
   type SubscriberTag,
+  type TaggedSubscriber,
   type UpdateBroadcast,
   type UpdateSubscriberLocation,
   type UpdateSubscriberLocationParams,
@@ -181,6 +184,34 @@ export type UpdatedLocationResponse = Assert<
     UpdateSubscriberLocation["subscriber"]["location"],
     PinnedSubscriberLocation
   >
+>;
+
+// Subscription endpoints retain their broader state type and existing core fields.
+type ExpectedSubscriptionSubscriber = {
+  id: number;
+  first_name: string | null;
+  email_address: string;
+  state: string;
+  created_at: string;
+  fields: Record<string, string | null>;
+};
+export type FormSubscriberCore = Assert<
+  Equal<
+    Omit<FormSubscriber, "added_at" | "referrer" | "referrer_utm_parameters">,
+    ExpectedSubscriptionSubscriber
+  >
+>;
+export type TaggedSubscriberCore = Assert<
+  Equal<Omit<TaggedSubscriber, "tagged_at">, ExpectedSubscriptionSubscriber>
+>;
+export type SequenceSubscriberCore = Assert<
+  Equal<
+    Omit<SequenceSubscriber, "added_at" | "email_address">,
+    Omit<ExpectedSubscriptionSubscriber, "email_address">
+  >
+>;
+export type SequenceSubscriberEmail = Assert<
+  Equal<SequenceSubscriber["email_address"], string | null>
 >;
 
 const kit = new Kit({ apiKey: "typecheck-only", maxRetries: 0 });

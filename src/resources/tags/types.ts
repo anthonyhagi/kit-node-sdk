@@ -1,4 +1,5 @@
 import type { Pagination, PaginationParams } from "~/common/types";
+import type { Subscriber } from "~/resources/subscribers/types";
 import type { Nullable } from "~/utils/types";
 
 export type Tag = {
@@ -202,14 +203,9 @@ export interface ListTagSubscribersParams extends PaginationParams {
 }
 
 /** Subscriber record returned when listing a tag or tagging by ID or email. */
-export interface TaggedSubscriber {
-  id: number;
-  first_name: string | null;
-  email_address: string;
+export interface TaggedSubscriber extends Omit<Subscriber, "state"> {
   state: string;
-  created_at: string;
   tagged_at: string;
-  fields: Record<string, string | null>;
 }
 
 /** Bulk tagging returns subscription metadata with a non-null first name. */
