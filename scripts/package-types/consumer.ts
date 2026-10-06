@@ -4,12 +4,16 @@ import {
   Kit,
   refreshOAuthToken,
   verifyWebhookSignature,
+  type AccountEmailStats,
+  type AccountGrowthStats,
   type Broadcast,
   type BroadcastListItem,
   type CreateWebhook,
   type EmailTemplate,
   type Form,
   type GetBroadcast,
+  type GetEmailStats,
+  type GetGrowthStats,
   type GetPost,
   type GetSequence,
   type GetSequenceEmail,
@@ -96,6 +100,13 @@ export type WebhookCreatedEventKeys = Assert<
 >;
 export type WebhookCreatedInitiator = Assert<
   Equal<CreateWebhook["webhook"]["event"]["initiator_value"], string | null>
+>;
+
+export type AccountEmailStatsResponse = Assert<
+  Equal<GetEmailStats["stats"], AccountEmailStats>
+>;
+export type AccountGrowthStatsResponse = Assert<
+  Equal<GetGrowthStats["stats"], AccountGrowthStats>
 >;
 
 const kit = new Kit({ apiKey: "typecheck-only", maxRetries: 0 });
