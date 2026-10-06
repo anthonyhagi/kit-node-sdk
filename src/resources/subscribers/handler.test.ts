@@ -32,6 +32,7 @@ import {
   type PinSubscriberLocationParams,
   type Subscriber,
   type SubscriberLocation,
+  type SubscriberStats,
   type UpdateSubscriber,
   type UpdateSubscriberLocation,
   type UpdateSubscriberLocationParams,
@@ -927,6 +928,21 @@ describe("subscriber requests through Kit", () => {
 
     const result = await kit.subscribers.filter(filterBody);
     expectTypeOf(result).toEqualTypeOf<FilterSubscribers>();
+    expectTypeOf<
+      NonNullable<FilterSubscribers["subscribers"][number]["stats"]>
+    >().toEqualTypeOf<{
+      sent?: number | undefined;
+      opened?: number | undefined;
+      clicked?: number | undefined;
+      bounced?: number | undefined;
+      open_rate?: number | undefined;
+      click_rate?: number | undefined;
+      last_sent?: string | null | undefined;
+      last_opened?: string | null | undefined;
+      last_clicked?: string | null | undefined;
+      sends_since_last_open?: number | undefined;
+      sends_since_last_click?: number | undefined;
+    }>();
     expectTypeOf(signupCondition).toExtend<
       FilterSubscriberBody["all"][number]
     >();
@@ -1518,6 +1534,7 @@ describe("subscriber requests through Kit", () => {
 
     const result = await kit.subscribers.getStats(42, params);
     expectTypeOf(result).toEqualTypeOf<GetSubscriberStats | null>();
+    expectTypeOf(result!.subscriber.stats).toEqualTypeOf<SubscriberStats>();
     expect(result).toEqual(response);
     request("GET", "/subscribers/42/stats", {
       email_sent_after: "2026-01-01",
