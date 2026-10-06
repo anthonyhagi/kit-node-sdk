@@ -4,6 +4,34 @@ export interface AccountUser {
   id?: number | undefined;
 }
 
+/** Sending address metadata returned by current account reads. */
+export interface AccountSendingAddress {
+  email_address: string;
+  from_name: string;
+  status: string;
+  is_default: boolean;
+  is_verified: boolean;
+  is_dmarc_configured: boolean;
+}
+
+/** Account plan metadata; scheduled plan dates may be unavailable. */
+export interface AccountPlan {
+  plan_type: string;
+  interval: string;
+  subscriber_limit: number;
+  on_trial: boolean;
+  trial_lapse_date: string | null;
+  renews_at: string | null;
+  cancels_at: string | null;
+}
+
+/** Timezone metadata returned by current account reads. */
+export interface AccountTimezone {
+  name: string;
+  friendly_name: string;
+  utc_offset: string;
+}
+
 /** Current account details, including optional sending addresses and plan metadata. */
 export interface Account {
   id: number;
@@ -11,32 +39,9 @@ export interface Account {
   plan_type: string;
   primary_email_address: string;
   created_at: string;
-  sending_addresses?:
-    | {
-        email_address: string;
-        from_name: string;
-        status: string;
-        is_default: boolean;
-        is_verified: boolean;
-        is_dmarc_configured: boolean;
-      }[]
-    | undefined;
-  plan?:
-    | {
-        plan_type: string;
-        interval: string;
-        subscriber_limit: number;
-        on_trial: boolean;
-        trial_lapse_date: string | null;
-        renews_at: string | null;
-        cancels_at: string | null;
-      }
-    | undefined;
-  timezone: {
-    name: string;
-    friendly_name: string;
-    utc_offset: string;
-  };
+  sending_addresses?: AccountSendingAddress[] | undefined;
+  plan?: AccountPlan | undefined;
+  timezone: AccountTimezone;
 }
 
 export interface GetCurrentAccount {

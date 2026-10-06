@@ -4,6 +4,9 @@ import {
   type Account,
   type AccountEmailStats,
   type AccountGrowthStats,
+  type AccountPlan,
+  type AccountSendingAddress,
+  type AccountTimezone,
   type AccountUser,
   type CreatorProfile,
   type GetCurrentAccount,
@@ -188,6 +191,13 @@ describe("account requests through Kit", () => {
       fetchMock.mockResponseOnce(JSON.stringify(response));
       const result = await kit.accounts.getCurrentAccount();
       expectTypeOf(result).toEqualTypeOf<GetCurrentAccount>();
+      expectTypeOf(result.account.plan).toEqualTypeOf<
+        AccountPlan | undefined
+      >();
+      expectTypeOf(result.account.sending_addresses).toEqualTypeOf<
+        AccountSendingAddress[] | undefined
+      >();
+      expectTypeOf(result.account.timezone).toEqualTypeOf<AccountTimezone>();
       expectTypeOf(result.user.id).toEqualTypeOf<number | undefined>();
       expectTypeOf(result.account.plan!.trial_lapse_date).toEqualTypeOf<
         string | null

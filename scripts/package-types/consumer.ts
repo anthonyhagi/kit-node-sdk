@@ -7,6 +7,9 @@ import {
   type Account,
   type AccountEmailStats,
   type AccountGrowthStats,
+  type AccountPlan,
+  type AccountSendingAddress,
+  type AccountTimezone,
   type AccountUser,
   type Broadcast,
   type BroadcastListItem,
@@ -135,6 +138,16 @@ export type FilteredSubscriberLastSent = Assert<
     NonNullable<FilterSubscribers["subscribers"][number]["stats"]>["last_sent"],
     string | null | undefined
   >
+>;
+
+export type AccountPlanResponse = Assert<
+  Equal<Account["plan"], AccountPlan | undefined>
+>;
+export type AccountSendingAddressesResponse = Assert<
+  Equal<Account["sending_addresses"], AccountSendingAddress[] | undefined>
+>;
+export type AccountTimezoneResponse = Assert<
+  Equal<Account["timezone"], AccountTimezone>
 >;
 
 const kit = new Kit({ apiKey: "typecheck-only", maxRetries: 0 });
