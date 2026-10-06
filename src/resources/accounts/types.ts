@@ -1,41 +1,47 @@
-export interface GetCurrentAccount {
-  user: {
-    email: string;
-    id?: number | undefined;
-  };
-  account: {
-    id: number;
+/** User metadata returned by the current account endpoint. */
+export interface AccountUser {
+  email: string;
+  id?: number | undefined;
+}
+
+/** Current account details, including optional sending addresses and plan metadata. */
+export interface Account {
+  id: number;
+  name: string;
+  plan_type: string;
+  primary_email_address: string;
+  created_at: string;
+  sending_addresses?:
+    | {
+        email_address: string;
+        from_name: string;
+        status: string;
+        is_default: boolean;
+        is_verified: boolean;
+        is_dmarc_configured: boolean;
+      }[]
+    | undefined;
+  plan?:
+    | {
+        plan_type: string;
+        interval: string;
+        subscriber_limit: number;
+        on_trial: boolean;
+        trial_lapse_date: string | null;
+        renews_at: string | null;
+        cancels_at: string | null;
+      }
+    | undefined;
+  timezone: {
     name: string;
-    plan_type: string;
-    primary_email_address: string;
-    created_at: string;
-    sending_addresses?:
-      | {
-          email_address: string;
-          from_name: string;
-          status: string;
-          is_default: boolean;
-          is_verified: boolean;
-          is_dmarc_configured: boolean;
-        }[]
-      | undefined;
-    plan?:
-      | {
-          plan_type: string;
-          interval: string;
-          subscriber_limit: number;
-          on_trial: boolean;
-          trial_lapse_date: string | null;
-          renews_at: string | null;
-          cancels_at: string | null;
-        }
-      | undefined;
-    timezone: {
-      name: string;
-      friendly_name: string;
-      utc_offset: string;
-    };
+    friendly_name: string;
+    utc_offset: string;
   };
+}
+
+export interface GetCurrentAccount {
+  user: AccountUser;
+  account: Account;
 }
 
 export interface ListColors {
@@ -57,14 +63,17 @@ export interface UpdateColors {
   colors: string[];
 }
 
+/** Public creator profile metadata returned by account reads. */
+export interface CreatorProfile {
+  name: string;
+  byline: string;
+  bio: string;
+  image_url: string;
+  profile_url: string;
+}
+
 export interface GetCreatorProfile {
-  profile: {
-    name: string;
-    byline: string;
-    bio: string;
-    image_url: string;
-    profile_url: string;
-  };
+  profile: CreatorProfile;
 }
 
 /** Account-wide email engagement and tracking statistics. */

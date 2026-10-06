@@ -1,8 +1,11 @@
 import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
 import {
   Kit,
+  type Account,
   type AccountEmailStats,
   type AccountGrowthStats,
+  type AccountUser,
+  type CreatorProfile,
   type GetCurrentAccount,
   type GetEmailStats,
 } from "~/index";
@@ -126,6 +129,8 @@ describe("account requests through Kit", () => {
     } satisfies GetCurrentAccount;
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.accounts.getCurrentAccount();
+    expectTypeOf(result.account).toEqualTypeOf<Account>();
+    expectTypeOf(result.user).toEqualTypeOf<AccountUser>();
     expect(result).toEqual(response);
     expect(result.user.id).toBeUndefined();
     expect(result.account.sending_addresses).toBeUndefined();
@@ -244,7 +249,9 @@ describe("account requests through Kit", () => {
       },
     };
     fetchMock.mockResponseOnce(JSON.stringify(response));
-    expect(await kit.accounts.getCreatorProfile()).toEqual(response);
+    const result = await kit.accounts.getCreatorProfile();
+    expectTypeOf(result!.profile).toEqualTypeOf<CreatorProfile>();
+    expect(result).toEqual(response);
     expect(await request("GET", "/account/creator_profile").text()).toBe("");
   });
 
