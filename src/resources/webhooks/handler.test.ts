@@ -1,10 +1,13 @@
 import { beforeEach, describe, expect, expectTypeOf, it } from "vitest";
 import {
   Kit,
+  type CreateWebhook,
   type CreateWebhookParams,
   type ListWebhooks,
   type ListWebhooksParams,
+  type Webhook,
   type WebhookEvent,
+  type WebhookEventResponse,
 } from "~/index";
 
 const targetUrl = "https://example.com/hooks/kit?source=newsletter&token=a%2Bb";
@@ -75,6 +78,10 @@ describe("webhook requests through Kit", () => {
       fetchMock.mockResponseOnce(JSON.stringify(response));
       const result = await kit.webhooks.list(params);
       expectTypeOf(result).toEqualTypeOf<ListWebhooks>();
+      expectTypeOf(result.webhooks[0]!).toEqualTypeOf<Webhook>();
+      expectTypeOf(
+        result.webhooks[0]!.event
+      ).toEqualTypeOf<WebhookEventResponse>();
       expect(result).toEqual(response);
       expect(await request("GET", "/webhooks").text()).toBe("");
     }
@@ -256,6 +263,12 @@ describe("webhook requests through Kit", () => {
         },
       };
       fetchMock.mockResponseOnce(JSON.stringify(response), { status: 201 });
+      expectTypeOf<
+        CreateWebhook["webhook"]["event"]["initiator_value"]
+      >().toEqualTypeOf<string | null>();
+      expectTypeOf<keyof CreateWebhook["webhook"]["event"]>().toEqualTypeOf<
+        "name" | "initiator_value"
+      >();
       expect(await kit.webhooks.create(body)).toEqual(response);
       const req = request("POST", "/webhooks");
       expect(req.headers.get("Content-Type")).toBe("application/json");

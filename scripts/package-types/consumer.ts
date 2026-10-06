@@ -6,6 +6,7 @@ import {
   verifyWebhookSignature,
   type Broadcast,
   type BroadcastListItem,
+  type CreateWebhook,
   type EmailTemplate,
   type Form,
   type GetBroadcast,
@@ -26,6 +27,7 @@ import {
   type ListSequencesWithStats,
   type ListSnippetsWithContent,
   type ListSubscribers,
+  type ListWebhooks,
   type OAuthPKCE,
   type OAuthTokenResponse,
   type Post,
@@ -35,7 +37,9 @@ import {
   type SequenceEmail,
   type Snippet,
   type UpdateBroadcast,
+  type Webhook,
   type WebhookDelivery,
+  type WebhookEventResponse,
 } from "@anthonyhagi/kit-node-sdk";
 
 type Equal<A, B> =
@@ -80,6 +84,19 @@ export type SegmentListResponse = Assert<
 >;
 
 export type FormListResponse = Assert<Equal<ListForms["forms"][number], Form>>;
+
+export type WebhookListResponse = Assert<
+  Equal<ListWebhooks["webhooks"][number], Webhook>
+>;
+export type WebhookListedEvent = Assert<
+  Equal<Webhook["event"], WebhookEventResponse>
+>;
+export type WebhookCreatedEventKeys = Assert<
+  Equal<keyof CreateWebhook["webhook"]["event"], "name" | "initiator_value">
+>;
+export type WebhookCreatedInitiator = Assert<
+  Equal<CreateWebhook["webhook"]["event"]["initiator_value"], string | null>
+>;
 
 const kit = new Kit({ apiKey: "typecheck-only", maxRetries: 0 });
 const options = {

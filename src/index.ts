@@ -504,7 +504,9 @@ export type {
   CreateWebhookParams,
   ListWebhooks,
   ListWebhooksParams,
+  Webhook,
   WebhookEvent,
+  WebhookEventResponse,
 } from "./resources/webhooks/types";
 
 export type {
