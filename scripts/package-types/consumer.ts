@@ -45,6 +45,9 @@ import {
   type ListWebhooks,
   type OAuthPKCE,
   type OAuthTokenResponse,
+  type PinnedSubscriberLocation,
+  type PinSubscriberLocation,
+  type PinSubscriberLocationParams,
   type Post,
   type RequestOptions,
   type Segment,
@@ -54,6 +57,8 @@ import {
   type SubscriberStats,
   type SubscriberTag,
   type UpdateBroadcast,
+  type UpdateSubscriberLocation,
+  type UpdateSubscriberLocationParams,
   type Webhook,
   type WebhookDelivery,
   type WebhookEventResponse,
@@ -157,6 +162,25 @@ export type SubscriberTagResponse = Assert<
 >;
 export type SubscriberTagKeys = Assert<
   Equal<keyof SubscriberTag, "id" | "name" | "added_at" | "tagged_at">
+>;
+
+export type PinnedLocationRequest = Assert<
+  Equal<PinSubscriberLocationParams["location"], PinnedSubscriberLocation>
+>;
+export type PinnedLocationResponse = Assert<
+  Equal<
+    PinSubscriberLocation["subscriber"]["location"],
+    PinnedSubscriberLocation
+  >
+>;
+export type UpdatedLocationRequest = Assert<
+  Equal<UpdateSubscriberLocationParams["location"], PinnedSubscriberLocation>
+>;
+export type UpdatedLocationResponse = Assert<
+  Equal<
+    UpdateSubscriberLocation["subscriber"]["location"],
+    PinnedSubscriberLocation
+  >
 >;
 
 const kit = new Kit({ apiKey: "typecheck-only", maxRetries: 0 });
