@@ -28,6 +28,7 @@ import {
   type ListSlimSubscribers,
   type ListSubscribers,
   type ListSubscribersParams,
+  type PinnedSubscriberLocation,
   type PinSubscriberLocation,
   type PinSubscriberLocationParams,
   type Subscriber,
@@ -747,6 +748,9 @@ describe("subscriber requests through Kit", () => {
 
       const result = await kit.subscribers.pinLocation(42, body);
       expectTypeOf(result).toEqualTypeOf<PinSubscriberLocation | null>();
+      expectTypeOf(
+        result!.subscriber.location
+      ).toEqualTypeOf<PinnedSubscriberLocation>();
       expect(result).toEqual(response);
       expect(await request("POST", "/subscribers/42/location").json()).toEqual(
         body
@@ -802,6 +806,9 @@ describe("subscriber requests through Kit", () => {
 
       const result = await kit.subscribers.updateLocation(42, body);
       expectTypeOf(result).toEqualTypeOf<UpdateSubscriberLocation | null>();
+      expectTypeOf(
+        result!.subscriber.location
+      ).toEqualTypeOf<PinnedSubscriberLocation>();
       expect(result).toEqual(response);
       expect(await request("PATCH", "/subscribers/42/location").json()).toEqual(
         body

@@ -452,23 +452,26 @@ export interface UpdateSubscriber {
   subscriber: Subscriber;
 }
 
+/** Required location fields shared by pinned location requests and responses. */
+export interface PinnedSubscriberLocation {
+  city: string;
+  state_province: string;
+  /** ISO 3166-1 alpha-2 country code. */
+  country_code: string;
+  latitude: number;
+  longitude: number;
+  /** IANA timezone name, such as America/Denver. */
+  timezone: string;
+}
+
 export interface PinSubscriberLocationParams {
-  location: {
-    city: string;
-    state_province: string;
-    /** ISO 3166-1 alpha-2 country code. */
-    country_code: string;
-    latitude: number;
-    longitude: number;
-    /** IANA timezone name, such as America/Denver. */
-    timezone: string;
-  };
+  location: PinnedSubscriberLocation;
 }
 
 export interface PinSubscriberLocation {
   subscriber: {
     id: number;
-    location: PinSubscriberLocationParams["location"];
+    location: PinnedSubscriberLocation;
   };
 }
 

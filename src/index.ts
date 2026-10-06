@@ -443,6 +443,7 @@ export type {
   ListSlimSubscribers,
   ListSubscribers,
   ListSubscribersParams,
+  PinnedSubscriberLocation,
   PinSubscriberLocation,
   PinSubscriberLocationParams,
   Subscriber,
