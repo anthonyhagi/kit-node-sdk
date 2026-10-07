@@ -14,6 +14,9 @@ import {
   type Broadcast,
   type BroadcastListItem,
   type BroadcastStatus,
+  type BulkCreateCallback,
+  type BulkCreatedCustomField,
+  type BulkCreateSynchronous,
   type CreateWebhook,
   type CreatorProfile,
   type EmailTemplate,
@@ -75,6 +78,32 @@ type Equal<A, B> =
     ? true
     : false;
 type Assert<T extends true> = T;
+
+// Bulk custom-field failures retain the complete field record and errors.
+export type BulkCustomFieldFailureRecord = Assert<
+  Equal<
+    BulkCreateSynchronous["failures"][number]["custom_field"],
+    {
+      id: number;
+      name: string;
+      key: string;
+      label: string;
+      created_at: string;
+    }
+  >
+>;
+export type BulkCustomFieldFailureSharedRecord = Assert<
+  Equal<
+    BulkCreateSynchronous["failures"][number]["custom_field"],
+    BulkCreatedCustomField
+  >
+>;
+export type BulkCustomFieldCallbackFailures = Assert<
+  Equal<
+    BulkCreateCallback["failures"],
+    { custom_field: BulkCreatedCustomField; errors: string[] }[]
+  >
+>;
 
 export type SequenceResponse = Assert<Equal<GetSequence["sequence"], Sequence>>;
 export type SequenceEmailResponse = Assert<
