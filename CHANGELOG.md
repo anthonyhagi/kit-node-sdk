@@ -1,5 +1,39 @@
 # @anthonyhagi/kit-node-sdk
 
+## 0.7.3
+
+### Patch Changes
+
+- 48be135: Export reusable `AccountSendingAddress`, `AccountPlan`, and `AccountTimezone` types, preserving optional account metadata, nullable plan dates, and all existing fields.
+- 31ee639: Export reusable `Account`, `AccountUser`, and `CreatorProfile` record types, preserving optional account metadata and all existing response fields.
+- 59ec5fc: Export reusable `AccountEmailStats` and `AccountGrowthStats` response types, preserving all existing account statistics fields and accepted email stats modes.
+- 307983d: Export reusable `Broadcast` and `BroadcastListItem` response types, preserving required single-response public URLs, optional list enrichments, and all existing creation and slim-list contracts.
+- 3778108: Export reusable `EmailTemplate` and `Segment` record types and use them in list responses, preserving all existing fields and pagination contracts.
+- 6702da4: Export a reusable `Form` response type and use it in form lists, preserving nullable format values, optional subscriber counts, and all existing fields.
+- 580fbb9: Export a reusable `PinnedSubscriberLocation` type for pin/update location requests and responses, preserving all required fields and their existing names and types.
+- 3e0e402: Export reusable `SubscriberStats` fields and reuse them in filtered subscriber statistics, preserving required endpoint fields, optional filter fields, and nullable filter timestamps.
+- 151c053: Reuse subscriber core fields across form, tag, and sequence subscriber records, preserving broader subscription states, nullable sequence email addresses, and existing endpoint-specific metadata.
+- bcc50e8: Reuse broadcast list date and status filters in aggregate stats parameters, preserving nullable pagination and date values while keeping the slim option exclusive to list requests.
+- daa3ea8: Reuse form and tag subscriber response fields in bulk subscription results, preserving their smaller response shapes and non-null first names.
+- e44ec75: Reuse the shared bulk-created custom field type in bulk creation failures, preserving the complete field record and callback error types.
+- 7452301: Export shared `CustomField` and `BulkCreatedCustomField` response types and reuse them across successful list, create, update, and bulk creation results. Bulk creation retains its required `created_at` timestamp.
+- 189d67e: Export shared `FormSubscriber` and `FormReferrerUtmParameters` response types and reuse form subscriber fields and UTM metadata across list, add, and bulk responses. Preserve the existing nullability differences between list and add responses.
+- 94ef1e7: Export a reusable `Post` response type for full post reads and content-inclusive lists, preserving optional default list content and existing nullable metadata.
+- d5e7eac: Export CreatePurchaseProductParams and reuse shared purchase product fields in create inputs, preserving optional nullable request SKUs and required nullable response SKUs.
+- a90540b: Export shared `Purchase` and `PurchaseProduct` response types and reuse them across purchase list, create, and get responses to prevent their field definitions from drifting apart.
+- e252be9: Export a reusable `SequenceEmail` response type and share it across full-content reads, lists, and write responses, preserving nullable content, optional stats, and nullable write positions.
+- 8f4577b: Reuse shared pagination parameters for sequence subscriber lists, preserving nullable cursors and page sizes, optional count flags, and endpoint-specific filters.
+- 5905470: Export a reusable `Sequence` response type and derive sequence create, update, get, and list responses from it, preserving optional counts, list metadata, and statistics behavior.
+- 9bc5a37: Export a shared `SequenceSubscriber` response type and derive sequence add responses from it, preserving nullable email addresses and custom field values in lists and string-only values in add responses.
+- 9ad3091: Export a reusable `Snippet` response type for full reads, updates, and content-inclusive lists, preserving optional default list fields and nullable document HTML in creation responses.
+- f741c2e: Export SubscriberAttribution and reuse its fields in subscriber list and filter responses, preserving required nullable list fields and optional nullable filter fields.
+- 1c887b6: Reuse the shared `Subscriber` core fields in list and bulk creation response types, preserving required custom fields in full lists, optional custom fields in slim lists, and the smaller bulk creation records.
+- 2f71cb8: Export shared `SubscriberLocation` response fields and reuse them across subscriber lists, reads, and filters, preserving endpoint-specific object nullability and optional location fields.
+- 66dbb3a: Export a shared `Subscriber` response type and reuse it in create, get, and update responses. Preserve nullable names and custom field values, optional read details, and create/update warnings.
+- 246ff14: Export a reusable `SubscriberTag` response type and share tag identity fields, preserving optional subscription timestamps and the smaller subscriber-tag record shape.
+- 66b850a: Export a shared `TaggedSubscriber` response type and reuse it in tag subscriber lists and tagging responses by ID and email, preserving nullable names, custom field values, and slim response optionality.
+- ed46e27: Export reusable `Webhook` and `WebhookEventResponse` record types and share legacy webhook response fields, preserving optional list event fields and the required nullable creation initiator value.
+
 ## 0.7.2
 
 ### Patch Changes
