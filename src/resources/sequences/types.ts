@@ -111,19 +111,15 @@ export interface ListSequences {
   pagination: Pagination;
 }
 
-export interface ListSequenceSubscribersParams {
+export interface ListSequenceSubscribersParams extends PaginationParams {
   /** Added after this date (YYYY-MM-DD). Date objects use their UTC calendar date. */
   added_after?: Date | string | null | undefined;
   /** Added before this date (YYYY-MM-DD). Date objects use their UTC calendar date. */
   added_before?: Date | string | null | undefined;
-  after?: string | null | undefined;
-  before?: string | null | undefined;
   /** Created after this date (YYYY-MM-DD). Date objects use their UTC calendar date. */
   created_after?: Date | string | null | undefined;
   /** Created before this date (YYYY-MM-DD). Date objects use their UTC calendar date. */
   created_before?: Date | string | null | undefined;
-  include_total_count?: boolean | undefined;
-  per_page?: number | null | undefined;
   status?: SubscriberState | "all" | (string & {}) | undefined;
 }
 

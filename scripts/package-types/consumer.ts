@@ -40,6 +40,7 @@ import {
   type ListSegments,
   type ListSequenceEmailsWithContent,
   type ListSequenceEmailsWithContentAndStats,
+  type ListSequenceSubscribersParams,
   type ListSequencesWithStats,
   type ListSnippetsWithContent,
   type ListSubscribers,
@@ -212,6 +213,21 @@ export type SequenceSubscriberCore = Assert<
 >;
 export type SequenceSubscriberEmail = Assert<
   Equal<SequenceSubscriber["email_address"], string | null>
+>;
+
+export type SequenceSubscriberPagination = Assert<
+  Equal<
+    Pick<
+      ListSequenceSubscribersParams,
+      "after" | "before" | "include_total_count" | "per_page"
+    >,
+    {
+      after?: string | null | undefined;
+      before?: string | null | undefined;
+      include_total_count?: boolean | undefined;
+      per_page?: number | null | undefined;
+    }
+  >
 >;
 
 const kit = new Kit({ apiKey: "typecheck-only", maxRetries: 0 });
