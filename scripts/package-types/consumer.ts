@@ -17,6 +17,8 @@ import {
   type BulkCreateCallback,
   type BulkCreatedCustomField,
   type BulkCreateSynchronous,
+  type CreatePurchaseParams,
+  type CreatePurchaseProductParams,
   type CreateWebhook,
   type CreatorProfile,
   type EmailTemplate,
@@ -56,6 +58,7 @@ import {
   type PinSubscriberLocation,
   type PinSubscriberLocationParams,
   type Post,
+  type PurchaseProduct,
   type RequestOptions,
   type Segment,
   type Sequence,
@@ -117,6 +120,33 @@ export type SequenceEmailContentList = Assert<
 export type SnippetResponse = Assert<Equal<GetSnippet["snippet"], Snippet>>;
 export type SnippetContentList = Assert<
   Equal<ListSnippetsWithContent["snippets"][number], Snippet>
+>;
+
+// Purchase inputs share product fields while allowing SKU to be omitted.
+export type PurchaseProductInputShape = Assert<
+  Equal<
+    CreatePurchaseProductParams,
+    {
+      name: string;
+      pid: string;
+      lid: string;
+      quantity: number;
+      unit_price: number;
+      sku?: string | null | undefined;
+    }
+  >
+>;
+export type PurchaseProductInputCore = Assert<
+  Equal<Omit<CreatePurchaseProductParams, "sku">, Omit<PurchaseProduct, "sku">>
+>;
+export type PurchaseProductRequest = Assert<
+  Equal<
+    CreatePurchaseParams["purchase"]["products"][number],
+    CreatePurchaseProductParams
+  >
+>;
+export type PurchaseProductResponseSku = Assert<
+  Equal<Pick<PurchaseProduct, "sku">, { sku: string | null }>
 >;
 
 export type PostResponse = Assert<Equal<GetPost["post"], Post>>;

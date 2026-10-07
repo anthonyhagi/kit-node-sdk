@@ -343,6 +343,7 @@ export type {
 export type {
   CreatePurchase,
   CreatePurchaseParams,
+  CreatePurchaseProductParams,
   GetPurchase,
   ListPurchases,
   ListPurchasesParams,

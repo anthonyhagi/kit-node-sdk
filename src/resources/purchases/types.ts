@@ -4,12 +4,38 @@ export interface ListPurchasesParams extends PaginationParams {}
 
 /** A purchased line item returned by Kit. External IDs remain strings. */
 export interface PurchaseProduct {
-  quantity: number;
-  lid: string;
-  unit_price: number;
-  sku: string | null;
+  /**
+   * The product name displayed to the Subscriber.
+   */
   name: string;
+
+  /**
+   * This is your identifier for a product. Each product provided in the
+   * `products` array must have a unique pid. Variants of the same
+   * product should have the same `pid`.
+   */
   pid: string;
+
+  /**
+   * Each product should have a unique lid (i.e., line item identifier)
+   * for this purchase.
+   */
+  lid: string;
+
+  /**
+   * Product quantity.
+   */
+  quantity: number;
+
+  /**
+   * Product sku.
+   */
+  sku: string | null;
+
+  /**
+   * Product price.
+   */
+  unit_price: number;
 }
 
 /** Purchase record shared by list, create, and get responses. */
@@ -33,6 +59,15 @@ export interface Purchase {
 export interface ListPurchases {
   purchases: Purchase[];
   pagination: Pagination;
+}
+
+/** A purchase line item input; SKU may be omitted or supplied as null. */
+export interface CreatePurchaseProductParams extends Omit<
+  PurchaseProduct,
+  "sku"
+> {
+  /** Product sku. */
+  sku?: string | null | undefined;
 }
 
 export interface CreatePurchaseParams {
@@ -70,40 +105,7 @@ export interface CreatePurchaseParams {
      * Line items to add. For an existing transaction_id, include only products
      * that have not already been synced; resending them creates duplicates.
      */
-    products: {
-      /**
-       * The product name displayed to the Subscriber.
-       */
-      name: string;
-
-      /**
-       * This is your identifier for a product. Each product provided in the
-       * `products` array must have a unique pid. Variants of the same
-       * product should have the same `pid`.
-       */
-      pid: string;
-
-      /**
-       * Each product should have a unique lid (i.e., line item identifier)
-       * for this purchase.
-       */
-      lid: string;
-
-      /**
-       * Product quantity.
-       */
-      quantity: number;
-
-      /**
-       * Product sku.
-       */
-      sku?: string | null | undefined;
-
-      /**
-       * Product price.
-       */
-      unit_price: number;
-    }[];
+    products: CreatePurchaseProductParams[];
   };
 }
 
