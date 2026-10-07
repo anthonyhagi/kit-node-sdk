@@ -56,6 +56,7 @@ import {
   type SequenceEmail,
   type SequenceSubscriber,
   type Snippet,
+  type SubscriberAttribution,
   type SubscriberStats,
   type SubscriberTag,
   type TaggedSubscriber,
@@ -165,6 +166,50 @@ export type SubscriberTagResponse = Assert<
 >;
 export type SubscriberTagKeys = Assert<
   Equal<keyof SubscriberTag, "id" | "name" | "added_at" | "tagged_at">
+>;
+
+// Lists require attribution fields; filters permit each field to be omitted.
+export type SubscriberAttributionShape = Assert<
+  Equal<
+    SubscriberAttribution,
+    {
+      referrer: string | null;
+      utm_source: string | null;
+      utm_medium: string | null;
+      utm_campaign: string | null;
+      utm_term: string | null;
+      utm_content: string | null;
+      source_type: string | null;
+      source_name: string | null;
+      source_mechanism: string | null;
+      source_mechanism_id: number | null;
+    }
+  >
+>;
+export type SubscriberListAttribution = Assert<
+  Equal<
+    ListSubscribers["subscribers"][number]["attribution"],
+    SubscriberAttribution | null | undefined
+  >
+>;
+export type SubscriberFilterAttribution = Assert<
+  Equal<
+    FilterSubscribers["subscribers"][number]["attribution"],
+    | {
+        referrer?: string | null | undefined;
+        utm_source?: string | null | undefined;
+        utm_medium?: string | null | undefined;
+        utm_campaign?: string | null | undefined;
+        utm_term?: string | null | undefined;
+        utm_content?: string | null | undefined;
+        source_type?: string | null | undefined;
+        source_name?: string | null | undefined;
+        source_mechanism?: string | null | undefined;
+        source_mechanism_id?: number | null | undefined;
+      }
+    | null
+    | undefined
+  >
 >;
 
 export type PinnedLocationRequest = Assert<

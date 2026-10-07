@@ -447,6 +447,7 @@ export type {
   PinSubscriberLocation,
   PinSubscriberLocationParams,
   Subscriber,
+  SubscriberAttribution,
   SubscriberLocation,
   SubscriberStats,
   SubscriberTag,

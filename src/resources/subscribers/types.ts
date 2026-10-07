@@ -16,6 +16,25 @@ export interface Subscriber {
   fields: Record<string, string | null>;
 }
 
+/** Signup attribution returned by subscriber lists; unknown values are null. */
+export interface SubscriberAttribution {
+  referrer: string | null;
+  utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
+  utm_term: string | null;
+  utm_content: string | null;
+  source_type: string | null;
+  source_name: string | null;
+  source_mechanism: string | null;
+  source_mechanism_id: number | null;
+}
+
+/** Filter attribution also permits omitted or explicitly undefined fields. */
+type PartialSubscriberAttribution = {
+  [Key in keyof SubscriberAttribution]?: SubscriberAttribution[Key] | undefined;
+};
+
 /** Location fields returned by subscriber reads; individual values may be unknown. */
 export interface SubscriberLocation {
   city: string | null;
@@ -115,21 +134,7 @@ export interface ListSubscribers {
     /** Omitted when slim is true. */
     fields?: Subscriber["fields"] | undefined;
     /** Included when attribution is requested. */
-    attribution?:
-      | {
-          referrer: string | null;
-          utm_source: string | null;
-          utm_medium: string | null;
-          utm_campaign: string | null;
-          utm_term: string | null;
-          utm_content: string | null;
-          source_type: string | null;
-          source_name: string | null;
-          source_mechanism: string | null;
-          source_mechanism_id: number | null;
-        }
-      | null
-      | undefined;
+    attribution?: SubscriberAttribution | null | undefined;
     /** Included when tags are requested. */
     tags?:
       | { id?: number | null | undefined; name?: string | null | undefined }[]
@@ -394,21 +399,7 @@ export interface FilterSubscribers {
     tag_names?: string[] | undefined;
     tag_ids?: string[] | undefined;
     /** Included when attribution is requested; null when unavailable. */
-    attribution?:
-      | {
-          referrer?: string | null | undefined;
-          utm_source?: string | null | undefined;
-          utm_medium?: string | null | undefined;
-          utm_campaign?: string | null | undefined;
-          utm_term?: string | null | undefined;
-          utm_content?: string | null | undefined;
-          source_type?: string | null | undefined;
-          source_name?: string | null | undefined;
-          source_mechanism?: string | null | undefined;
-          source_mechanism_id?: number | null | undefined;
-        }
-      | null
-      | undefined;
+    attribution?: PartialSubscriberAttribution | null | undefined;
     /** Included when tags are requested. */
     tags?: { id?: number | undefined; name?: string | undefined }[] | undefined;
     /** Included when location is requested; null when unavailable. */
