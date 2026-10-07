@@ -213,14 +213,11 @@ export interface CreateBroadcast {
   broadcast: CreatedBroadcast;
 }
 
-export interface GetBroadcastStatsParams extends PaginationParams {
-  /** Filter broadcasts sent after this date (YYYY-MM-DD). */
-  sent_after?: string | null | undefined;
-  /** Filter broadcasts sent before this date (YYYY-MM-DD). */
-  sent_before?: string | null | undefined;
-  /** Filter broadcasts by lifecycle status. */
-  status?: BroadcastStatus | undefined;
-}
+/** Aggregate stats use the same list filters without the slim response option. */
+export interface GetBroadcastStatsParams extends Omit<
+  ListBroadcastsParams,
+  "slim"
+> {}
 
 export interface GetBroadcastStats {
   broadcasts: {

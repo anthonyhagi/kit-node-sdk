@@ -13,6 +13,7 @@ import {
   type AccountUser,
   type Broadcast,
   type BroadcastListItem,
+  type BroadcastStatus,
   type CreateWebhook,
   type CreatorProfile,
   type EmailTemplate,
@@ -20,6 +21,7 @@ import {
   type Form,
   type FormSubscriber,
   type GetBroadcast,
+  type GetBroadcastStatsParams,
   type GetCreatorProfile,
   type GetCurrentAccount,
   type GetEmailStats,
@@ -362,3 +364,22 @@ export function invalidInputs() {
   // @ts-expect-error Cancellation requires an AbortSignal.
   kit.subscribers.list({}, { signal: "invalid" });
 }
+
+// Preserve aggregate stats parameters independently of their shared list source.
+export type BroadcastStatsParameters = Assert<
+  Equal<
+    GetBroadcastStatsParams,
+    {
+      after?: string | null | undefined;
+      before?: string | null | undefined;
+      include_total_count?: boolean | undefined;
+      per_page?: number | null | undefined;
+      sent_after?: string | null | undefined;
+      sent_before?: string | null | undefined;
+      status?: BroadcastStatus | undefined;
+    }
+  >
+>;
+export type BroadcastStatsExcludeSlim = Assert<
+  Equal<Extract<keyof GetBroadcastStatsParams, "slim">, never>
+>;
