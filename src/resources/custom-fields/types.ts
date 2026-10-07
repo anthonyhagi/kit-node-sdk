@@ -31,13 +31,7 @@ export interface BulkCreateSynchronous {
   type: "synchronous";
   custom_fields: BulkCreatedCustomField[];
   failures: {
-    custom_field: {
-      id: number;
-      label: string;
-      key: string;
-      name: string;
-      created_at: string;
-    };
+    custom_field: BulkCreatedCustomField;
     errors: string[];
   }[];
 }
