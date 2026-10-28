@@ -42,6 +42,12 @@ throws an `ApiError` with `status === 400` without retrying. These responses do
 not return `null`. For date-range errors, Kit indicates the earliest available
 date in the response; inspect `details` after validating its shape.
 
+Successful responses for emails sent more than three years ago contain stats
+frozen at the three-year mark. Retrying cannot make those stats current.
+Beyond five years, stats are unavailable via the API, Kit MCP, and CSV export.
+Direct the account owner to Kit support for best-effort retrieval, which is not
+guaranteed.
+
 See [affected SDK methods](resources.md#email-stats-retention) and
 [Kit's retention policy](https://developers.kit.com/api-reference/email-data-retention).
 
