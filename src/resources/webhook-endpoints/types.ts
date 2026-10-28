@@ -1,4 +1,8 @@
 import type { Pagination, PaginationParams } from "~/common/types";
+import type {
+  WebhookDeliveryEvent,
+  WebhookEndpointEventType,
+} from "~/webhook-delivery";
 
 export type WebhookEndpointStatus = "active" | "disabled";
 
@@ -76,4 +80,58 @@ export interface RevokePreviousWebhookEndpointSecret {
     /** The previous secret has been revoked and the overlap window is closed. */
     previous_secret_expires_at: null;
   };
+}
+
+export type WebhookDeliveryStatus =
+  "pending" | "delivered" | "failed" | "retrying";
+
+export interface ListWebhookDeliveriesParams extends Omit<
+  PaginationParams,
+  "include_total_count"
+> {
+  status?: WebhookDeliveryStatus | undefined;
+  event_type?: WebhookEndpointEventType | undefined;
+}
+
+/** A retained delivery record, distinct from the incoming WebhookDelivery envelope. */
+export interface WebhookDeliveryRecord {
+  id: number;
+  event_type: string;
+  status: string;
+  attempt_count: number;
+  created_at: string;
+  /** Timestamp when delivered or failed; null before completion. */
+  completed_at: string | null;
+}
+
+export interface WebhookDeliveryAttempt {
+  id: number;
+  attempt_number: number;
+  status_code: number | null;
+  error_message: string | null;
+  response_body: string | null;
+  duration_ms: number | null;
+  attempted_at: string;
+}
+
+export interface WebhookDeliveryDetails extends WebhookDeliveryRecord {
+  /** Newest attempt first. */
+  attempts: WebhookDeliveryAttempt[];
+  /** Same events array sent to the endpoint; returned only with include_payload=true. */
+  payload?: WebhookDeliveryEvent[] | undefined;
+}
+
+export interface ListWebhookDeliveries {
+  /** Newest delivery first; history is retained for 30 days. */
+  deliveries: WebhookDeliveryRecord[];
+  pagination: Pagination;
+}
+
+export interface GetWebhookDeliveryParams {
+  /** Include the events sent in this delivery. Omitted by default. */
+  include_payload?: boolean | undefined;
+}
+
+export interface GetWebhookDelivery {
+  delivery: WebhookDeliveryDetails;
 }

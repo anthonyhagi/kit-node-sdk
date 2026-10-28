@@ -3,7 +3,11 @@ import { paginationQuery } from "~/utils/pagination";
 import type {
   CreateWebhookEndpoint,
   CreateWebhookEndpointParams,
+  GetWebhookDelivery,
+  GetWebhookDeliveryParams,
   GetWebhookEndpoint,
+  ListWebhookDeliveries,
+  ListWebhookDeliveriesParams,
   ListWebhookEndpoints,
   ListWebhookEndpointsParams,
   RevokePreviousWebhookEndpointSecret,
@@ -15,6 +19,52 @@ import type {
 
 export class WebhookEndpointsHandler {
   constructor(private api: Kit) {}
+
+  /**
+   * List an endpoint's deliveries, newest first, within the 30-day retention window.
+   * OAuth can access only endpoints created by its app; API keys can access all
+   * endpoints on the account. Returns null for missing or inaccessible endpoints.
+   * @see https://developers.kit.com/api-reference/webhooks/list-webhook-deliveries
+   */
+  public async listDeliveries(
+    id: number,
+    params?: ListWebhookDeliveriesParams,
+    options?: RequestOptions
+  ): Promise<ListWebhookDeliveries | null> {
+    const { status, event_type } = params || {};
+    const query = new URLSearchParams({
+      ...paginationQuery(params, { includeZeroPageSize: true }),
+      ...(status && { status }),
+      ...(event_type && { event_type }),
+    });
+    return await this.api.get<ListWebhookDeliveries | null>(
+      `/webhook_endpoints/${id}/deliveries`,
+      { query, signal: options?.signal, maxRetries: options?.maxRetries }
+    );
+  }
+
+  /**
+   * Get delivery metadata and attempts; payload is omitted unless requested.
+   * Returns null for missing, expired, mismatched, or inaccessible deliveries.
+   * OAuth visibility is limited to endpoints created by the current app.
+   * @see https://developers.kit.com/api-reference/webhooks/get-webhook-delivery-details
+   */
+  public async getDelivery(
+    id: number,
+    deliveryId: number,
+    params?: GetWebhookDeliveryParams,
+    options?: RequestOptions
+  ): Promise<GetWebhookDelivery | null> {
+    const query = new URLSearchParams({
+      ...(params?.include_payload !== undefined && {
+        include_payload: String(params.include_payload),
+      }),
+    });
+    return await this.api.get<GetWebhookDelivery | null>(
+      `/webhook_endpoints/${id}/deliveries/${deliveryId}`,
+      { query, signal: options?.signal, maxRetries: options?.maxRetries }
+    );
+  }
 
   /**
    * Revoke the previous signing secret and close the rotation overlap window.
@@ -142,6 +192,7 @@ export class WebhookEndpointsHandler {
 
   /**
    * List webhook endpoints, optionally filtered by active or disabled status.
+   * OAuth sees only endpoints created by its app; API keys see all account endpoints.
    *
    * @param params - Optional pagination and status parameters.
    * @param options - Optional request controls, including cancellation.
