@@ -62,6 +62,51 @@ interface Scenario {
 
 const scenarios: Scenario[] = [
   {
+    name: "listDeliveries",
+    run: (kit, options) =>
+      kit.webhookEndpoints.listDeliveries(
+        123,
+        {
+          after: "next+/=",
+          per_page: 25,
+          status: "failed",
+          event_type: "subscriber.created",
+        },
+        options
+      ),
+    method: "GET",
+    path: "/webhook_endpoints/123/deliveries",
+    query: {
+      after: "next+/=",
+      per_page: "25",
+      status: "failed",
+      event_type: "subscriber.created",
+    },
+    response: { deliveries: [], pagination: listResponse.pagination },
+  },
+  {
+    name: "getDelivery",
+    run: (kit, options) =>
+      kit.webhookEndpoints.getDelivery(
+        123,
+        456,
+        { include_payload: false },
+        options
+      ),
+    method: "GET",
+    path: "/webhook_endpoints/123/deliveries/456",
+    query: { include_payload: "false" },
+    response: { delivery: { id: 456, attempts: [] } },
+  },
+  {
+    name: "getDelivery without params",
+    run: (kit, options) =>
+      kit.webhookEndpoints.getDelivery(123, 456, undefined, options),
+    method: "GET",
+    path: "/webhook_endpoints/123/deliveries/456",
+    response: { delivery: { id: 456, attempts: [] } },
+  },
+  {
     name: "create",
     run: (kit, options) => kit.webhookEndpoints.create(create, options),
     method: "POST",
