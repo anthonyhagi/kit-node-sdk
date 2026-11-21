@@ -3,7 +3,9 @@
   "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
   "timezone": "Australia/Adelaide",
   "schedule": ["* 3-6 * * 1"],
-  "dependencyDashboard": true,
+  "dependencyDashboard": {
+    "enabled": true
+  },
   "configMigration": true,
   "labels": ["dependencies"],
   "rangeStrategy": "auto",
