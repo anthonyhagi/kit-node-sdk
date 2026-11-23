@@ -17,6 +17,11 @@ contribution guidelines and dependency-update policy.
 
 For local setup, scripts, and tests, see [DEVELOPMENT.md](../DEVELOPMENT.md).
 
-- [Migrating 404 handling](migration-404.md) — replace null checks with ApiError handling.
+## Upgrading to 0.8
 
-[Migration: no-data results](migration-void.md)
+Version 0.8 contains two breaking changes. Apply both when upgrading from 0.7:
+
+- [Migrating 404 handling](migration-404.md): missing resources throw
+  `NotFoundError` instead of returning `null`.
+- [Migrating no-data results](migration-void.md): deletes and removals resolve
+  to `undefined` instead of `{}`.

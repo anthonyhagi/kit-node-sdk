@@ -35,6 +35,7 @@ See the [documentation index](docs/README.md) for the complete guides:
 - [API resources](docs/resources.md): supported resources and methods.
 - [Examples](docs/examples.md): pagination, subscribers, tags, forms, and sequences.
 - [Errors, retries, and rate limits](docs/error-handling.md): response handling and retry behavior.
+- [Upgrading to 0.8](docs/README.md#upgrading-to-08): 404 handling and no-data result migrations.
 
 ## Contributing and license
 
