@@ -141,6 +141,8 @@ jobs:
             node-types: 22.0.0
           - typescript: "6"
             node-types: "22"
+          - typescript: "7"
+            node-types: "22"
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v7
