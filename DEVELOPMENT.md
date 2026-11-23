@@ -42,6 +42,22 @@ packed-package checks cover Node 22.0.0, latest Node 22, and Node 24 in CI.
 - `npm run test:package-types` - After building, compile standalone ESM/CommonJS consumers against the packed SDK using TypeScript 6 and Node 22 type definitions
 - `npm run changeset` - Create a changeset for version management
 
+### TypeScript 6 and 7 side by side
+
+The repository compiles and type-checks with TypeScript 7, while tools that
+import TypeScript's JavaScript API keep TypeScript 6. TypeScript 7.0 ships no
+programmatic API, and typescript-eslint (used by ESLint) refuses to run on it.
+`package.json` follows [Microsoft's side-by-side setup](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/#running-side-by-side-with-typescript-6.0)
+with two npm aliases:
+
+- `"typescript": "npm:@typescript/typescript6@^6.0.2"`: the TypeScript 6 API,
+  imported by typescript-eslint and tsdown's declaration build.
+- `"@typescript/native": "npm:typescript@^7.0.2"`: TypeScript 7, which provides
+  the `tsc` used by `npm run typecheck` (`npx tsc --version` reports 7.x).
+
+Remove the aliases and depend on `typescript@^7` directly once typescript-eslint
+supports a TypeScript 7 release with an API.
+
 ## Testing
 
 The project uses [Vitest](https://vitest.dev/) for testing with fetch mocking capabilities.
@@ -62,7 +78,7 @@ npm run test -- --coverage
 ### Packed TypeScript Compatibility
 
 CI checks the published declarations with TypeScript 5.0.4 (the minimum supported
-compiler) and TypeScript 6. Each check packs and installs the SDK in a temporary
+compiler), TypeScript 6 and TypeScript 7. Each check packs and installs the SDK in a temporary
 project, then compiles dedicated `.mts` and `.cts` consumers with strict checking
 and `skipLibCheck: false`. The fixtures check public imports, inferred return
 types, and rejected inputs without running API requests.
@@ -73,6 +89,7 @@ Run the same matrix locally after building:
 npm run build
 npm run test:package-types -- 5.0.4 22.0.0
 npm run test:package-types -- 6 22
+npm run test:package-types -- 7 22
 ```
 
 The arguments select TypeScript and `@types/node` versions. The minimum compiler
