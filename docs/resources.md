@@ -9,6 +9,7 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 | Resource                   | Description                                                        | Key Methods                                                                                                                            |
 | -------------------------- | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
 | **`kit.accounts`**         | Account and user information, creator profiles, email/growth stats | `getCurrentAccount()`, `getEmailStats()`, `getGrowthStats()`                                                                           |
+| **`kit.apps`**             | Kit App Store catalog: listed apps plus the account's own          | `list()`, `get()`                                                                                                                      |
 | **`kit.broadcasts`**       | One-off emails sent to subscribers                                 | `list()`, `create()`, `update()`, `getStats()`                                                                                         |
 | **`kit.customFields`**     | Additional fields for subscriber profiles and forms                | `list()`, `create()`, `update()`, `bulkCreate()`, `bulkUpdateSubscriberValues()`                                                       |
 | **`kit.emailTemplates`**   | Pre-designed email layouts                                         | `list()`                                                                                                                               |
@@ -65,6 +66,62 @@ Stats older than five years are archived and unavailable through the API,
 Kit MCP, or CSV export. Direct the account owner to Kit support for best-effort
 retrieval; recovery is not guaranteed. Apps should not contact support on the
 creator's behalf.
+
+## App Store catalog
+
+`kit.apps.list(params)` returns the Kit App Store apps the account can see:
+every listed app, plus any app the account created in any status (marked
+`owned`). Each row is a compact summary. Filter by `category` (one category or
+an array, matching any) and search with `query` (up to 100 characters):
+
+```typescript
+const page = await kit.apps.list({
+  category: ["scheduling", "crm"],
+  query: "calendar",
+  per_page: 50,
+});
+
+if (page.pagination.has_next_page) {
+  // Cursors do not record filters: repeat the same query and category.
+  await kit.apps.list({
+    category: ["scheduling", "crm"],
+    query: "calendar",
+    after: page.pagination.end_cursor,
+  });
+}
+```
+
+- Without `query`, apps are ordered by install count and `total_count` is exact.
+- With `query`, apps are in relevance order and the cursors are search cursors.
+  `total_count` is the search index's estimate: capped at 10,000 and possibly
+  counting apps the page does not return. Kit returns 422 for a search page
+  ending at or past the 10,000th result, and 503 when search is unavailable
+  (retried under the client's retry policy).
+- Changing `query` or `category` between pages skips or repeats apps instead of
+  failing. Mixing search and non-search cursors returns 422.
+- Built-in integrations are not apps, so `category: "ai_connectors"` on its own
+  currently returns an empty page. `per_page` defaults to 50 (maximum 100).
+
+`kit.apps.get(id)` adds the plain-text `description`, `capabilities`, developer
+`links`, screenshot `media_links`, `upgrade_required`, and `install_url`. A 404
+throws `NotFoundError` for an app that does not exist or another developer's app
+that is unpublished, unlisted, disabled or blocked.
+
+```typescript
+const { app } = await kit.apps.get(1245);
+if (app.install_url) {
+  // Installing is a browser step; the SDK never follows this URL.
+  console.log(`Install in a browser: ${app.install_url}`);
+} else if (app.upgrade_required) {
+  console.log(`Requires the ${app.plan_availability} plan`);
+}
+```
+
+`description` is untrusted, developer-written text: escape it before rendering.
+`install_url` may point to Kit or a partner and acts on whichever Kit account is
+signed in to that browser. Category, status and other enum-like types accept
+strings Kit adds later. See [List apps](https://developers.kit.com/api-reference/apps/list-apps)
+and [Get an app](https://developers.kit.com/api-reference/apps/get-an-app).
 
 ## Account sending addresses and plan details
 

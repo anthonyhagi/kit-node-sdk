@@ -2,6 +2,7 @@ import process from "node:process";
 
 import { ApiClient } from "./api-client";
 import { AccountsHandler } from "./resources/accounts/handler";
+import { AppsHandler } from "./resources/apps/handler";
 import { BroadcastsHandler } from "./resources/broadcasts/handler";
 import { CustomFieldsHandler } from "./resources/custom-fields/handler";
 import { EmailTemplatesHandler } from "./resources/email-templates/handler";
@@ -25,6 +26,12 @@ export class Kit extends ApiClient {
    * @see {@link https://developers.kit.com/v4#kit-api-accounts}
    */
   public readonly accounts: AccountsHandler;
+
+  /**
+   * Kit App Store catalog: listed apps plus the account's own apps.
+   * @see {@link https://developers.kit.com/api-reference/apps/list-apps}
+   */
+  public readonly apps: AppsHandler;
 
   /**
    * One-off, non-automated emails sent to subscribers, publishable
@@ -176,6 +183,7 @@ export class Kit extends ApiClient {
     this.options = options;
 
     this.accounts = new AccountsHandler(this);
+    this.apps = new AppsHandler(this);
     this.broadcasts = new BroadcastsHandler(this);
     this.customFields = new CustomFieldsHandler(this);
     this.emailTemplates = new EmailTemplatesHandler(this);
@@ -253,6 +261,21 @@ export type {
   UpdateColorsParams,
 } from "./resources/accounts/types";
 export type { ClientOptions, RequestOptions };
+
+export type {
+  App,
+  AppAccessType,
+  AppCategory,
+  AppLinks,
+  AppListItem,
+  AppPlanAvailability,
+  AppPlugin,
+  AppPricing,
+  AppStatus,
+  GetApp,
+  ListApps,
+  ListAppsParams,
+} from "./resources/apps/types";
 
 export type {
   BasicSubscriberFilterItem,
