@@ -27,6 +27,24 @@ const kit = new Kit({
 });
 ```
 
+API keys are sent only in the `X-Kit-Api-Key` header; OAuth tokens use
+`Authorization: Bearer`. Pass an API key with `authType: "oauth"` and Kit
+rejects it.
+
+### Methods that require OAuth
+
+Kit requires OAuth for every bulk endpoint and for all three purchase methods.
+With an API key, Kit returns HTTP 401 with an OAuth-required error. The SDK
+throws it as `ApiError` without retrying and never switches credentials for you:
+
+- `kit.subscribers.bulkCreate()`
+- `kit.forms.bulkAddSubscribers()`
+- `kit.customFields.bulkCreate()` and `kit.customFields.bulkUpdateSubscriberValues()`
+- `kit.tags.bulkCreate()`, `bulkDelete()`, `bulkRemove()` and `bulkTag()`
+- `kit.purchases.list()`, `get()` and `create()`
+
+See [Kit's authentication guide](https://developers.kit.com/api-reference/authentication).
+
 ### Building an Authorization URL
 
 Build the initial redirect URL with the client ID and an app-configured redirect URI:

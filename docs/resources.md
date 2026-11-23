@@ -186,6 +186,37 @@ await kit.forms.addSubscriberByEmail(7, {
 The subscriber must already exist. See
 [Kit's endpoint reference](https://developers.kit.com/api-reference/forms/add-subscriber-to-form-by-email-address).
 
+## Archived forms reject new subscriptions
+
+Kit announced on October 12, 2026 that archived forms refuse new API
+subscriptions. `kit.forms.addSubscriber()` and `kit.forms.addSubscriberByEmail()`
+throw `ApiError` with status 422 for an archived, deleted or restricted form,
+and the subscriber is not added. This includes subscribers **already on the
+form**, which used to succeed, so these calls are no longer a safe idempotent
+re-add. Branch on the status rather than the message text, and do not retry:
+
+```ts
+import { ApiError } from "@anthonyhagi/kit-node-sdk";
+
+try {
+  await kit.forms.addSubscriber(formId, subscriberId);
+} catch (error) {
+  if (error instanceof ApiError && error.status === 422) {
+    // Form is archived, deleted or restricted; pick an active form instead.
+  } else {
+    throw error;
+  }
+}
+```
+
+`kit.forms.bulkAddSubscribers()` still succeeds overall. Rejected additions are
+listed in `failures` (for example `Form does not exist`) with no subscription.
+For more than 100 additions the method returns `{ type: "asynchronous" }`; the
+failures arrive later at `callback_url`, so the acknowledgment is not success for
+each addition. Use `kit.forms.list({ status: "archived" })` to find archived
+forms. Confirmation links and additions made in the Kit app, by CSV import or
+by automation rules are unaffected.
+
 ## Creating or updating a subscriber by email
 
 `kit.subscribers.create()` matches subscribers by `email_address`. If no match

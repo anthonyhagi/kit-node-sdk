@@ -313,22 +313,37 @@ const kitConservative = new Kit({
 
 ## Rate Limiting
 
-The SDK automatically handles rate limiting (HTTP 429) responses with exponential backoff retries. When you encounter rate limits, the SDK will:
+Kit allows **120 requests per 60 seconds per API key** and **600 per 60 seconds
+per OAuth access token**. Over the limit, Kit returns HTTP 429 with the plain-text
+body `Retry later` and **no `Retry-After` header**, so clients must back off on
+their own. See [Kit's rate-limit guide](https://developers.kit.com/api-reference/rate-limits).
 
-1. **Automatically retry** the request after a delay
-2. **Use exponential backoff** to progressively increase wait times
-3. **Add jitter** to prevent multiple clients from retrying simultaneously
-4. **Respect your configured retry limits**
+The SDK retries 429 responses with exponential backoff and jitter, within your
+retry limits. Because Kit sends no `Retry-After`, the wait comes from
+`retryDelay` alone. (If a `Retry-After` header is ever present, the SDK still
+honors it.) When retries run out, the SDK throws `ApiError` with
+`status === 429` and `details === "Retry later"`, the raw text body.
+
+The defaults (`maxRetries: 3`, `retryDelay: 1000`) wait roughly 1, 2 and 4
+seconds, about 7 seconds in total. That is much shorter than the 60-second
+window, so a burst that exhausts the limit can still fail after every retry.
+Retries reduce failures; they do not guarantee recovery.
 
 ```typescript
-// The SDK handles this automatically
-const subscribers = await kit.subscribers.list();
-// If rate limited, this will retry up to 3 times with increasing delays
+try {
+  await kit.subscribers.list();
+} catch (error) {
+  if (error instanceof ApiError && error.status === 429) {
+    // Retries are exhausted: pause this workload before trying again.
+  } else {
+    throw error;
+  }
+}
 ```
 
-For high-volume applications, consider:
+For high-volume applications:
 
-- Implementing request queuing in your application
-- Using larger retry delays: `retryDelay: 5000`
-- Increasing retry attempts: `maxRetries: 5`
-- Monitoring your retry patterns and adjusting configuration as needed
+- Throttle or queue requests in your application to stay under the limit.
+- Raise `retryDelay` (for example `5000`) and `maxRetries` (for example `5`) so
+  retries span more of the rate window.
+- Use `maxRetries: 0` on a request when you would rather handle 429 yourself.
