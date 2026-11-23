@@ -48,6 +48,7 @@ import {
   type ListBroadcasts,
   type ListEmailTemplates,
   type ListForms,
+  type ListKitFields,
   type ListPostsWithContent,
   type ListSegments,
   type ListSequenceEmailsWithContent,
@@ -507,6 +508,10 @@ export const apps = kit.apps.list(
 export const appDetails = kit.apps.get(1245, options);
 export type AppsResult = Assert<Equal<typeof apps, Promise<ListApps>>>;
 export type AppInstallUrl = Assert<Equal<App["install_url"], string | null>>;
+export const kitFields = kit.kitFields.list(options);
+export type KitFieldsResult = Assert<
+  Equal<typeof kitFields, Promise<ListKitFields>>
+>;
 export const minimalBroadcastUpdate = kit.broadcasts.update(1, {
   email_template_id: 9,
   allow_content_loss: true,

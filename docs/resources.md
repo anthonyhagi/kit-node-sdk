@@ -14,6 +14,7 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 | **`kit.customFields`**     | Additional fields for subscriber profiles and forms                | `list()`, `create()`, `update()`, `bulkCreate()`, `bulkUpdateSubscriberValues()`                                                       |
 | **`kit.emailTemplates`**   | Pre-designed email layouts                                         | `list()`                                                                                                                               |
 | **`kit.forms`**            | Web forms for collecting subscriber information                    | `list()`, `addSubscriber()`, `addSubscriberByEmail()`, `listSubscribers()`                                                             |
+| **`kit.kitFields`**        | Subscriber Signals field definitions (paid Pro plans)              | `list()`                                                                                                                               |
 | **`kit.posts`**            | Content published to the creator’s Kit site or sent by email       | `list()`, `get()`                                                                                                                      |
 | **`kit.purchases`**        | Transaction records for products/services                          | `list()`, `create()`, `get()`                                                                                                          |
 | **`kit.segments`**         | Dynamic subscriber groups based on criteria                        | `list()`                                                                                                                               |
@@ -122,6 +123,26 @@ if (app.install_url) {
 signed in to that browser. Category, status and other enum-like types accept
 strings Kit adds later. See [List apps](https://developers.kit.com/api-reference/apps/list-apps)
 and [Get an app](https://developers.kit.com/api-reference/apps/get-an-app).
+
+## Kit Fields
+
+`kit.kitFields.list()` returns the Kit Fields that Subscriber Signals knows
+about subscribers, such as job title, social profiles and demographics. Each
+field has a `name` and a `data_type` (`String`, `Text`, `Integer`, `Float`,
+`Boolean`, `Date` or `DateTime`). Fields that only store values from a fixed
+list also include `available_options`.
+
+```typescript
+const { kit_fields } = await kit.kitFields.list();
+for (const field of kit_fields) {
+  console.log(field.name, field.data_type, field.available_options ?? []);
+}
+```
+
+This lists field definitions, not subscriber values. Kit Fields require
+Subscriber Signals on a paid Pro plan; other accounts get HTTP 422, thrown as
+`ApiError` without retrying. Do not hard-code field names: read them from this
+list. See the [Kit API reference](https://developers.kit.com/api-reference/kit-fields/list-kit-fields).
 
 ## Account sending addresses and plan details
 

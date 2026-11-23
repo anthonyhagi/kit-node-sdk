@@ -7,6 +7,7 @@ import { BroadcastsHandler } from "./resources/broadcasts/handler";
 import { CustomFieldsHandler } from "./resources/custom-fields/handler";
 import { EmailTemplatesHandler } from "./resources/email-templates/handler";
 import { FormsHandler } from "./resources/forms/handler";
+import { KitFieldsHandler } from "./resources/kit-fields/handler";
 import { PostsHandler } from "./resources/posts/handler";
 import { PurchasesHandler } from "./resources/purchases/handler";
 import { SegmentsHandler } from "./resources/segments/handler";
@@ -70,6 +71,12 @@ export class Kit extends ApiClient {
    * @see {@link https://developers.kit.com/api-reference/posts/list-posts}
    */
   public readonly posts: PostsHandler;
+
+  /**
+   * Subscriber Signals field definitions (paid Pro plans).
+   * @see {@link https://developers.kit.com/api-reference/kit-fields/list-kit-fields}
+   */
+  public readonly kitFields: KitFieldsHandler;
 
   /**
    * Transactions for buying products or services through Kit.com,
@@ -188,6 +195,7 @@ export class Kit extends ApiClient {
     this.customFields = new CustomFieldsHandler(this);
     this.emailTemplates = new EmailTemplatesHandler(this);
     this.forms = new FormsHandler(this);
+    this.kitFields = new KitFieldsHandler(this);
     this.posts = new PostsHandler(this);
     this.purchases = new PurchasesHandler(this);
     this.segments = new SegmentsHandler(this);
@@ -355,6 +363,12 @@ export type {
   ListFormSubscribersParams,
   ListSlimFormSubscribers,
 } from "./resources/forms/types";
+
+export type {
+  KitField,
+  KitFieldDataType,
+  ListKitFields,
+} from "./resources/kit-fields/types";
 
 export type {
   GetPost,
