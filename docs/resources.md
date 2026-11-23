@@ -1330,6 +1330,36 @@ Starting point templates now accept supplied HTML directly, so the
 `allow_starting_point` option is deprecated. It is still sent when provided. See
 the [Kit API reference](https://developers.kit.com/api-reference/broadcasts/update-a-broadcast).
 
+## Broadcast A/B tests
+
+Broadcast list, get, create and update responses can include `ab_test`: `null`
+when the broadcast has no A/B test, and possibly absent. Its `type` is
+`subject` (versions differ in subject and preview text) or `content` (versions
+differ in content, which is not listed, so every variant shows the same subject
+and preview text). `variants` lists the versions in order; a variant's
+`preview_text` can be null.
+
+Check `ab_test` before writing `subject` or `preview_text`, because updates do
+not reach every version the same way:
+
+- On a subject-line test, `subject` replaces only the **first** variant's
+  subject; the others keep theirs. `preview_text` is saved but not sent, since
+  each version sends its own preview text. Edit variant preview text in Kit.
+- On a content test, `subject` is written to every variant.
+- Content and template changes are rejected with 422 while a content test runs.
+
+```typescript
+const { broadcast } = await kit.broadcasts.get(123);
+if (broadcast.ab_test?.type === "subject") {
+  // Only the first variant changes; review the others in Kit.
+  console.log(broadcast.ab_test.variants?.map((variant) => variant.subject));
+}
+await kit.broadcasts.update(123, { subject: "New subject" });
+```
+
+The SDK has no `ab_test` input: Kit's update endpoint does not accept one. The
+exported types are `BroadcastAbTest` and `BroadcastAbTestVariant`.
+
 ## Broadcast creation retries
 
 `kit.broadcasts.create(params)` makes one attempt by default, for both drafts

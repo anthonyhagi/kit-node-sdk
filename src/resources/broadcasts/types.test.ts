@@ -1,6 +1,7 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
 import type {
   Broadcast,
+  BroadcastAbTest,
   BroadcastEmailTemplate,
   BroadcastLinkClick,
   BroadcastListItem,
@@ -137,6 +138,7 @@ type ExpectedBroadcast = {
   email_address: string | null;
   email_template: BroadcastEmailTemplate;
   subscriber_filter: BroadcastSubscriberFilterResponseGroup[];
+  ab_test?: BroadcastAbTest | null | undefined;
 };
 
 describe("broadcast response compatibility", () => {
