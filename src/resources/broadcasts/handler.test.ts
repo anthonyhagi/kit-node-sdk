@@ -757,6 +757,66 @@ describe("broadcast creation filters through Kit", () => {
     expect(Array.isArray(params.subscriber_filter)).toBe(false);
   });
 
+  describe.each(["create", "update"] as const)(
+    "%s keeps per-entry targeting intact",
+    (method) => {
+      const entries = {
+        "AND across entries": [
+          {
+            all: [
+              { type: "tag", ids: [1] },
+              { type: "tag", ids: [2] },
+            ],
+            any: null,
+            none: null,
+          },
+        ],
+        "OR within one entry": [
+          { all: [{ type: "tag", ids: [1, 2] }], any: null, none: null },
+        ],
+        "mixed tags and segments": [
+          {
+            all: [
+              { type: "tag", ids: [1, 2] },
+              { type: "segment", ids: [42] },
+              { type: "tag", ids: [3] },
+            ],
+            any: null,
+            none: null,
+          },
+        ],
+      };
+
+      it.each(Object.entries(entries))(
+        "sends %s without merging or splitting entries",
+        async (_name, subscriber_filter) => {
+          const params = {
+            ...draft,
+            email_template_id: 3,
+            email_address: null,
+            thumbnail_alt: null,
+            thumbnail_url: null,
+            subscriber_filter,
+          } satisfies CreateBroadcastParams & UpdateBroadcastParams;
+          const snapshot = structuredClone(subscriber_filter);
+          fetchMock.mockResponseOnce(
+            JSON.stringify({ broadcast: { id: 123 } }),
+            { status: method === "create" ? 201 : 200 }
+          );
+
+          await (method === "create"
+            ? kit.broadcasts.create(params)
+            : kit.broadcasts.update(123, params));
+          const body = (await fetchMock.requests()[0]!.json()) as {
+            subscriber_filter: unknown;
+          };
+          expect(body.subscriber_filter).toEqual(snapshot);
+          expect(subscriber_filter).toEqual(snapshot);
+        }
+      );
+    }
+  );
+
   it.each([null, []])("preserves a filter of %j", async (subscriber_filter) => {
     const params = {
       ...draft,

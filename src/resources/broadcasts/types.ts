@@ -53,8 +53,14 @@ export type BroadcastSubscriberFilterResponseGroup = {
   none?: BroadcastSubscriberFilterResponseItem[] | null | undefined;
 };
 
+/**
+ * One filter entry: a single condition that matches subscribers in **any** of
+ * its `ids`. To require several tags or segments, use separate entries under
+ * `all` instead of listing the IDs in one entry.
+ */
 export type TypedSubscriberFilterItem = {
   type: "segment" | "tag" | (string & {});
+  /** IDs of the given type; a subscriber in any one of them matches this entry. */
   ids: number[];
 };
 
@@ -64,13 +70,22 @@ type UpdateBroadcastSubscriberFilterGroup =
     all: TypedSubscriberFilterItem[];
   };
 
-/** Use one of all, any, or none in a broadcast filter group. */
+/**
+ * Use one of all, any, or none in a broadcast filter group. Each entry matches
+ * any of its own `ids`; the group key decides how entries combine.
+ *
+ * @example
+ * // Tag 1 AND tag 2: separate entries under `all`.
+ * [{ all: [{ type: "tag", ids: [1] }, { type: "tag", ids: [2] }] }]
+ * // Tag 1 OR tag 2: one entry with both IDs.
+ * [{ all: [{ type: "tag", ids: [1, 2] }] }]
+ */
 export type BroadcastSubscriberFilterGroup = {
-  /** Subscribers must belong to all specified segments and tags. */
+  /** Subscribers must match every entry (AND across entries, OR within an entry's `ids`). */
   all?: TypedSubscriberFilterItem[] | null | undefined;
-  /** Subscribers must belong to at least one specified segment or tag. */
+  /** Subscribers must match at least one entry. */
   any?: TypedSubscriberFilterItem[] | null | undefined;
-  /** Subscribers must belong to none of the specified segments and tags. */
+  /** Subscribers must match no entry, so any listed ID excludes them. */
   none?: TypedSubscriberFilterItem[] | null | undefined;
 };
 
@@ -201,6 +216,9 @@ export interface CreateBroadcastParams {
    * one filter group type via the API (e.g. all, any, or none but
    * no combinations). If nothing is provided, will default to all
    * of your subscribers.
+   * Each entry matches any of its `ids`; under `all`, separate entries
+   * must all match. The SDK sends entries as given and never merges or
+   * splits them.
    * Pass an array of filter groups to match the API format. A single
    * group object is also accepted for backward compatibility and
    * is wrapped in an array before sending.
@@ -308,6 +326,9 @@ export interface UpdateBroadcastParams {
    * one filter group type via the API (e.g. all, any, or none but no
    * combinations). If nothing is provided, will default to all of
    * your subscribers.
+   * Each entry matches any of its `ids`; under `all`, separate entries
+   * must all match. The SDK sends entries as given and never merges or
+   * splits them.
    */
   subscriber_filter: UpdateBroadcastSubscriberFilterGroup[];
 }
