@@ -33,6 +33,12 @@ export class FormsHandler {
    * When adding more than 100 subscribers, it's recommended to set the
    * callback URL. This will notify you of any failures in processing.
    *
+   * Additions to archived, deleted or restricted forms are not subscribed:
+   * they appear in `failures` (for example `Form does not exist`) while the
+   * request itself still succeeds. Check `failures` rather than treating a
+   * successful response, or an asynchronous acknowledgment, as success for
+   * every addition.
+   *
    * @param params - The required fields to run this request.
    * @param options - Optional request controls, including cancellation.
    *
@@ -161,6 +167,11 @@ export class FormsHandler {
    * @remarks This subscriber MUST exist in the remote API otherwise
    * this call will fail.
    *
+   * Kit refuses API subscriptions to archived, deleted or
+   * restricted forms with HTTP 422, including for subscribers already on the
+   * form, and does not subscribe them. Check `ApiError.status`, not the
+   * message text; `kit.forms.list({ status: "archived" })` finds archived forms.
+   *
    * @param id - The unique ID of the form to add the subscriber to.
    * @param params - The required and optional parameters to add
    * the subscriber.
@@ -193,6 +204,11 @@ export class FormsHandler {
 
   /**
    * Add a subscriber to a form by the subscribers' ID.
+   *
+   * @remarks Kit refuses API subscriptions to archived, deleted or
+   * restricted forms with HTTP 422, including for subscribers already on the
+   * form, and does not subscribe them. Check `ApiError.status`, not the
+   * message text; `kit.forms.list({ status: "archived" })` finds archived forms.
    *
    * @param formId - The unique ID of the form to add the subscriber to.
    * @param subscriberId - The unique ID of the subscriber.
