@@ -30,8 +30,14 @@ See [Examples](examples.md) for subscriber, tag, form, and sequence operations.
 
 Starting **October 15, 2026**, Kit makes email stats available through the API
 for a rolling **five-year (60-month)** window. This covers sends, opens, clicks,
-bounces, and unsubscribes; subscriber records, tags, custom fields, purchases,
-and broadcast content are unaffected.
+bounces, unsubscribes, and complaints. Stats for emails sent more than three
+years ago are frozen at their three-year mark, even while retrievable through
+the API within the five-year window. Availability does not mean the stats are
+still updating. The Kit app shows only the last three years; the API, Kit MCP,
+and CSV exports provide five years.
+
+Subscriber records, tags, custom fields, purchases, and broadcast content are
+unaffected. Older broadcasts can still be viewed and duplicated.
 
 | SDK method                                     | Retention behavior                                                                                         |
 | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
@@ -45,6 +51,11 @@ See [retention errors](error-handling.md#email-stats-retention-errors) for SDK
 error handling and [Kit's retention policy](https://developers.kit.com/api-reference/email-data-retention)
 for details. Applications maintaining longer histories should sync stats before
 they age out of the window.
+
+Stats older than five years are archived and unavailable through the API,
+Kit MCP, or CSV export. Direct the account owner to Kit support for best-effort
+retrieval; recovery is not guaranteed. Apps should not contact support on the
+creator's behalf.
 
 ## Account sending addresses and plan details
 
