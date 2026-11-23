@@ -64,6 +64,13 @@ const appsResponse = { apps: [], pagination: page };
 
 const scenarios: Scenario[] = [
   {
+    name: "kitFields.list",
+    run: (kit, options) => kit.kitFields.list(options),
+    method: "GET",
+    path: "/kit_fields",
+    response: { kit_fields: [] },
+  },
+  {
     name: "apps.get",
     run: (kit, options) => kit.apps.get(123, options),
     method: "GET",
