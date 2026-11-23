@@ -23,7 +23,9 @@ All unsuccessful HTTP responses throw `ApiError`, including 404. A 404 throws
 `NotFoundError`, an exported `ApiError` subclass with `status` typed as `404`,
 so `instanceof ApiError` checks still match. A missing resource never produces
 a successful `null` or `undefined` result.
-Empty successful response bodies return `{}`. Errors reading or parsing a
+Resource methods with no meaningful response data return `Promise<void>` and
+resolve to `undefined`; see the [migration guide](migration-void.md). Bulk
+operations retain their asynchronous acknowledgments. Errors reading or parsing a
 successful response body throw without repeating the request.
 
 HTTP failures throw the exported `ApiError`, an `Error` subclass with a numeric
