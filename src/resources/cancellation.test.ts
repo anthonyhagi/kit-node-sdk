@@ -60,7 +60,28 @@ interface Scenario {
   result?: unknown;
 }
 
+const appsResponse = { apps: [], pagination: page };
+
 const scenarios: Scenario[] = [
+  {
+    name: "apps.get",
+    run: (kit, options) => kit.apps.get(123, options),
+    method: "GET",
+    path: "/apps/123",
+    response: { app: { id: 123 } },
+  },
+  {
+    name: "apps.list",
+    run: (kit, options) =>
+      kit.apps.list(
+        { ...pagination, category: ["crm", "events"], query: "booking" },
+        options
+      ),
+    method: "GET",
+    path: "/apps",
+    response: appsResponse,
+    query: { ...paginationQuery, category: "crm,events", query: "booking" },
+  },
   {
     name: "posts.get",
     run: (kit, options) => kit.posts.get(123, options),

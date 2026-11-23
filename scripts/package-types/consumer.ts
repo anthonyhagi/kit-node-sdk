@@ -12,6 +12,7 @@ import {
   type AccountSendingAddress,
   type AccountTimezone,
   type AccountUser,
+  type App,
   type Broadcast,
   type BroadcastAbTest,
   type BroadcastListItem,
@@ -43,6 +44,7 @@ import {
   type GetSubscriberStats,
   type GetSubscriberTags,
   type GetWebhookDelivery,
+  type ListApps,
   type ListBroadcasts,
   type ListEmailTemplates,
   type ListForms,
@@ -498,6 +500,13 @@ export type BroadcastAbTestMetadata = Assert<
     BroadcastAbTest | null | undefined
   >
 >;
+export const apps = kit.apps.list(
+  { category: ["crm", "ai_connectors"], query: null, after: null },
+  options
+);
+export const appDetails = kit.apps.get(1245, options);
+export type AppsResult = Assert<Equal<typeof apps, Promise<ListApps>>>;
+export type AppInstallUrl = Assert<Equal<App["install_url"], string | null>>;
 export const minimalBroadcastUpdate = kit.broadcasts.update(1, {
   email_template_id: 9,
   allow_content_loss: true,
