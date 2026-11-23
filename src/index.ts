@@ -500,7 +500,11 @@ export type {
 export type {
   CreateWebhookEndpoint,
   CreateWebhookEndpointParams,
+  GetWebhookDelivery,
+  GetWebhookDeliveryParams,
   GetWebhookEndpoint,
+  ListWebhookDeliveries,
+  ListWebhookDeliveriesParams,
   ListWebhookEndpoints,
   ListWebhookEndpointsParams,
   RevokePreviousWebhookEndpointSecret,
@@ -508,6 +512,10 @@ export type {
   RotateWebhookEndpointSecretParams,
   UpdateWebhookEndpoint,
   UpdateWebhookEndpointParams,
+  WebhookDeliveryAttempt,
+  WebhookDeliveryDetails,
+  WebhookDeliveryRecord,
+  WebhookDeliveryStatus,
   WebhookEndpoint,
   WebhookEndpointStatus,
 } from "./resources/webhook-endpoints/types";

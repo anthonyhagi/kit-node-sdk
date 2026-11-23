@@ -40,6 +40,7 @@ import {
   type GetSubscriber,
   type GetSubscriberStats,
   type GetSubscriberTags,
+  type GetWebhookDelivery,
   type ListBroadcasts,
   type ListEmailTemplates,
   type ListForms,
@@ -51,6 +52,7 @@ import {
   type ListSequencesWithStats,
   type ListSnippetsWithContent,
   type ListSubscribers,
+  type ListWebhookDeliveries,
   type ListWebhooks,
   type OAuthPKCE,
   type OAuthTokenResponse,
@@ -487,3 +489,32 @@ export type BroadcastStatsParameters = Assert<
 export type BroadcastStatsExcludeSlim = Assert<
   Equal<Extract<keyof GetBroadcastStatsParams, "slim">, never>
 >;
+
+export const deliveryHistory = kit.webhookEndpoints.listDeliveries(
+  42,
+  {
+    status: "failed",
+    event_type: "subscriber.created",
+    after: null,
+    per_page: 25,
+  },
+  options
+);
+export const deliveryDetails = kit.webhookEndpoints.getDelivery(
+  42,
+  123456,
+  {
+    include_payload: false,
+  },
+  options
+);
+export type DeliveryHistoryResult = Assert<
+  Equal<typeof deliveryHistory, Promise<ListWebhookDeliveries | null>>
+>;
+export type DeliveryDetailsResult = Assert<
+  Equal<typeof deliveryDetails, Promise<GetWebhookDelivery | null>>
+>;
+export function deliveryTagId(result: GetWebhookDelivery): number | undefined {
+  const event = result.delivery.payload?.[0];
+  return event?.type === "tag.created" ? event.data.tag.id : undefined;
+}
