@@ -15,7 +15,7 @@ try {
     ["ESM", esm],
     ["CommonJS", cjs],
   ]) {
-    const { Kit, ApiError, generateOAuthPKCE } = sdk;
+    const { Kit, ApiError, NotFoundError, generateOAuthPKCE } = sdk;
     const kit = new Kit({ apiKey: "runtime-test-key", maxRetries: 0 });
     const expected = { colors: ["#123456"] };
     let calls = 0;
@@ -62,6 +62,18 @@ try {
     globalThis.fetch = () =>
       Promise.resolve(new Response("Unauthorized", { status: 401 }));
     await assert.rejects(kit.accounts.listColors(), ApiError);
+
+    const notFound = { errors: ["Missing resource"] };
+    globalThis.fetch = () =>
+      Promise.resolve(Response.json(notFound, { status: 404 }));
+    await assert.rejects(kit.accounts.listColors(), (error) => {
+      assert.ok(error instanceof NotFoundError);
+      assert.ok(error instanceof ApiError);
+      assert.equal(error.name, "NotFoundError");
+      assert.equal(error.status, 404);
+      assert.deepEqual(error.details, notFound);
+      return true;
+    });
 
     const pkce = generateOAuthPKCE();
     assert.match(pkce.code_verifier, /^[\w-]{43}$/);

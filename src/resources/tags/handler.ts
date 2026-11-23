@@ -329,17 +329,17 @@ export class TagsHandler {
    *
    * @see {@link https://developers.kit.com/api-reference/tags/update-tag-name}
    *
-   * @returns The updated Tag object on success, or `null` if the Tag
-   * was not found.
+   * @returns The updated Tag object on success.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    */
   public async update(
     tagId: number,
     params: UpdateTagParams,
     options?: RequestOptions
-  ): Promise<UpdateTag | null> {
+  ): Promise<UpdateTag> {
     const body = JSON.stringify(params || {});
 
-    return await this.api.put<UpdateTag | null>(`/tags/${tagId}`, {
+    return await this.api.put<UpdateTag>(`/tags/${tagId}`, {
       body,
       signal: options?.signal,
       maxRetries: options?.maxRetries,
@@ -358,9 +358,8 @@ export class TagsHandler {
    *
    * @see {@link https://developers.kit.com/api-reference/tags/remove-tag-from-subscriber-by-email-address}
    *
-   * @returns An empty object `{}` on success. Returns `null` if the
-   * Tag or Subscriber was not found, or if the subscriber was not
-   * tagged with the specified tag.
+   * @returns An empty object `{}` on success.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    *
    * @example Removing a subscriber by email
    * ```typescript
@@ -373,11 +372,11 @@ export class TagsHandler {
     tagId: number,
     params: RemoveSubscriberByEmailParams,
     options?: RequestOptions
-  ): Promise<{} | null> {
+  ): Promise<{}> {
     const query = new URLSearchParams({ email_address: params.email_address });
     const url = `/tags/${tagId}/subscribers`;
 
-    return await this.api.delete<{} | null>(url, {
+    return await this.api.delete<{}>(url, {
       query,
       signal: options?.signal,
       maxRetries: options?.maxRetries,
@@ -395,9 +394,8 @@ export class TagsHandler {
    *
    * @see {@link https://developers.kit.com/api-reference/tags/list-subscribers-for-a-tag}
    *
-   * @returns A `ListTagSubscribers` object containing an array of
-   * subscriber details and pagination details, or `null` if the
-   * Tag was not found.
+   * @returns A `ListTagSubscribers` object containing an array of subscriber details and pagination details.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    *
    * @example Listing subscribers for a tag
    * ```typescript
@@ -411,22 +409,22 @@ export class TagsHandler {
     tagId: number,
     params: ListTagSubscribersParams & { slim: true },
     options?: RequestOptions
-  ): Promise<ListSlimTagSubscribers | null>;
+  ): Promise<ListSlimTagSubscribers>;
   public async listSubscribers(
     tagId: number,
     params?: ListTagSubscribersParams & { slim?: false | undefined },
     options?: RequestOptions
-  ): Promise<ListTagSubscribers | null>;
+  ): Promise<ListTagSubscribers>;
   public async listSubscribers(
     tagId: number,
     params?: ListTagSubscribersParams,
     options?: RequestOptions
-  ): Promise<ListTagSubscribers | ListSlimTagSubscribers | null>;
+  ): Promise<ListTagSubscribers | ListSlimTagSubscribers>;
   public async listSubscribers(
     tagId: number,
     params?: ListTagSubscribersParams,
     options?: RequestOptions
-  ): Promise<ListTagSubscribers | ListSlimTagSubscribers | null> {
+  ): Promise<ListTagSubscribers | ListSlimTagSubscribers> {
     const {
       created_after,
       created_before,
@@ -450,13 +448,14 @@ export class TagsHandler {
 
     const url = `/tags/${tagId}/subscribers`;
 
-    return await this.api.get<
-      ListTagSubscribers | ListSlimTagSubscribers | null
-    >(url, {
-      query,
-      signal: options?.signal,
-      maxRetries: options?.maxRetries,
-    });
+    return await this.api.get<ListTagSubscribers | ListSlimTagSubscribers>(
+      url,
+      {
+        query,
+        signal: options?.signal,
+        maxRetries: options?.maxRetries,
+      }
+    );
   }
 
   /**
@@ -471,9 +470,8 @@ export class TagsHandler {
    *
    * @see {@link https://developers.kit.com/api-reference/tags/tag-a-subscriber-by-email-address}
    *
-   * @returns A `TagSubscriberByEmail` object containing the details of
-   * the `subscriber` who was tagged. Returns `null` if the Tag was not
-   * found.
+   * @returns A `TagSubscriberByEmail` object containing the details of the `subscriber` who was tagged.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    *
    * @example Tagging a subscriber by email
    * ```typescript
@@ -486,11 +484,11 @@ export class TagsHandler {
     tagId: number,
     params: TagSubscriberByEmailParams,
     options?: RequestOptions
-  ): Promise<TagSubscriberByEmail | null> {
+  ): Promise<TagSubscriberByEmail> {
     const body = JSON.stringify(params || {});
     const url = `/tags/${tagId}/subscribers`;
 
-    return await this.api.post<TagSubscriberByEmail | null>(url, {
+    return await this.api.post<TagSubscriberByEmail>(url, {
       body,
       signal: options?.signal,
       maxRetries: options?.maxRetries,
@@ -507,28 +505,23 @@ export class TagsHandler {
    *
    * @see {@link https://developers.kit.com/api-reference/tags/remove-tag-from-subscriber}
    *
-   * @returns An empty object `{}` on success. Returns `null` if the Tag or Subscriber
-   *   was not found, or if the subscriber was not tagged with the specified tag.
+   * @returns An empty object `{}` on success.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    *
    * @example Removing a subscriber by ID
    * ```typescript
-   * const result = await kit.tags.removeSubscriber(123, 456);
-   *
-   * if (result !== null) {
-   *   console.log('Subscriber successfully removed from tag.');
-   * } else {
-   *   console.log('Tag or Subscriber not found, or subscriber was not tagged.');
-   * }
+   * await kit.tags.removeSubscriber(123, 456);
+   * console.log('Subscriber successfully removed from tag.');
    * ```
    */
   public async removeSubscriber(
     tagId: number,
     subscriberId: number,
     options?: RequestOptions
-  ): Promise<{} | null> {
+  ): Promise<{}> {
     const url = `/tags/${tagId}/subscribers/${subscriberId}`;
 
-    return await this.api.delete<{} | null>(url, {
+    return await this.api.delete<{}>(url, {
       signal: options?.signal,
       maxRetries: options?.maxRetries,
     });
@@ -545,8 +538,8 @@ export class TagsHandler {
    *
    * @see {@link https://developers.kit.com/api-reference/tags/tag-a-subscriber}
    *
-   * @returns A `TagSubscriber` object containing the details of the `subscriber`
-   *   who was tagged. Returns `null` if the Tag or Subscriber was not found.
+   * @returns A `TagSubscriber` object containing the details of the `subscriber` who was tagged.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
    *
    * @example Tagging a subscriber by ID
    * ```typescript
@@ -557,10 +550,10 @@ export class TagsHandler {
     tagId: number,
     subscriberId: number,
     options?: RequestOptions
-  ): Promise<TagSubscriber | null> {
+  ): Promise<TagSubscriber> {
     const url = `/tags/${tagId}/subscribers/${subscriberId}`;
 
-    return await this.api.post<TagSubscriber | null>(url, {
+    return await this.api.post<TagSubscriber>(url, {
       signal: options?.signal,
       maxRetries: options?.maxRetries,
     });

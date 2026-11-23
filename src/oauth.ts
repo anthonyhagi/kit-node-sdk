@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
-import { ApiError } from "./errors";
+import { ApiError, NotFoundError } from "./errors";
 
 export interface OAuthPKCE {
   /** Save this secret verifier for the authorization code exchange. */
@@ -238,11 +238,10 @@ async function readOAuthResponse(
     } catch {
       details = responseBody;
     }
-    throw new ApiError(
-      `OAuth token ${operation} failed. Status: ${response.status}`,
-      response.status,
-      details
-    );
+    const message = `OAuth token ${operation} failed. Status: ${response.status}`;
+    throw response.status === 404
+      ? new NotFoundError(message, details)
+      : new ApiError(message, response.status, details);
   }
   return responseBody;
 }

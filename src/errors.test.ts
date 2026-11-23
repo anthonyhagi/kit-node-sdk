@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
-import { ApiError, Kit } from "./index";
+import { ApiError, Kit, NotFoundError } from "./index";
 
 describe("public API errors", () => {
   let kit: Kit;
@@ -27,6 +27,7 @@ describe("public API errors", () => {
       label: "",
     },
     { status: 403, prefix: "Unknown error", label: "Details: " },
+    { status: 404, prefix: "Resource not found", label: "" },
     { status: 409, prefix: "Unknown error", label: "Details: " },
     { status: 422, prefix: "Bad data in request", label: "" },
     { status: 429, prefix: "Rate limit exceeded", label: "" },
@@ -42,7 +43,8 @@ describe("public API errors", () => {
       fetchMock.mockResponseOnce(JSON.stringify(details), { status });
       const error = await getError();
       expect(error).toBeInstanceOf(Error);
-      expect(error.name).toBe("ApiError");
+      expect(error.name).toBe(status === 404 ? "NotFoundError" : "ApiError");
+      expect(error instanceof NotFoundError).toBe(status === 404);
       expect(error.status).toBe(status);
       expect(error.details).toEqual(details);
       expectTypeOf(error.details).toEqualTypeOf<unknown>();
@@ -144,11 +146,14 @@ describe("public API errors", () => {
     expect(fetchMock.requests()).toHaveLength(1);
   });
 
-  it("continues returning null for 404 responses", async () => {
+  it("throws ApiError for 404 responses", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not found"] }), {
       status: 404,
     });
-    expect(await kit.accounts.getCurrentAccount()).toBeNull();
+    await expect(kit.accounts.getCurrentAccount()).rejects.toMatchObject({
+      name: "NotFoundError",
+      status: 404,
+    });
   });
 
   it("preserves network errors without wrapping them as ApiError", async () => {

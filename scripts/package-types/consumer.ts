@@ -2,6 +2,7 @@ import {
   ApiError,
   generateOAuthPKCE,
   Kit,
+  NotFoundError,
   refreshOAuthToken,
   verifyWebhookSignature,
   type Account,
@@ -371,12 +372,12 @@ export const sequenceEmails = kit.sequenceEmails.list(
   options
 );
 export type SequenceEmailsResult = Assert<
-  Equal<typeof sequenceEmails, Promise<ListSequenceEmailsWithContent | null>>
+  Equal<typeof sequenceEmails, Promise<ListSequenceEmailsWithContent>>
 >;
 export function sequenceEmailContent(
-  page: ListSequenceEmailsWithContent | null
+  page: ListSequenceEmailsWithContent
 ): (string | null)[] {
-  return page?.emails.map((email) => email.content) ?? [];
+  return page.emails.map((email) => email.content);
 }
 
 export const sequencesWithStats = kit.sequences.list(
@@ -392,7 +393,7 @@ export type SequencesStatsResult = Assert<
   Equal<typeof sequencesWithStats, Promise<ListSequencesWithStats>>
 >;
 export type SequenceStatsResult = Assert<
-  Equal<typeof sequenceWithStats, Promise<GetSequenceWithStats | null>>
+  Equal<typeof sequenceWithStats, Promise<GetSequenceWithStats>>
 >;
 export function sequenceOpenRates(
   page: ListSequencesWithStats
@@ -412,23 +413,21 @@ export const emailsWithContentAndStats = kit.sequenceEmails.list(
   options
 );
 export type EmailStatsResult = Assert<
-  Equal<typeof emailWithStats, Promise<GetSequenceEmailWithStats | null>>
+  Equal<typeof emailWithStats, Promise<GetSequenceEmailWithStats>>
 >;
 export type EmailContentStatsResult = Assert<
   Equal<
     typeof emailsWithContentAndStats,
-    Promise<ListSequenceEmailsWithContentAndStats | null>
+    Promise<ListSequenceEmailsWithContentAndStats>
   >
 >;
 export function emailStatsContent(
-  page: ListSequenceEmailsWithContentAndStats | null
+  page: ListSequenceEmailsWithContentAndStats
 ): (string | null)[] {
-  return (
-    page?.emails.map((email) => {
-      const stats = email.stats;
-      return stats.open_rate === 0 ? email.content : null;
-    }) ?? []
-  );
+  return page.emails.map((email) => {
+    const stats = email.stats;
+    return stats.open_rate === 0 ? email.content : null;
+  });
 }
 
 export const pkce = generateOAuthPKCE();
@@ -437,6 +436,8 @@ export const tokens = refreshOAuthToken(
   options
 );
 export const error = new ApiError("typecheck-only", 401, { errors: [] });
+export const notFoundError: ApiError = new NotFoundError("typecheck-only", {});
+export type NotFoundStatus = Assert<Equal<NotFoundError["status"], 404>>;
 export const signature = verifyWebhookSignature(
   new Uint8Array(),
   null,
@@ -444,7 +445,7 @@ export const signature = verifyWebhookSignature(
 );
 
 export type SubscriberResult = Assert<
-  Equal<typeof subscriber, Promise<GetSubscriber | null>>
+  Equal<typeof subscriber, Promise<GetSubscriber>>
 >;
 export type ListResult = Assert<
   typeof subscribers extends Promise<ListSubscribers> ? true : false
@@ -509,10 +510,10 @@ export const deliveryDetails = kit.webhookEndpoints.getDelivery(
   options
 );
 export type DeliveryHistoryResult = Assert<
-  Equal<typeof deliveryHistory, Promise<ListWebhookDeliveries | null>>
+  Equal<typeof deliveryHistory, Promise<ListWebhookDeliveries>>
 >;
 export type DeliveryDetailsResult = Assert<
-  Equal<typeof deliveryDetails, Promise<GetWebhookDelivery | null>>
+  Equal<typeof deliveryDetails, Promise<GetWebhookDelivery>>
 >;
 export function deliveryTagId(result: GetWebhookDelivery): number | undefined {
   const event = result.delivery.payload?.[0];

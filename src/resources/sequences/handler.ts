@@ -90,33 +90,35 @@ export class SequencesHandler {
    * @param id - The unique ID of the sequence.
    * @param params - Optional data to include in the response.
    * @param options - Optional request controls, including cancellation.
-   * @returns The sequence details, or null if the sequence was not found.
+   * @returns The sequence details.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
+   *
    * @see {@link https://developers.kit.com/api-reference/sequences/get-a-sequence}
    */
   public async get(
     id: number,
     params: GetSequenceParams & { include: "stats" },
     options?: RequestOptions
-  ): Promise<GetSequenceWithStats | null>;
+  ): Promise<GetSequenceWithStats>;
   public async get(
     id: number,
     params?: GetSequenceParams & { include?: undefined },
     options?: RequestOptions
-  ): Promise<GetSequence | null>;
+  ): Promise<GetSequence>;
   public async get(
     id: number,
     params?: GetSequenceParams,
     options?: RequestOptions
-  ): Promise<GetSequence | GetSequenceWithStats | null>;
+  ): Promise<GetSequence | GetSequenceWithStats>;
   public async get(
     id: number,
     params?: GetSequenceParams,
     options?: RequestOptions
-  ): Promise<GetSequence | GetSequenceWithStats | null> {
+  ): Promise<GetSequence | GetSequenceWithStats> {
     const query = new URLSearchParams({
       ...(params?.include && { include: params.include }),
     });
-    return await this.api.get<GetSequence | null>(`/sequences/${id}`, {
+    return await this.api.get<GetSequence>(`/sequences/${id}`, {
       query,
       signal: options?.signal,
       maxRetries: options?.maxRetries,
@@ -129,15 +131,17 @@ export class SequencesHandler {
    * @param id - The unique ID of the sequence.
    * @param params - The settings to change.
    * @param options - Optional request controls, including cancellation.
-   * @returns The updated sequence, or null if it was not found.
+   * @returns The updated sequence.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
+   *
    * @see {@link https://developers.kit.com/api-reference/sequences/update-a-sequence}
    */
   public async update(
     id: number,
     params: UpdateSequenceParams,
     options?: RequestOptions
-  ): Promise<UpdateSequence | null> {
-    return await this.api.put<UpdateSequence | null>(`/sequences/${id}`, {
+  ): Promise<UpdateSequence> {
+    return await this.api.put<UpdateSequence>(`/sequences/${id}`, {
       body: JSON.stringify(params),
       signal: options?.signal,
       maxRetries: options?.maxRetries,
@@ -150,14 +154,13 @@ export class SequencesHandler {
    *
    * @param id - The unique ID of the sequence.
    * @param options - Optional request controls, including cancellation.
-   * @returns An empty object on success, or null if the sequence was not found.
+   * @returns An empty object on success.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
+   *
    * @see {@link https://developers.kit.com/api-reference/sequences/delete-a-sequence}
    */
-  public async delete(
-    id: number,
-    options?: RequestOptions
-  ): Promise<{} | null> {
-    return await this.api.delete<{} | null>(`/sequences/${id}`, {
+  public async delete(id: number, options?: RequestOptions): Promise<{}> {
+    return await this.api.delete<{}>(`/sequences/${id}`, {
       signal: options?.signal,
       maxRetries: options?.maxRetries,
     });
@@ -178,7 +181,7 @@ export class SequencesHandler {
     id: number,
     params?: ListSequenceSubscribersParams,
     options?: RequestOptions
-  ): Promise<ListSequenceSubscribers | null> {
+  ): Promise<ListSequenceSubscribers> {
     const { added_after, added_before, created_after, created_before, status } =
       params || {};
 
@@ -195,7 +198,7 @@ export class SequencesHandler {
 
     const url = `/sequences/${id}/subscribers`;
 
-    return await this.api.get<ListSequenceSubscribers | null>(url, {
+    return await this.api.get<ListSequenceSubscribers>(url, {
       query,
       signal: options?.signal,
       maxRetries: options?.maxRetries,
@@ -217,12 +220,12 @@ export class SequencesHandler {
     id: number,
     params: AddSubscriberByEmailParams,
     options?: RequestOptions
-  ): Promise<AddSubscriberToSequence | null> {
+  ): Promise<AddSubscriberToSequence> {
     const body = JSON.stringify(params || {});
 
     const url = `/sequences/${id}/subscribers`;
 
-    return await this.api.post<AddSubscriberToSequence | null>(url, {
+    return await this.api.post<AddSubscriberToSequence>(url, {
       body,
       signal: options?.signal,
       maxRetries: options?.maxRetries,
@@ -244,10 +247,10 @@ export class SequencesHandler {
     sequenceId: number,
     subscriberId: number,
     options?: RequestOptions
-  ): Promise<AddSubscriberToSequence | null> {
+  ): Promise<AddSubscriberToSequence> {
     const url = `/sequences/${sequenceId}/subscribers/${subscriberId}`;
 
-    return await this.api.post<AddSubscriberToSequence | null>(url, {
+    return await this.api.post<AddSubscriberToSequence>(url, {
       signal: options?.signal,
       maxRetries: options?.maxRetries,
     });

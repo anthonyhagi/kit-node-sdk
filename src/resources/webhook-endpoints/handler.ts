@@ -23,21 +23,21 @@ export class WebhookEndpointsHandler {
   /**
    * List an endpoint's deliveries, newest first, within the 30-day retention window.
    * OAuth can access only endpoints created by its app; API keys can access all
-   * endpoints on the account. Returns null for missing or inaccessible endpoints.
+   * endpoints on the account. Rejects with ApiError for missing or inaccessible endpoints.
    * @see https://developers.kit.com/api-reference/webhooks/list-webhook-deliveries
    */
   public async listDeliveries(
     id: number,
     params?: ListWebhookDeliveriesParams,
     options?: RequestOptions
-  ): Promise<ListWebhookDeliveries | null> {
+  ): Promise<ListWebhookDeliveries> {
     const { status, event_type } = params || {};
     const query = new URLSearchParams({
       ...paginationQuery(params, { includeZeroPageSize: true }),
       ...(status && { status }),
       ...(event_type && { event_type }),
     });
-    return await this.api.get<ListWebhookDeliveries | null>(
+    return await this.api.get<ListWebhookDeliveries>(
       `/webhook_endpoints/${id}/deliveries`,
       { query, signal: options?.signal, maxRetries: options?.maxRetries }
     );
@@ -45,7 +45,7 @@ export class WebhookEndpointsHandler {
 
   /**
    * Get delivery metadata and attempts; payload is omitted unless requested.
-   * Returns null for missing, expired, mismatched, or inaccessible deliveries.
+   * Rejects with ApiError for missing, expired, mismatched, or inaccessible deliveries.
    * OAuth visibility is limited to endpoints created by the current app.
    * @see https://developers.kit.com/api-reference/webhooks/get-webhook-delivery-details
    */
@@ -54,13 +54,13 @@ export class WebhookEndpointsHandler {
     deliveryId: number,
     params?: GetWebhookDeliveryParams,
     options?: RequestOptions
-  ): Promise<GetWebhookDelivery | null> {
+  ): Promise<GetWebhookDelivery> {
     const query = new URLSearchParams({
       ...(params?.include_payload !== undefined && {
         include_payload: String(params.include_payload),
       }),
     });
-    return await this.api.get<GetWebhookDelivery | null>(
+    return await this.api.get<GetWebhookDelivery>(
       `/webhook_endpoints/${id}/deliveries/${deliveryId}`,
       { query, signal: options?.signal, maxRetries: options?.maxRetries }
     );
@@ -71,14 +71,16 @@ export class WebhookEndpointsHandler {
    *
    * @param id - The webhook endpoint whose previous secret should be revoked.
    * @param options - Optional request controls, including cancellation.
-   * @returns Endpoint metadata, or null when it was not found.
+   * @returns Endpoint metadata.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
+   *
    * @see {@link https://developers.kit.com/api-reference/webhooks/revoke-the-previous-webhook-endpoint-secret}
    */
   public async revokePreviousSecret(
     id: number,
     options?: RequestOptions
-  ): Promise<RevokePreviousWebhookEndpointSecret | null> {
-    return await this.api.post<RevokePreviousWebhookEndpointSecret | null>(
+  ): Promise<RevokePreviousWebhookEndpointSecret> {
+    return await this.api.post<RevokePreviousWebhookEndpointSecret>(
       `/webhook_endpoints/${id}/revoke_previous_secret`,
       { signal: options?.signal, maxRetries: options?.maxRetries }
     );
@@ -93,15 +95,17 @@ export class WebhookEndpointsHandler {
    * @param id - The webhook endpoint whose secret should rotate.
    * @param params - Optional force flag for rotation during an open overlap window.
    * @param options - Optional request controls, including cancellation.
-   * @returns The rotated endpoint, or null when it was not found.
+   * @returns The rotated endpoint.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
+   *
    * @see {@link https://developers.kit.com/api-reference/webhooks/rotate-a-webhook-endpoint-secret}
    */
   public async rotateSecret(
     id: number,
     params?: RotateWebhookEndpointSecretParams,
     options?: RequestOptions
-  ): Promise<RotateWebhookEndpointSecret | null> {
-    return await this.api.post<RotateWebhookEndpointSecret | null>(
+  ): Promise<RotateWebhookEndpointSecret> {
+    return await this.api.post<RotateWebhookEndpointSecret>(
       `/webhook_endpoints/${id}/rotate_secret`,
       {
         body: JSON.stringify(params || {}),
@@ -116,14 +120,13 @@ export class WebhookEndpointsHandler {
    *
    * @param id - The webhook endpoint to delete.
    * @param options - Optional request controls, including cancellation.
-   * @returns An empty object on success, or null when it was not found or is inaccessible.
+   * @returns An empty object on success.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
+   *
    * @see {@link https://developers.kit.com/api-reference/webhooks/delete-a-webhook-endpoint}
    */
-  public async delete(
-    id: number,
-    options?: RequestOptions
-  ): Promise<{} | null> {
-    return await this.api.delete<{} | null>(`/webhook_endpoints/${id}`, {
+  public async delete(id: number, options?: RequestOptions): Promise<{}> {
+    return await this.api.delete<{}>(`/webhook_endpoints/${id}`, {
       signal: options?.signal,
       maxRetries: options?.maxRetries,
     });
@@ -135,15 +138,17 @@ export class WebhookEndpointsHandler {
    * @param id - The webhook endpoint to update.
    * @param params - Metadata, status, or subscription changes.
    * @param options - Optional request controls, including cancellation.
-   * @returns The updated endpoint, or null when it was not found.
+   * @returns The updated endpoint.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
+   *
    * @see {@link https://developers.kit.com/api-reference/webhooks/update-a-webhook-endpoint}
    */
   public async update(
     id: number,
     params: UpdateWebhookEndpointParams,
     options?: RequestOptions
-  ): Promise<UpdateWebhookEndpoint | null> {
-    return await this.api.patch<UpdateWebhookEndpoint | null>(
+  ): Promise<UpdateWebhookEndpoint> {
+    return await this.api.patch<UpdateWebhookEndpoint>(
       `/webhook_endpoints/${id}`,
       {
         body: JSON.stringify(params),
@@ -177,17 +182,19 @@ export class WebhookEndpointsHandler {
    *
    * @param id - The webhook endpoint to retrieve.
    * @param options - Optional request controls, including cancellation.
-   * @returns The endpoint, or null when it was not found or is inaccessible.
+   * @returns The endpoint.
+   * @throws {ApiError} If Kit returns an unsuccessful HTTP response.
+   *
    * @see {@link https://developers.kit.com/api-reference/webhooks/get-a-webhook-endpoint}
    */
   public async get(
     id: number,
     options?: RequestOptions
-  ): Promise<GetWebhookEndpoint | null> {
-    return await this.api.get<GetWebhookEndpoint | null>(
-      `/webhook_endpoints/${id}`,
-      { signal: options?.signal, maxRetries: options?.maxRetries }
-    );
+  ): Promise<GetWebhookEndpoint> {
+    return await this.api.get<GetWebhookEndpoint>(`/webhook_endpoints/${id}`, {
+      signal: options?.signal,
+      maxRetries: options?.maxRetries,
+    });
   }
 
   /**

@@ -46,7 +46,7 @@ describe("sequence email get requests through Kit", () => {
     } satisfies GetSequenceEmail;
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.sequenceEmails.get(108, 6);
-    expectTypeOf(result).toEqualTypeOf<GetSequenceEmail | null>();
+    expectTypeOf(result).toEqualTypeOf<GetSequenceEmail>();
     expectTypeOf(result!.email).toEqualTypeOf<SequenceEmail>();
     expectTypeOf(result!.email.content).toEqualTypeOf<string | null>();
     expectTypeOf(result!.email.stats).toEqualTypeOf<
@@ -112,13 +112,13 @@ describe("sequence email get requests through Kit", () => {
     expect(new URL(fetchMock.requests()[0]!.url).search).toBe("");
   });
 
-  it("returns null for missing emails", async () => {
+  it("throws ApiError for missing emails", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
       status: 404,
     });
-    expect(
-      await kit.sequenceEmails.get(108, 404, { include: "stats" })
-    ).toBeNull();
+    await expect(
+      kit.sequenceEmails.get(108, 404, { include: "stats" })
+    ).rejects.toMatchObject({ name: "NotFoundError", status: 404 });
     expect(fetchMock.requests()[0]!.url).toBe(
       "https://api.kit.com/v4/sequences/108/emails/404?include=stats"
     );
@@ -139,7 +139,7 @@ describe("sequence email list requests through Kit", () => {
     } satisfies ListSequenceEmails;
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.sequenceEmails.list(108);
-    expectTypeOf(result).toEqualTypeOf<ListSequenceEmails | null>();
+    expectTypeOf(result).toEqualTypeOf<ListSequenceEmails>();
     expectTypeOf(result!.emails[0]!.content).toEqualTypeOf<
       string | null | undefined
     >();
@@ -309,11 +309,14 @@ describe("sequence email list requests through Kit", () => {
     });
   });
 
-  it("returns null for a missing sequence", async () => {
+  it("throws ApiError for a missing sequence", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
       status: 404,
     });
-    expect(await kit.sequenceEmails.list(404)).toBeNull();
+    await expect(kit.sequenceEmails.list(404)).rejects.toMatchObject({
+      name: "NotFoundError",
+      status: 404,
+    });
   });
 });
 
@@ -417,7 +420,7 @@ describe("sequence email create requests through Kit", () => {
     } satisfies CreateSequenceEmail;
     fetchMock.mockResponseOnce(JSON.stringify(response), { status: 201 });
     const result = await kit.sequenceEmails.create(108, params);
-    expectTypeOf(result).toEqualTypeOf<CreateSequenceEmail | null>();
+    expectTypeOf(result).toEqualTypeOf<CreateSequenceEmail>();
     expectTypeOf(result!.email).toEqualTypeOf<
       Omit<SequenceEmail, "stats" | "position"> & { position: number | null }
     >();
@@ -520,17 +523,17 @@ describe("sequence email create requests through Kit", () => {
     expect(body).not.toHaveProperty("published");
   });
 
-  it("returns null when the sequence does not exist", async () => {
+  it("throws ApiError when the sequence does not exist", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
       status: 404,
     });
-    expect(
-      await kit.sequenceEmails.create(404, {
+    await expect(
+      kit.sequenceEmails.create(404, {
         subject: "Welcome",
         delay_value: 1,
         delay_unit: "days",
       })
-    ).toBeNull();
+    ).rejects.toMatchObject({ name: "NotFoundError", status: 404 });
   });
 
   it("surfaces API validation errors", async () => {
@@ -569,7 +572,7 @@ describe("sequence email update requests through Kit", () => {
     } satisfies UpdateSequenceEmail;
     fetchMock.mockResponseOnce(JSON.stringify(response));
     const result = await kit.sequenceEmails.update(108, 6, params);
-    expectTypeOf(result).toEqualTypeOf<UpdateSequenceEmail | null>();
+    expectTypeOf(result).toEqualTypeOf<UpdateSequenceEmail>();
     expectTypeOf(result!.email).toEqualTypeOf<
       Omit<SequenceEmail, "stats" | "position"> & { position: number | null }
     >();
@@ -658,13 +661,13 @@ describe("sequence email update requests through Kit", () => {
     expect(await fetchMock.requests()[0]!.json()).toEqual({});
   });
 
-  it("returns null for missing sequences or emails", async () => {
+  it("throws ApiError for missing sequences or emails", async () => {
     fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
       status: 404,
     });
-    expect(
-      await kit.sequenceEmails.update(108, 404, { published: false })
-    ).toBeNull();
+    await expect(
+      kit.sequenceEmails.update(108, 404, { published: false })
+    ).rejects.toMatchObject({ name: "NotFoundError", status: 404 });
   });
 
   it("surfaces server validation errors for hourly schedule overrides", async () => {
@@ -695,7 +698,7 @@ describe("sequence email delete requests through Kit", () => {
   it("deletes an email with a bodyless request and handles an empty 204 response", async () => {
     fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
     const result = await kit.sequenceEmails.delete(108, 6);
-    expectTypeOf(result).toEqualTypeOf<{} | null>();
+    expectTypeOf(result).toEqualTypeOf<{}>();
     expect(result).toEqual({});
     expect(fetchMock.requests()).toHaveLength(1);
     const req = fetchMock.requests()[0]!;
@@ -708,12 +711,14 @@ describe("sequence email delete requests through Kit", () => {
     [404, 6],
     [108, 404],
   ])(
-    "returns null for a missing sequence or email (%s, %s)",
+    "throws ApiError for a missing sequence or email (%s, %s)",
     async (sequenceId, emailId) => {
       fetchMock.mockResponseOnce(JSON.stringify({ errors: ["Not Found"] }), {
         status: 404,
       });
-      expect(await kit.sequenceEmails.delete(sequenceId, emailId)).toBeNull();
+      await expect(
+        kit.sequenceEmails.delete(sequenceId, emailId)
+      ).rejects.toMatchObject({ name: "NotFoundError", status: 404 });
       expect(fetchMock.requests()[0]!.url).toBe(
         `https://api.kit.com/v4/sequences/${sequenceId}/emails/${emailId}`
       );

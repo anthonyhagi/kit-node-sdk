@@ -213,7 +213,7 @@ export class Kit extends ApiClient {
   }
 }
 
-export { ApiError } from "./errors";
+export { ApiError, NotFoundError } from "./errors";
 export {
   buildOAuthAuthorizationUrl,
   exchangeOAuthCode,
