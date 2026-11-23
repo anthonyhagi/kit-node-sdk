@@ -1,5 +1,13 @@
 # @anthonyhagi/kit-node-sdk
 
+## 0.8.0
+
+### Minor Changes
+
+- 369889e: BREAKING: All HTTP 404 responses now throw NotFoundError, a new exported ApiError subclass with status and response details, instead of returning null. Resource return types no longer include a top-level null union. Replace null checks with ApiError handling; see docs/migration-404.md. Successful response payloads and bulk acknowledgements are unchanged.
+- 79e0133: BREAKING: Resource operations with no meaningful response data now return `Promise<void>` and resolve to `undefined` instead of `{}`. This applies to deletes, subscriber unsubscribe/location removal, and tag removal. Bulk acknowledgments and methods returning resource metadata are unchanged. See `docs/migration-void.md` for migration guidance.
+- 035f20d: Add webhook delivery history list and detail methods with typed attempts and optional event payloads. Document 30-day retention and OAuth endpoint visibility.
+
 ## 0.7.3
 
 ### Patch Changes
