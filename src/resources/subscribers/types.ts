@@ -218,10 +218,16 @@ export interface FilterSubscriberBodyAnyUrls {
 export interface FilterSubscriberBodyAllSubscribed {
   type: "subscribed";
 
-  /** Start date (YYYY-MM-DD). This filters by `subscriber_created_at`. */
+  /**
+   * Start date (YYYY-MM-DD). Filters by `subscriber_created_at`, with no
+   * retention cap (unlike engagement conditions).
+   */
   after?: string | undefined;
 
-  /** End date (YYYY-MM-DD). Filters by `subscriber_created_at`. */
+  /**
+   * End date (YYYY-MM-DD). Filters by `subscriber_created_at`, with no
+   * retention cap (unlike engagement conditions).
+   */
   before?: string | undefined;
 }
 
@@ -241,10 +247,17 @@ export interface FilterSubscriberBodyAllBase {
   /** Maximum count (inclusive). */
   count_less_than_or_equal?: number | undefined;
 
-  /** Start date (YYYY-MM-DD). Filters by the event date. */
+  /**
+   * Start date (YYYY-MM-DD). Filters by the event date. Must be on or after
+   * the same calendar date three years ago; older dates throw `ApiError` with
+   * status 400 naming the earliest allowed date. The SDK does not clamp it.
+   */
   after?: string | undefined;
 
-  /** End date (YYYY-MM-DD). Filters by the event date. */
+  /**
+   * End date (YYYY-MM-DD). Filters by the event date. Must be on or after the
+   * same calendar date three years ago, or Kit returns 400.
+   */
   before?: string | undefined;
 
   /**
@@ -340,7 +353,11 @@ export type FilterSubscriberInclude =
     }
   | {
       type: "stats";
-      /** Date window (YYYY-MM-DD). Defaults to the last 90 days. */
+      /**
+       * Date window (YYYY-MM-DD). Defaults to the last 90 days. Both dates
+       * must be on or after the same calendar date three years ago, or Kit
+       * returns 400.
+       */
       range?:
         | {
             start?: string | undefined;
