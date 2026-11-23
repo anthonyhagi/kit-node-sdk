@@ -103,6 +103,25 @@ export interface ListBroadcastsParams extends PaginationParams {
   status?: BroadcastStatus | undefined;
 }
 
+/** One tested version of a broadcast A/B test. Kit does not mark these fields required. */
+export interface BroadcastAbTestVariant {
+  /** Subject line this version sends. */
+  subject?: string | undefined;
+  /** Preview text this version sends; null when it has none. */
+  preview_text?: string | null | undefined;
+}
+
+/**
+ * A broadcast's A/B test. On a `subject` test the versions differ in subject
+ * and preview text; on a `content` test they differ in content (not listed), so
+ * each variant shows the same subject and preview text.
+ */
+export interface BroadcastAbTest {
+  type?: "subject" | "content" | undefined;
+  /** Tested versions in order. On a subject test, a `subject` write replaces the first. */
+  variants?: BroadcastAbTestVariant[] | undefined;
+}
+
 /** Fields shared by full broadcast responses. */
 interface BroadcastResponse {
   status: BroadcastStatus;
@@ -121,6 +140,11 @@ interface BroadcastResponse {
   email_address: string | null;
   email_template: BroadcastEmailTemplate;
   subscriber_filter: BroadcastSubscriberFilterResponseGroup[];
+  /**
+   * The broadcast's A/B test, or `null` when it has none. May be absent.
+   * Check it before writing `subject` or `preview_text` in an update.
+   */
+  ab_test?: BroadcastAbTest | null | undefined;
 }
 
 /** Full broadcast list record with optional URL, click, and stats enrichments. */
@@ -340,7 +364,17 @@ export interface UpdateBroadcastParams {
   send_at?: Date | string | null | undefined;
   thumbnail_alt?: string | null | undefined;
   thumbnail_url?: string | null | undefined;
+  /**
+   * Preview text shown in inboxes. On a subject-line A/B test each version
+   * sends its own preview text, so this value is saved but not sent; edit the
+   * versions' preview text in Kit.
+   */
   preview_text?: string | null | undefined;
+  /**
+   * The subject line. On a subject-line A/B test this replaces only the first
+   * version's subject; the others keep theirs. On a content A/B test it is
+   * written to every version. Check `ab_test` before writing it.
+   */
   subject?: string | null | undefined;
 
   /**

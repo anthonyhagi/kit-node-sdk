@@ -257,6 +257,8 @@ export type { ClientOptions, RequestOptions };
 export type {
   BasicSubscriberFilterItem,
   Broadcast,
+  BroadcastAbTest,
+  BroadcastAbTestVariant,
   BroadcastEmailTemplate,
   BroadcastLinkClick,
   BroadcastListItem,

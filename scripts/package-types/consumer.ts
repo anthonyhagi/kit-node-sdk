@@ -13,6 +13,7 @@ import {
   type AccountTimezone,
   type AccountUser,
   type Broadcast,
+  type BroadcastAbTest,
   type BroadcastListItem,
   type BroadcastStatus,
   type BulkCreateCallback,
@@ -491,6 +492,12 @@ export type BroadcastStatsExcludeSlim = Assert<
   Equal<Extract<keyof GetBroadcastStatsParams, "slim">, never>
 >;
 
+export type BroadcastAbTestMetadata = Assert<
+  Equal<
+    GetBroadcast["broadcast"]["ab_test"],
+    BroadcastAbTest | null | undefined
+  >
+>;
 export const minimalBroadcastUpdate = kit.broadcasts.update(1, {
   email_template_id: 9,
   allow_content_loss: true,
