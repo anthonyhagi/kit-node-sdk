@@ -543,7 +543,7 @@ describe("api-client", () => {
     const api = new ApiClient({ baseUrl: "http://localhost" });
 
     await expect(api.get("/some/route")).rejects.toMatchObject({
-      name: "ApiError",
+      name: "NotFoundError",
       status: 404,
     });
     expect(fetchMock.requests().length).toBe(1);

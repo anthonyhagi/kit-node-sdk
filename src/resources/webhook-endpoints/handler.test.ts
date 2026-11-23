@@ -308,7 +308,7 @@ describe("webhook endpoint get requests through Kit", () => {
       status: 404,
     });
     await expect(kit.webhookEndpoints.get(404)).rejects.toMatchObject({
-      name: "ApiError",
+      name: "NotFoundError",
       status: 404,
     });
     expect(fetchMock.requests()[0]!.url).toBe(
@@ -526,7 +526,7 @@ describe("webhook endpoint update requests through Kit", () => {
     });
     await expect(
       kit.webhookEndpoints.update(404, { status: "disabled" })
-    ).rejects.toMatchObject({ name: "ApiError", status: 404 });
+    ).rejects.toMatchObject({ name: "NotFoundError", status: 404 });
     expect(fetchMock.requests()[0]!.url).toBe(
       "https://api.kit.com/v4/webhook_endpoints/404"
     );
@@ -583,7 +583,7 @@ describe("webhook endpoint delete requests through Kit", () => {
       status: 404,
     });
     await expect(kit.webhookEndpoints.delete(404)).rejects.toMatchObject({
-      name: "ApiError",
+      name: "NotFoundError",
       status: 404,
     });
     expect(fetchMock.requests()[0]!.url).toBe(
@@ -732,7 +732,7 @@ describe("webhook endpoint secret rotation requests through Kit", () => {
       status: 404,
     });
     await expect(kit.webhookEndpoints.rotateSecret(404)).rejects.toMatchObject({
-      name: "ApiError",
+      name: "NotFoundError",
       status: 404,
     });
     expect(fetchMock.requests()[0]!.url).toBe(
@@ -804,7 +804,7 @@ describe("webhook endpoint previous-secret revocation requests through Kit", () 
     });
     await expect(
       kit.webhookEndpoints.revokePreviousSecret(404)
-    ).rejects.toMatchObject({ name: "ApiError", status: 404 });
+    ).rejects.toMatchObject({ name: "NotFoundError", status: 404 });
     expect(fetchMock.requests()[0]!.url).toBe(
       "https://api.kit.com/v4/webhook_endpoints/404/revoke_previous_secret"
     );

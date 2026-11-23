@@ -2,6 +2,7 @@ import {
   ApiError,
   generateOAuthPKCE,
   Kit,
+  NotFoundError,
   refreshOAuthToken,
   verifyWebhookSignature,
   type Account,
@@ -435,6 +436,8 @@ export const tokens = refreshOAuthToken(
   options
 );
 export const error = new ApiError("typecheck-only", 401, { errors: [] });
+export const notFoundError: ApiError = new NotFoundError("typecheck-only", {});
+export type NotFoundStatus = Assert<Equal<NotFoundError["status"], 404>>;
 export const signature = verifyWebhookSignature(
   new Uint8Array(),
   null,

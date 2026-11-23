@@ -2,7 +2,8 @@
 
 [Documentation index](README.md) · [Error handling](error-handling.md)
 
-All SDK requests now throw the exported `ApiError` for HTTP 404 responses.
+All SDK requests now throw the exported `NotFoundError`, a subclass of
+`ApiError`, for HTTP 404 responses.
 Earlier versions returned `null`, even from methods whose TypeScript types
 promised a non-null result. Bulk operations could then fail with a `TypeError`
 while examining that null response.
@@ -15,14 +16,14 @@ or raw text response in `details`.
 Replace checks for a null result with a catch where missing resources are expected:
 
 ```typescript
-import { ApiError, Kit } from "@anthonyhagi/kit-node-sdk";
+import { Kit, NotFoundError } from "@anthonyhagi/kit-node-sdk";
 
 const kit = new Kit();
 try {
   const result = await kit.broadcasts.get(123);
   console.log(result.broadcast.subject);
 } catch (error) {
-  if (error instanceof ApiError && error.status === 404) {
+  if (error instanceof NotFoundError) {
     console.log("Broadcast not found");
   } else {
     throw error;
@@ -31,7 +32,7 @@ try {
 ```
 
 For writes, reaching the next statement means the operation succeeded. If absence
-is acceptable when deleting, catch only `ApiError` with status 404 and propagate
+is acceptable when deleting, catch only `NotFoundError` and propagate
 other failures. Do not turn authentication, network, timeout, or parsing errors
 into missing-resource results.
 

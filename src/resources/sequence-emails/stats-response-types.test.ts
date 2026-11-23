@@ -181,12 +181,12 @@ describe("sequence email stats inference", () => {
     const kit = new Kit({ apiKey: "test", maxRetries: 0 });
     await expect(
       kit.sequenceEmails.get(123, 456, { include: "stats" })
-    ).rejects.toMatchObject({ name: "ApiError", status: 404 });
+    ).rejects.toMatchObject({ name: "NotFoundError", status: 404 });
     await expect(
       kit.sequenceEmails.list(123, {
         include: "stats",
         include_content: true,
       })
-    ).rejects.toMatchObject({ name: "ApiError", status: 404 });
+    ).rejects.toMatchObject({ name: "NotFoundError", status: 404 });
   });
 });

@@ -144,7 +144,7 @@ describe("sequence stats response inference", () => {
     }).sequences.get(404, { include: "stats" });
     expectTypeOf(result).toEqualTypeOf<Promise<GetSequenceWithStats>>();
     await expect(result).rejects.toMatchObject({
-      name: "ApiError",
+      name: "NotFoundError",
       status: 404,
     });
   });

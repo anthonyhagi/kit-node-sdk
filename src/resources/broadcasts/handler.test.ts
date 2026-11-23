@@ -562,7 +562,7 @@ describe("broadcast link click pagination through Kit", () => {
     });
     await expect(
       kit.broadcasts.getLinkClicksById(171, { per_page: 25 })
-    ).rejects.toMatchObject({ name: "ApiError", status: 404 });
+    ).rejects.toMatchObject({ name: "NotFoundError", status: 404 });
     fetchMock.resetMocks();
     await expect(
       kit.broadcasts.getLinkClicksById(0, { after: "next" })

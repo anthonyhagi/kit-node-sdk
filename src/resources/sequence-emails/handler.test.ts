@@ -118,7 +118,7 @@ describe("sequence email get requests through Kit", () => {
     });
     await expect(
       kit.sequenceEmails.get(108, 404, { include: "stats" })
-    ).rejects.toMatchObject({ name: "ApiError", status: 404 });
+    ).rejects.toMatchObject({ name: "NotFoundError", status: 404 });
     expect(fetchMock.requests()[0]!.url).toBe(
       "https://api.kit.com/v4/sequences/108/emails/404?include=stats"
     );
@@ -314,7 +314,7 @@ describe("sequence email list requests through Kit", () => {
       status: 404,
     });
     await expect(kit.sequenceEmails.list(404)).rejects.toMatchObject({
-      name: "ApiError",
+      name: "NotFoundError",
       status: 404,
     });
   });
@@ -533,7 +533,7 @@ describe("sequence email create requests through Kit", () => {
         delay_value: 1,
         delay_unit: "days",
       })
-    ).rejects.toMatchObject({ name: "ApiError", status: 404 });
+    ).rejects.toMatchObject({ name: "NotFoundError", status: 404 });
   });
 
   it("surfaces API validation errors", async () => {
@@ -667,7 +667,7 @@ describe("sequence email update requests through Kit", () => {
     });
     await expect(
       kit.sequenceEmails.update(108, 404, { published: false })
-    ).rejects.toMatchObject({ name: "ApiError", status: 404 });
+    ).rejects.toMatchObject({ name: "NotFoundError", status: 404 });
   });
 
   it("surfaces server validation errors for hourly schedule overrides", async () => {
@@ -718,7 +718,7 @@ describe("sequence email delete requests through Kit", () => {
       });
       await expect(
         kit.sequenceEmails.delete(sequenceId, emailId)
-      ).rejects.toMatchObject({ name: "ApiError", status: 404 });
+      ).rejects.toMatchObject({ name: "NotFoundError", status: 404 });
       expect(fetchMock.requests()[0]!.url).toBe(
         `https://api.kit.com/v4/sequences/${sequenceId}/emails/${emailId}`
       );

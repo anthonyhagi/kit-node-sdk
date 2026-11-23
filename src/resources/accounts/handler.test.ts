@@ -270,7 +270,7 @@ describe("account requests through Kit", () => {
       status: 404,
     });
     await expect(kit.accounts.getCreatorProfile()).rejects.toMatchObject({
-      name: "ApiError",
+      name: "NotFoundError",
       status: 404,
     });
     request("GET", "/account/creator_profile");

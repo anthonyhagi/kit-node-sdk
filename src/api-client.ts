@@ -1,4 +1,4 @@
-import { ApiError } from "./errors";
+import { ApiError, NotFoundError } from "./errors";
 import { delay } from "./utils/helpers";
 
 type HttpMethod =
@@ -330,9 +330,8 @@ export class ApiClient {
         );
 
       case 404:
-        throw new ApiError(
+        throw new NotFoundError(
           `Resource not found. Status: ${resp.status} - ${detailsString}`,
-          resp.status,
           details
         );
 

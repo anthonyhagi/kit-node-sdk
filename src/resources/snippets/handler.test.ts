@@ -324,7 +324,7 @@ describe("snippet get requests through Kit", () => {
       status: 404,
     });
     await expect(kit.snippets.get(404)).rejects.toMatchObject({
-      name: "ApiError",
+      name: "NotFoundError",
       status: 404,
     });
     expect(fetchMock.requests()[0]!.url).toBe(
@@ -482,7 +482,7 @@ describe("snippet update requests through Kit", () => {
     });
     await expect(
       kit.snippets.update(404, { name: "Renamed" })
-    ).rejects.toMatchObject({ name: "ApiError", status: 404 });
+    ).rejects.toMatchObject({ name: "NotFoundError", status: 404 });
     expect(fetchMock.requests()[0]!.url).toBe(
       "https://api.kit.com/v4/snippets/404"
     );

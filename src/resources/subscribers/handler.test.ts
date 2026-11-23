@@ -765,7 +765,7 @@ describe("subscriber requests through Kit", () => {
 
     await expect(
       kit.subscribers.pinLocation(42, pinnedLocation)
-    ).rejects.toMatchObject({ name: "ApiError", status: 404 });
+    ).rejects.toMatchObject({ name: "NotFoundError", status: 404 });
     expect(await request("POST", "/subscribers/42/location").json()).toEqual(
       pinnedLocation
     );
@@ -835,7 +835,7 @@ describe("subscriber requests through Kit", () => {
 
     await expect(
       kit.subscribers.updateLocation(42, pinnedLocation)
-    ).rejects.toMatchObject({ name: "ApiError", status: 404 });
+    ).rejects.toMatchObject({ name: "NotFoundError", status: 404 });
     expect(await request("PATCH", "/subscribers/42/location").json()).toEqual(
       pinnedLocation
     );
@@ -884,7 +884,7 @@ describe("subscriber requests through Kit", () => {
     });
 
     await expect(kit.subscribers.deleteLocation(42)).rejects.toMatchObject({
-      name: "ApiError",
+      name: "NotFoundError",
       status: 404,
     });
     expect(await request("DELETE", "/subscribers/42/location").text()).toBe("");
@@ -1720,7 +1720,7 @@ describe("subscriber requests through Kit", () => {
             })
           : kit.subscribers[method](42);
       await expect(result).rejects.toMatchObject({
-        name: "ApiError",
+        name: "NotFoundError",
         status: 404,
       });
       expect(fetchMock.requests()).toHaveLength(1);

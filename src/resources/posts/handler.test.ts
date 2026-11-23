@@ -347,7 +347,7 @@ describe("post get requests through Kit", () => {
       status: 404,
     });
     await expect(kit.posts.get(404)).rejects.toMatchObject({
-      name: "ApiError",
+      name: "NotFoundError",
       status: 404,
     });
     expect(fetchMock.requests()[0]!.url).toBe(

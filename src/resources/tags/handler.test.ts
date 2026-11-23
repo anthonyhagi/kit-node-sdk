@@ -402,7 +402,7 @@ describe("tag requests through Kit", () => {
     });
     await expect(
       kit.tags.listSubscribers(404, { slim: true })
-    ).rejects.toMatchObject({ name: "ApiError", status: 404 });
+    ).rejects.toMatchObject({ name: "NotFoundError", status: 404 });
     request("GET", "/tags/404/subscribers", { slim: "true" });
   });
 
@@ -807,7 +807,7 @@ describe("tag requests through Kit", () => {
           break;
       }
       await expect(result).rejects.toMatchObject({
-        name: "ApiError",
+        name: "NotFoundError",
         status: 404,
       });
       expect(fetchMock.requests()).toHaveLength(1);

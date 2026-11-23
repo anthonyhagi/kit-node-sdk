@@ -211,7 +211,7 @@ describe("sequence requests through Kit", () => {
       status: 404,
     });
     await expect(kit.sequences.delete(404)).rejects.toMatchObject({
-      name: "ApiError",
+      name: "NotFoundError",
       status: 404,
     });
     expect(await request("DELETE", "/sequences/404").text()).toBe("");
@@ -399,7 +399,7 @@ describe("sequence requests through Kit", () => {
     });
     await expect(
       kit.sequences.update(404, { name: "Missing" })
-    ).rejects.toMatchObject({ name: "ApiError", status: 404 });
+    ).rejects.toMatchObject({ name: "NotFoundError", status: 404 });
     expect(await request("PUT", "/sequences/404").json()).toEqual({
       name: "Missing",
     });
@@ -486,7 +486,7 @@ describe("sequence requests through Kit", () => {
     });
     await expect(
       kit.sequences.get(404, { include: "stats" })
-    ).rejects.toMatchObject({ name: "ApiError", status: 404 });
+    ).rejects.toMatchObject({ name: "NotFoundError", status: 404 });
     request("GET", "/sequences/404", { include: "stats" });
   });
 
@@ -808,7 +808,7 @@ describe("sequence requests through Kit", () => {
           break;
       }
       await expect(result).rejects.toMatchObject({
-        name: "ApiError",
+        name: "NotFoundError",
         status: 404,
       });
       expect(fetchMock.requests()).toHaveLength(1);

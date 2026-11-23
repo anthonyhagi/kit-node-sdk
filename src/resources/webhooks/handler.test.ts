@@ -349,7 +349,7 @@ describe("webhook requests through Kit", () => {
       status: 404,
     });
     await expect(kit.webhooks.delete(1)).rejects.toMatchObject({
-      name: "ApiError",
+      name: "NotFoundError",
       status: 404,
     });
     request("DELETE", "/webhooks/1");

@@ -126,7 +126,7 @@ describe("sequence email list response inference", () => {
       Promise<ListSequenceEmailsWithContent>
     >();
     await expect(result).rejects.toMatchObject({
-      name: "ApiError",
+      name: "NotFoundError",
       status: 404,
     });
   });

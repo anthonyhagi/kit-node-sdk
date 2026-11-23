@@ -19,8 +19,10 @@ The SDK automatically retries requests for:
 
 - **4xx client errors** (400, 401, 403, 404, 422) - These indicate client-side issues
 
-All unsuccessful HTTP responses throw `ApiError`, including 404. A missing
-resource never produces a successful `null` or `undefined` result.
+All unsuccessful HTTP responses throw `ApiError`, including 404. A 404 throws
+`NotFoundError`, an exported `ApiError` subclass with `status` typed as `404`,
+so `instanceof ApiError` checks still match. A missing resource never produces
+a successful `null` or `undefined` result.
 Empty successful response bodies return `{}`. Errors reading or parsing a
 successful response body throw without repeating the request.
 

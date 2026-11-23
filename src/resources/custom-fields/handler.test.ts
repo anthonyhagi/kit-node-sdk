@@ -220,7 +220,7 @@ describe("custom-field requests through Kit", () => {
           ? kit.customFields.update(7, { label: "Family name" })
           : kit.customFields.delete(7);
       await expect(result).rejects.toMatchObject({
-        name: "ApiError",
+        name: "NotFoundError",
         status: 404,
       });
       request(method === "update" ? "PUT" : "DELETE", "/custom_fields/7");

@@ -220,7 +220,7 @@ describe("webhook delivery history", () => {
           ? kit.webhookEndpoints.listDeliveries(42)
           : kit.webhookEndpoints.getDelivery(42, 123456);
       await expect(result).rejects.toMatchObject({
-        name: "ApiError",
+        name: "NotFoundError",
         status: 404,
       });
       await expect(result).rejects.toBeInstanceOf(ApiError);

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
-import { ApiError, Kit } from "./index";
+import { ApiError, Kit, NotFoundError } from "./index";
 
 describe("public API errors", () => {
   let kit: Kit;
@@ -43,7 +43,8 @@ describe("public API errors", () => {
       fetchMock.mockResponseOnce(JSON.stringify(details), { status });
       const error = await getError();
       expect(error).toBeInstanceOf(Error);
-      expect(error.name).toBe("ApiError");
+      expect(error.name).toBe(status === 404 ? "NotFoundError" : "ApiError");
+      expect(error instanceof NotFoundError).toBe(status === 404);
       expect(error.status).toBe(status);
       expect(error.details).toEqual(details);
       expectTypeOf(error.details).toEqualTypeOf<unknown>();
@@ -150,7 +151,7 @@ describe("public API errors", () => {
       status: 404,
     });
     await expect(kit.accounts.getCurrentAccount()).rejects.toMatchObject({
-      name: "ApiError",
+      name: "NotFoundError",
       status: 404,
     });
   });
