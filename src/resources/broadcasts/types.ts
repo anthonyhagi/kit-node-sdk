@@ -166,12 +166,14 @@ export interface ListSlimBroadcasts {
 export interface CreateBroadcastParams {
   /**
    * Id of the email template to use. Uses the account's default
-   * template if not provided. When supplying content with a Starting
-   * point template, set allow_starting_point to true.
+   * template if not provided.
    */
   email_template_id?: number | undefined;
 
-  /** Allow custom HTML content when using a Starting point email template. */
+  /**
+   * @deprecated Kit no longer documents this option: Starting point templates
+   * now accept supplied HTML directly. It is still sent when provided.
+   */
   allow_starting_point?: boolean | undefined;
 
   /**
@@ -182,8 +184,8 @@ export interface CreateBroadcastParams {
 
   /**
    * The HTML content of the email. Omit when selecting a Starting point
-   * template to use that template's own design. When supplying custom HTML
-   * with a Starting point template, set allow_starting_point to true.
+   * template to use that template's own design; supplied HTML is
+   * incorporated into the template's design.
    */
   content?: string | undefined;
   description: string;
@@ -274,52 +276,72 @@ export interface GetBroadcast {
   broadcast: Broadcast;
 }
 
+/**
+ * Only supplied fields change; omitted fields keep their current values.
+ * Changing `email_template_id` without `content` can discard content: Kit then
+ * returns 409 unless `allow_content_loss` is true.
+ */
 export interface UpdateBroadcastParams {
   /**
-   * Id of the email template to use. Uses the account's default template
-   * if not provided. When supplying content with a Starting point
-   * template, set allow_starting_point to true.
+   * Id of the email template to use. Omit it or send `null` to keep the current
+   * template. Changing it without sending `content` applies the new template's
+   * design; if that would discard the broadcast's content or overwrite unsaved
+   * edits open in Kit's editor, Kit returns 409 unless `allow_content_loss` is
+   * true. Send `content` in the same request to keep your own content. The
+   * template of a broadcast running a content A/B test cannot be changed.
    */
-  email_template_id: number | null;
+  email_template_id?: number | null | undefined;
 
-  /** Allow custom HTML content when using a Starting point email template. */
+  /**
+   * Confirm a template change that would discard content or overwrite unsaved
+   * editor changes. Only applies when `email_template_id` changes without
+   * `content`; Kit defaults it to `false`. Set it deliberately: do not retry a
+   * 409 with this flag automatically.
+   */
+  allow_content_loss?: boolean | null | undefined;
+
+  /**
+   * @deprecated Kit no longer documents this option: Starting point templates
+   * now accept supplied HTML directly. It is still sent when provided.
+   */
   allow_starting_point?: boolean | undefined;
 
   /**
    * The sending email address to use. Uses the account's sending email
    * address if not provided.
    */
-  email_address: string | null;
+  email_address?: string | null | undefined;
 
   /**
-   * The HTML content of the email.
+   * The HTML content of the email. On a Starting point template this is the
+   * complete email and is incorporated into the template's design.
    */
-  content: string | null;
-  description: string | null;
+  content?: string | null | undefined;
+  description?: string | null | undefined;
 
   /**
    * Set to `true` to publish this broadcast. Otherwise, set to `false`
    * to save as a draft.
    */
-  public: boolean | null;
+  public?: boolean | null | undefined;
 
   /**
    * The published timestamp to display in ISO8601 format. If no timezone
    * is provided, UTC is assumed. Date objects will be automatically
    * converted into the correct format.
    */
-  published_at: Date | string | null;
+  published_at?: Date | string | null | undefined;
 
   /**
    * The scheduled send time for this broadcast in ISO8601 format. If no
    * timezone is provided, UTC is assumed. Date objects will be
    * automatically converted into the correct format.
    */
-  send_at: Date | string | null;
-  thumbnail_alt: string | null;
-  thumbnail_url: string | null;
-  preview_text: string | null;
-  subject: string | null;
+  send_at?: Date | string | null | undefined;
+  thumbnail_alt?: string | null | undefined;
+  thumbnail_url?: string | null | undefined;
+  preview_text?: string | null | undefined;
+  subject?: string | null | undefined;
 
   /**
    * Filters your subscribers. At this time, Kit only supports using only
@@ -330,7 +352,7 @@ export interface UpdateBroadcastParams {
    * must all match. The SDK sends entries as given and never merges or
    * splits them.
    */
-  subscriber_filter: UpdateBroadcastSubscriberFilterGroup[];
+  subscriber_filter?: UpdateBroadcastSubscriberFilterGroup[] | undefined;
 }
 
 export interface UpdateBroadcast {

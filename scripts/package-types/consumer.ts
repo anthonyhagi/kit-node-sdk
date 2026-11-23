@@ -491,6 +491,21 @@ export type BroadcastStatsExcludeSlim = Assert<
   Equal<Extract<keyof GetBroadcastStatsParams, "slim">, never>
 >;
 
+export const minimalBroadcastUpdate = kit.broadcasts.update(1, {
+  email_template_id: 9,
+  allow_content_loss: true,
+});
+export const sequenceTemplateSwitch = kit.sequenceEmails.update(1, 2, {
+  email_template_id: null,
+  allow_content_loss: null,
+});
+export type SequenceEmailDraftState = Assert<
+  Equal<
+    GetSequenceEmail["email"]["has_unpublished_changes"],
+    boolean | undefined
+  >
+>;
+
 export const deliveryHistory = kit.webhookEndpoints.listDeliveries(
   42,
   {

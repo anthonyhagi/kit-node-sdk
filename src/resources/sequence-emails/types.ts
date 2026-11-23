@@ -28,14 +28,37 @@ export interface CreateSequenceEmail {
   email: WrittenSequenceEmail;
 }
 
-/** Only supplied fields change; omitted fields retain their existing values. */
+/**
+ * Only supplied fields change; omitted fields retain their existing values.
+ * On a published email, `content` and `email_template_id` changes are saved as
+ * a draft until you send `published: true`; reads keep returning the live
+ * values and set `has_unpublished_changes`. Content made in Kit's legacy editor
+ * still updates immediately.
+ */
 export interface UpdateSequenceEmailParams {
   subject?: string | undefined;
   preview_text?: string | null | undefined;
+  /** On a Starting point template, the HTML is placed inside its design. */
   content?: string | null | undefined;
   delay_value?: number | undefined;
   delay_unit?: "days" | "hours" | undefined;
+  /**
+   * Template for layout and styling; `null` clears it (unlike broadcasts,
+   * where `null` keeps the current template). Switching to or from a Starting
+   * point template without `content` applies the new design; if that would
+   * discard existing content, Kit returns 409 unless `allow_content_loss` is
+   * true. Legacy-editor emails cannot switch to a Starting point template
+   * until opened once in Kit.
+   */
   email_template_id?: number | null | undefined;
+  /**
+   * Confirm a template change that would discard the email's content. Only
+   * applies when `email_template_id` changes without `content`; Kit defaults
+   * it to `false`. Set it deliberately: do not retry a 409 with this flag
+   * automatically.
+   */
+  allow_content_loss?: boolean | null | undefined;
+  /** `true` publishes the email, including any pending draft changes. */
   published?: boolean | undefined;
   /** Day-based emails only; null resets the per-email schedule override. */
   send_days?: SequenceSendDay[] | null | undefined;
@@ -80,6 +103,11 @@ export interface SequenceEmailListItem {
   delay_value: number;
   delay_unit: string;
   send_days: string[] | null;
+  /**
+   * `true` while `content` or `email_template_id` changes wait to be
+   * published; those fields show the live values until then. May be absent.
+   */
+  has_unpublished_changes?: boolean | undefined;
   /** Included when requested with include_content: true. */
   content?: string | null | undefined;
   /** Included when requested with include: "stats". */
