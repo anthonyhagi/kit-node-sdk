@@ -39,13 +39,22 @@ and CSV exports provide five years.
 Subscriber records, tags, custom fields, purchases, and broadcast content are
 unaffected. Older broadcasts can still be viewed and duplicated.
 
-| SDK method                                     | Retention behavior                                                                                         |
-| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `kit.broadcasts.getStats(id)`                  | Stats for broadcasts sent before the window return HTTP 400.                                               |
-| `kit.broadcasts.getAllStats(params)`           | Broadcasts sent before the window are omitted.                                                             |
-| `kit.broadcasts.getLinkClicksById(id, params)` | Click data older than the window is unavailable.                                                           |
-| `kit.subscribers.getStats(id, params)`         | Date parameters are clamped to the window; dates outside it return HTTP 400.                               |
-| `kit.subscribers.filter(body, params)`         | Engagement-condition date bounds are clamped; a `stats` include range outside the window returns HTTP 400. |
+| SDK method                                     | Retention behavior                                                                                                                                             |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `kit.broadcasts.getStats(id)`                  | Stats for broadcasts sent before the window return HTTP 400.                                                                                                   |
+| `kit.broadcasts.getAllStats(params)`           | Broadcasts sent before the window are omitted.                                                                                                                 |
+| `kit.broadcasts.getLinkClicksById(id, params)` | Click data older than the window is unavailable.                                                                                                               |
+| `kit.subscribers.getStats(id, params)`         | Date parameters are clamped to the window; dates outside it return HTTP 400.                                                                                   |
+| `kit.subscribers.filter(body, params)`         | Engagement-condition dates and `stats` include ranges are limited to **three** years; older dates return HTTP 400. Signup (`subscribed`) dates are not capped. |
+
+`kit.subscribers.filter()` is stricter than the general five-year window:
+engagement `after`/`before` dates (opens, clicks, sent, delivered) and the
+`stats` include `range.start`/`range.end` must be on or after the same calendar
+date three years ago. Kit used to clamp older engagement dates; it now rejects
+them with HTTP 400 naming the earliest allowed date. The SDK passes dates
+through unchanged and does not clamp them for you. Signup (`subscribed`)
+conditions filter by `subscriber_created_at` and have no cap, and the `stats`
+include still defaults to the last 90 days.
 
 See [retention errors](error-handling.md#email-stats-retention-errors) for SDK
 error handling and [Kit's retention policy](https://developers.kit.com/api-reference/email-data-retention)

@@ -50,6 +50,11 @@ throws an `ApiError` with `status === 400` without retrying. These responses do
 not return `null`. For date-range errors, Kit indicates the earliest available
 date in the response; inspect `details` after validating its shape.
 
+`kit.subscribers.filter()` uses a shorter three-year limit for engagement
+condition dates and `stats` include ranges, and returns HTTP 400 for older
+dates instead of clamping them. Signup (`subscribed`) dates are not limited.
+Retrying the same request cannot succeed; adjust the dates and send it again.
+
 Successful responses for emails sent more than three years ago contain stats
 frozen at the three-year mark. Retrying cannot make those stats current.
 Beyond five years, stats are unavailable via the API, Kit MCP, and CSV export.
