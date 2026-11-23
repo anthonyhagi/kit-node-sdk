@@ -17,8 +17,10 @@ describe("broadcast filter input compatibility", () => {
     expectTypeOf<{ all: null }>().toExtend<BroadcastSubscriberFilterGroup>();
   });
 
-  it("keeps every update group key required and all non-null", () => {
-    type Group = UpdateBroadcastParams["subscriber_filter"][number];
+  it("keeps every supplied update group key required and all non-null", () => {
+    type Group = NonNullable<
+      UpdateBroadcastParams["subscriber_filter"]
+    >[number];
     type PreviousGroup = {
       all: TypedSubscriberFilterItem[];
       any: TypedSubscriberFilterItem[] | null;

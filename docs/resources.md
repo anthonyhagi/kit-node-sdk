@@ -899,6 +899,26 @@ const result = await kit.sequenceEmails.update(123, 456, {
 console.log(result?.email.subject);
 ```
 
+On a published email, `content` and `email_template_id` changes are saved as a
+draft. Reads keep returning the live values, with `has_unpublished_changes: true`,
+until you send `published: true`. Publishing is never implied by an update, so
+send it explicitly once the draft is ready:
+
+```ts
+await kit.sequenceEmails.update(123, 456, { content: "<p>New copy</p>" });
+// Review in Kit, then publish the pending changes:
+await kit.sequenceEmails.update(123, 456, { published: true });
+```
+
+Content made in Kit's legacy editor still takes effect immediately.
+`has_unpublished_changes` may be absent from responses.
+
+Switching to or from a Starting point template without sending `content`
+applies the new template's design. If that would discard existing content, Kit
+returns 409; send `content` in the same request to keep your own, or set
+`allow_content_loss: true` to accept the loss. A legacy-editor email cannot
+switch to a Starting point template until it is opened once in Kit.
+
 Pass `email_template_id: null` to clear the template, or `send_days: null` to
 reset a day-based email's schedule override. Kit then returns all seven sending
 days to indicate no per-email restriction. Sending `send_days` for an hour-based
@@ -909,7 +929,9 @@ at position zero triggers processing of its queued subscribers.
 The exported types are `UpdateSequenceEmailParams` and `UpdateSequenceEmail`.
 The response includes the content field and allows nullable content, preview
 text, sending days, and position. Missing sequences or emails throw `ApiError` with status 404;
-validation errors throw. See the
+validation errors throw, as do 403 for accounts blocked from changing sequences
+and 409 for template changes that would discard content. A 502 means Kit applied
+nothing; it is retried under the client's retry policy. See the
 [Kit API reference](https://developers.kit.com/api-reference/sequence-emails/update-a-sequence-email).
 
 ## Creating a sequence email
@@ -1275,6 +1297,38 @@ with both normal and slim responses; status and explicit false flags are still s
 
 Keep the same filters on subsequent pages. All filters are optional; calls
 without arguments continue to work. See the [Kit API reference](https://developers.kit.com/api-reference/broadcasts/list-broadcasts).
+
+## Broadcast updates and template switching
+
+`kit.broadcasts.update(id, params)` changes only the fields you send:
+
+```typescript
+await kit.broadcasts.update(123, { subject: "Updated subject" });
+```
+
+Omitting `email_template_id` or sending `null` keeps the current template (for
+sequence emails, `null` clears it instead). Changing the template without
+`content` applies the new template's design. When that would discard the
+broadcast's content or overwrite unsaved edits open in Kit's editor, Kit returns 409. Either send `content` in the same request to keep your own content, or
+confirm the loss explicitly:
+
+```typescript
+await kit.broadcasts.update(123, {
+  email_template_id: 9,
+  allow_content_loss: true, // discards the current content
+});
+```
+
+Treat `allow_content_loss` as a decision for the caller, not a retry strategy:
+do not set it automatically in response to a 409. Kit returns 422 for content or
+template changes on a broadcast running a content A/B test, and for broadcasts
+that have started sending or were cancelled; 403 means the account cannot change
+broadcasts. A 502 means Kit applied nothing; updates are retried under the
+client's retry policy.
+
+Starting point templates now accept supplied HTML directly, so the
+`allow_starting_point` option is deprecated. It is still sent when provided. See
+the [Kit API reference](https://developers.kit.com/api-reference/broadcasts/update-a-broadcast).
 
 ## Broadcast creation retries
 
