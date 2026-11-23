@@ -1215,6 +1215,33 @@ const broadcast = await kit.broadcasts.create({
 });
 ```
 
+Each entry in a group is one condition that matches subscribers in **any** of
+its `ids`. The group key then combines entries: under `all`, a subscriber must
+match every entry. To require several tags or segments, give each its own entry:
+
+```typescript
+// Subscribers with tag 1 AND tag 2
+const bothTags = [
+  {
+    all: [
+      { type: "tag", ids: [1] },
+      { type: "tag", ids: [2] },
+    ],
+  },
+];
+
+// Subscribers with tag 1 OR tag 2 (one entry, two IDs)
+const eitherTag = [{ all: [{ type: "tag", ids: [1, 2] }] }];
+```
+
+Pass either array as `subscriber_filter`.
+
+Kit announced this per-entry behavior in November 2026, so review existing
+`all` filters that list several IDs in one entry: they match subscribers with
+any of those IDs, not all of them. The same rules apply to
+`kit.broadcasts.update()`. The SDK sends entries exactly as given and never
+merges or splits them.
+
 Use `type: "segment"` to target segment IDs. Existing single-object filters are
 also accepted and wrapped in an array before sending. A `null` filter is passed
 through unchanged. See the [Kit API reference](https://developers.kit.com/api-reference/broadcasts/create-a-broadcast).
