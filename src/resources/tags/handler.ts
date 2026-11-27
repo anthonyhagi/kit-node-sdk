@@ -347,6 +347,31 @@ export class TagsHandler {
   }
 
   /**
+   * Delete a Tag by its unique ID. To delete several tags in one request, use
+   * {@link TagsHandler.bulkDelete}.
+   *
+   * @param tagId - The unique ID of the tag to delete.
+   * @param options - Optional request controls, including cancellation.
+   *
+   * @see {@link https://developers.kit.com/api-reference/tags/delete-a-tag}
+   *
+   * @returns Resolves without a value on success.
+   * @throws {NotFoundError} If the tag does not exist.
+   * @throws {ApiError} If Kit returns another unsuccessful HTTP response.
+   *
+   * @example Deleting a tag
+   * ```typescript
+   * await kit.tags.delete(123);
+   * ```
+   */
+  public async delete(tagId: number, options?: RequestOptions): Promise<void> {
+    await this.api.delete<void>(`/tags/${tagId}`, {
+      signal: options?.signal,
+      maxRetries: options?.maxRetries,
+    });
+  }
+
+  /**
    * Removes a Subscriber from a Tag using the Subscriber's email address.
    *
    * @param tagId - The unique ID of the Tag.

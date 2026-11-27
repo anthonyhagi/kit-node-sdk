@@ -71,6 +71,19 @@ const scenarios: Scenario[] = [
     response: { kit_fields: [] },
   },
   {
+    name: "kitFields.updateSubscriberValues",
+    run: (kit, options) =>
+      kit.kitFields.updateSubscriberValues(
+        130,
+        { kit_fields: { age: 34 } },
+        options
+      ),
+    method: "PATCH",
+    path: "/subscribers/130/kit_fields",
+    body: { kit_fields: { age: 34 } },
+    response: { subscriber: { id: 130, kit_fields: { age: 34 } } },
+  },
+  {
     name: "apps.get",
     run: (kit, options) => kit.apps.get(123, options),
     method: "GET",
