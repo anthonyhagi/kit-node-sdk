@@ -1,5 +1,21 @@
 # @anthonyhagi/kit-node-sdk
 
+## 0.9.0
+
+### Minor Changes
+
+- c49d7d1: Add `kit.apps.list()` and `kit.apps.get()` for Kit's App Store catalog, with category and search filters, cursor pagination, and typed list and detail models (including the `ai_connectors` category). Installation stays a browser step: the SDK returns `install_url` but never follows it.
+- 9f4e035: Expose broadcast A/B test metadata. Broadcast list, get, create and update responses include optional, nullable `ab_test` with its `type` (`subject` or `content`) and ordered `variants`; `BroadcastAbTest` and `BroadcastAbTestVariant` are exported. Document that on a subject-line test an update's `subject` replaces only the first variant and `preview_text` is saved but not sent.
+- b6a84d3: Add `kit.tags.delete()` (`DELETE /v4/tags/{id}`) to delete a single tag, and `kit.kitFields.updateSubscriberValues()` (`PATCH /v4/subscribers/{subscriber_id}/kit_fields`) to correct a subscriber's Kit Field values, where `null` removes a value written through the API.
+- 09365ff: Add `kit.kitFields.list()` for Kit's Subscriber Signals field catalog (`GET /v4/kit_fields`), returning each field's name, data type, and fixed options where they exist. Accounts without Subscriber Signals on a paid Pro plan receive a 422.
+- b063b00: Support Kit's template-switching and sequence-email draft changes. Broadcast and sequence-email updates accept `allow_content_loss` to confirm a template change that would discard content (Kit otherwise returns 409). All `UpdateBroadcastParams` fields are now optional, so updates can send only what changes; omitted or null `email_template_id` keeps the current template. Sequence-email responses expose optional `has_unpublished_changes`. `allow_starting_point` is deprecated because Starting point templates now accept supplied HTML directly; it is still sent when provided.
+
+### Patch Changes
+
+- e244843: Document Kit's broadcast filter entry semantics: each entry matches any of its `ids`, and separate entries under `all` must all match. Use one entry per tag or segment to require several; existing `all` filters that list several IDs in one entry match any of them. No runtime or type-shape changes.
+- 7acecbd: Document Kit's plain-text 429 responses (no `Retry-After`) and per-credential rate limits, which methods require OAuth, and that archived, deleted or restricted forms now reject `forms.addSubscriber()` and `forms.addSubscriberByEmail()` with HTTP 422 while bulk additions report them in `failures`. No runtime changes.
+- 070fd5a: Document Kit's three-year limit on `subscribers.filter()` engagement dates and `stats` include ranges: older dates now return HTTP 400 naming the earliest allowed date instead of being clamped. Signup (`subscribed`) dates have no cap. The SDK still passes dates through unchanged.
+
 ## 0.8.0
 
 ### Minor Changes
