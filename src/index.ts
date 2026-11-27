@@ -73,7 +73,7 @@ export class Kit extends ApiClient {
   public readonly posts: PostsHandler;
 
   /**
-   * Subscriber Signals field definitions (paid Pro plans).
+   * Subscriber Signals field definitions and subscriber values (paid Pro plans).
    * @see {@link https://developers.kit.com/api-reference/kit-fields/list-kit-fields}
    */
   public readonly kitFields: KitFieldsHandler;
@@ -367,7 +367,10 @@ export type {
 export type {
   KitField,
   KitFieldDataType,
+  KitFieldValue,
   ListKitFields,
+  UpdateSubscriberKitFields,
+  UpdateSubscriberKitFieldsParams,
 } from "./resources/kit-fields/types";
 
 export type {

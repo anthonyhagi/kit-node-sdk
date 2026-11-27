@@ -77,6 +77,7 @@ import {
   type SubscriberTag,
   type TaggedSubscriber,
   type UpdateBroadcast,
+  type UpdateSubscriberKitFields,
   type UpdateSubscriberLocation,
   type UpdateSubscriberLocationParams,
   type Webhook,
@@ -512,6 +513,16 @@ export const kitFields = kit.kitFields.list(options);
 export type KitFieldsResult = Assert<
   Equal<typeof kitFields, Promise<ListKitFields>>
 >;
+export const kitFieldValues = kit.kitFields.updateSubscriberValues(
+  130,
+  { kit_fields: { age: 34, job_title: null } },
+  options
+);
+export type KitFieldValuesResult = Assert<
+  Equal<typeof kitFieldValues, Promise<UpdateSubscriberKitFields>>
+>;
+export const deletedTag = kit.tags.delete(7, options);
+export type DeletedTagResult = Assert<Equal<typeof deletedTag, Promise<void>>>;
 export const minimalBroadcastUpdate = kit.broadcasts.update(1, {
   email_template_id: 9,
   allow_content_loss: true,

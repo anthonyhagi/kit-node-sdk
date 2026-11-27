@@ -37,6 +37,13 @@ interface Scenario {
 
 const scenarios: Scenario[] = [
   {
+    name: "delete",
+    run: (kit, options) => kit.tags.delete(123, options),
+    method: "DELETE",
+    path: "/tags/123",
+    result: undefined,
+  },
+  {
     name: "bulkDelete",
     run: (kit, options) =>
       kit.tags.bulkDelete({ tags: [{ id: 123 }] }, options),

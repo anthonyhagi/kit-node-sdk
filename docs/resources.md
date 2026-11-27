@@ -14,7 +14,7 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 | **`kit.customFields`**     | Additional fields for subscriber profiles and forms                | `list()`, `create()`, `update()`, `bulkCreate()`, `bulkUpdateSubscriberValues()`                                                       |
 | **`kit.emailTemplates`**   | Pre-designed email layouts                                         | `list()`                                                                                                                               |
 | **`kit.forms`**            | Web forms for collecting subscriber information                    | `list()`, `addSubscriber()`, `addSubscriberByEmail()`, `listSubscribers()`                                                             |
-| **`kit.kitFields`**        | Subscriber Signals field definitions (paid Pro plans)              | `list()`                                                                                                                               |
+| **`kit.kitFields`**        | Subscriber Signals fields and subscriber values (paid Pro plans)   | `list()`, `updateSubscriberValues()`                                                                                                   |
 | **`kit.posts`**            | Content published to the creator’s Kit site or sent by email       | `list()`, `get()`                                                                                                                      |
 | **`kit.purchases`**        | Transaction records for products/services                          | `list()`, `create()`, `get()`                                                                                                          |
 | **`kit.segments`**         | Dynamic subscriber groups based on criteria                        | `list()`                                                                                                                               |
@@ -22,7 +22,7 @@ The SDK is structured to mirror the [Kit.com API v4](https://developers.kit.com/
 | **`kit.sequences`**        | Automated email series                                             | `list()`, `get()`, `create()`, `update()`, `delete()`, `addSubscriberById()`, `addSubscriberByEmail()`, `listSubscribers()`            |
 | **`kit.snippets`**         | Reusable email content referenced by Liquid keys                   | `list()`, `get()`, `create()`, `update()`                                                                                              |
 | **`kit.subscribers`**      | Individual email recipients                                        | `list()`, `create()`, `get()`, `update()`, `bulkCreate()`, `getTags()`                                                                 |
-| **`kit.tags`**             | Labels for categorizing subscribers                                | `list()`, `create()`, `update()`, `bulkCreate()`, `tagSubscriber()`, `listSubscribers()`                                               |
+| **`kit.tags`**             | Labels for categorizing subscribers                                | `list()`, `create()`, `update()`, `delete()`, `bulkCreate()`, `tagSubscriber()`, `listSubscribers()`                                   |
 | **`kit.webhookEndpoints`** | Webhook endpoints with multiple events and signed deliveries       | `list()`, `get()`, `create()`, `update()`, `delete()`, `rotateSecret()`, `revokePreviousSecret()`, `listDeliveries()`, `getDelivery()` |
 | **`kit.webhooks`**         | HTTP callbacks for real-time notifications                         | `list()`, `create()`                                                                                                                   |
 
@@ -143,6 +143,24 @@ This lists field definitions, not subscriber values. Kit Fields require
 Subscriber Signals on a paid Pro plan; other accounts get HTTP 422, thrown as
 `ApiError` without retrying. Do not hard-code field names: read them from this
 list. See the [Kit API reference](https://developers.kit.com/api-reference/kit-fields/list-kit-fields).
+
+### Correcting a subscriber's Kit Fields
+
+`kit.kitFields.updateSubscriberValues(subscriberId, { kit_fields })` writes
+values for the named fields and leaves the others alone. Values are strings,
+numbers or booleans; fields with `available_options` only accept those values.
+Set a field to `null` to remove the value you wrote through the API; values
+from other sources stay in place.
+
+```typescript
+const { subscriber } = await kit.kitFields.updateSubscriberValues(130, {
+  kit_fields: { gender: "female", age: 34, job_title: null },
+});
+console.log(subscriber.kit_fields); // all current values after the write
+```
+
+Pass at least one field. A value that doesn't fit its field returns HTTP 422,
+thrown as `ApiError` without retrying. See the [Kit API reference](https://developers.kit.com/api-reference/kit-fields/update-a-subscribers-kit-fields).
 
 ## Account sending addresses and plan details
 
@@ -432,6 +450,18 @@ Use optional access when reading them. Calls with `slim: false` or without `slim
 retain `ListTagSubscribers`; a dynamic boolean returns the union.
 
 See the [Kit API reference](https://developers.kit.com/api-reference/tags/list-subscribers-for-a-tag).
+
+## Deleting a tag
+
+`kit.tags.delete(tagId)` deletes one tag and resolves without a value. A
+missing tag throws `NotFoundError`. To delete many tags in one request, use
+`kit.tags.bulkDelete()`.
+
+```ts
+await kit.tags.delete(123);
+```
+
+See the [Kit API reference](https://developers.kit.com/api-reference/tags/delete-a-tag).
 
 ## Including tag subscriber counts
 

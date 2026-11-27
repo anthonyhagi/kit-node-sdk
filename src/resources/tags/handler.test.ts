@@ -237,6 +237,15 @@ describe("tag requests through Kit", () => {
     }
   );
 
+  it("deletes a tag with a bodyless DELETE", async () => {
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
+    const result = await kit.tags.delete(7);
+    expectTypeOf(result).toEqualTypeOf<void>();
+    expect(result).toBeUndefined();
+    const req = request("DELETE", "/tags/7");
+    expect(await req.text()).toBe("");
+  });
+
   it("creates a tag with a JSON name", async () => {
     const body = { name: "News & updates ✨" };
     const response = { tag: { ...tag, ...body } };
@@ -764,6 +773,7 @@ describe("tag requests through Kit", () => {
   );
 
   it.each([
+    "delete",
     "update",
     "listSubscribers",
     "tagSubscriber",
@@ -778,6 +788,9 @@ describe("tag requests through Kit", () => {
       });
       let result;
       switch (method) {
+        case "delete":
+          result = kit.tags.delete(7);
+          break;
         case "update":
           result = kit.tags.update(7, { name: "Renamed" });
           break;

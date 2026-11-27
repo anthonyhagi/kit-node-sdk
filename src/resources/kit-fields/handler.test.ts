@@ -4,7 +4,10 @@ import {
   Kit,
   type KitField,
   type KitFieldDataType,
+  type KitFieldValue,
   type ListKitFields,
+  type UpdateSubscriberKitFields,
+  type UpdateSubscriberKitFieldsParams,
 } from "~/index";
 
 const response = {
@@ -74,5 +77,55 @@ describe("Kit Fields requests through Kit", () => {
     await expect(result).rejects.toBeInstanceOf(ApiError);
     await expect(result).rejects.toMatchObject({ status, details: { errors } });
     expect(fetchMock.requests()).toHaveLength(1);
+  });
+
+  describe("updateSubscriberValues", () => {
+    const updated = {
+      subscriber: { id: 130, kit_fields: { age: 34, gender: "female" } },
+    } satisfies UpdateSubscriberKitFields;
+
+    it("PATCHes the subscriber's kit_fields with a JSON body", async () => {
+      fetchMock.mockResponseOnce(JSON.stringify(updated));
+      const params = {
+        kit_fields: {
+          gender: "female",
+          age: 34,
+          opted_in: true,
+          job_title: null,
+        },
+      } satisfies UpdateSubscriberKitFieldsParams;
+      const result = await kit.kitFields.updateSubscriberValues(130, params);
+      expectTypeOf(result).toEqualTypeOf<UpdateSubscriberKitFields>();
+      expect(result).toEqual(updated);
+      const req = fetchMock.requests()[0]!;
+      expect(req.method).toBe("PATCH");
+      expect(req.url).toBe("https://api.kit.com/v4/subscribers/130/kit_fields");
+      expect(req.headers.get("Content-Type")).toBe("application/json");
+      expect(await req.json()).toEqual(params);
+    });
+
+    it("types values as strings, numbers, booleans or null", () => {
+      expectTypeOf<KitFieldValue>().toEqualTypeOf<string | number | boolean>();
+      expectTypeOf<
+        UpdateSubscriberKitFieldsParams["kit_fields"][string]
+      >().toEqualTypeOf<KitFieldValue | null>();
+      expectTypeOf<
+        UpdateSubscriberKitFields["subscriber"]["kit_fields"][string]
+      >().toEqualTypeOf<KitFieldValue>();
+    });
+
+    it("throws 422 for a value that doesn't fit its field, without retrying", async () => {
+      const errors = ["household_income must be one of: Under $10,000"];
+      fetchMock.mockResponseOnce(JSON.stringify({ errors }), { status: 422 });
+      const result = kit.kitFields.updateSubscriberValues(130, {
+        kit_fields: { household_income: "lots" },
+      });
+      await expect(result).rejects.toBeInstanceOf(ApiError);
+      await expect(result).rejects.toMatchObject({
+        status: 422,
+        details: { errors },
+      });
+      expect(fetchMock.requests()).toHaveLength(1);
+    });
   });
 });
